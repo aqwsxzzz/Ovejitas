@@ -1,4 +1,4 @@
-//import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,7 +24,7 @@ const SignUpForm = () => {
         <div>
             <p>Create your account</p>
             <Form {...form}>
-                <form>
+                <form className="flex flex-col gap-7">
                     <FormField
                     control={form.control}
                     name="email"
@@ -38,9 +38,34 @@ const SignUpForm = () => {
                             </FormControl>
                             <FormMessage />
                         </FormItem>
-                    )}>
-
-                    </FormField>
+                    )} />
+                    <FormField
+                    control={form.control}
+                    name='name'
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter your name"
+                                {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField
+                    control={form.control}
+                    name='password'
+                    render={({field}) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter a password"
+                                {...field}/>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <Button type='submit'>Create</Button>
                 </form>
             </Form>
         </div>
