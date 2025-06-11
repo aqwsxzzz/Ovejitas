@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import SignUpForm from "@/features/auth/components/sign-up-form";
+import SignUpForm from "@/features/auth/components/create-account-form/sign-up-form";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/_layout/signup")({

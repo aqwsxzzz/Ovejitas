@@ -4,24 +4,41 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
+import { useSignUp } from "@/features/auth/api/auth-queries";
+import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 const formSchema = z.object({
     email: z.string().email(),
-    name: z.string(),
-    password: z.string().min(6),
+    displayName: z.string(),
+    password: z.string().min(8, "Password must have at least 8 characters."),
 });
 
 const SignUpForm = () => {
+    const navigate = useNavigate();
+    const { mutateAsync: signUp, error } = useSignUp();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: { email: "", name: "", password: "" },
+        defaultValues: { email: "", displayName: "", password: "" },
     });
+
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
+        const response = await signUp({ payload: data });
+
+        if (response.status === "success") {
+            toast.success("Account created successfully");
+            navigate({
+                to: "/login",
+            });
+        }
+    };
 
     return (
         <div>
             <div>
                 <Form {...form}>
-                    <form className="flex flex-col gap-7">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
                         <FormField
                             control={form.control}
                             name="email"
@@ -37,7 +54,7 @@ const SignUpForm = () => {
                         />
                         <FormField
                             control={form.control}
-                            name="name"
+                            name="displayName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Name</FormLabel>
@@ -55,12 +72,13 @@ const SignUpForm = () => {
                                 <FormItem>
                                     <FormLabel>Password</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter a password" {...field} />
+                                        <Input placeholder="Enter a password" {...field} type="password" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
+                        {error && <p className="text-destructive">{error.message}</p>}
                         <Button type="submit">Create</Button>
                     </form>
                 </Form>
