@@ -13,10 +13,10 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as PublicLayoutImport } from './routes/_public/_layout'
-import { Route as PrivateLayoutImport } from './routes/_private/_layout'
+import { Route as PrivatePrivatelayoutImport } from './routes/_private/_privatelayout'
 import { Route as PublicLayoutSignupImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginImport } from './routes/_public/_layout/login'
-import { Route as PrivateLayoutDashboardImport } from './routes/_private/_layout/dashboard'
+import { Route as PrivatePrivatelayoutDashboardImport } from './routes/_private/_privatelayout/dashboard'
 
 // Create/Update Routes
 
@@ -31,8 +31,8 @@ const PublicLayoutRoute = PublicLayoutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const PrivateLayoutRoute = PrivateLayoutImport.update({
-  id: '/_private/_layout',
+const PrivatePrivatelayoutRoute = PrivatePrivatelayoutImport.update({
+  id: '/_private/_privatelayout',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -48,11 +48,12 @@ const PublicLayoutLoginRoute = PublicLayoutLoginImport.update({
   getParentRoute: () => PublicLayoutRoute,
 } as any)
 
-const PrivateLayoutDashboardRoute = PrivateLayoutDashboardImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => PrivateLayoutRoute,
-} as any)
+const PrivatePrivatelayoutDashboardRoute =
+  PrivatePrivatelayoutDashboardImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => PrivatePrivatelayoutRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -65,11 +66,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/_private/_layout': {
-      id: '/_private/_layout'
+    '/_private/_privatelayout': {
+      id: '/_private/_privatelayout'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof PrivateLayoutImport
+      preLoaderRoute: typeof PrivatePrivatelayoutImport
       parentRoute: typeof rootRoute
     }
     '/_public/_layout': {
@@ -79,12 +80,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLayoutImport
       parentRoute: typeof rootRoute
     }
-    '/_private/_layout/dashboard': {
-      id: '/_private/_layout/dashboard'
+    '/_private/_privatelayout/dashboard': {
+      id: '/_private/_privatelayout/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof PrivateLayoutDashboardImport
-      parentRoute: typeof PrivateLayoutImport
+      preLoaderRoute: typeof PrivatePrivatelayoutDashboardImport
+      parentRoute: typeof PrivatePrivatelayoutImport
     }
     '/_public/_layout/login': {
       id: '/_public/_layout/login'
@@ -105,17 +106,16 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-interface PrivateLayoutRouteChildren {
-  PrivateLayoutDashboardRoute: typeof PrivateLayoutDashboardRoute
+interface PrivatePrivatelayoutRouteChildren {
+  PrivatePrivatelayoutDashboardRoute: typeof PrivatePrivatelayoutDashboardRoute
 }
 
-const PrivateLayoutRouteChildren: PrivateLayoutRouteChildren = {
-  PrivateLayoutDashboardRoute: PrivateLayoutDashboardRoute,
+const PrivatePrivatelayoutRouteChildren: PrivatePrivatelayoutRouteChildren = {
+  PrivatePrivatelayoutDashboardRoute: PrivatePrivatelayoutDashboardRoute,
 }
 
-const PrivateLayoutRouteWithChildren = PrivateLayoutRoute._addFileChildren(
-  PrivateLayoutRouteChildren,
-)
+const PrivatePrivatelayoutRouteWithChildren =
+  PrivatePrivatelayoutRoute._addFileChildren(PrivatePrivatelayoutRouteChildren)
 
 interface PublicLayoutRouteChildren {
   PublicLayoutLoginRoute: typeof PublicLayoutLoginRoute
@@ -134,7 +134,7 @@ const PublicLayoutRouteWithChildren = PublicLayoutRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof PublicLayoutRouteWithChildren
-  '/dashboard': typeof PrivateLayoutDashboardRoute
+  '/dashboard': typeof PrivatePrivatelayoutDashboardRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
 }
@@ -142,7 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof PublicLayoutRouteWithChildren
-  '/dashboard': typeof PrivateLayoutDashboardRoute
+  '/dashboard': typeof PrivatePrivatelayoutDashboardRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
 }
@@ -150,9 +150,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/_private/_layout': typeof PrivateLayoutRouteWithChildren
+  '/_private/_privatelayout': typeof PrivatePrivatelayoutRouteWithChildren
   '/_public/_layout': typeof PublicLayoutRouteWithChildren
-  '/_private/_layout/dashboard': typeof PrivateLayoutDashboardRoute
+  '/_private/_privatelayout/dashboard': typeof PrivatePrivatelayoutDashboardRoute
   '/_public/_layout/login': typeof PublicLayoutLoginRoute
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
 }
@@ -165,9 +165,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_private/_layout'
+    | '/_private/_privatelayout'
     | '/_public/_layout'
-    | '/_private/_layout/dashboard'
+    | '/_private/_privatelayout/dashboard'
     | '/_public/_layout/login'
     | '/_public/_layout/signup'
   fileRoutesById: FileRoutesById
@@ -175,13 +175,13 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PrivateLayoutRoute: typeof PrivateLayoutRouteWithChildren
+  PrivatePrivatelayoutRoute: typeof PrivatePrivatelayoutRouteWithChildren
   PublicLayoutRoute: typeof PublicLayoutRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PrivateLayoutRoute: PrivateLayoutRouteWithChildren,
+  PrivatePrivatelayoutRoute: PrivatePrivatelayoutRouteWithChildren,
   PublicLayoutRoute: PublicLayoutRouteWithChildren,
 }
 
@@ -196,17 +196,17 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_private/_layout",
+        "/_private/_privatelayout",
         "/_public/_layout"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/_private/_layout": {
-      "filePath": "_private/_layout.tsx",
+    "/_private/_privatelayout": {
+      "filePath": "_private/_privatelayout.tsx",
       "children": [
-        "/_private/_layout/dashboard"
+        "/_private/_privatelayout/dashboard"
       ]
     },
     "/_public/_layout": {
@@ -216,9 +216,9 @@ export const routeTree = rootRoute
         "/_public/_layout/signup"
       ]
     },
-    "/_private/_layout/dashboard": {
-      "filePath": "_private/_layout/dashboard.tsx",
-      "parent": "/_private/_layout"
+    "/_private/_privatelayout/dashboard": {
+      "filePath": "_private/_privatelayout/dashboard.tsx",
+      "parent": "/_private/_privatelayout"
     },
     "/_public/_layout/login": {
       "filePath": "_public/_layout/login.tsx",
