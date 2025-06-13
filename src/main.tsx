@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./index.css";
 import { Toaster } from "sonner";
+import { CheckCircle, X } from "lucide-react";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -29,7 +30,7 @@ if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement);
     root.render(
         <StrictMode>
-            <Toaster position="top-center" />
+            <Toaster position="top-center" icons={{ success: <CheckCircle className="text-success" />, error: <X className="text-destructive" /> }} />
             <QueryClientProvider client={queryClient}>
                 <RouterProvider router={router} context={{ queryClient }} />
             </QueryClientProvider>

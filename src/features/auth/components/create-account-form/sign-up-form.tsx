@@ -5,17 +5,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/features/auth/api/auth-queries";
-import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
 
 const formSchema = z.object({
     email: z.string().email(),
-    displayName: z.string(),
+    displayName: z.string().min(2, "Name must have at least 2 characters."),
     password: z.string().min(8, "Password must have at least 8 characters."),
 });
 
 const SignUpForm = () => {
-    const navigate = useNavigate();
     const { mutateAsync: signUp, error } = useSignUp();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -24,66 +21,55 @@ const SignUpForm = () => {
     });
 
     const onSubmit = async (data: z.infer<typeof formSchema>) => {
-        const response = await signUp({ payload: data });
-
-        if (response.status === "success") {
-            toast.success("Account created successfully");
-            navigate({
-                to: "/login",
-            });
-        }
+        await signUp({ payload: data });
     };
 
     return (
-        <div>
-            <div>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter your email" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="displayName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter your name" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Password</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter a password" {...field} type="password" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {error && <p className="text-destructive">{error.message}</p>}
-                        <Button type="submit">Create</Button>
-                    </form>
-                </Form>
-            </div>
-        </div>
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
+                <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter your email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="displayName"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Enter your name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input autoComplete="new-password" placeholder="Enter a password" {...field} type="password" />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                {error && <p className="text-destructive">{error.message}</p>}
+                <Button type="submit">Create</Button>
+            </form>
+        </Form>
     );
 };
 
