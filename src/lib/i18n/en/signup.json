@@ -1,4 +1,13 @@
 {
     "headerTitle": "Welcome to ovejitas",
-    "headerDescription": "Enter your details to create your account"
+    "headerDescription": "Enter your details to create your account",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "displayNamePlaceholder": "Enter your name",
+    "footerTitle": "Already have an account?",
+    "footerLink": "Log in here",
+    "buttonText": "Sign up",
+    "emailInputLabel": "Email",
+    "passwordInputLabel": "Password",
+    "displayNameInputLabel": "Name"
 }

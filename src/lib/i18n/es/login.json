@@ -1,4 +1,11 @@
 {
     "headerTitle": "Bienvenido a Ovejitas",
-    "headerDescription": "Ingresa tus datos para entrar a tu cuenta"
+    "headerDescription": "Ingresa tus datos para entrar a tu cuenta",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "loginButton": "Iniciar sesión",
+    "footerTitle": "¿No tienes una cuenta?",
+    "footerLink": "Regístrate aquí",
+    "emailInputLabel": "Correo electrónico",
+    "passwordInputLabel": "Contraseña"
 }
