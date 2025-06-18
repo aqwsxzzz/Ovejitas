@@ -5,13 +5,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useLogin } from "@/features/auth/api/auth-queries";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
     email: z.string().email(),
     password: z.string(),
 });
 
-const LoginForm = () => {
+export const LoginForm = () => {
     const { mutateAsync: login } = useLogin();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -23,6 +24,8 @@ const LoginForm = () => {
     };
 
     const password = form.watch("password");
+
+    const { t } = useTranslation("login");
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
@@ -31,9 +34,9 @@ const LoginForm = () => {
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>{t("emailInputLabel")}</FormLabel>
                             <FormControl>
-                                <Input placeholder="Enter your email" {...field} />
+                                <Input placeholder={t("emailPlaceholder")} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -44,19 +47,18 @@ const LoginForm = () => {
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>{t("passwordInputLabel")}</FormLabel>
                             <FormControl>
-                                <Input autoComplete="new-password" placeholder="Enter a password" {...field} type="password" />
+                                <Input autoComplete="new-password" placeholder={t("passwordPlaceholder")} {...field} type="password" />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 <Button type="submit" disabled={password.length < 8}>
-                    Login
+                    {t("loginButton")}
                 </Button>
             </form>
         </Form>
     );
 };
-export default LoginForm;

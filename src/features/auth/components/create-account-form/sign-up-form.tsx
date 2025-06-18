@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/features/auth/api/auth-queries";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -12,7 +13,7 @@ const formSchema = z.object({
     password: z.string().min(8, "Password must have at least 8 characters."),
 });
 
-const SignUpForm = () => {
+export const SignUpForm = () => {
     const { mutateAsync: signUp, error } = useSignUp();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -24,6 +25,7 @@ const SignUpForm = () => {
         await signUp({ payload: data });
     };
 
+    const { t } = useTranslation("signup");
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
@@ -32,9 +34,9 @@ const SignUpForm = () => {
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>{t("emailInputLabel")}</FormLabel>
                             <FormControl>
-                                <Input placeholder="Enter your email" {...field} />
+                                <Input placeholder={t("emailPlaceholder")} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -45,9 +47,9 @@ const SignUpForm = () => {
                     name="displayName"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Name</FormLabel>
+                            <FormLabel>{t("displayNameInputLabel")}</FormLabel>
                             <FormControl>
-                                <Input placeholder="Enter your name" {...field} />
+                                <Input placeholder={t("displayNamePlaceholder")} {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -58,19 +60,17 @@ const SignUpForm = () => {
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>{t("passwordInputLabel")}</FormLabel>
                             <FormControl>
-                                <Input autoComplete="new-password" placeholder="Enter a password" {...field} type="password" />
+                                <Input autoComplete="new-password" placeholder={t("passwordPlaceholder")} {...field} type="password" />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 {error && <p className="text-destructive">{error.message}</p>}
-                <Button type="submit">Create</Button>
+                <Button type="submit">{t("createAccountButton")}</Button>
             </form>
         </Form>
     );
 };
-
-export default SignUpForm;

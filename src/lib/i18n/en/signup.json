@@ -4,9 +4,9 @@
     "emailPlaceholder": "Enter your email",
     "passwordPlaceholder": "Enter your password",
     "displayNamePlaceholder": "Enter your name",
+    "createAccountButton": "Sign up",
     "footerTitle": "Already have an account?",
     "footerLink": "Log in here",
-    "buttonText": "Sign up",
     "emailInputLabel": "Email",
     "passwordInputLabel": "Password",
     "displayNameInputLabel": "Name"
