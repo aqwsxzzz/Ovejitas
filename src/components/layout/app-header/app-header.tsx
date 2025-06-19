@@ -1,8 +1,7 @@
+import { DropdownHeaderMenu } from "@/components/layout/app-header/dropdown-header-menu";
+import { HeaderNotifications } from "@/components/layout/app-header/header-notifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { IUser } from "@/features/auth/types/auth-types";
-import { Menu } from "lucide-react";
 
 export const AppHeader = ({ userData }: { userData: IUser }) => {
     return (
@@ -18,13 +17,8 @@ export const AppHeader = ({ userData }: { userData: IUser }) => {
                 </div>
             </div>
             <div className="flex items-center">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant={"ghost"} className="">
-                            <Menu />
-                        </Button>
-                    </DropdownMenuTrigger>
-                </DropdownMenu>
+                <HeaderNotifications />
+                <DropdownHeaderMenu />
             </div>
         </div>
     );

@@ -1,4 +1,4 @@
-import { AppHeader } from "@/components/layout/app-header";
+import { AppHeader } from "@/components/layout/app-header/app-header";
 import { getUserProfile } from "@/features/auth/api/auth-api";
 import { authQueryKeys, useGetUserProfile } from "@/features/auth/api/auth-queries";
 import type { IUser } from "@/features/auth/types/auth-types";
