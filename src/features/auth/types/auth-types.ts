@@ -27,4 +27,5 @@ export interface ISignUpResponse {
 
 export interface ILoginResponse {
     message: string;
+    user: { lastVisitedFarmId: string };
 }

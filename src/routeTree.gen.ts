@@ -16,7 +16,8 @@ import { Route as PublicLayoutImport } from './routes/_public/_layout'
 import { Route as PrivatePrivatelayoutImport } from './routes/_private/_privatelayout'
 import { Route as PublicLayoutSignupImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginImport } from './routes/_public/_layout/login'
-import { Route as PrivatePrivatelayoutDashboardImport } from './routes/_private/_privatelayout/dashboard'
+import { Route as PrivatePrivatelayoutFarmFarmIdDashboardImport } from './routes/_private/_privatelayout/farm/$farmId/dashboard'
+import { Route as PrivatePrivatelayoutFarmFarmIdAnimalsImport } from './routes/_private/_privatelayout/farm/$farmId/animals'
 
 // Create/Update Routes
 
@@ -48,10 +49,17 @@ const PublicLayoutLoginRoute = PublicLayoutLoginImport.update({
   getParentRoute: () => PublicLayoutRoute,
 } as any)
 
-const PrivatePrivatelayoutDashboardRoute =
-  PrivatePrivatelayoutDashboardImport.update({
-    id: '/dashboard',
-    path: '/dashboard',
+const PrivatePrivatelayoutFarmFarmIdDashboardRoute =
+  PrivatePrivatelayoutFarmFarmIdDashboardImport.update({
+    id: '/farm/$farmId/dashboard',
+    path: '/farm/$farmId/dashboard',
+    getParentRoute: () => PrivatePrivatelayoutRoute,
+  } as any)
+
+const PrivatePrivatelayoutFarmFarmIdAnimalsRoute =
+  PrivatePrivatelayoutFarmFarmIdAnimalsImport.update({
+    id: '/farm/$farmId/animals',
+    path: '/farm/$farmId/animals',
     getParentRoute: () => PrivatePrivatelayoutRoute,
   } as any)
 
@@ -80,13 +88,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLayoutImport
       parentRoute: typeof rootRoute
     }
-    '/_private/_privatelayout/dashboard': {
-      id: '/_private/_privatelayout/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof PrivatePrivatelayoutDashboardImport
-      parentRoute: typeof PrivatePrivatelayoutImport
-    }
     '/_public/_layout/login': {
       id: '/_public/_layout/login'
       path: '/login'
@@ -101,17 +102,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLayoutSignupImport
       parentRoute: typeof PublicLayoutImport
     }
+    '/_private/_privatelayout/farm/$farmId/animals': {
+      id: '/_private/_privatelayout/farm/$farmId/animals'
+      path: '/farm/$farmId/animals'
+      fullPath: '/farm/$farmId/animals'
+      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdAnimalsImport
+      parentRoute: typeof PrivatePrivatelayoutImport
+    }
+    '/_private/_privatelayout/farm/$farmId/dashboard': {
+      id: '/_private/_privatelayout/farm/$farmId/dashboard'
+      path: '/farm/$farmId/dashboard'
+      fullPath: '/farm/$farmId/dashboard'
+      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdDashboardImport
+      parentRoute: typeof PrivatePrivatelayoutImport
+    }
   }
 }
 
 // Create and export the route tree
 
 interface PrivatePrivatelayoutRouteChildren {
-  PrivatePrivatelayoutDashboardRoute: typeof PrivatePrivatelayoutDashboardRoute
+  PrivatePrivatelayoutFarmFarmIdAnimalsRoute: typeof PrivatePrivatelayoutFarmFarmIdAnimalsRoute
+  PrivatePrivatelayoutFarmFarmIdDashboardRoute: typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
 }
 
 const PrivatePrivatelayoutRouteChildren: PrivatePrivatelayoutRouteChildren = {
-  PrivatePrivatelayoutDashboardRoute: PrivatePrivatelayoutDashboardRoute,
+  PrivatePrivatelayoutFarmFarmIdAnimalsRoute:
+    PrivatePrivatelayoutFarmFarmIdAnimalsRoute,
+  PrivatePrivatelayoutFarmFarmIdDashboardRoute:
+    PrivatePrivatelayoutFarmFarmIdDashboardRoute,
 }
 
 const PrivatePrivatelayoutRouteWithChildren =
@@ -134,17 +153,19 @@ const PublicLayoutRouteWithChildren = PublicLayoutRoute._addFileChildren(
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof PublicLayoutRouteWithChildren
-  '/dashboard': typeof PrivatePrivatelayoutDashboardRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
+  '/farm/$farmId/animals': typeof PrivatePrivatelayoutFarmFarmIdAnimalsRoute
+  '/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof PublicLayoutRouteWithChildren
-  '/dashboard': typeof PrivatePrivatelayoutDashboardRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
+  '/farm/$farmId/animals': typeof PrivatePrivatelayoutFarmFarmIdAnimalsRoute
+  '/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
 }
 
 export interface FileRoutesById {
@@ -152,24 +173,38 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_private/_privatelayout': typeof PrivatePrivatelayoutRouteWithChildren
   '/_public/_layout': typeof PublicLayoutRouteWithChildren
-  '/_private/_privatelayout/dashboard': typeof PrivatePrivatelayoutDashboardRoute
   '/_public/_layout/login': typeof PublicLayoutLoginRoute
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
+  '/_private/_privatelayout/farm/$farmId/animals': typeof PrivatePrivatelayoutFarmFarmIdAnimalsRoute
+  '/_private/_privatelayout/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/dashboard' | '/login' | '/signup'
+  fullPaths:
+    | '/'
+    | ''
+    | '/login'
+    | '/signup'
+    | '/farm/$farmId/animals'
+    | '/farm/$farmId/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/dashboard' | '/login' | '/signup'
+  to:
+    | '/'
+    | ''
+    | '/login'
+    | '/signup'
+    | '/farm/$farmId/animals'
+    | '/farm/$farmId/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_private/_privatelayout'
     | '/_public/_layout'
-    | '/_private/_privatelayout/dashboard'
     | '/_public/_layout/login'
     | '/_public/_layout/signup'
+    | '/_private/_privatelayout/farm/$farmId/animals'
+    | '/_private/_privatelayout/farm/$farmId/dashboard'
   fileRoutesById: FileRoutesById
 }
 
@@ -206,7 +241,8 @@ export const routeTree = rootRoute
     "/_private/_privatelayout": {
       "filePath": "_private/_privatelayout.tsx",
       "children": [
-        "/_private/_privatelayout/dashboard"
+        "/_private/_privatelayout/farm/$farmId/animals",
+        "/_private/_privatelayout/farm/$farmId/dashboard"
       ]
     },
     "/_public/_layout": {
@@ -216,10 +252,6 @@ export const routeTree = rootRoute
         "/_public/_layout/signup"
       ]
     },
-    "/_private/_privatelayout/dashboard": {
-      "filePath": "_private/_privatelayout/dashboard.tsx",
-      "parent": "/_private/_privatelayout"
-    },
     "/_public/_layout/login": {
       "filePath": "_public/_layout/login.tsx",
       "parent": "/_public/_layout"
@@ -227,6 +259,14 @@ export const routeTree = rootRoute
     "/_public/_layout/signup": {
       "filePath": "_public/_layout/signup.tsx",
       "parent": "/_public/_layout"
+    },
+    "/_private/_privatelayout/farm/$farmId/animals": {
+      "filePath": "_private/_privatelayout/farm/$farmId/animals.tsx",
+      "parent": "/_private/_privatelayout"
+    },
+    "/_private/_privatelayout/farm/$farmId/dashboard": {
+      "filePath": "_private/_privatelayout/farm/$farmId/dashboard.tsx",
+      "parent": "/_private/_privatelayout"
     }
   }
 }

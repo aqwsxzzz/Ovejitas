@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SignUpForm } from "@/features/auth/components/create-account-form/sign-up-form";
+import { SignUpForm } from "@/features/auth/components/sign-up-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
