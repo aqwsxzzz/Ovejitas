@@ -11,6 +11,7 @@ import { DateSelector } from "@/components/common/DateSelector";
 import { useCreateAnimal } from "@/features/animal/api/animal-queries";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
+import { SpecieSelect } from "@/features/specie/components/specie-select";
 
 const formSchema = z.object({
     specieId: z.string(),
@@ -73,16 +74,7 @@ export const NewAnimalForm = () => {
                         <FormItem>
                             <FormLabel>Specie</FormLabel>
                             <FormControl>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a specie.." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="AdWNDqgV">Ovine</SelectItem>
-                                        <SelectItem value="NArJeWyE">Caprine</SelectItem>
-                                        <SelectItem value="7ZWDkbpO">Bovine</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <SpecieSelect value={field.value} onChange={field.onChange} />
                             </FormControl>
                         </FormItem>
                     )}
