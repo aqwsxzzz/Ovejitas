@@ -12,6 +12,7 @@ import { useCreateAnimal } from "@/features/animal/api/animal-queries";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
 import { SpecieSelect } from "@/features/specie/components/specie-select";
+import { BreedSelect } from "@/features/breed/components/breed-select";
 
 const formSchema = z.object({
     specieId: z.string(),
@@ -64,6 +65,8 @@ export const NewAnimalForm = () => {
         resolver: zodResolver(formSchema),
     });
 
+    const selectedSpecieId = form.watch("specieId");
+
     return (
         <Form {...form}>
             <form className="flex flex-col gap-2" onSubmit={form.handleSubmit(onSubmit)}>
@@ -86,16 +89,7 @@ export const NewAnimalForm = () => {
                         <FormItem>
                             <FormLabel>Breed</FormLabel>
                             <FormControl>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a breed.." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="AdWNDqgV">Ovine</SelectItem>
-                                        <SelectItem value="Jlq1nbR6">Caprine</SelectItem>
-                                        <SelectItem value="3nqdjW2Z">Bovine</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <BreedSelect value={field.value} onChange={field.onChange} specieId={selectedSpecieId} />
                             </FormControl>
                         </FormItem>
                     )}
