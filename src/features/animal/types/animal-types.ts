@@ -10,7 +10,7 @@ export interface IAnimal {
     weight: number;
     status: "alive" | "deceased" | "sold";
     reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
-    parentId: string | null;
+    fatherId: string | null;
     motherId: string | null;
     acquisitionType: "born" | "purchased" | "other";
     acquisitionDate: string;
@@ -30,7 +30,7 @@ export interface ICreateAnimalPayload {
     weight: number;
     status: "alive" | "deceased" | "sold";
     reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
-    parentId: string | null;
+    fatherId: string | null;
     motherId: string | null;
     acquisitionType: "born" | "purchased" | "other";
     acquisitionDate: string;

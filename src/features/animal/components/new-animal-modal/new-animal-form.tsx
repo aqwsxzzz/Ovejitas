@@ -24,7 +24,7 @@ const formSchema = z.object({
     weight: z.string(),
     status: z.enum(["alive", "deceased", "sold"] as [IAnimal["status"], IAnimal["status"], IAnimal["status"]]),
     reproductiveStatus: z.enum(["open", "pregnant", "lactating", "other"] as [IAnimal["reproductiveStatus"], IAnimal["reproductiveStatus"], IAnimal["reproductiveStatus"], IAnimal["reproductiveStatus"]]),
-    parentId: z.string(),
+    fatherId: z.string(),
     motherId: z.string(),
     acquisitionType: z.enum(["born", "purchased", "other"] as [IAnimal["acquisitionType"], IAnimal["acquisitionType"], IAnimal["acquisitionType"]]),
     acquisitionDate: z.date(),
@@ -53,7 +53,7 @@ export const NewAnimalForm = () => {
                 weight: parseFloat(data.weight),
                 status: data.status,
                 reproductiveStatus: data.reproductiveStatus,
-                parentId: data.parentId,
+                fatherId: data.fatherId,
                 motherId: data.motherId,
                 acquisitionType: data.acquisitionType,
                 acquisitionDate: formatDate(data.acquisitionDate),
@@ -221,7 +221,7 @@ export const NewAnimalForm = () => {
                 />
                 <FormField
                     control={form.control}
-                    name="parentId"
+                    name="fatherId"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Father</FormLabel>

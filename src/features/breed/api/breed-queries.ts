@@ -11,5 +11,6 @@ export const useGetBreedsBySpecieId = (speciesId: string) => {
         queryKey: breedQueryKeys.breedsListBySpecieId(speciesId),
         queryFn: () => getBreedsBySpecieId({ speciesId }),
         select: (data) => data.data,
+        staleTime: 1000 * 60 * 5,
     });
 };

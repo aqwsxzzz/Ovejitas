@@ -3,7 +3,6 @@ import { useGetBreedsBySpecieId } from "@/features/breed/api/breed-queries";
 
 export const BreedSelect = ({ value, onChange, specieId }: { value: string; onChange: (value: string) => void; specieId: string }) => {
     const { data: breedsData } = useGetBreedsBySpecieId(specieId);
-    console.log(specieId, breedsData);
 
     return (
         <Select onValueChange={onChange} value={value}>
