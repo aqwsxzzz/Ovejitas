@@ -36,7 +36,7 @@ function PrivateLayout() {
         }
     }, [userData]);
     return (
-        <div className="bg-destructive h-screen w-screen flex flex-col">
+        <div className="bg-background h-screen w-screen flex flex-col">
             <AppHeader userData={userData!} />
             <Outlet />
         </div>

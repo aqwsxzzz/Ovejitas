@@ -8,7 +8,9 @@ export const NewAnimalModal = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger>
-                <Button variant="outline">New Animal</Button>
+                <Button variant="outline" className="bg-primary text-primary-foreground">
+                    New Animal
+                </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogTitle>Create a new animal</DialogTitle>
