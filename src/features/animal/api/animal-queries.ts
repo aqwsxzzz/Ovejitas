@@ -1,11 +1,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createAnimal, getAnimalsByFarmId } from "@/features/animal/api/animal-api";
+import { createAnimal, getAnimalById, getAnimalsByFarmId } from "@/features/animal/api/animal-api";
 import type { ICreateAnimalPayload } from "@/features/animal/types/animal-types";
 import { toast } from "sonner";
 
 export const animalQueryKeys = {
     all: ["animal"] as const,
     animalList: (farmId: string) => [...animalQueryKeys.all, "list", farmId] as const,
+    animalById: (animalId: string) => [...animalQueryKeys.all, "byId", animalId] as const,
 };
 
 export const useGetAnimalsByFarmId = (farmId: string) =>
@@ -24,4 +25,11 @@ export const useCreateAnimal = () =>
         onSuccess: () => {
             toast.success("Animal created successfully");
         },
+    });
+
+export const useGetAnimalById = (farmId: string, animalId: string) =>
+    useQuery({
+        queryKey: animalQueryKeys.animalById(animalId),
+        queryFn: () => getAnimalById({ farmId, animalId }),
+        select: (data) => data.data,
     });

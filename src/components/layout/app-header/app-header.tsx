@@ -5,7 +5,7 @@ import type { IUser } from "@/features/auth/types/auth-types";
 
 export const AppHeader = ({ userData }: { userData: IUser }) => {
     return (
-        <div className="bg-primary h-16 flex items-center justify-between px-4 w-screen">
+        <div className="bg-card h-16 flex items-center justify-between px-4 w-screen">
             <div className="flex">
                 <Avatar className="bg-foreground border-2">
                     <AvatarImage></AvatarImage>

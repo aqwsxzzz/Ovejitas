@@ -4,142 +4,142 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Verde pasto suave para el fondo */
-  --background: oklch(0.9412 0.0824 142.50);
-  /* Marrón oscuro para texto principal */
-  --foreground: oklch(0.2353 0.0490 45.30);
-  /* Blanco cremoso para tarjetas */
-  --card: oklch(0.9804 0.0196 85.40);
-  /* Marrón oscuro para texto en tarjetas */
-  --card-foreground: oklch(0.2353 0.0490 45.30);
-  /* Blanco cremoso para popovers */
-  --popover: oklch(0.9804 0.0196 85.40);
-  /* Marrón oscuro para texto en popovers */
-  --popover-foreground: oklch(0.2353 0.0490 45.30);
-  /* Verde bosque para elementos primarios */
-  --primary: oklch(0.4510 0.1373 152.80);
-  /* Crema claro para texto sobre primario */
-  --primary-foreground: oklch(0.9804 0.0196 85.40);
-  /* Marrón tierra para elementos secundarios */
-  --secondary: oklch(0.5294 0.0784 65.20);
-  /* Crema claro para texto sobre secundario */
-  --secondary-foreground: oklch(0.9804 0.0196 85.40);
-  /* Beige neutral para elementos mutados */
-  --muted: oklch(0.8627 0.0392 85.40);
-  /* Marrón medio para texto mutado */
-  --muted-foreground: oklch(0.4706 0.0588 50.20);
-  /* Amarillo dorado suave para acentos */
-  --accent: oklch(0.8235 0.1176 95.30);
-  /* Marrón oscuro para texto sobre acentos */
-  --accent-foreground: oklch(0.2353 0.0490 45.30);
-  /* Rojo intenso para destructivo (NO CAMBIAR) */
+  /* Light blue background */
+  --background: oklch(0.9804 0.0196 240.00);
+  /* Dark blue-gray for text */
+  --foreground: oklch(0.2745 0.0392 240.00);
+  /* Pure white for cards */
+  --card: oklch(1.0000 0.0000 0.0000);
+  /* Dark blue-gray for card text */
+  --card-foreground: oklch(0.2745 0.0392 240.00);
+  /* Pure white for popovers */
+  --popover: oklch(1.0000 0.0000 0.0000);
+  /* Dark blue-gray for popover text */
+  --popover-foreground: oklch(0.2745 0.0392 240.00);
+  /* Primary vibrant blue */
+  --primary: oklch(0.6196 0.2157 250.00);
+  /* White text on primary */
+  --primary-foreground: oklch(1.0000 0.0000 0.0000);
+  /* Light blue for secondary elements */
+  --secondary: oklch(0.9412 0.0392 240.00);
+  /* Dark blue for secondary text */
+  --secondary-foreground: oklch(0.2745 0.0392 240.00);
+  /* Very light blue for muted elements */
+  --muted: oklch(0.9608 0.0196 240.00);
+  /* Medium blue-gray for muted text */
+  --muted-foreground: oklch(0.5490 0.0392 240.00);
+  /* Light blue accent */
+  --accent: oklch(0.9412 0.0392 240.00);
+  /* Dark blue accent text */
+  --accent-foreground: oklch(0.2745 0.0392 240.00);
+  /* Red for destructive (keeping original) */
   --destructive: oklch(0.6275 0.2570 27.0000);
-  /* Blanco para texto destructivo */
+  /* White for destructive text */
   --destructive-foreground: oklch(1.0000 0.0000 0.0000);
-  /* Gris tierra para bordes */
-  --border: oklch(0.7451 0.0392 65.20);
-  /* Gris tierra para inputs */
-  --input: oklch(0.7451 0.0392 65.20);
-  /* Verde bosque para rings */
-  --ring: oklch(0.4510 0.1373 152.80);
-  /* Colores para gráficos con temática agrícola */
-  --chart-1: oklch(0.4510 0.1373 152.80); /* Verde bosque */
-  --chart-2: oklch(0.5294 0.0784 65.20);  /* Marrón tierra */
-  --chart-3: oklch(0.8235 0.1176 95.30);  /* Amarillo dorado */
-  --chart-4: oklch(0.6078 0.0980 45.30);  /* Marrón claro */
-  --chart-5: oklch(0.7255 0.0588 142.50); /* Verde pasto */
-  /* Sidebar con tonos naturales */
-  --sidebar: oklch(0.9020 0.0588 142.50);
-  --sidebar-foreground: oklch(0.2353 0.0490 45.30);
-  --sidebar-primary: oklch(0.4510 0.1373 152.80);
-  --sidebar-primary-foreground: oklch(0.9804 0.0196 85.40);
-  --sidebar-accent: oklch(0.5294 0.0784 65.20);
-  --sidebar-accent-foreground: oklch(0.9804 0.0196 85.40);
-  --sidebar-border: oklch(0.7451 0.0392 65.20);
-  --sidebar-ring: oklch(0.4510 0.1373 152.80);
+  /* Light blue-gray for borders */
+  --border: oklch(0.9020 0.0196 240.00);
+  /* Light blue-gray for inputs */
+  --input: oklch(0.9020 0.0196 240.00);
+  /* Primary blue for focus rings */
+  --ring: oklch(0.6196 0.2157 250.00);
+  /* Blue-themed chart colors */
+  --chart-1: oklch(0.6196 0.2157 250.00); /* Primary blue */
+  --chart-2: oklch(0.7255 0.1569 260.00); /* Light blue */
+  --chart-3: oklch(0.5490 0.1961 240.00); /* Dark blue */
+  --chart-4: oklch(0.8039 0.0784 250.00); /* Very light blue */
+  --chart-5: oklch(0.4510 0.1373 230.00); /* Navy blue */
+  /* Sidebar with blue theme */
+  --sidebar: oklch(0.9804 0.0196 240.00);
+  --sidebar-foreground: oklch(0.2745 0.0392 240.00);
+  --sidebar-primary: oklch(0.6196 0.2157 250.00);
+  --sidebar-primary-foreground: oklch(1.0000 0.0000 0.0000);
+  --sidebar-accent: oklch(0.9412 0.0392 240.00);
+  --sidebar-accent-foreground: oklch(0.2745 0.0392 240.00);
+  --sidebar-border: oklch(0.9020 0.0196 240.00);
+  --sidebar-ring: oklch(0.6196 0.2157 250.00);
   --font-sans: DM Sans, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.5rem;
-  --shadow-2xs: 2px 2px 0px 0px hsl(45 20% 40% / 0.06);
-  --shadow-xs: 2px 2px 0px 0px hsl(45 20% 40% / 0.06);
-  --shadow-sm: 2px 2px 0px 0px hsl(45 20% 40% / 0.11), 2px 1px 2px -1px hsl(45 20% 40% / 0.11);
-  --shadow: 2px 2px 0px 0px hsl(45 20% 40% / 0.11), 2px 1px 2px -1px hsl(45 20% 40% / 0.11);
-  --shadow-md: 2px 2px 0px 0px hsl(45 20% 40% / 0.11), 2px 2px 4px -1px hsl(45 20% 40% / 0.11);
-  --shadow-lg: 2px 2px 0px 0px hsl(45 20% 40% / 0.11), 2px 4px 6px -1px hsl(45 20% 40% / 0.11);
-  --shadow-xl: 2px 2px 0px 0px hsl(45 20% 40% / 0.11), 2px 8px 10px -1px hsl(45 20% 40% / 0.11);
-  --shadow-2xl: 2px 2px 0px 0px hsl(45 20% 40% / 0.28);
-  /* Success mantiene su valor original */
+  --shadow-2xs: 0px 1px 2px 0px hsl(240 20% 60% / 0.06);
+  --shadow-xs: 0px 1px 2px 0px hsl(240 20% 60% / 0.06);
+  --shadow-sm: 0px 1px 3px 0px hsl(240 20% 60% / 0.11), 0px 1px 2px -1px hsl(240 20% 60% / 0.11);
+  --shadow: 0px 1px 3px 0px hsl(240 20% 60% / 0.11), 0px 1px 2px -1px hsl(240 20% 60% / 0.11);
+  --shadow-md: 0px 4px 6px -1px hsl(240 20% 60% / 0.11), 0px 2px 4px -2px hsl(240 20% 60% / 0.11);
+  --shadow-lg: 0px 10px 15px -3px hsl(240 20% 60% / 0.11), 0px 4px 6px -4px hsl(240 20% 60% / 0.11);
+  --shadow-xl: 0px 20px 25px -5px hsl(240 20% 60% / 0.11), 0px 8px 10px -6px hsl(240 20% 60% / 0.11);
+  --shadow-2xl: 0px 25px 50px -12px hsl(240 20% 60% / 0.28);
+  /* Success green (keeping original) */
   --success: oklch(0.8103 0.2985 147.71);
 }
 
 .dark {
-  /* Marrón muy oscuro para fondo modo oscuro */
-  --background: oklch(0.1569 0.0392 45.30);
-  /* Verde pasto claro para texto en modo oscuro */
-  --foreground: oklch(0.9020 0.0588 142.50);
-  /* Marrón oscuro para tarjetas */
-  --card: oklch(0.2157 0.0490 45.30);
-  /* Verde pasto claro para texto en tarjetas */
-  --card-foreground: oklch(0.9020 0.0588 142.50);
-  /* Marrón oscuro para popovers */
-  --popover: oklch(0.2157 0.0490 45.30);
-  /* Verde pasto claro para texto en popovers */
-  --popover-foreground: oklch(0.9020 0.0588 142.50);
-  /* Verde bosque más claro para primario en modo oscuro */
-  --primary: oklch(0.5490 0.1569 152.80);
-  /* Marrón muy oscuro para texto sobre primario */
-  --primary-foreground: oklch(0.1569 0.0392 45.30);
-  /* Amarillo dorado más suave para secundario */
-  --secondary: oklch(0.7059 0.1176 85.30);
-  /* Marrón oscuro para texto sobre secundario */
-  --secondary-foreground: oklch(0.1569 0.0392 45.30);
-  /* Gris marrón para elementos mutados */
-  --muted: oklch(0.3529 0.0392 45.30);
-  /* Beige claro para texto mutado */
-  --muted-foreground: oklch(0.7451 0.0392 65.20);
-  /* Amarillo dorado para acentos */
-  --accent: oklch(0.8235 0.1176 95.30);
-  /* Marrón muy oscuro para texto sobre acentos */
-  --accent-foreground: oklch(0.1569 0.0392 45.30);
-  /* Rojo intenso para destructivo (NO CAMBIAR) */
+  /* Dark blue background */
+  --background: oklch(0.1176 0.0392 240.00);
+  /* Light blue-gray for text */
+  --foreground: oklch(0.9020 0.0196 240.00);
+  /* Dark blue-gray for cards */
+  --card: oklch(0.1569 0.0392 240.00);
+  /* Light blue-gray for card text */
+  --card-foreground: oklch(0.9020 0.0196 240.00);
+  /* Dark blue-gray for popovers */
+  --popover: oklch(0.1569 0.0392 240.00);
+  /* Light blue-gray for popover text */
+  --popover-foreground: oklch(0.9020 0.0196 240.00);
+  /* Brighter blue for primary in dark mode */
+  --primary: oklch(0.6863 0.2157 250.00);
+  /* Dark blue for primary text */
+  --primary-foreground: oklch(0.1176 0.0392 240.00);
+  /* Medium blue for secondary */
+  --secondary: oklch(0.2745 0.0392 240.00);
+  /* Light blue for secondary text */
+  --secondary-foreground: oklch(0.9020 0.0196 240.00);
+  /* Dark blue-gray for muted */
+  --muted: oklch(0.2157 0.0392 240.00);
+  /* Medium blue-gray for muted text */
+  --muted-foreground: oklch(0.7451 0.0196 240.00);
+  /* Medium blue for accent */
+  --accent: oklch(0.2745 0.0392 240.00);
+  /* Light blue for accent text */
+  --accent-foreground: oklch(0.9020 0.0196 240.00);
+  /* Red for destructive (keeping original) */
   --destructive: oklch(0.6275 0.2570 27.0000);
-  /* Verde pasto claro para texto destructivo */
-  --destructive-foreground: oklch(0.9020 0.0588 142.50);
-  /* Gris marrón para bordes */
-  --border: oklch(0.3529 0.0392 45.30);
-  /* Gris marrón para inputs */
-  --input: oklch(0.3529 0.0392 45.30);
-  /* Verde bosque para rings */
-  --ring: oklch(0.5490 0.1569 152.80);
-  /* Colores para gráficos modo oscuro */
-  --chart-1: oklch(0.5490 0.1569 152.80); /* Verde bosque claro */
-  --chart-2: oklch(0.7059 0.1176 85.30);  /* Amarillo dorado */
-  --chart-3: oklch(0.8235 0.1176 95.30);  /* Amarillo más intenso */
-  --chart-4: oklch(0.6078 0.0784 65.20);  /* Marrón medio */
-  --chart-5: oklch(0.7255 0.0784 142.50); /* Verde pasto medio */
-  /* Sidebar modo oscuro */
-  --sidebar: oklch(0.1176 0.0392 45.30);
-  --sidebar-foreground: oklch(0.9020 0.0588 142.50);
-  --sidebar-primary: oklch(0.5490 0.1569 152.80);
-  --sidebar-primary-foreground: oklch(0.1569 0.0392 45.30);
-  --sidebar-accent: oklch(0.7059 0.1176 85.30);
-  --sidebar-accent-foreground: oklch(0.1569 0.0392 45.30);
-  --sidebar-border: oklch(0.3529 0.0392 45.30);
-  --sidebar-ring: oklch(0.5490 0.1569 152.80);
+  /* Light blue for destructive text */
+  --destructive-foreground: oklch(0.9020 0.0196 240.00);
+  /* Dark blue for borders */
+  --border: oklch(0.2157 0.0392 240.00);
+  /* Dark blue for inputs */
+  --input: oklch(0.2157 0.0392 240.00);
+  /* Bright blue for rings */
+  --ring: oklch(0.6863 0.2157 250.00);
+  /* Dark mode chart colors */
+  --chart-1: oklch(0.6863 0.2157 250.00); /* Bright blue */
+  --chart-2: oklch(0.7843 0.1569 260.00); /* Light blue */
+  --chart-3: oklch(0.5882 0.1961 240.00); /* Medium blue */
+  --chart-4: oklch(0.4510 0.1373 250.00); /* Dark blue */
+  --chart-5: oklch(0.3529 0.0784 230.00); /* Navy blue */
+  /* Sidebar dark mode */
+  --sidebar: oklch(0.0784 0.0392 240.00);
+  --sidebar-foreground: oklch(0.9020 0.0196 240.00);
+  --sidebar-primary: oklch(0.6863 0.2157 250.00);
+  --sidebar-primary-foreground: oklch(0.1176 0.0392 240.00);
+  --sidebar-accent: oklch(0.2745 0.0392 240.00);
+  --sidebar-accent-foreground: oklch(0.9020 0.0196 240.00);
+  --sidebar-border: oklch(0.2157 0.0392 240.00);
+  --sidebar-ring: oklch(0.6863 0.2157 250.00);
   --font-sans: DM Sans, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.5rem;
-  --shadow-2xs: 2px 2px 0px 0px hsl(45 20% 20% / 0.06);
-  --shadow-xs: 2px 2px 0px 0px hsl(45 20% 20% / 0.06);
-  --shadow-sm: 2px 2px 0px 0px hsl(45 20% 20% / 0.11), 2px 1px 2px -1px hsl(45 20% 20% / 0.11);
-  --shadow: 2px 2px 0px 0px hsl(45 20% 20% / 0.11), 2px 1px 2px -1px hsl(45 20% 20% / 0.11);
-  --shadow-md: 2px 2px 0px 0px hsl(45 20% 20% / 0.11), 2px 2px 4px -1px hsl(45 20% 20% / 0.11);
-  --shadow-lg: 2px 2px 0px 0px hsl(45 20% 20% / 0.11), 2px 4px 6px -1px hsl(45 20% 20% / 0.11);
-  --shadow-xl: 2px 2px 0px 0px hsl(45 20% 20% / 0.11), 2px 8px 10px -1px hsl(45 20% 20% / 0.11);
-  --shadow-2xl: 2px 2px 0px 0px hsl(45 20% 20% / 0.28);
-  /* Success mantiene su valor original */
+  --shadow-2xs: 0px 1px 2px 0px hsl(240 20% 10% / 0.06);
+  --shadow-xs: 0px 1px 2px 0px hsl(240 20% 10% / 0.06);
+  --shadow-sm: 0px 1px 3px 0px hsl(240 20% 10% / 0.11), 0px 1px 2px -1px hsl(240 20% 10% / 0.11);
+  --shadow: 0px 1px 3px 0px hsl(240 20% 10% / 0.11), 0px 1px 2px -1px hsl(240 20% 10% / 0.11);
+  --shadow-md: 0px 4px 6px -1px hsl(240 20% 10% / 0.11), 0px 2px 4px -2px hsl(240 20% 10% / 0.11);
+  --shadow-lg: 0px 10px 15px -3px hsl(240 20% 10% / 0.11), 0px 4px 6px -4px hsl(240 20% 10% / 0.11);
+  --shadow-xl: 0px 20px 25px -5px hsl(240 20% 10% / 0.11), 0px 8px 10px -6px hsl(240 20% 10% / 0.11);
+  --shadow-2xl: 0px 25px 50px -12px hsl(240 20% 10% / 0.28);
+  /* Success green (keeping original) */
   --success: oklch(0.8103 0.2985 147.71);
 }
 

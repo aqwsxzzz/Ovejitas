@@ -14,3 +14,9 @@ export const createAnimal = ({ payload, farmId }: { payload: ICreateAnimalPayloa
         url: `/farms/${farmId}/animals`,
         data: payload,
     });
+
+export const getAnimalById = ({ farmId, animalId }: { farmId: string; animalId: string }) =>
+    axiosHelper<IResponse<IAnimal>>({
+        method: "get",
+        url: `/farms/${farmId}/animals/${animalId}`,
+    });
