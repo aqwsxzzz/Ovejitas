@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createAnimal, getAnimalById, getAnimalsByFarmId } from "@/features/animal/api/animal-api";
-import type { ICreateAnimalPayload } from "@/features/animal/types/animal-types";
+import { createAnimal, editAnimalById, getAnimalById, getAnimalsByFarmId } from "@/features/animal/api/animal-api";
+import type { ICreateAnimalPayload, IEditAnimalPayload } from "@/features/animal/types/animal-types";
 import { toast } from "sonner";
 
 export const animalQueryKeys = {
@@ -32,4 +32,15 @@ export const useGetAnimalById = (farmId: string, animalId: string) =>
         queryKey: animalQueryKeys.animalById(animalId),
         queryFn: () => getAnimalById({ farmId, animalId }),
         select: (data) => data.data,
+    });
+
+export const useEditAnimalById = () =>
+    useMutation({
+        mutationFn: ({ payload, farmId, animalId }: { payload: IEditAnimalPayload; farmId: string; animalId: string }) => editAnimalById({ payload, farmId, animalId }),
+        onError: (error) => {
+            toast.error(error.message);
+        },
+        onSuccess: () => {
+            toast.success("Animal edited successfully");
+        },
     });

@@ -12,7 +12,7 @@ export const NewAnimalModal = () => {
                     New Animal
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto p-4">
                 <DialogTitle>Create a new animal</DialogTitle>
                 <DialogDescription>Here you can create a new animal to join your farm!</DialogDescription>
                 <NewAnimalForm />
