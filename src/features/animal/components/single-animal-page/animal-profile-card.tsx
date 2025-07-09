@@ -47,7 +47,7 @@ export const AnimalProfileCard = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                             <div>
                                 <h2 className="text-2xl font-bold text-foreground">{animalData.name}</h2>
-                                <p className="text-muted-foreground">{animalData.breedId}</p>
+                                <p className="text-muted-foreground">{animalData.breed.id}</p>
                             </div>
                             <Badge className={`${getHealthStatusColor(animalData.status)} mt-2 sm:mt-0 text-foreground`}>{animalData.status}</Badge>
                         </div>
