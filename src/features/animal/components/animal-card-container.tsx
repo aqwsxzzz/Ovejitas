@@ -2,9 +2,20 @@ import { AnimalCard } from "@/features/animal/components/animal-card";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 
 interface AnimalCardContainerProps {
-    animalsList: IAnimal[];
+	animalsList: IAnimal[];
 }
 
-export const AnimalCardContainer = ({ animalsList }: AnimalCardContainerProps) => {
-    return <div className="text-sidebar p-2 flex flex-col gap-2">{animalsList?.map((animal) => <AnimalCard animal={animal} key={animal.id} />)}</div>;
+export const AnimalCardContainer = ({
+	animalsList,
+}: AnimalCardContainerProps) => {
+	return (
+		<div className="text-sidebar flex flex-col gap-2">
+			{animalsList?.map((animal) => (
+				<AnimalCard
+					animal={animal}
+					key={animal.id}
+				/>
+			))}
+		</div>
+	);
 };
