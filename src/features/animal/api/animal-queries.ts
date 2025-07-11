@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createAnimal,
 	deleteAnimalById,
@@ -7,10 +7,12 @@ import {
 	getAnimalsByFarmId,
 } from "@/features/animal/api/animal-api";
 import type {
+	IAnimal,
 	ICreateAnimalPayload,
 	IEditAnimalPayload,
 } from "@/features/animal/types/animal-types";
 import { toast } from "sonner";
+import type { IResponse } from "@/lib/axios";
 
 export const animalQueryKeys = {
 	all: ["animal"] as const,
@@ -27,8 +29,10 @@ export const useGetAnimalsByFarmId = (farmId: string) =>
 		select: (data) => data.data,
 	});
 
-export const useCreateAnimal = () =>
-	useMutation({
+export const useCreateAnimal = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
 		mutationFn: ({
 			payload,
 			farmId,
@@ -39,10 +43,25 @@ export const useCreateAnimal = () =>
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: () => {
+		onSuccess: (response, { farmId }) => {
 			toast.success("Animal created successfully");
+			queryClient.setQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId),
+
+				(oldData) => {
+					console.log(oldData, response);
+					if (!oldData) {
+						return;
+					}
+					return {
+						...oldData,
+						data: [...oldData.data, response.data],
+					};
+				},
+			);
 		},
 	});
+};
 
 export const useGetAnimalById = (farmId: string, animalId: string) =>
 	useQuery({
@@ -51,8 +70,10 @@ export const useGetAnimalById = (farmId: string, animalId: string) =>
 		select: (data) => data.data,
 	});
 
-export const useEditAnimalById = () =>
-	useMutation({
+export const useEditAnimalById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
 		mutationFn: ({
 			payload,
 			farmId,
@@ -65,19 +86,49 @@ export const useEditAnimalById = () =>
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: () => {
+		onSuccess: (response, { farmId }) => {
 			toast.success("Animal edited successfully");
+			queryClient.setQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId),
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+					return {
+						...oldData,
+						data: oldData.data.map((animal) =>
+							animal.id === response.data.id ? response.data : animal,
+						),
+					};
+				},
+			);
 		},
 	});
+};
 
-export const useDeleteAnimalById = () =>
-	useMutation({
+export const useDeleteAnimalById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
 		mutationFn: ({ farmId, animalId }: { farmId: string; animalId: string }) =>
 			deleteAnimalById({ farmId, animalId }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: () => {
+		onSuccess: (_, { farmId, animalId }) => {
 			toast.success("Animal deleted successfully");
+			queryClient.setQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId),
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+					return {
+						...oldData,
+						data: oldData.data.filter((animal) => animal.id !== animalId),
+					};
+				},
+			);
 		},
 	});
+};

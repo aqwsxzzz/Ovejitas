@@ -29,7 +29,7 @@ export const NewAnimalModal = () => {
 				<DialogDescription>
 					Here you can create a new animal to join your farm!
 				</DialogDescription>
-				<NewAnimalForm />
+				<NewAnimalForm closeDialog={() => setOpen(false)} />
 			</DialogContent>
 		</Dialog>
 	);
