@@ -43,8 +43,8 @@ export const DeleteAnimalModal = ({ animal }: DeleteAnimalProps) => {
 					Do you want to delete {animal.name} {animal.tagNumber} from your farm?
 				</DialogTitle>
 				<DialogDescription>
-					This will erase any information given from{" "}
-					<strong> {animal.name} </strong> to other animals, like relantionships
+					This will erase any information given from
+					<strong> {animal.name} </strong> to other animals, like relationships
 					and others. Remember that animals tagged as "sold" will not be count
 					as animals in your farm and will not be shown in your animals
 					dashboard.
