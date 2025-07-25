@@ -5,7 +5,7 @@ import { formatDateByMonth } from "@/lib/dayjs/date-formats";
 import { useParams } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { MeasurementRecordModal } from "@/features/measurement/components/measurement-record-modal";
-import { AddNewMeasurementModal } from "@/features/measurement/components/add-new-measurement-modal";
+import { AddNewMeasurementModal } from "@/features/measurement/components/add-new-measurement-modal/add-new-measurement-modal";
 
 export const AnimalProfileHealthCard = () => {
 	const { farmId, animalId } = useParams({ strict: false });

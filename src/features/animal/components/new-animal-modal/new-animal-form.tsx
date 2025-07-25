@@ -423,12 +423,20 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 						</FormItem>
 					)}
 				/>
-				<Button
-					disabled={isPending}
-					type="submit"
-				>
-					Create
-				</Button>
+				<div className="flex justify-around">
+					<Button
+						disabled={isPending}
+						type="submit"
+					>
+						Create
+					</Button>
+					<Button
+						onClick={closeDialog}
+						className="bg-destructive"
+					>
+						Cancel
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

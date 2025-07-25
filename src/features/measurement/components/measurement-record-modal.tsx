@@ -1,6 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { useGetMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
 import { Trash2 } from "lucide-react";
@@ -27,7 +33,12 @@ export const MeasurementRecordModal = ({
 			<DialogTrigger asChild>
 				<Button className="">Record</Button>
 			</DialogTrigger>
-			<DialogContent>
+			<DialogContent aria-describedby={undefined}>
+				<DialogHeader>
+					<DialogTitle className="text-2xl font-bold">
+						Measurement Records
+					</DialogTitle>
+				</DialogHeader>
 				{isLoading ? (
 					<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
 				) : (!isLoading && measurementData?.length == 0) || null ? (
@@ -35,7 +46,7 @@ export const MeasurementRecordModal = ({
 				) : (
 					measurementData!.map((data) => {
 						return (
-							<Card>
+							<Card key={data.id}>
 								<CardContent className="flex gap-4">
 									<h1>
 										{data.value} {data.unit}
