@@ -7,6 +7,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -96,6 +97,10 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 	};
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			specieId: "",
+			breedId: "",
+		},
 	});
 
 	const selectedSpecieId = form.watch("specieId");
@@ -106,323 +111,336 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 				className="flex flex-col gap-2"
 				onSubmit={form.handleSubmit(onSubmit)}
 			>
-				<FormField
-					control={form.control}
-					name="specieId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Specie</FormLabel>
-							<FormControl>
-								<SpecieSelect
-									value={field.value}
-									onChange={field.onChange}
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="breedId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Breed</FormLabel>
-							<FormControl>
-								<BreedSelect
-									value={field.value}
-									onChange={field.onChange}
-									specieId={selectedSpecieId}
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Name</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Enter a name"
-									{...field}
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="tagNumber"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Tag Number</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Enter a tag number"
-									{...field}
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="sex"
-					render={({ field }) => (
-						<FormItem>
-							<Label>Gender</Label>
-							<RadioGroup
-								onValueChange={field.onChange}
-								defaultValue={field.value}
-								className="flex"
-							>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="male"
-										id="male"
-									/>
-									<Label htmlFor="male">Male</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="female"
-										id="female"
-									/>
-									<Label htmlFor="female">Female</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="unknown"
-										id="unkown"
-									/>
-									<Label htmlFor="unknown">Unknown</Label>
-								</div>
-							</RadioGroup>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="birthDate"
-					render={({ field }) => (
-						<FormItem className="space-y-2">
-							<div className="flex items-center gap-2">
-								<FormLabel className="shrink-0">
-									Select a creation date
-								</FormLabel>
-								<div className="border-t border-primary/50 w-full" />
-							</div>
-							<FormControl>
-								<DateSelector
-									date={field.value ?? undefined}
-									setDate={field.onChange}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="weight"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Weight</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Enter the animal's weight"
-									{...field}
-								/>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="status"
-					render={({ field }) => (
-						<FormItem>
-							<Label>Status</Label>
-							<RadioGroup
-								onValueChange={field.onChange}
-								defaultValue={field.value}
-								className="flex"
-							>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="alive"
-										id="alive"
-									/>
-									<Label htmlFor="alive">Alive</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="sold"
-										id="sold"
-									/>
-									<Label htmlFor="sold">Sold</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="deceased"
-										id="deceased"
-									/>
-									<Label htmlFor="deceased">Deceased</Label>
-								</div>
-							</RadioGroup>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="reproductiveStatus"
-					render={({ field }) => (
-						<FormItem>
-							<Label>Reproductive Status</Label>
-							<RadioGroup
-								onValueChange={field.onChange}
-								defaultValue={field.value}
-								className="flex"
-							>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="open"
-										id="open"
-									/>
-									<Label htmlFor="open">Open</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="pregnant"
-										id="pregnant"
-									/>
-									<Label htmlFor="pregnant">Pregnant</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="lactating"
-										id="lactating"
-									/>
-									<Label htmlFor="lactating">Lactating</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="other"
-										id="other"
-									/>
-									<Label htmlFor="other">Other</Label>
-								</div>
-							</RadioGroup>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="fatherId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Father</FormLabel>
-							<FormControl>
-								<Select
-									onValueChange={field.onChange}
-									value={field.value}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Select a father.." />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="7ZWDkbpO">Pepito</SelectItem>
-										<SelectItem value="3">Rodolfo</SelectItem>
-										<SelectItem value="2">Chuchumeco</SelectItem>
-									</SelectContent>
-								</Select>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="motherId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Mother</FormLabel>
-							<FormControl>
-								<Select
-									onValueChange={field.onChange}
-									value={field.value}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Select a mother.." />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="AdWNDqgV">Pepita</SelectItem>
-										<SelectItem value="NArJeWyE">Rodolfa</SelectItem>
-										<SelectItem value="Jlq1nbR6">Chuchumeca</SelectItem>
-									</SelectContent>
-								</Select>
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="acquisitionType"
-					render={({ field }) => (
-						<FormItem>
-							<Label>Acquisition Type</Label>
-							<RadioGroup
-								onValueChange={field.onChange}
-								defaultValue={field.value}
-								className="flex"
-							>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="born"
-										id="born"
-									/>
-									<Label htmlFor="born">Born</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="purchased"
-										id="purchased"
-									/>
-									<Label htmlFor="purchased">Purchased</Label>
-								</div>
-								<div className="flex gap-1">
-									<RadioGroupItem
-										value="other"
-										id="other"
-									/>
-									<Label htmlFor="other">Other</Label>
-								</div>
-							</RadioGroup>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="acquisitionDate"
-					render={({ field }) => (
-						<FormItem className="space-y-2">
-							<div className="flex items-center gap-2">
-								<FormLabel className="shrink-0">
-									Select an acquisition date
-								</FormLabel>
-								<div className="border-t border-primary/50 w-full" />
-							</div>
-							<FormControl>
-								<DateSelector
-									date={field.value ?? undefined}
-									setDate={field.onChange}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				<Tabs
+					defaultValue="basic"
+					className="w-full"
+				>
+					<TabsList className="grid w-full grid-cols-2">
+						<TabsTrigger value="basic">Basic Info</TabsTrigger>
+						<TabsTrigger value="optional">Optional Info</TabsTrigger>
+					</TabsList>
+					<TabsContent value="basic">
+						<FormField
+							control={form.control}
+							name="specieId"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Specie</FormLabel>
+									<FormControl>
+										<SpecieSelect
+											value={field.value}
+											onChange={field.onChange}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="breedId"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Breed</FormLabel>
+									<FormControl>
+										<BreedSelect
+											value={field.value}
+											onChange={field.onChange}
+											specieId={selectedSpecieId}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="name"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Name</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Enter a name"
+											{...field}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="tagNumber"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Tag Number</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Enter a tag number"
+											{...field}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+					</TabsContent>
+					<TabsContent value="optional">
+						<FormField
+							control={form.control}
+							name="sex"
+							render={({ field }) => (
+								<FormItem>
+									<Label>Gender</Label>
+									<RadioGroup
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+										className="flex"
+									>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="male"
+												id="male"
+											/>
+											<Label htmlFor="male">Male</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="female"
+												id="female"
+											/>
+											<Label htmlFor="female">Female</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="unknown"
+												id="unkown"
+											/>
+											<Label htmlFor="unknown">Unknown</Label>
+										</div>
+									</RadioGroup>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="birthDate"
+							render={({ field }) => (
+								<FormItem className="space-y-2">
+									<div className="flex items-center gap-2">
+										<FormLabel className="shrink-0">
+											Select a birth date
+										</FormLabel>
+										<div className="border-t border-primary/50 w-full" />
+									</div>
+									<FormControl>
+										<DateSelector
+											date={field.value ?? undefined}
+											setDate={field.onChange}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="weight"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Weight</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Enter the animal's weight"
+											{...field}
+										/>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="status"
+							render={({ field }) => (
+								<FormItem>
+									<Label>Status</Label>
+									<RadioGroup
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+										className="flex"
+									>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="alive"
+												id="alive"
+											/>
+											<Label htmlFor="alive">Alive</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="sold"
+												id="sold"
+											/>
+											<Label htmlFor="sold">Sold</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="deceased"
+												id="deceased"
+											/>
+											<Label htmlFor="deceased">Deceased</Label>
+										</div>
+									</RadioGroup>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="reproductiveStatus"
+							render={({ field }) => (
+								<FormItem>
+									<Label>Reproductive Status</Label>
+									<RadioGroup
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+										className="flex"
+									>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="open"
+												id="open"
+											/>
+											<Label htmlFor="open">Open</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="pregnant"
+												id="pregnant"
+											/>
+											<Label htmlFor="pregnant">Pregnant</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="lactating"
+												id="lactating"
+											/>
+											<Label htmlFor="lactating">Lactating</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="other"
+												id="other"
+											/>
+											<Label htmlFor="other">Other</Label>
+										</div>
+									</RadioGroup>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="fatherId"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Father</FormLabel>
+									<FormControl>
+										<Select
+											onValueChange={field.onChange}
+											value={field.value}
+										>
+											<SelectTrigger>
+												<SelectValue placeholder="Select a father.." />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="7ZWDkbpO">Pepito</SelectItem>
+												<SelectItem value="3">Rodolfo</SelectItem>
+												<SelectItem value="2">Chuchumeco</SelectItem>
+											</SelectContent>
+										</Select>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="motherId"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Mother</FormLabel>
+									<FormControl>
+										<Select
+											onValueChange={field.onChange}
+											value={field.value}
+										>
+											<SelectTrigger>
+												<SelectValue placeholder="Select a mother.." />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="AdWNDqgV">Pepita</SelectItem>
+												<SelectItem value="NArJeWyE">Rodolfa</SelectItem>
+												<SelectItem value="Jlq1nbR6">Chuchumeca</SelectItem>
+											</SelectContent>
+										</Select>
+									</FormControl>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="acquisitionType"
+							render={({ field }) => (
+								<FormItem>
+									<Label>Acquisition Type</Label>
+									<RadioGroup
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+										className="flex"
+									>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="born"
+												id="born"
+											/>
+											<Label htmlFor="born">Born</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="purchased"
+												id="purchased"
+											/>
+											<Label htmlFor="purchased">Purchased</Label>
+										</div>
+										<div className="flex gap-1">
+											<RadioGroupItem
+												value="other"
+												id="other"
+											/>
+											<Label htmlFor="other">Other</Label>
+										</div>
+									</RadioGroup>
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="acquisitionDate"
+							render={({ field }) => (
+								<FormItem className="space-y-2">
+									<div className="flex items-center gap-2">
+										<FormLabel className="shrink-0">
+											Select an acquisition date
+										</FormLabel>
+										<div className="border-t border-primary/50 w-full" />
+									</div>
+									<FormControl>
+										<DateSelector
+											date={field.value ?? undefined}
+											setDate={field.onChange}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</TabsContent>
+				</Tabs>
 				<div className="flex justify-around">
 					<Button
 						disabled={isPending}
