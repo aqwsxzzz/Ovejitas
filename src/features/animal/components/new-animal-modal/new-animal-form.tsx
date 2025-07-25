@@ -119,7 +119,10 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 						<TabsTrigger value="basic">Basic Info</TabsTrigger>
 						<TabsTrigger value="optional">Optional Info</TabsTrigger>
 					</TabsList>
-					<TabsContent value="basic">
+					<TabsContent
+						value="basic"
+						className="flex flex-col gap-2"
+					>
 						<FormField
 							control={form.control}
 							name="specieId"
@@ -135,22 +138,24 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								</FormItem>
 							)}
 						/>
-						<FormField
-							control={form.control}
-							name="breedId"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Breed</FormLabel>
-									<FormControl>
-										<BreedSelect
-											value={field.value}
-											onChange={field.onChange}
-											specieId={selectedSpecieId}
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
+						{selectedSpecieId ? (
+							<FormField
+								control={form.control}
+								name="breedId"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Breed</FormLabel>
+										<FormControl>
+											<BreedSelect
+												value={field.value}
+												onChange={field.onChange}
+												specieId={selectedSpecieId}
+											/>
+										</FormControl>
+									</FormItem>
+								)}
+							/>
+						) : null}
 						<FormField
 							control={form.control}
 							name="name"
@@ -182,7 +187,10 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							)}
 						/>
 					</TabsContent>
-					<TabsContent value="optional">
+					<TabsContent
+						value="optional"
+						className="flex flex-col gap-2"
+					>
 						<FormField
 							control={form.control}
 							name="sex"
