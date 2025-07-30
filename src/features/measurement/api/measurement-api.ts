@@ -6,7 +6,6 @@ import type {
 } from "@/features/measurement/types/measurement";
 
 export const getMeasurementsByAnimalId = ({
-	farmId,
 	animalId,
 	measurementType,
 	limit = "10",
@@ -18,20 +17,18 @@ export const getMeasurementsByAnimalId = ({
 }) =>
 	axiosHelper<IResponse<IMeasurement[]>>({
 		method: "get",
-		url: `/farms/${farmId}/animals/${animalId}/measurements?measurementType=${measurementType}&limit=${limit}`,
+		url: `/animals/${animalId}/measurements?measurementType=${measurementType}&limit=${limit}`,
 	});
 
 export const createMeasurement = ({
 	payload,
-	farmId,
 	animalId,
 }: {
 	payload: ICreateMeasurementPayload;
-	farmId: string;
 	animalId: string;
 }) =>
 	axiosHelper<IResponse<IMeasurement>>({
 		method: "post",
-		url: `/farms/${farmId}/animals/${animalId}/measurements`,
+		url: `/animals/${animalId}/measurements`,
 		data: payload,
 	});

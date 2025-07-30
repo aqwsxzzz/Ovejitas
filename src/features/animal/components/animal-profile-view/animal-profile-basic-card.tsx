@@ -5,9 +5,13 @@ import { useParams } from "@tanstack/react-router";
 import dayjs from "dayjs";
 
 export const AnimalProfileCard = () => {
-	const { farmId, animalId } = useParams({ strict: false });
-
-	const { data: animalData } = useGetAnimalById(farmId!, animalId!);
+	const { animalId } = useParams({ strict: false });
+	const include = "breed,species,lastMeasurement";
+	const { data: animalData } = useGetAnimalById({
+		animalId: animalId!,
+		include,
+		withLanguage: true,
+	});
 
 	const getHealthStatusColor = (status: string) => {
 		switch (status) {
@@ -72,7 +76,7 @@ export const AnimalProfileCard = () => {
 							<div>
 								<p className="text-foreground">Weight</p>
 								<p className="font-medium text-muted-foreground">
-									{animalData.weight}
+									{animalData.lastMeasurement?.value}
 								</p>
 							</div>
 							<div>

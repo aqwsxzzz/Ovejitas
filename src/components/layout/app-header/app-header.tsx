@@ -1,7 +1,6 @@
 import { DropdownHeaderMenu } from "@/components/layout/app-header/components/dropdown-header-menu";
 import { HeaderNotifications } from "@/components/layout/app-header/components/header-notifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import type { IUser } from "@/features/auth/types/auth-types";
 import { useGetFarmById } from "@/features/farm/api/farm-queries";
 import { useParams } from "@tanstack/react-router";
@@ -9,7 +8,6 @@ import { useParams } from "@tanstack/react-router";
 export const AppHeader = ({ userData }: { userData: IUser }) => {
 	const { farmId } = useParams({ strict: false });
 	const { data: farmData } = useGetFarmById(farmId!);
-	const { data: animalsData } = useGetAnimalsByFarmId(farmId!);
 
 	return (
 		<div className="bg-card h-16 flex items-center justify-between px-4 w-screen">
@@ -22,7 +20,6 @@ export const AppHeader = ({ userData }: { userData: IUser }) => {
 				</Avatar>
 				<div className="flex flex-col text-foreground items-center">
 					<h1>Farm {farmData?.name} </h1>
-					<h2>{animalsData?.length} animals. </h2>
 				</div>
 			</div>
 			<div className="flex items-center">

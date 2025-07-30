@@ -13,7 +13,11 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
 	const { farmId } = useParams({ strict: false });
-	const { data: animalData } = useGetAnimalsByFarmId(farmId!);
+	const { data: animalData } = useGetAnimalsByFarmId({
+		farmId: farmId!,
+		include: "species.translations,breed",
+		withLanguage: true,
+	});
 
 	return (
 		<div className="flex gap-2 justify-center p-4">

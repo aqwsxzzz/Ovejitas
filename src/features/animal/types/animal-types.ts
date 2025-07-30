@@ -7,13 +7,22 @@ export interface IAnimal {
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
 	birthDate: string;
-	weight: number;
 	status: "alive" | "deceased" | "sold";
 	reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
 	fatherId: string | null;
 	motherId: string | null;
 	acquisitionType: "born" | "purchased" | "other";
 	acquisitionDate: string;
+	lastMeasurement: {
+		id: string;
+		animalId: string;
+		measurementType: string;
+		value: number;
+		unit: string;
+		measuredAt: string;
+		measuredBy: string;
+		notes: string | null;
+	};
 }
 
 export interface IAnimalPayload {
@@ -27,7 +36,6 @@ export interface ICreateAnimalPayload {
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
 	birthDate: string;
-	weight: number;
 	status: "alive" | "deceased" | "sold";
 	reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
 	fatherId: string | null;
@@ -43,7 +51,6 @@ export interface IEditAnimalPayload {
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
 	birthDate: string;
-	weight: number;
 	status: "alive" | "deceased" | "sold";
 	reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
 	fatherId: string | null;

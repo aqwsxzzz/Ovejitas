@@ -51,7 +51,7 @@ export const MeasurementRecordModal = ({
 									<h1>
 										{data.value} {data.unit}
 									</h1>
-									<h2>{formatDateByMonth(measurementData![0].measuredAt)}</h2>
+									<h2>{formatDateByMonth(data.measuredAt)}</h2>
 									<Button className="bg-destructive">
 										<Trash2 />
 									</Button>

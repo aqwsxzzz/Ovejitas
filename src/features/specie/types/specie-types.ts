@@ -1,8 +1,10 @@
 export interface ISpecie {
-    id: string;
-    translation: {
-        id: string;
-        language: string;
-        name: string;
-    };
+	id: string;
+	translations: [
+		{
+			id: string;
+			language: string;
+			name: string;
+		},
+	];
 }

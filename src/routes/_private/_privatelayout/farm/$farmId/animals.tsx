@@ -11,7 +11,12 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
 	const { farmId } = useParams({ strict: false });
-	const { data: animalData, isPending } = useGetAnimalsByFarmId(farmId!);
+	const include = "";
+	const { data: animalData, isPending } = useGetAnimalsByFarmId({
+		farmId: farmId!,
+		include,
+		withLanguage: true,
+	});
 
 	if (isPending) {
 		return <div>Loading...</div>;

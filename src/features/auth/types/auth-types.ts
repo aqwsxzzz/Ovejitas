@@ -1,31 +1,31 @@
 export interface ISignUpPayload {
-    displayName: string;
-    email: string;
-    password: string;
+	displayName: string;
+	email: string;
+	password: string;
 }
 
 export interface IUser {
-    id: string;
-    displayName: string;
-    email: string;
-    isActive: boolean;
-    role: string;
-    language: "es" | "en";
-    createdAt: string;
-    updatedAt: string;
-    lastVisitedFarmId: string;
+	id: string;
+	displayName: string;
+	email: string;
+	isActive: boolean;
+	role: string;
+	language: "es" | "en";
+	createdAt: string;
+	updatedAt: string;
+	lastVisitedFarmId: string;
 }
 
 export interface ILoginPayload {
-    email: string;
-    password: string;
+	email: string;
+	password: string;
 }
 
 export interface ISignUpResponse {
-    message: string;
+	message: string;
 }
 
 export interface ILoginResponse {
-    message: string;
-    user: { lastVisitedFarmId: string };
+	message: string;
+	data: { lastVisitedFarmId: string };
 }

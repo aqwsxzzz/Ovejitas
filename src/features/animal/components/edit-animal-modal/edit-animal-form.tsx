@@ -40,7 +40,6 @@ const getDefaultValues = (animal: IAnimal) => {
 		tagNumber: animal.tagNumber,
 		sex: animal.sex,
 		birthDate: animal.birthDate ? new Date(animal.birthDate) : undefined,
-		weight: animal ? animal.weight.toString() : "",
 		status: animal.status,
 		reproductiveStatus: animal.reproductiveStatus,
 		fatherId: animal.fatherId ?? "",
@@ -63,7 +62,6 @@ const formSchema = z.object({
 		IAnimal["sex"],
 	]),
 	birthDate: z.date(),
-	weight: z.string(),
 	status: z.enum(["alive", "deceased", "sold"] as [
 		IAnimal["status"],
 		IAnimal["status"],
@@ -108,7 +106,6 @@ export const EditAnimalForm = ({
 				tagNumber: data.tagNumber,
 				sex: data.sex,
 				birthDate: formatDate(data.birthDate),
-				weight: parseFloat(data.weight),
 				status: data.status,
 				reproductiveStatus: data.reproductiveStatus,
 				fatherId: data.fatherId || null,
@@ -253,22 +250,6 @@ export const EditAnimalForm = ({
 								<DateSelector
 									date={field.value ?? undefined}
 									setDate={field.onChange}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="weight"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Weight</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Enter the animal's weight"
-									{...field}
 								/>
 							</FormControl>
 							<FormMessage />

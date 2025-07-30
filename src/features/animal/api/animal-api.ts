@@ -6,36 +6,41 @@ import type {
 	IDeleteResponse,
 	IEditAnimalPayload,
 } from "@/features/animal/types/animal-types";
+import { includeQueryParam } from "@/utils/include-query-params";
 
-export const getAnimalsByFarmId = ({ farmId }: { farmId: string }) =>
+export const getAnimalsByFarmId = ({
+	include,
+	withLanguage,
+}: {
+	include: string;
+	withLanguage: boolean;
+}) =>
 	axiosHelper<IResponse<IAnimal[]>>({
 		method: "get",
-		url: `/farms/${farmId}/animals`,
+		url: "/animals",
+		urlParams: includeQueryParam(include, withLanguage),
 	});
 
-export const createAnimal = ({
-	payload,
-	farmId,
-}: {
-	payload: ICreateAnimalPayload;
-	farmId: string;
-}) =>
+export const createAnimal = ({ payload }: { payload: ICreateAnimalPayload }) =>
 	axiosHelper<IResponse<IAnimal>>({
 		method: "post",
-		url: `/farms/${farmId}/animals`,
+		url: "/animals",
 		data: payload,
 	});
 
 export const getAnimalById = ({
-	farmId,
 	animalId,
+	include,
+	withLanguage,
 }: {
-	farmId: string;
 	animalId: string;
+	include: string;
+	withLanguage: boolean;
 }) =>
 	axiosHelper<IResponse<IAnimal>>({
 		method: "get",
-		url: `/farms/${farmId}/animals/${animalId}`,
+		url: `/animals/${animalId}`,
+		urlParams: includeQueryParam(include, withLanguage),
 	});
 
 export const editAnimalById = ({

@@ -35,13 +35,11 @@ export const useCreateMeasurement = () => {
 	return useMutation({
 		mutationFn: ({
 			payload,
-			farmId,
 			animalId,
 		}: {
 			payload: ICreateMeasurementPayload;
-			farmId: string;
 			animalId: string;
-		}) => createMeasurement({ payload, farmId, animalId }),
+		}) => createMeasurement({ payload, animalId }),
 		onError: (error) => {
 			toast.error(error.message);
 		},

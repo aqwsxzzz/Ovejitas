@@ -43,7 +43,6 @@ export const AddNewMeasurementForm = ({
 	closeDialog: () => void;
 }) => {
 	const { mutateAsync: createMeasurement, isPending } = useCreateMeasurement();
-	const { farmId } = useParams({ strict: false });
 	const { animalId } = useParams({ strict: false });
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -96,7 +95,6 @@ export const AddNewMeasurementForm = ({
 				measuredAt: `${formatDate(data.measuredAt)}T10:30:00Z`,
 				notes: data.notes,
 			},
-			farmId: farmId!,
 			animalId: animalId!,
 		});
 		if (response.status == "success") {

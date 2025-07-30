@@ -22,11 +22,20 @@ export const animalQueryKeys = {
 		[...animalQueryKeys.all, "byId", animalId] as const,
 };
 
-export const useGetAnimalsByFarmId = (farmId: string) =>
+export const useGetAnimalsByFarmId = ({
+	farmId,
+	include,
+	withLanguage,
+}: {
+	farmId: string;
+	include: string;
+	withLanguage: boolean;
+}) =>
 	useQuery({
 		queryKey: animalQueryKeys.animalList(farmId),
-		queryFn: () => getAnimalsByFarmId({ farmId }),
+		queryFn: () => getAnimalsByFarmId({ include, withLanguage }),
 		select: (data) => data.data,
+		enabled: !!farmId,
 	});
 
 export const useCreateAnimal = () => {
@@ -35,11 +44,10 @@ export const useCreateAnimal = () => {
 	return useMutation({
 		mutationFn: ({
 			payload,
-			farmId,
 		}: {
 			payload: ICreateAnimalPayload;
 			farmId: string;
-		}) => createAnimal({ payload, farmId }),
+		}) => createAnimal({ payload }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
@@ -63,10 +71,18 @@ export const useCreateAnimal = () => {
 	});
 };
 
-export const useGetAnimalById = (farmId: string, animalId: string) =>
+export const useGetAnimalById = ({
+	animalId,
+	include,
+	withLanguage,
+}: {
+	animalId: string;
+	include: string;
+	withLanguage: boolean;
+}) =>
 	useQuery({
 		queryKey: animalQueryKeys.animalById(animalId),
-		queryFn: () => getAnimalById({ farmId, animalId }),
+		queryFn: () => getAnimalById({ animalId, include, withLanguage }),
 		select: (data) => data.data,
 	});
 

@@ -39,7 +39,6 @@ const formSchema = z.object({
 		IAnimal["sex"],
 	]),
 	birthDate: z.date(),
-	weight: z.string(),
 	status: z.enum(["alive", "deceased", "sold"] as [
 		IAnimal["status"],
 		IAnimal["status"],
@@ -81,7 +80,6 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 				tagNumber: data.tagNumber,
 				sex: data.sex,
 				birthDate: formatDate(data.birthDate),
-				weight: parseFloat(data.weight),
 				status: data.status,
 				reproductiveStatus: data.reproductiveStatus,
 				fatherId: data.fatherId ?? null,
@@ -250,21 +248,6 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 						/>
 						<FormField
 							control={form.control}
-							name="weight"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Weight</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Enter the animal's weight"
-											{...field}
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
 							name="status"
 							render={({ field }) => (
 								<FormItem>
@@ -381,7 +364,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 												<SelectValue placeholder="Select a mother.." />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="AdWNDqgV">Pepita</SelectItem>
+												<SelectItem value="yMWXPWGQ">Pepita</SelectItem>
 												<SelectItem value="NArJeWyE">Rodolfa</SelectItem>
 												<SelectItem value="Jlq1nbR6">Chuchumeca</SelectItem>
 											</SelectContent>
