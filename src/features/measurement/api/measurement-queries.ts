@@ -19,13 +19,12 @@ export const measurementQueryKeys = {
 export const useGetMeasurementsByAnimalId = (
 	farmId: string,
 	animalId: string,
-	measurementType: "weight" | "height" | "body_condition",
-	limit?: string,
+	measurementType: "weight" | "height" | "temperature",
 ) =>
 	useQuery({
 		queryKey: measurementQueryKeys.measurementListByAnimalId(animalId),
 		queryFn: () =>
-			getMeasurementsByAnimalId({ farmId, animalId, measurementType, limit }),
+			getMeasurementsByAnimalId({ farmId, animalId, measurementType }),
 		select: (data) => data.data,
 	});
 

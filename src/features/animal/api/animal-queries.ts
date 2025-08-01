@@ -16,8 +16,8 @@ import type { IResponse } from "@/lib/axios";
 
 export const animalQueryKeys = {
 	all: ["animal"] as const,
-	animalList: (farmId: string) =>
-		[...animalQueryKeys.all, "list", farmId] as const,
+	animalList: (farmId: string, filters?: string) =>
+		[...animalQueryKeys.all, "list", farmId, filters] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
 };
@@ -26,14 +26,16 @@ export const useGetAnimalsByFarmId = ({
 	farmId,
 	include,
 	withLanguage,
+	sex,
 }: {
 	farmId: string;
 	include: string;
 	withLanguage: boolean;
+	sex?: string;
 }) =>
 	useQuery({
-		queryKey: animalQueryKeys.animalList(farmId),
-		queryFn: () => getAnimalsByFarmId({ include, withLanguage }),
+		queryKey: animalQueryKeys.animalList(farmId, sex),
+		queryFn: () => getAnimalsByFarmId({ include, withLanguage, sex }),
 		select: (data) => data.data,
 		enabled: !!farmId,
 	});

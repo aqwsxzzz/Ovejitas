@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 
 export const AnimalProfileCard = () => {
 	const { animalId } = useParams({ strict: false });
-	const include = "breed,species,lastMeasurement";
+	const include = "breed,species";
 	const { data: animalData } = useGetAnimalById({
 		animalId: animalId!,
 		include,

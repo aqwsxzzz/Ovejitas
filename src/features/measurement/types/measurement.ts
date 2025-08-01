@@ -1,7 +1,7 @@
 export interface IMeasurement {
 	id: string;
 	animalId: string;
-	measurementType: "weight" | "height" | "body_condition";
+	measurementType: "weight" | "height" | "temperature";
 	value: number;
 	unit: "kg" | "cm" | "°C";
 	measuredAt: string;

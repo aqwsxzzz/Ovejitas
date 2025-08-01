@@ -12,13 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { DateSelector } from "@/components/common/DateSelector";
@@ -27,6 +20,7 @@ import type { IAnimal } from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
 import { SpecieSelect } from "@/features/specie/components/specie-select";
 import { BreedSelect } from "@/features/breed/components/breed-select";
+import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-gender-select/parents-by-gender-select";
 
 const formSchema = z.object({
 	specieId: z.string(),
@@ -332,19 +326,14 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								<FormItem>
 									<FormLabel>Father</FormLabel>
 									<FormControl>
-										<Select
-											onValueChange={field.onChange}
+										<ParentsByGenderSelect
 											value={field.value}
-										>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a father.." />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="7ZWDkbpO">Pepito</SelectItem>
-												<SelectItem value="3">Rodolfo</SelectItem>
-												<SelectItem value="2">Chuchumeco</SelectItem>
-											</SelectContent>
-										</Select>
+											onChange={field.onChange}
+											farmId={farmId!}
+											sex="male"
+											include=""
+											withLanguage={true}
+										/>
 									</FormControl>
 								</FormItem>
 							)}
@@ -356,19 +345,14 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								<FormItem>
 									<FormLabel>Mother</FormLabel>
 									<FormControl>
-										<Select
-											onValueChange={field.onChange}
+										<ParentsByGenderSelect
 											value={field.value}
-										>
-											<SelectTrigger>
-												<SelectValue placeholder="Select a mother.." />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="yMWXPWGQ">Pepita</SelectItem>
-												<SelectItem value="NArJeWyE">Rodolfa</SelectItem>
-												<SelectItem value="Jlq1nbR6">Chuchumeca</SelectItem>
-											</SelectContent>
-										</Select>
+											onChange={field.onChange}
+											farmId={farmId!}
+											sex="female"
+											include=""
+											withLanguage={true}
+										/>
 									</FormControl>
 								</FormItem>
 							)}

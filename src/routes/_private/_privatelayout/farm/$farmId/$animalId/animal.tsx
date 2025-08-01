@@ -1,5 +1,5 @@
 import { AnimalProfileCard } from "@/features/animal/components/animal-profile-view/animal-profile-basic-card";
-import { AnimalProfileHealthCard } from "@/features/animal/components/animal-profile-view/animal-profile-health-card";
+import { AnimalProfileHealthCard } from "@/features/animal/components/animal-profile-view/animal-profile-health-card/animal-profile-health-card";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { CircleChevronLeft } from "lucide-react";
 

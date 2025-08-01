@@ -14,7 +14,7 @@ import { Trash2 } from "lucide-react";
 interface MeasurementRecordModalProps {
 	farmId: string;
 	animalId: string;
-	measurementType: "weight" | "height" | "body_condition";
+	measurementType: "weight" | "height" | "temperature";
 }
 
 export const MeasurementRecordModal = ({

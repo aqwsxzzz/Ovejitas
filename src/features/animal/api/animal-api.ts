@@ -11,14 +11,16 @@ import { includeQueryParam } from "@/utils/include-query-params";
 export const getAnimalsByFarmId = ({
 	include,
 	withLanguage,
+	sex,
 }: {
 	include: string;
 	withLanguage: boolean;
+	sex?: string;
 }) =>
 	axiosHelper<IResponse<IAnimal[]>>({
 		method: "get",
 		url: "/animals",
-		urlParams: includeQueryParam(include, withLanguage),
+		urlParams: includeQueryParam(include, withLanguage, sex),
 	});
 
 export const createAnimal = ({ payload }: { payload: ICreateAnimalPayload }) =>
