@@ -19,7 +19,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-	measurementType: z.enum(["weight", "height", "body_condition"] as [
+	measurementType: z.enum(["weight", "height", "temperature"] as [
 		IMeasurement["measurementType"],
 		IMeasurement["measurementType"],
 		IMeasurement["measurementType"],
