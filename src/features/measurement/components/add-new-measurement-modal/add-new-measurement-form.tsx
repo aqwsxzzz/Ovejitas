@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateMeasurement } from "@/features/measurement/api/measurement-queries";
 import { MeasurementTypeSelect } from "@/features/measurement/components/measurement-type-select/measurement-type-select";
-import type { IMeasurement } from "@/features/measurement/types/measurement";
+import type { IMeasurement } from "@/features/measurement/types/measurement-types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
 import { useForm, useWatch } from "react-hook-form";

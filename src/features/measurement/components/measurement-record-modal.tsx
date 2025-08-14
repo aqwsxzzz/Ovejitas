@@ -8,8 +8,8 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { useGetMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
+import { DeleteMeasurementModal } from "@/features/measurement/components/delete-measurement-modal/delete-measurement-modal";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
-import { Trash2 } from "lucide-react";
 
 interface MeasurementRecordModalProps {
 	farmId: string;
@@ -52,9 +52,10 @@ export const MeasurementRecordModal = ({
 										{data.value} {data.unit}
 									</h1>
 									<h2>{formatDateByMonth(data.measuredAt)}</h2>
-									<Button className="bg-destructive">
-										<Trash2 />
-									</Button>
+									<DeleteMeasurementModal
+										measurementId={data.id}
+										animalId={animalId}
+									/>
 								</CardContent>
 							</Card>
 						);

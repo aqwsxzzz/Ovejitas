@@ -16,3 +16,7 @@ export interface ICreateMeasurementPayload {
 	measuredAt: string;
 	notes?: string;
 }
+
+export interface IDeleteMeasurementResponse {
+	messages: string;
+}

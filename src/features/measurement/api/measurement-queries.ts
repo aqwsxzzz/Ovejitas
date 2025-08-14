@@ -1,12 +1,13 @@
 import {
 	createMeasurement,
+	deleteMeasurementById,
 	getMeasurementsByAnimalId,
 } from "@/features/measurement/api/measurement-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
 	ICreateMeasurementPayload,
 	IMeasurement,
-} from "@/features/measurement/types/measurement";
+} from "@/features/measurement/types/measurement-types";
 import { toast } from "sonner";
 import type { IResponse } from "@/lib/axios";
 
@@ -53,6 +54,40 @@ export const useCreateMeasurement = () => {
 					return {
 						...oldData,
 						data: [...oldData.data, response.data],
+					};
+				},
+			);
+		},
+	});
+};
+
+export const useDeleteMeasurementById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			animalId,
+			measurementId,
+		}: {
+			animalId: string;
+			measurementId: string;
+		}) => deleteMeasurementById({ animalId, measurementId }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { animalId, measurementId }) => {
+			toast.success("Measurement deleted successfully");
+			queryClient.setQueryData<IResponse<IMeasurement[]>>(
+				measurementQueryKeys.measurementListByAnimalId(animalId),
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+					return {
+						...oldData,
+						data: oldData.data.filter(
+							(measurement) => measurement.id !== measurementId,
+						),
 					};
 				},
 			);

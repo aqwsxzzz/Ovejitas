@@ -1,6 +1,6 @@
 import { useGetMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
 import { MeasurementRecordModal } from "@/features/measurement/components/measurement-record-modal";
-import type { IMeasurement } from "@/features/measurement/types/measurement";
+import type { IMeasurement } from "@/features/measurement/types/measurement-types";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
 import { useParams } from "@tanstack/react-router";
 
