@@ -17,6 +17,10 @@ export const HealthCardIndividualInfo = ({
 		measurementType,
 	);
 
+	const filteredData = measurementData?.filter(
+		(m) => m.measurementType === measurementType,
+	);
+
 	return (
 		<div className="flex flex-col">
 			<div className="flex gap-4">
@@ -25,10 +29,10 @@ export const HealthCardIndividualInfo = ({
 					<h2>
 						{isLoading ? (
 							<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
-						) : (!isLoading && measurementData?.length == 0) || null ? (
+						) : !isLoading && (!filteredData || filteredData.length === 0) ? (
 							"No data"
 						) : (
-							`${measurementData?.[0]?.value} ${measurementData?.[0]?.unit}`
+							`${filteredData?.[0]?.value} ${filteredData?.[0]?.unit}`
 						)}
 					</h2>
 				</div>
@@ -37,10 +41,10 @@ export const HealthCardIndividualInfo = ({
 					<h2>
 						{isLoading ? (
 							<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
-						) : (!isLoading && measurementData?.length == 0) || null ? (
+						) : !isLoading && (!filteredData || filteredData.length === 0) ? (
 							"No data"
 						) : (
-							formatDateByMonth(measurementData![0].measuredAt)
+							formatDateByMonth(filteredData![0].measuredAt)
 						)}
 					</h2>
 				</div>

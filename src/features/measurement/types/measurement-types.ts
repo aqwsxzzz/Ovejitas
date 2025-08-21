@@ -3,7 +3,7 @@ export interface IMeasurement {
 	animalId: string;
 	measurementType: "weight" | "height" | "temperature";
 	value: number;
-	unit: "kg" | "cm" | "°C";
+	unit: "kg" | "cm" | "celsius";
 	measuredAt: string;
 	measuredBy: string;
 	method: string;

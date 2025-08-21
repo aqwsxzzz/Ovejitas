@@ -25,7 +25,7 @@ const formSchema = z.object({
 		IMeasurement["measurementType"],
 	]),
 	value: z.string().min(1, "Please enter a value"),
-	unit: z.enum(["kg", "cm", "°C"] as [
+	unit: z.enum(["kg", "cm", "celsius"] as [
 		IMeasurement["unit"],
 		IMeasurement["unit"],
 		IMeasurement["unit"],
@@ -70,8 +70,8 @@ export const AddNewMeasurementForm = ({
 			case "height":
 				form.setValue("unit", "cm");
 				return "cm";
-			case "body condition":
-				form.setValue("unit", "°C");
+			case "temperature":
+				form.setValue("unit", "celsius");
 				return "°C"; // Preparado para futuro cambio
 			default:
 				return "";

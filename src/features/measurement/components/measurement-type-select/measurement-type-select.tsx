@@ -16,7 +16,7 @@ export const MeasurementTypeSelect = ({
 	const measurementTypeData = [
 		{ id: 1, name: "Weight" },
 		{ id: 2, name: "Height" },
-		{ id: 3, name: "Body Condition" },
+		{ id: 3, name: "Temperature" },
 	];
 
 	return (
