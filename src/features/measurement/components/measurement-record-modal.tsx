@@ -25,7 +25,10 @@ export const MeasurementRecordModal = ({
 	const { data: measurementData, isLoading } = useGetMeasurementsByAnimalId(
 		farmId,
 		animalId,
-		measurementType,
+	);
+
+	const filteredData = measurementData?.filter(
+		(m) => m.measurementType === measurementType,
 	);
 
 	return (
@@ -44,7 +47,7 @@ export const MeasurementRecordModal = ({
 				) : (!isLoading && measurementData?.length == 0) || null ? (
 					"No data"
 				) : (
-					measurementData!.map((data) => {
+					filteredData!.map((data) => {
 						return (
 							<Card key={data.id}>
 								<CardContent className="flex gap-4">

@@ -14,7 +14,6 @@ export const HealthCardIndividualInfo = ({
 	const { data: measurementData, isLoading } = useGetMeasurementsByAnimalId(
 		farmId!,
 		animalId!,
-		measurementType,
 	);
 
 	const filteredData = measurementData?.filter(
