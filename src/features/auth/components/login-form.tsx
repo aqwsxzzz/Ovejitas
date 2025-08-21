@@ -78,7 +78,7 @@ export const LoginForm = () => {
 					type="submit"
 					disabled={password.length < 8}
 				>
-					{isPending ? <Loader className="spinner" /> : t("loginButton")}
+					{isPending ? <Loader className="animate-spin" /> : t("loginButton")}
 				</Button>
 			</form>
 		</Form>
