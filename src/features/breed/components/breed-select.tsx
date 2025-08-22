@@ -16,7 +16,7 @@ export const BreedSelect = ({
 	value: string;
 	onChange: (value: string) => void;
 	specieId: string;
-	defaultValue: string;
+	defaultValue?: string;
 }) => {
 	const { data: breedsData } = useGetBreedsBySpecieId(specieId);
 

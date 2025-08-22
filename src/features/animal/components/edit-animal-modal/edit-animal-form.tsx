@@ -36,7 +36,7 @@ const getDefaultValues = (animal: IAnimal) => {
 	return {
 		speciesId: animal.species.id,
 		breedId: animal.breed.id,
-		name: animal.name,
+		name: animal.name ?? "",
 		tagNumber: animal.tagNumber,
 		sex: animal.sex,
 		birthDate: animal.birthDate ? new Date(animal.birthDate) : undefined,
@@ -62,11 +62,9 @@ const formSchema = z.object({
 		IAnimal["sex"],
 	]),
 	birthDate: z.date(),
-	status: z.enum(["alive", "deceased", "sold"] as [
-		IAnimal["status"],
-		IAnimal["status"],
-		IAnimal["status"],
-	]),
+	status: z.enum(["alive", "deceased", "sold"]).nullable() as z.ZodType<
+		IAnimal["status"]
+	>,
 	reproductiveStatus: z.enum(["open", "pregnant", "lactating", "other"] as [
 		IAnimal["reproductiveStatus"],
 		IAnimal["reproductiveStatus"],
@@ -264,7 +262,6 @@ export const EditAnimalForm = ({
 							<Label>Status</Label>
 							<RadioGroup
 								onValueChange={field.onChange}
-								defaultValue={field.value}
 								className="flex"
 							>
 								<div className="flex gap-1">
