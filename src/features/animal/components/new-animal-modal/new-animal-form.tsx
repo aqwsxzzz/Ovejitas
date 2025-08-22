@@ -25,19 +25,13 @@ import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-g
 const formSchema = z.object({
 	specieId: z.string(),
 	breedId: z.string(),
-	name: z.string(),
+	name: z.string().optional(),
 	tagNumber: z.string(),
-	sex: z.enum(["female", "male", "unknown"] as [
-		IAnimal["sex"],
-		IAnimal["sex"],
-		IAnimal["sex"],
-	]),
-	birthDate: z.date(),
-	status: z.enum(["alive", "deceased", "sold"] as [
-		IAnimal["status"],
-		IAnimal["status"],
-		IAnimal["status"],
-	]),
+	sex: z.enum(["female", "male", "unknown"]) as z.ZodType<IAnimal["sex"]>,
+	birthDate: z.date().optional(),
+	status: z.enum(["alive", "deceased", "sold"]).nullable() as z.ZodType<
+		IAnimal["status"]
+	>,
 	reproductiveStatus: z.enum(["open", "pregnant", "lactating", "other"] as [
 		IAnimal["reproductiveStatus"],
 		IAnimal["reproductiveStatus"],
@@ -51,7 +45,7 @@ const formSchema = z.object({
 		IAnimal["acquisitionType"],
 		IAnimal["acquisitionType"],
 	]),
-	acquisitionDate: z.date(),
+	acquisitionDate: z.date().optional(),
 });
 
 export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
@@ -70,19 +64,22 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 			payload: {
 				speciesId: data.specieId,
 				breedId: data.breedId,
-				name: data.name,
+				name: data.name ?? null,
 				tagNumber: data.tagNumber,
 				sex: data.sex,
-				birthDate: formatDate(data.birthDate),
+				birthDate: data.birthDate ? formatDate(data.birthDate) : null,
 				status: data.status,
 				reproductiveStatus: data.reproductiveStatus,
 				fatherId: data.fatherId ?? null,
 				motherId: data.motherId ?? null,
 				acquisitionType: data.acquisitionType,
-				acquisitionDate: formatDate(data.acquisitionDate),
+				acquisitionDate: data.acquisitionDate
+					? formatDate(data.acquisitionDate)
+					: null,
 			},
 			farmId: farmId!,
 		});
+
 		if (response.status === "success") {
 			closeDialog();
 		}
@@ -92,6 +89,16 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 		defaultValues: {
 			specieId: "",
 			breedId: "",
+			name: "",
+			tagNumber: "",
+			birthDate: undefined,
+			status: "alive",
+			reproductiveStatus: "other",
+			acquisitionType: "other",
+			sex: "unknown",
+			acquisitionDate: undefined,
+			fatherId: undefined,
+			motherId: undefined,
 		},
 	});
 
@@ -125,6 +132,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 										<SpecieSelect
 											value={field.value}
 											onChange={field.onChange}
+											defaultValue={field.value}
 										/>
 									</FormControl>
 								</FormItem>
@@ -142,6 +150,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 												value={field.value}
 												onChange={field.onChange}
 												specieId={selectedSpecieId}
+												defaultValue={field.value}
 											/>
 										</FormControl>
 									</FormItem>
@@ -191,8 +200,8 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 									<Label>Gender</Label>
 									<RadioGroup
 										onValueChange={field.onChange}
-										defaultValue={field.value}
 										className="flex"
+										{...field}
 									>
 										<div className="flex gap-1">
 											<RadioGroupItem
@@ -232,7 +241,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 									</div>
 									<FormControl>
 										<DateSelector
-											date={field.value ?? undefined}
+											date={field.value}
 											setDate={field.onChange}
 										/>
 									</FormControl>
@@ -248,8 +257,8 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 									<Label>Status</Label>
 									<RadioGroup
 										onValueChange={field.onChange}
-										defaultValue={field.value}
 										className="flex"
+										{...field}
 									>
 										<div className="flex gap-1">
 											<RadioGroupItem
@@ -284,8 +293,8 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 									<Label>Reproductive Status</Label>
 									<RadioGroup
 										onValueChange={field.onChange}
-										defaultValue={field.value}
 										className="flex"
+										{...field}
 									>
 										<div className="flex gap-1">
 											<RadioGroupItem
@@ -363,33 +372,35 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							render={({ field }) => (
 								<FormItem>
 									<Label>Acquisition Type</Label>
-									<RadioGroup
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-										className="flex"
-									>
-										<div className="flex gap-1">
-											<RadioGroupItem
-												value="born"
-												id="born"
-											/>
-											<Label htmlFor="born">Born</Label>
-										</div>
-										<div className="flex gap-1">
-											<RadioGroupItem
-												value="purchased"
-												id="purchased"
-											/>
-											<Label htmlFor="purchased">Purchased</Label>
-										</div>
-										<div className="flex gap-1">
-											<RadioGroupItem
-												value="other"
-												id="other"
-											/>
-											<Label htmlFor="other">Other</Label>
-										</div>
-									</RadioGroup>
+									<FormControl>
+										<RadioGroup
+											onValueChange={field.onChange}
+											className="flex"
+											{...field}
+										>
+											<div className="flex gap-1">
+												<RadioGroupItem
+													value="born"
+													id="born"
+												/>
+												<Label htmlFor="born">Born</Label>
+											</div>
+											<div className="flex gap-1">
+												<RadioGroupItem
+													value="purchased"
+													id="purchased"
+												/>
+												<Label htmlFor="purchased">Purchased</Label>
+											</div>
+											<div className="flex gap-1">
+												<RadioGroupItem
+													value="other"
+													id="other"
+												/>
+												<Label htmlFor="other">Other</Label>
+											</div>
+										</RadioGroup>
+									</FormControl>
 								</FormItem>
 							)}
 						/>
@@ -406,7 +417,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 									</div>
 									<FormControl>
 										<DateSelector
-											date={field.value ?? undefined}
+											date={field.value}
 											setDate={field.onChange}
 										/>
 									</FormControl>

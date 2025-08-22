@@ -3,16 +3,16 @@ export interface IAnimal {
 	farmId: string;
 	species: { id: string; name: string };
 	breed: { id: string; name: string };
-	name: string;
+	name: string | null;
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
-	birthDate: string;
-	status: "alive" | "deceased" | "sold";
+	birthDate: string | null;
+	status: "alive" | "deceased" | "sold" | null;
 	reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
 	fatherId: string | null;
 	motherId: string | null;
 	acquisitionType: "born" | "purchased" | "other";
-	acquisitionDate: string;
+	acquisitionDate: string | null;
 	lastMeasurement: {
 		id: string;
 		animalId: string;
@@ -32,31 +32,31 @@ export interface IAnimalPayload {
 export interface ICreateAnimalPayload {
 	speciesId: string;
 	breedId: string;
-	name: string;
+	name: string | null;
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
-	birthDate: string;
-	status: "alive" | "deceased" | "sold";
+	birthDate: string | null;
+	status: "alive" | "deceased" | "sold" | null;
 	reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
 	fatherId: string | null;
 	motherId: string | null;
 	acquisitionType: "born" | "purchased" | "other";
-	acquisitionDate: string;
+	acquisitionDate: string | null;
 }
 
 export interface IEditAnimalPayload {
 	speciesId: string;
 	breedId: string;
-	name: string;
+	name: string | null;
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
-	birthDate: string;
-	status: "alive" | "deceased" | "sold";
+	birthDate: string | null;
+	status: "alive" | "deceased" | "sold" | null;
 	reproductiveStatus: "open" | "pregnant" | "lactating" | "other";
 	fatherId: string | null;
 	motherId: string | null;
 	acquisitionType: "born" | "purchased" | "other";
-	acquisitionDate: string;
+	acquisitionDate: string | null;
 }
 
 export interface IDeleteAnimal {

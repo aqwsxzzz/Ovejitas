@@ -10,9 +10,11 @@ import { useGetSpecies } from "@/features/specie/api/specie.queries";
 export const SpecieSelect = ({
 	value,
 	onChange,
+	defaultValue,
 }: {
 	value: string;
 	onChange: (value: string) => void;
+	defaultValue?: string;
 }) => {
 	const include = "";
 	const { data: speciesData } = useGetSpecies({ include, withLanguage: true });
@@ -21,6 +23,7 @@ export const SpecieSelect = ({
 		<Select
 			onValueChange={onChange}
 			value={value}
+			defaultValue={defaultValue}
 		>
 			<SelectTrigger>
 				<SelectValue placeholder="Select a specie.." />
