@@ -47,7 +47,7 @@ export const AnimalProfileCard = () => {
 					<div className="w-32 h-32 bg-background rounded-full flex items-center justify-center flex-shrink-0">
 						<img
 							src={"/placeholder.svg"}
-							alt={animalData.name}
+							alt={animalData.name ?? ""}
 							className="w-28 h-28 rounded-full object-cover"
 						/>
 					</div>
@@ -60,7 +60,7 @@ export const AnimalProfileCard = () => {
 								<p className="text-muted-foreground">{animalData.breed.name}</p>
 							</div>
 							<Badge
-								className={`${getHealthStatusColor(animalData.status)} mt-2 sm:mt-0 text-foreground`}
+								className={`${getHealthStatusColor(animalData.status ?? "")} mt-2 sm:mt-0 text-foreground`}
 							>
 								{animalData.status}
 							</Badge>
@@ -70,7 +70,9 @@ export const AnimalProfileCard = () => {
 							<div>
 								<p className="text-foreground">Age</p>
 								<p className="font-medium text-muted-foreground">
-									{calculateAgeFloor(animalData.birthDate)}
+									{animalData.birthDate
+										? calculateAgeFloor(animalData.birthDate)
+										: "No Data"}
 								</p>
 							</div>
 							<div>
