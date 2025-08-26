@@ -16,9 +16,12 @@ import {
 import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
+import { useLogout } from "@/features/auth/api/auth-queries";
 
 export const DropdownHeaderMenu = () => {
 	const { farmId } = useParams({ strict: false });
+	const { mutateAsync: logout } = useLogout();
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -74,6 +77,13 @@ export const DropdownHeaderMenu = () => {
 						</DropdownMenuPortal>
 					</DropdownMenuSub>
 				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					onClick={() => logout()}
+					className="text-destructive font-semibold"
+				>
+					Logout
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

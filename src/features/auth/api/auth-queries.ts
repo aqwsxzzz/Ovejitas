@@ -3,7 +3,12 @@ import type {
 	ILoginPayload,
 	ISignUpPayload,
 } from "@/features/auth/types/auth-types";
-import { getUserProfile, login, signup } from "@/features/auth/api/auth-api";
+import {
+	getUserProfile,
+	login,
+	logout,
+	signup,
+} from "@/features/auth/api/auth-api";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -52,3 +57,18 @@ export const useGetUserProfile = () =>
 		select: (data) => data.data,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 	});
+
+export const useLogout = () => {
+	const navigation = useNavigate();
+	return useMutation({
+		mutationFn: () => logout(),
+		onSuccess: () => {
+			navigation({
+				to: "/login",
+			});
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+	});
+};
