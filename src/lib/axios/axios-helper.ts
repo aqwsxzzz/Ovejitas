@@ -15,6 +15,7 @@ export const axiosHelper = async <Res, Params = unknown, Data = unknown>({
 	headers?: {
 		Authorization?: `Bearer ${string}`;
 	};
+	withCredentials?: boolean;
 }): Promise<Res> => {
 	return axiosInstance[method]<Res>(
 		url,

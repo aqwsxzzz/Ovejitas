@@ -25,4 +25,8 @@ export const getUserProfile = () =>
 	axiosHelper<IResponse<IUser>>({ method: "get", url: "/auth/me" });
 
 export const logout = () =>
-	axiosHelper<IResponse<string>>({ method: "post", url: "/auth/logout" });
+	axiosHelper<IResponse<string>>({
+		method: "post",
+		url: "/auth/logout",
+		withCredentials: true,
+	});
