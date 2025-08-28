@@ -8,19 +8,19 @@ import signupES from "./es/signup.json";
 export const defaultNS = "login";
 
 i18next
-    .use(LanguageDetector) // <-- Agrega el detector aquí
-    .use(initReactI18next)
-    .init({
-        debug: true,
-        resources: {
-            en: {
-                login: loginEN,
-                signup: signupEN,
-            },
-            es: {
-                login: loginES,
-                signup: signupES,
-            },
-        },
-        defaultNS,
-    });
+	.use(LanguageDetector) // <-- Agrega el detector aquí
+	.use(initReactI18next)
+	.init({
+		debug: import.meta.env.DEV,
+		resources: {
+			en: {
+				login: loginEN,
+				signup: signupEN,
+			},
+			es: {
+				login: loginES,
+				signup: signupES,
+			},
+		},
+		defaultNS,
+	});
