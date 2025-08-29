@@ -1,5 +1,4 @@
 import { DropdownHeaderMenu } from "@/components/layout/app-header/components/dropdown-header-menu";
-import { HeaderNotifications } from "@/components/layout/app-header/components/header-notifications";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { IUser } from "@/features/auth/types/auth-types";
 import { useGetFarmById } from "@/features/farm/api/farm-queries";
@@ -11,7 +10,7 @@ export const AppHeader = ({ userData }: { userData: IUser }) => {
 
 	return (
 		<div className="bg-card h-16 flex items-center justify-between px-4 w-screen">
-			<div className="flex">
+			<div className="flex gap-2 items-center">
 				<Avatar className="bg-foreground border-2">
 					<AvatarImage></AvatarImage>
 					<AvatarFallback>
@@ -19,11 +18,10 @@ export const AppHeader = ({ userData }: { userData: IUser }) => {
 					</AvatarFallback>
 				</Avatar>
 				<div className="flex flex-col text-foreground items-center">
-					<h1>Farm {farmData?.name} </h1>
+					<h1>{farmData?.name} </h1>
 				</div>
 			</div>
 			<div className="flex items-center">
-				<HeaderNotifications />
 				<DropdownHeaderMenu />
 			</div>
 		</div>

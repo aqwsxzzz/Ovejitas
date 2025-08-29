@@ -33,7 +33,10 @@ export const DropdownHeaderMenu = () => {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-48">
-				<DropdownMenuLabel>The menu!</DropdownMenuLabel>
+				<DropdownMenuLabel className="text-center text-chart-5">
+					The menu!
+				</DropdownMenuLabel>
+				<DropdownMenuSeparator className="w-2/3 mx-auto" />
 				<DropdownMenuGroup>
 					<Link
 						to="/farm/$farmId/dashboard"
@@ -41,7 +44,9 @@ export const DropdownHeaderMenu = () => {
 					>
 						<DropdownMenuItem>
 							Dashboard
-							<DropdownMenuShortcut>D</DropdownMenuShortcut>
+							<DropdownMenuShortcut className="text-primary">
+								D
+							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
 					<Link
@@ -50,7 +55,9 @@ export const DropdownHeaderMenu = () => {
 					>
 						<DropdownMenuItem>
 							Animals
-							<DropdownMenuShortcut>A</DropdownMenuShortcut>
+							<DropdownMenuShortcut className="text-primary">
+								A
+							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
 					<Link
@@ -59,12 +66,14 @@ export const DropdownHeaderMenu = () => {
 					>
 						<DropdownMenuItem>
 							Farms
-							<DropdownMenuShortcut>F</DropdownMenuShortcut>
+							<DropdownMenuShortcut className="text-primary">
+								F
+							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
+				{/* <DropdownMenuGroup>
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger>Invite</DropdownMenuSubTrigger>
 						<DropdownMenuPortal>
@@ -77,7 +86,7 @@ export const DropdownHeaderMenu = () => {
 						</DropdownMenuPortal>
 					</DropdownMenuSub>
 				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
+				<DropdownMenuSeparator /> */}
 				<DropdownMenuItem
 					onClick={() => logout()}
 					className="text-destructive font-semibold"
