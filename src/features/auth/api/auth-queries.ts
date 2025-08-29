@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
 	ILoginPayload,
 	ISignUpPayload,
@@ -60,9 +60,11 @@ export const useGetUserProfile = () =>
 
 export const useLogout = () => {
 	const navigation = useNavigate();
+	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: () => logout(),
 		onSuccess: () => {
+			queryClient.removeQueries({ queryKey: authQueryKeys.all });
 			navigation({
 				to: "/login",
 			});
