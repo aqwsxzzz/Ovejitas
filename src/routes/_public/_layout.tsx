@@ -6,11 +6,9 @@ import { getUserProfile } from "@/features/auth/api/auth-api";
 import type { IUser } from "@/features/auth/types/auth-types";
 import type { IResponse } from "@/lib/axios";
 import { Route as FarmDashboardRoute } from "@/routes/_private/_privatelayout/farm/$farmId/dashboard";
-import { useState, useEffect } from "react";
 import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
 
 export const Route = createFileRoute("/_public/_layout")({
-	// ...existing beforeLoad...
 	beforeLoad: async ({ context }) => {
 		try {
 			const response = await context.queryClient.ensureQueryData<
@@ -28,45 +26,25 @@ export const Route = createFileRoute("/_public/_layout")({
 			void error;
 		}
 	},
+	pendingComponent: () => (
+		<div className="h-screen w-screen flex justify-center items-center flex-col gap-12">
+			<h1 className="text-center text-4xl font-extrabold tracking-tight text-balance">
+				Welcome to Ovejitas
+			</h1>
+			<FarmAnimalSpinner
+				size="md"
+				speed="slow"
+			/>
+			<h2 className="text-center text-2xl">Just a moment...</h2>
+		</div>
+	),
+	pendingMs: 1,
 	component: RouteComponent,
 });
 
 function RouteComponent() {
 	const login = location.pathname.includes("login") ? "login" : "signup";
 	const { t } = useTranslation(login);
-
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		// Simulate the beforeLoad check
-		const checkAuth = async () => {
-			try {
-				// You may want to use the same logic as beforeLoad here
-				await getUserProfile();
-				// If successful, redirect (handled by beforeLoad)
-			} catch {
-				// If failed, stay on login/signup
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		checkAuth();
-	}, []);
-
-	if (isLoading) {
-		return (
-			<div className="h-screen w-screen flex justify-center items-center flex-col gap-12">
-				<h1 className="text-center text-4xl font-extrabold tracking-tight text-balance">
-					Welcome to Ovejitas
-				</h1>
-				<FarmAnimalSpinner
-					size="md"
-					speed="slow"
-				/>
-				<h2 className="text-center text-2xl">Just a moment...</h2>
-			</div>
-		);
-	}
 
 	return (
 		<div className="h-screen w-screen flex justify-center items-center md:p-4 p-2 flex-col">
