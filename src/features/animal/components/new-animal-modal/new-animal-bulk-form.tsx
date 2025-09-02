@@ -8,7 +8,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { SpecieSelect } from "@/features/specie/components/specie-select";
@@ -18,70 +18,16 @@ import { Label } from "@/components/ui/label";
 import { useCreateAnimalBulk } from "@/features/animal/api/animal-queries";
 import { useParams } from "@tanstack/react-router";
 
-const formSchema = z
-	.object({
-		specieId: z.string(),
-		breedId: z.string(),
-		groupName: z.string().optional(),
-		count: z
-			.string()
-			.transform((val) => (val === "" ? undefined : Number(val)))
-			.pipe(
-				z
-					.number()
-					.int()
-					.min(1, { message: "Quantity must be at least 1" })
-					.max(100, { message: "Quantity too large" })
-					.optional(),
-			),
-		tagPrefix: z.string().optional(),
-		tagMode: z.enum(["manual", "sequential"]),
-		tags: z.preprocess((val: unknown) => {
-			if (typeof val === "string") {
-				return val.trim() === ""
-					? []
-					: val
-							.trim()
-							.split(/[,\s]+/)
-							.filter(Boolean);
-			}
-			if (Array.isArray(val)) return val;
-			return [];
-		}, z.array(z.string())),
-		tagStartNumber: z
-			.string()
-			.transform((val) => (val === "" ? null : Number(val)))
-			.pipe(z.number().nullable()),
-	})
-	.superRefine((data, ctx) => {
-		if (
-			data.tagMode === "manual" &&
-			(!data.tags || (Array.isArray(data.tags) && data.tags.length === 0))
-		) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["tags"],
-				message: "Tags are required in manual mode.",
-			});
-		}
-
-		if (data.tagMode === "sequential") {
-			if (!data.tagStartNumber) {
-				ctx.addIssue({
-					code: "custom",
-					path: ["tagStartNumber"],
-					message: "Tag start number is required in sequential mode.",
-				});
-			}
-			if (!data.count) {
-				ctx.addIssue({
-					code: "custom",
-					path: ["count"],
-					message: "Count is required in sequential mode.",
-				});
-			}
-		}
-	});
+const formSchema = z.object({
+	specieId: z.string(),
+	breedId: z.string(),
+	groupName: z.string().optional(),
+	count: z.number().optional(),
+	tagPrefix: z.string().optional(),
+	tagMode: z.enum(["manual", "sequential"]),
+	tags: z.string().optional(),
+	tagStartNumber: z.number().optional(),
+});
 
 export const NewAnimalBulkForm = ({
 	closeDialog,
@@ -89,9 +35,7 @@ export const NewAnimalBulkForm = ({
 	closeDialog: () => void;
 }) => {
 	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema) as unknown as Resolver<
-			z.infer<typeof formSchema>
-		>,
+		resolver: zodResolver(formSchema),
 		defaultValues: {
 			specieId: "",
 			breedId: "",
@@ -99,8 +43,8 @@ export const NewAnimalBulkForm = ({
 			count: 1,
 			tagPrefix: "",
 			tagMode: "manual",
-			tags: [],
-			tagStartNumber: null,
+			tags: "",
+			tagStartNumber: 0,
 		},
 	});
 
@@ -109,15 +53,23 @@ export const NewAnimalBulkForm = ({
 
 	const { mutateAsync: createAnimalBulk, isPending } = useCreateAnimalBulk();
 	const { farmId } = useParams({ strict: false });
+	console.log(form.formState.errors, tagMode);
+
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
+		console.log(data);
 		if (tagMode === "manual") {
+			const tagsArray = data.tags
+				?.split(" ")
+				.map((tag) => tag.trim())
+				.filter(Boolean);
+
 			const response = await createAnimalBulk({
 				payload: {
 					speciesId: data.specieId,
 					breedId: data.breedId,
 					groupName: data.groupName ?? null,
 					tagPrefix: data.tagPrefix ?? null,
-					tags: data.tags ?? null,
+					tags: tagsArray ?? null,
 				},
 				farmId: farmId!,
 			});
@@ -203,30 +155,6 @@ export const NewAnimalBulkForm = ({
 										ref={ref}
 									/>
 								</FormControl>
-							</FormItem>
-						);
-					}}
-				/>
-				<FormField
-					control={form.control}
-					name="count"
-					render={({ field }) => {
-						const { value, onChange, onBlur, name, ref } = field;
-						return (
-							<FormItem>
-								<FormLabel>Quantity</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										min={1}
-										max={100}
-										value={value}
-										onChange={onChange}
-										onBlur={onBlur}
-										name={name}
-										ref={ref}
-									/>
-								</FormControl>
 								<FormMessage />
 							</FormItem>
 						);
@@ -284,6 +212,7 @@ export const NewAnimalBulkForm = ({
 									</div>
 								</RadioGroup>
 							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
@@ -313,29 +242,57 @@ export const NewAnimalBulkForm = ({
 					/>
 				)}
 				{tagMode === "sequential" && (
-					<FormField
-						control={form.control}
-						name="tagStartNumber"
-						render={({ field }) => {
-							const { value, onChange, onBlur, name, ref } = field;
-							return (
-								<FormItem>
-									<FormLabel>Tag Start Number</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Starting number for tags (e.g. 1001)"
-											value={value ?? ""}
-											onChange={onChange}
-											onBlur={onBlur}
-											name={name}
-											ref={ref}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							);
-						}}
-					/>
+					<div className="flex flex-col gap-2">
+						<FormField
+							control={form.control}
+							name="count"
+							render={({ field }) => {
+								const { value, onChange, onBlur, name, ref } = field;
+								return (
+									<FormItem>
+										<FormLabel>Quantity</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={1}
+												max={100}
+												value={value}
+												onChange={onChange}
+												onBlur={onBlur}
+												name={name}
+												ref={ref}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								);
+							}}
+						/>
+
+						<FormField
+							control={form.control}
+							name="tagStartNumber"
+							render={({ field }) => {
+								const { value, onChange, onBlur, name, ref } = field;
+								return (
+									<FormItem>
+										<FormLabel>Tag Start Number</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Starting number for tags (e.g. 1001)"
+												value={value ?? ""}
+												onChange={onChange}
+												onBlur={onBlur}
+												name={name}
+												ref={ref}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								);
+							}}
+						/>
+					</div>
 				)}
 				<div className="flex justify-around">
 					<Button
