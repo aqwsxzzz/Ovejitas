@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
 	createAnimal,
+	createAnimalsBulk,
 	deleteAnimalById,
 	editAnimalById,
 	getAnimalById,
@@ -8,6 +9,7 @@ import {
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
+	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IEditAnimalPayload,
 } from "@/features/animal/types/animal-types";
@@ -144,6 +146,37 @@ export const useDeleteAnimalById = () => {
 					return {
 						...oldData,
 						data: oldData.data.filter((animal) => animal.id !== animalId),
+					};
+				},
+			);
+		},
+	});
+};
+
+export const useCreateAnimalBulk = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			payload,
+		}: {
+			payload: ICreateAnimalBulkPayload;
+			farmId: string;
+		}) => createAnimalsBulk({ payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (response, { farmId }) => {
+			toast.success("Animals created successfully");
+			queryClient.setQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId),
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+					return {
+						...oldData,
+						data: [...oldData.data, ...response.data.created],
 					};
 				},
 			);

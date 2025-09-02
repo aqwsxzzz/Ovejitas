@@ -44,6 +44,16 @@ export interface ICreateAnimalPayload {
 	acquisitionDate: string | null;
 }
 
+export interface ICreateAnimalBulkPayload {
+	speciesId: string;
+	breedId: string;
+	groupName: string | null;
+	tagPrefix: string | null;
+	count?: number | null;
+	tagStartNumber?: number | null;
+	tags?: string[] | null;
+}
+
 export interface IEditAnimalPayload {
 	speciesId: string;
 	breedId: string;

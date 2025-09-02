@@ -1,7 +1,8 @@
 import { axiosHelper } from "@/lib/axios/axios-helper";
-import type { IResponse } from "@/lib/axios";
+import type { IResponse, IResponseDataArray } from "@/lib/axios";
 import type {
 	IAnimal,
+	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IDeleteResponse,
 	IEditAnimalPayload,
@@ -70,4 +71,15 @@ export const deleteAnimalById = ({
 	axiosHelper<IResponse<IDeleteResponse>>({
 		method: "delete",
 		url: `/farms/${farmId}/animals/${animalId}`,
+	});
+
+export const createAnimalsBulk = ({
+	payload,
+}: {
+	payload: ICreateAnimalBulkPayload;
+}) =>
+	axiosHelper<IResponseDataArray<IAnimal[]>>({
+		method: "post",
+		url: `/animals/bulk`,
+		data: payload,
 	});
