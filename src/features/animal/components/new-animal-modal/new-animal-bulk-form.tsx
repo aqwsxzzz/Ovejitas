@@ -53,10 +53,8 @@ export const NewAnimalBulkForm = ({
 
 	const { mutateAsync: createAnimalBulk, isPending } = useCreateAnimalBulk();
 	const { farmId } = useParams({ strict: false });
-	console.log(form.formState.errors, tagMode);
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		console.log(data);
 		if (tagMode === "manual") {
 			const tagsArray = data.tags
 				?.split(" ")
@@ -224,10 +222,10 @@ export const NewAnimalBulkForm = ({
 							const { value, onChange, onBlur, name, ref } = field;
 							return (
 								<FormItem>
-									<FormLabel>Tags (comma or newline separated)</FormLabel>
+									<FormLabel>Tags (space separated)</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Enter tags separated by comma or newline"
+											placeholder="Enter tags separated by a space"
 											value={value}
 											onChange={onChange}
 											onBlur={onBlur}
@@ -276,7 +274,7 @@ export const NewAnimalBulkForm = ({
 								const { value, onChange, onBlur, name, ref } = field;
 								return (
 									<FormItem>
-										<FormLabel>Tag Start Number</FormLabel>
+										<FormLabel>Tag Starting Number</FormLabel>
 										<FormControl>
 											<Input
 												placeholder="Starting number for tags (e.g. 1001)"

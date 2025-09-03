@@ -61,7 +61,6 @@ export const useCreateAnimal = () => {
 				animalQueryKeys.animalList(farmId),
 
 				(oldData) => {
-					console.log(oldData, response);
 					if (!oldData) {
 						return;
 					}

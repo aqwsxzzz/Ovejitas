@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_private/_privatelayout")({
 				queryFn: getUserProfile,
 			});
 		} catch (error) {
-			console.log(error);
+			void error;
 			toast.error("You must be logged in to keep going.");
 			return redirect({ to: "/login" });
 		}
