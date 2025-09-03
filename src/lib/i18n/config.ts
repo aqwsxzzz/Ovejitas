@@ -5,6 +5,13 @@ import loginEN from "./en/login.json";
 import loginES from "./es/login.json";
 import signupEN from "./en/signup.json";
 import signupES from "./es/signup.json";
+import animalProfileHealthCardEN from "./en/animal-profile-health-card.json";
+import animalProfileHealthCardES from "./es/animal-profile-health-card.json";
+import healthCardIndividualInfoEN from "./en/health-card-individual-info.json";
+import healthCardIndividualInfoES from "./es/health-card-individual-info.json";
+import animalProfileBasicCardEN from "./en/animal-profile-basic-card.json";
+import animalProfileBasicCardES from "./es/animal-profile-basic-card.json";
+
 export const defaultNS = "login";
 
 i18next
@@ -16,10 +23,16 @@ i18next
 			en: {
 				login: loginEN,
 				signup: signupEN,
+				animalProfileHealthCard: animalProfileHealthCardEN,
+				healthCardIndividualInfo: healthCardIndividualInfoEN,
+				animalProfileBasicCard: animalProfileBasicCardEN,
 			},
 			es: {
 				login: loginES,
 				signup: signupES,
+				animalProfileHealthCard: animalProfileHealthCardES,
+				healthCardIndividualInfo: healthCardIndividualInfoES,
+				animalProfileBasicCard: animalProfileBasicCardES,
 			},
 		},
 		defaultNS,

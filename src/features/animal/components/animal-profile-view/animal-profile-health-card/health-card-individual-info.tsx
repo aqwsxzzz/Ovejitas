@@ -3,12 +3,14 @@ import { MeasurementRecordModal } from "@/features/measurement/components/measur
 import type { IMeasurement } from "@/features/measurement/types/measurement-types";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
 import { useParams } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 export const HealthCardIndividualInfo = ({
 	measurementType,
 }: {
 	measurementType: IMeasurement["measurementType"];
 }) => {
+	const { t } = useTranslation("healthCardIndividualInfo");
 	const { farmId, animalId } = useParams({ strict: false });
 
 	const { data: measurementData, isLoading } = useGetMeasurementsByAnimalId(
@@ -29,19 +31,19 @@ export const HealthCardIndividualInfo = ({
 						{isLoading ? (
 							<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
 						) : !isLoading && (!filteredData || filteredData.length === 0) ? (
-							"No data"
+							t("missingData")
 						) : (
 							`${filteredData?.[0]?.value} ${filteredData?.[0]?.unit}`
 						)}
 					</h2>
 				</div>
 				<div>
-					<h1>Date</h1>
+					<h1>{t("dateTitle")}</h1>
 					<h2>
 						{isLoading ? (
 							<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
 						) : !isLoading && (!filteredData || filteredData.length === 0) ? (
-							"No data"
+							t("missingData")
 						) : (
 							formatDateByMonth(filteredData![0].measuredAt)
 						)}

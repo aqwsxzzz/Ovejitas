@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
 import { useParams } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 
 export const AnimalProfileCard = () => {
 	const { animalId } = useParams({ strict: false });
@@ -12,6 +14,7 @@ export const AnimalProfileCard = () => {
 		include,
 		withLanguage: true,
 	});
+	const { t } = useTranslation("animalProfileBasicCard");
 
 	const getHealthStatusColor = (status: string) => {
 		switch (status) {
@@ -26,18 +29,23 @@ export const AnimalProfileCard = () => {
 		}
 	};
 
-	const calculateAgeFloor = (birthDate: string) => {
+	const calculateAgeFloor = (
+		birthDate: string,
+		t: TFunction<"animalProfileBasicCard">,
+	) => {
 		const age = dayjs().diff(dayjs(birthDate), "year", true);
 		if (age >= 1) {
-			return `${Math.floor(age)} year${Math.floor(age) > 1 ? "s" : ""}`;
+			return `${Math.floor(age)} ${t("Year")}${Math.floor(age) > 1 ? "s" : ""}`;
 		} else {
 			const months = Math.floor(age * 12);
-			return `${months} month${months > 1 ? "s" : ""}`;
+			return `${months} ${t("Month")}${months > 1 ? t("MonthExtension") : ""}`;
 		}
 	};
 
 	if (!animalData) {
-		return <div className="text-center text-gray-500">Animal not found</div>;
+		return (
+			<div className="text-center text-gray-500">{t("missingAnimal")}</div>
+		);
 	}
 
 	return (
@@ -68,27 +76,27 @@ export const AnimalProfileCard = () => {
 
 						<div className="grid grid-cols-2 gap-4 text-sm">
 							<div>
-								<p className="text-foreground">Age</p>
+								<p className="text-foreground">{t("AgeTitle")}</p>
 								<p className="font-medium text-muted-foreground">
 									{animalData.birthDate
-										? calculateAgeFloor(animalData.birthDate)
+										? calculateAgeFloor(animalData.birthDate, t)
 										: "No Data"}
 								</p>
 							</div>
 							<div>
-								<p className="text-foreground">Weight</p>
+								<p className="text-foreground">{t("WeightTitle")}</p>
 								<p className="font-medium text-muted-foreground">
 									{animalData.lastMeasurement?.value}
 								</p>
 							</div>
 							<div>
-								<p className="text-foreground">Location</p>
+								<p className="text-foreground">{t("LocationTitle")}</p>
 								<p className="font-medium text-muted-foreground">
 									{animalData.reproductiveStatus}
 								</p>
 							</div>
 							<div>
-								<p className="text-foreground">Last Checkup</p>
+								<p className="text-foreground">{t("LastCheckupTitle")}</p>
 								<p className="font-medium text-muted-foreground">
 									{animalData.name}
 								</p>

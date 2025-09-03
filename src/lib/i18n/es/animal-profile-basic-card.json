@@ -1,0 +1,10 @@
+{
+    "missingAnimal": "No se encontró el animal",
+    "AgeTitle": "Edad",
+    "WeightTitle": "Peso",
+    "LocationTitle": "Ubicacion",
+    "LastCheckupTitle": "Ultimo chequeo",
+    "Year": "año",
+    "Month": "mes",
+    "MonthExtension": "es"
+}
