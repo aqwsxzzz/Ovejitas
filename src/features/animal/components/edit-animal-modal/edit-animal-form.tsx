@@ -22,23 +22,26 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { DateSelector } from "@/components/common/DateSelector";
 import { useEditAnimalById } from "@/features/animal/api/animal-queries";
-import type { IAnimal } from "@/features/animal/types/animal-types";
+import type {
+	IAnimal,
+	IAnimalWithIncludes,
+} from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
 import { SpecieSelect } from "@/features/specie/components/specie-select";
 import { BreedSelect } from "@/features/breed/components/breed-select";
 import { useTranslation } from "react-i18next";
+import type { ISpecie } from "@/features/specie/types/specie-types";
+import type { IBreed } from "@/features/breed/types/breed-types";
 
 interface EditAnimalFormProps {
-	animal: IAnimal;
+	animal: IAnimalWithIncludes<ISpecie & IBreed>;
 	closeDialog: () => void;
 }
 
-const getDefaultValues = (animal: IAnimal) => {
-	console.log("🚀 ~ animal:", animal);
-
+const getDefaultValues = (animal: IAnimalWithIncludes<ISpecie>) => {
 	return {
-		speciesId: animal.species.id,
-		breedId: animal.breed.id,
+		speciesId: animal.speciesId,
+		breedId: animal.breedId,
 		name: animal.name ?? "",
 		tagNumber: animal.tagNumber,
 		sex: animal.sex,
