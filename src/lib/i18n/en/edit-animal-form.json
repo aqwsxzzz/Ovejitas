@@ -2,7 +2,9 @@
     "speciesLabel": "Species",
     "breedLabel": "Breed",
     "nameLabel": "Name",
-    "tabNumberLabel": "Tag Number",
+    "namePlaceholder": "Enter a name",
+    "tagNumberLabel": "Tag Number",
+    "tagNumberPlaceholder": "Enter a tag number",
     "genderLabel": "Gender",
     "genderSelectOptions": {
         "male": "Male",
@@ -24,15 +26,17 @@
         "other": "Other"
     },
     "fatherLabel": "Father",
+    "fatherPlaceholder": "Select a father",
     "motherLabel": "Mother",
-    "aquisitionTypeLabel": "Acquisition Type",
-    "aquisitionTypeSelectOptions": {
+    "motherPlaceholder": "Select a mother",
+    "acquisitionTypeLabel": "Acquisition Type",
+    "acquisitionTypeSelectOptions": {
         "born": "Born",
         "purchased": "Purchased",
         "gifted": "Gifted",
         "other": "Other"
     },
-    "aquisitionDateLabel": "Select an acquisition date",
-    "editButton": "Edit",
+    "acquisitionDateLabel": "Select an acquisition date",
+    "editButton": "Save",
     "cancelButton": "Cancel"
 }

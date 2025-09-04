@@ -2,7 +2,9 @@
     "speciesLabel": "Especie",
     "breedLabel": "Raza",
     "nameLabel": "Nombre",
-    "tabNumberLabel": "Número de etiqueta",
+    "namePlaceholder": "Ingrese un nombre",
+    "tagNumberLabel": "Número de etiqueta",
+    "tagNumberPlaceholder": "Ingrese un número de etiqueta",
     "genderLabel": "Género",
     "genderSelectOptions": {
         "male": "Masculino",
@@ -24,15 +26,17 @@
         "other": "Otra"
     },
     "fatherLabel": "Padre",
+    "fatherPlaceholder": "Seleccionar un padre",
     "motherLabel": "Madre",
-    "aquisitionTypeLabel": "Tipo de adquisición",
-    "aquisitionTypeSelectOptions": {
+    "motherPlaceholder": "Seleccionar una madre",
+    "acquisitionTypeLabel": "Tipo de adquisición",
+    "acquisitionTypeSelectOptions": {
         "born": "Nacido",
         "purchased": "Comprado",
         "gifted": "Regalado",
         "other": "Otro"
     },
-    "aquisitionDateLabel": "Seleccionar una fecha de adquisición",
-    "editButton": "Editar",
+    "acquisitionDateLabel": "Seleccionar una fecha de adquisición",
+    "editButton": "Guardar",
     "cancelButton": "Cancelar"
 }

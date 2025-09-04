@@ -15,6 +15,8 @@ import dropdownMenuHeaderEN from "./en/dropdown-menu-header.json";
 import dropdownMenuHeaderES from "./es/dropdown-menu-header.json";
 import deleteAnimalModalEN from "./en/delete-animal-modal.json";
 import deleteAnimalModalES from "./es/delete-animal-modal.json";
+import editAnimalFormEN from "./en/edit-animal-form.json";
+import editAnimalFormES from "./es/edit-animal-form.json";
 
 export const defaultNS = "login";
 
@@ -32,6 +34,7 @@ i18next
 				animalProfileBasicCard: animalProfileBasicCardEN,
 				dropdownMenuHeader: dropdownMenuHeaderEN,
 				deleteAnimalModal: deleteAnimalModalEN,
+				editAnimalForm: editAnimalFormEN,
 			},
 			es: {
 				login: loginES,
@@ -41,6 +44,7 @@ i18next
 				animalProfileBasicCard: animalProfileBasicCardES,
 				dropdownMenuHeader: dropdownMenuHeaderES,
 				deleteAnimalModal: deleteAnimalModalES,
+				editAnimalForm: editAnimalFormES,
 			},
 		},
 		defaultNS,

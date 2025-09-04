@@ -5,6 +5,7 @@ import healthCardIndividualInfo from "./en/health-card-individual-info.json";
 import animalProfileBasicCard from "./en/animal-profile-basic-card.json";
 import dropdownMenuHeader from "./en/dropdown-menu-header.json";
 import deleteAnimalModal from "./en/delete-animal-modal.json";
+import editAnimalForm from "./en/edit-animal-form.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -15,6 +16,7 @@ const resources = {
 	animalProfileBasicCard,
 	dropdownMenuHeader,
 	deleteAnimalModal,
+	editAnimalForm,
 } as const;
 
 export default resources;
