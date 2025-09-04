@@ -1,4 +1,7 @@
 {
     "missingData": "No data",
-    "dateTitle": "Date"
+    "dateTitle": "Date",
+    "weightTitle": "Weight",
+    "heightTitle": "Height",
+    "temperatureTitle": "Temperature"
 }

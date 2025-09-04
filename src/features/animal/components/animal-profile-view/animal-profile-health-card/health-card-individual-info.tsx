@@ -26,7 +26,7 @@ export const HealthCardIndividualInfo = ({
 		<div className="flex flex-col">
 			<div className="flex gap-4">
 				<div className="flex flex-col gap-2">
-					<h1>{measurementType}</h1>
+					<h1>{t(`${measurementType}Title`)}</h1>
 					<h2>
 						{isLoading ? (
 							<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
