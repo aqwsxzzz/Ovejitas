@@ -2,12 +2,15 @@ import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse, IResponseDataArray } from "@/lib/axios";
 import type {
 	IAnimal,
+	IAnimalWithIncludes,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IDeleteResponse,
 	IEditAnimalPayload,
 } from "@/features/animal/types/animal-types";
 import { includeQueryParam } from "@/utils/include-query-params";
+import type { IBreed } from "@/features/breed/types/breed-types";
+import type { ISpecie } from "@/features/specie/types/specie-types";
 
 export const getAnimalsByFarmId = ({
 	include,
@@ -39,12 +42,17 @@ export const getAnimalById = ({
 	animalId: string;
 	include: string;
 	withLanguage: boolean;
-}) =>
-	axiosHelper<IResponse<IAnimal>>({
+}) => {
+	type animalWithIncludes = IAnimalWithIncludes<{
+		breed: IBreed;
+		species: ISpecie;
+	}>;
+	return axiosHelper<IResponse<animalWithIncludes>>({
 		method: "get",
 		url: `/animals/${animalId}`,
 		urlParams: includeQueryParam(include, withLanguage),
 	});
+};
 
 export const editAnimalById = ({
 	payload,

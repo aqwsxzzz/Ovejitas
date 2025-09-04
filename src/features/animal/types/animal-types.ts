@@ -24,11 +24,7 @@ export interface IAnimal {
 		notes: string | null;
 	};
 }
-
-export interface IAnimalWithIncludes<T> extends IAnimal {
-	includes: T;
-}
-
+export type IAnimalWithIncludes<T = Record<string, unknown>> = IAnimal & T;
 export interface IAnimalPayload {
 	farmId: string;
 }
