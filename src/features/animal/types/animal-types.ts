@@ -1,8 +1,8 @@
 export interface IAnimal {
 	id: string;
 	farmId: string;
-	species: { id: string; name: string };
-	breed: { id: string; name: string };
+	speciesId: string;
+	breedId: string;
 	name: string | null;
 	tagNumber: string;
 	sex: "female" | "male" | "unknown";
@@ -23,6 +23,10 @@ export interface IAnimal {
 		measuredBy: string;
 		notes: string | null;
 	};
+}
+
+export interface IAnimalWithIncludes<T> extends IAnimal {
+	includes: T;
 }
 
 export interface IAnimalPayload {
