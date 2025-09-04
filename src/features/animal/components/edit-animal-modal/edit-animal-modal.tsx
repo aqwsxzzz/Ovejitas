@@ -10,6 +10,7 @@ import { EditAnimalForm } from "@/features/animal/components/edit-animal-modal/e
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface EditAnimalModalProps {
 	animal: IAnimal;
@@ -17,6 +18,7 @@ interface EditAnimalModalProps {
 
 export const EditAnimalModal = ({ animal }: EditAnimalModalProps) => {
 	const [open, setOpen] = useState<boolean>(false);
+	const { t } = useTranslation("editAnimalModal");
 
 	return (
 		<Dialog
@@ -32,10 +34,8 @@ export const EditAnimalModal = ({ animal }: EditAnimalModalProps) => {
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="max-h-[90vh] overflow-y-auto p-4">
-				<DialogTitle>Edit your animal</DialogTitle>
-				<DialogDescription>
-					Here you can edit the information of your animal!
-				</DialogDescription>
+				<DialogTitle>{t("editTitle")}</DialogTitle>
+				<DialogDescription>{t("editDescription")}</DialogDescription>
 				<EditAnimalForm
 					animal={animal}
 					closeDialog={() => setOpen(false)}
