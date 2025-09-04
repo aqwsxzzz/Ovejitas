@@ -11,6 +11,8 @@ import healthCardIndividualInfoEN from "./en/health-card-individual-info.json";
 import healthCardIndividualInfoES from "./es/health-card-individual-info.json";
 import animalProfileBasicCardEN from "./en/animal-profile-basic-card.json";
 import animalProfileBasicCardES from "./es/animal-profile-basic-card.json";
+import dropdownMenuHeaderEN from "./en/dropdown-menu-header.json";
+import dropdownMenuHeaderES from "./es/dropdown-menu-header.json";
 
 export const defaultNS = "login";
 
@@ -26,6 +28,7 @@ i18next
 				animalProfileHealthCard: animalProfileHealthCardEN,
 				healthCardIndividualInfo: healthCardIndividualInfoEN,
 				animalProfileBasicCard: animalProfileBasicCardEN,
+				dropdownMenuHeader: dropdownMenuHeaderEN,
 			},
 			es: {
 				login: loginES,
@@ -33,6 +36,7 @@ i18next
 				animalProfileHealthCard: animalProfileHealthCardES,
 				healthCardIndividualInfo: healthCardIndividualInfoES,
 				animalProfileBasicCard: animalProfileBasicCardES,
+				dropdownMenuHeader: dropdownMenuHeaderES,
 			},
 		},
 		defaultNS,

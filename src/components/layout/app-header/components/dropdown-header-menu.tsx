@@ -13,10 +13,12 @@ import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
 import { useLogout } from "@/features/auth/api/auth-queries";
+import { useTranslation } from "react-i18next";
 
 export const DropdownHeaderMenu = () => {
 	const { farmId } = useParams({ strict: false });
 	const { mutateAsync: logout } = useLogout();
+	const { t } = useTranslation("dropdownMenuHeader");
 
 	return (
 		<DropdownMenu>
@@ -30,7 +32,7 @@ export const DropdownHeaderMenu = () => {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent className="w-48">
 				<DropdownMenuLabel className="text-center text-chart-5">
-					The menu!
+					{t("menuTitle")}
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator className="w-2/3 mx-auto" />
 				<DropdownMenuGroup>
@@ -39,7 +41,7 @@ export const DropdownHeaderMenu = () => {
 						params={{ farmId: farmId! }}
 					>
 						<DropdownMenuItem>
-							Dashboard
+							{t("dashboard")}
 							<DropdownMenuShortcut className="text-primary">
 								D
 							</DropdownMenuShortcut>
@@ -50,7 +52,7 @@ export const DropdownHeaderMenu = () => {
 						params={{ farmId: farmId! }}
 					>
 						<DropdownMenuItem>
-							Animals
+							{t("animals")}
 							<DropdownMenuShortcut className="text-primary">
 								A
 							</DropdownMenuShortcut>
@@ -61,7 +63,7 @@ export const DropdownHeaderMenu = () => {
 						params={{ farmId: farmId! }}
 					>
 						<DropdownMenuItem>
-							Farms
+							{t("farms")}
 							<DropdownMenuShortcut className="text-primary">
 								F
 							</DropdownMenuShortcut>
@@ -87,7 +89,7 @@ export const DropdownHeaderMenu = () => {
 					onClick={() => logout()}
 					className="text-destructive font-semibold"
 				>
-					Logout
+					{t("Logout")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
