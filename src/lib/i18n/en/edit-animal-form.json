@@ -1,0 +1,38 @@
+{
+    "speciesLabel": "Species",
+    "breedLabel": "Breed",
+    "nameLabel": "Name",
+    "tabNumberLabel": "Tag Number",
+    "genderLabel": "Gender",
+    "genderSelectOptions": {
+        "male": "Male",
+        "female": "Female",
+        "unknown": "Unknown"
+    },
+    "birthDateLabel": "Select a birth date",
+    "statusLabel": "Status",
+    "statusSelectOptions": {
+        "alive": "Alive",
+        "deceased": "Deceased",
+        "sold": "Sold"
+    },
+    "reproductiveStatusLabel": "Reproductive Status",
+    "reproductiveStatusSelectOptions": {
+        "pregnant": "Pregnant",
+        "open": "Open",
+        "lactating": "Lactating",
+        "other": "Other"
+    },
+    "fatherLabel": "Father",
+    "motherLabel": "Mother",
+    "aquisitionTypeLabel": "Acquisition Type",
+    "aquisitionTypeSelectOptions": {
+        "born": "Born",
+        "purchased": "Purchased",
+        "gifted": "Gifted",
+        "other": "Other"
+    },
+    "aquisitionDateLabel": "Select an acquisition date",
+    "editButton": "Edit",
+    "cancelButton": "Cancel"
+}

@@ -11,12 +11,14 @@ import type { IAnimal } from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface DeleteAnimalProps {
 	animal: IAnimal;
 }
 
 export const DeleteAnimalModal = ({ animal }: DeleteAnimalProps) => {
+	const { t } = useTranslation("deleteAnimalModal");
 	const [open, setOpen] = useState(false);
 	const { farmId } = useParams({ strict: false });
 	const { mutateAsync: deleteAnimal } = useDeleteAnimalById();
@@ -40,18 +42,22 @@ export const DeleteAnimalModal = ({ animal }: DeleteAnimalProps) => {
 			</DialogTrigger>
 			<DialogContent className="max-w-70">
 				<DialogTitle>
-					Do you want to delete {animal.name} {animal.tagNumber} from your farm?
+					{t("deleteTitle1")}
+					{animal.name} {animal.tagNumber}
+					{t("deleteTitle2")}
 				</DialogTitle>
 				<DialogDescription>
-					This will erase any information given from
-					<strong> {animal.name} </strong> to other animals, like relationships
-					and others. Remember that animals tagged as "sold" will not be count
-					as animals in your farm and will not be shown in your animals
-					dashboard.
+					{t("deleteMessage1")}
+					<strong> {animal.name} </strong> {t("deleteMessage2")}
 				</DialogDescription>
-				<div>
-					<Button onClick={onSubmit}>Delete</Button>
-					<Button onClick={() => setOpen(false)}>Cancel</Button>
+				<div className="flex justify-between mt-4">
+					<Button
+						onClick={onSubmit}
+						className="bg-destructive"
+					>
+						{t("deleteButton")}
+					</Button>
+					<Button onClick={() => setOpen(false)}>{t("cancelButton")}</Button>
 				</div>
 			</DialogContent>
 		</Dialog>

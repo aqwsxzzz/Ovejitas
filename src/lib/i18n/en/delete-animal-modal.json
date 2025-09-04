@@ -1,0 +1,8 @@
+{
+    "deleteTitle1": "Do you want to delete ",
+    "deleteTitle2": " from your farm?",
+    "deleteMessage1": "This will erase any information given from ",
+    "deleteMessage2": " to other animals, like relationships and others. Remember that animals tagged as SOLD will not be counted as animals in your farm and will not be shown in your animals dashboard.",
+    "deleteButton": "Delete",
+    "cancelButton": "Cancel"
+}

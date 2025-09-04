@@ -1,0 +1,8 @@
+{
+    "deleteTitle1": "¿Deseas eliminar a ",
+    "deleteTitle2": " de tu granja?",
+    "deleteMessage1": "Esto borrará cualquier información dada por ",
+    "deleteMessage2": " a otros animales, como relaciones y otros. Recuerda que los animales etiquetados como VENDIDOS no se contarán como animales en tu granja y no se mostrarán en el panel de animales.",
+    "deleteButton": "Eliminar",
+    "cancelButton": "Cancelar"
+}

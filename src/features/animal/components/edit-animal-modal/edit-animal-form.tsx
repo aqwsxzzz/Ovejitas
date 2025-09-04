@@ -136,7 +136,7 @@ export const EditAnimalForm = ({
 					name="speciesId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Specie</FormLabel>
+							<FormLabel>Species</FormLabel>
 							<FormControl>
 								<SpecieSelect
 									value={field.value}
