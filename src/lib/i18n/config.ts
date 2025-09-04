@@ -19,6 +19,8 @@ import editAnimalFormEN from "./en/edit-animal-form.json";
 import editAnimalFormES from "./es/edit-animal-form.json";
 import editAnimalModalEN from "./en/edit-animal-modal.json";
 import editAnimalModalES from "./es/edit-animal-modal.json";
+import newAnimalBulkFormEN from "./en/new-animal-bulk-form.json";
+import newAnimalBulkFormES from "./es/new-animal-bulk-form.json";
 
 export const defaultNS = "login";
 
@@ -38,6 +40,7 @@ i18next
 				deleteAnimalModal: deleteAnimalModalEN,
 				editAnimalForm: editAnimalFormEN,
 				editAnimalModal: editAnimalModalEN,
+				newAnimalBulkForm: newAnimalBulkFormEN,
 			},
 			es: {
 				login: loginES,
@@ -49,6 +52,7 @@ i18next
 				deleteAnimalModal: deleteAnimalModalES,
 				editAnimalForm: editAnimalFormES,
 				editAnimalModal: editAnimalModalES,
+				newAnimalBulkForm: newAnimalBulkFormES,
 			},
 		},
 		defaultNS,

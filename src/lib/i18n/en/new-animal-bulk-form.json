@@ -1,0 +1,18 @@
+{
+    "specieLabel": "Specie",
+    "breedLabel": "Breed",
+    "groupNameLabel": "Group Name",
+    "groupNamePlaceholder": "Enter a group name",
+    "tagPrefixLabel": "Tag Prefix (optional)",
+    "tagPrefixPlaceholder": "Prefix for tags (e.g. A-)",
+    "tagInputModeLabel": "Tag Input Mode",
+    "manualTagsLabel": "Manual Tags",
+    "sequentialTagsLabel": "Sequential Tags",
+    "tagsLabel": "Tags (Space separated)",
+    "tagsPlaceholder": "Enter tags separated by a space",
+    "quantityLabel": "Quantity",
+    "tagStartingNumberLabel": "Tag Starting Number",
+    "tagStartingNumberPlaceholder": "Starting number for tags (e.g. 1001)",
+    "createButton": "Create",
+    "cancelButton": "Cancel"
+}

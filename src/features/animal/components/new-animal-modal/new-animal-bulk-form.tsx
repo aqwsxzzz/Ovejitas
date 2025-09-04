@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCreateAnimalBulk } from "@/features/animal/api/animal-queries";
 import { useParams } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
 	specieId: z.string(),
@@ -48,6 +49,7 @@ export const NewAnimalBulkForm = ({
 		},
 	});
 
+	const { t } = useTranslation("newAnimalBulkForm");
 	const selectedSpecieId = form.watch("specieId");
 	const tagMode = form.watch("tagMode");
 
@@ -105,7 +107,7 @@ export const NewAnimalBulkForm = ({
 					name="specieId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Specie</FormLabel>
+							<FormLabel>{t("specieLabel")}</FormLabel>
 							<FormControl>
 								<SpecieSelect
 									value={field.value}
@@ -122,7 +124,7 @@ export const NewAnimalBulkForm = ({
 						name="breedId"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Breed</FormLabel>
+								<FormLabel>{t("breedLabel")}</FormLabel>
 								<FormControl>
 									<BreedSelect
 										value={field.value}
@@ -142,10 +144,10 @@ export const NewAnimalBulkForm = ({
 						const { value, onChange, onBlur, name, ref } = field;
 						return (
 							<FormItem>
-								<FormLabel>Group Name</FormLabel>
+								<FormLabel>{t("groupNameLabel")}</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="Enter a group name"
+										placeholder={t("groupNamePlaceholder")}
 										value={value}
 										onChange={onChange}
 										onBlur={onBlur}
@@ -165,10 +167,10 @@ export const NewAnimalBulkForm = ({
 						const { value, onChange, onBlur, name, ref } = field;
 						return (
 							<FormItem>
-								<FormLabel>Tag Prefix (optional)</FormLabel>
+								<FormLabel>{t("tagPrefixLabel")}</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="Prefix for tags (e.g. A-)"
+										placeholder={t("tagPrefixPlaceholder")}
 										value={value}
 										onChange={onChange}
 										onBlur={onBlur}
@@ -186,7 +188,7 @@ export const NewAnimalBulkForm = ({
 					name="tagMode"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Tag Input Mode</FormLabel>
+							<FormLabel>{t("tagInputModeLabel")}</FormLabel>
 							<FormControl>
 								<RadioGroup
 									value={field.value}
@@ -199,14 +201,16 @@ export const NewAnimalBulkForm = ({
 											value="manual"
 											id="manual"
 										/>
-										<Label htmlFor="manual">Manual tags</Label>
+										<Label htmlFor="manual">{t("manualTagsLabel")}</Label>
 									</div>
 									<div className="flex items-center gap-2">
 										<RadioGroupItem
 											value="sequential"
 											id="sequential"
 										/>
-										<Label htmlFor="sequential">Sequential tags</Label>
+										<Label htmlFor="sequential">
+											{t("sequentialTagsLabel")}
+										</Label>
 									</div>
 								</RadioGroup>
 							</FormControl>
@@ -222,10 +226,10 @@ export const NewAnimalBulkForm = ({
 							const { value, onChange, onBlur, name, ref } = field;
 							return (
 								<FormItem>
-									<FormLabel>Tags (space separated)</FormLabel>
+									<FormLabel>{t("tagsLabel")}</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Enter tags separated by a space"
+											placeholder={t("tagsPlaceholder")}
 											value={value}
 											onChange={onChange}
 											onBlur={onBlur}
@@ -248,7 +252,7 @@ export const NewAnimalBulkForm = ({
 								const { value, onChange, onBlur, name, ref } = field;
 								return (
 									<FormItem>
-										<FormLabel>Quantity</FormLabel>
+										<FormLabel>{t("quantityLabel")}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -274,10 +278,10 @@ export const NewAnimalBulkForm = ({
 								const { value, onChange, onBlur, name, ref } = field;
 								return (
 									<FormItem>
-										<FormLabel>Tag Starting Number</FormLabel>
+										<FormLabel>{t("tagStartingNumberLabel")}</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="Starting number for tags (e.g. 1001)"
+												placeholder={t("tagStartingNumberPlaceholder")}
 												value={value ?? ""}
 												onChange={onChange}
 												onBlur={onBlur}
@@ -297,13 +301,13 @@ export const NewAnimalBulkForm = ({
 						type="submit"
 						disabled={isPending}
 					>
-						Create
+						{t("createButton")}
 					</Button>
 					<Button
 						onClick={closeDialog}
 						className="bg-destructive"
 					>
-						Cancel
+						{t("cancelButton")}
 					</Button>
 				</div>
 			</form>

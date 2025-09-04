@@ -7,6 +7,7 @@ import dropdownMenuHeader from "./en/dropdown-menu-header.json";
 import deleteAnimalModal from "./en/delete-animal-modal.json";
 import editAnimalForm from "./en/edit-animal-form.json";
 import editAnimalModal from "./en/edit-animal-modal.json";
+import newAnimalBulkForm from "./en/new-animal-bulk-form.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -19,6 +20,7 @@ const resources = {
 	deleteAnimalModal,
 	editAnimalForm,
 	editAnimalModal,
+	newAnimalBulkForm,
 } as const;
 
 export default resources;

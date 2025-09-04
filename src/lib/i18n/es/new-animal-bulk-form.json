@@ -1,0 +1,18 @@
+{
+    "specieLabel": "Especie",
+    "breedLabel": "Raza",
+    "groupNameLabel": "Nombre del grupo",
+    "groupNamePlaceholder": "Ingrese un nombre para el grupo",
+    "tagPrefixLabel": "Prefijo de etiqueta (opcional)",
+    "tagPrefixPlaceholder": "Prefijo para las etiquetas (por ejemplo, A-)",
+    "tagInputModeLabel": "Modo de entrada de etiqueta",
+    "manualTagsLabel": "Etiquetas manuales",
+    "sequentialTagsLabel": "Etiquetas secuenciales",
+    "tagsLabel": "Etiquetas (separadas por espacios)",
+    "tagsPlaceholder": "Ingrese las etiquetas separadas por un espacio",
+    "quantityLabel": "Cantidad",
+    "tagStartingNumberLabel": "Número de inicio de secuencia",
+    "tagStartingNumberPlaceholder": "Número de inicio para etiquetas (por ejemplo, 1001)",
+    "createButton": "Crear",
+    "cancelButton": "Cancelar"
+}
