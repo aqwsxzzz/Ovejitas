@@ -9,6 +9,7 @@ import {
 import { useDeleteMeasurementById } from "@/features/measurement/api/measurement-queries";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface DeleteMeasurementModalProps {
 	measurementId: string;
@@ -21,6 +22,7 @@ export const DeleteMeasurementModal = ({
 }: DeleteMeasurementModalProps) => {
 	const [open, setOpen] = useState(false);
 	const { mutateAsync: deleteMeasurement } = useDeleteMeasurementById();
+	const { t } = useTranslation("deleteMeasurementModal");
 
 	const onSubmit = async () => {
 		const response = await deleteMeasurement({
@@ -41,14 +43,16 @@ export const DeleteMeasurementModal = ({
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="max-w-70">
-				<DialogTitle>Do you want to delete this measurement?</DialogTitle>
-				<DialogDescription>
-					This will permanently remove the selected measurement record from the
-					animal's history.
-				</DialogDescription>
+				<DialogTitle>{t("deleteTitle")}</DialogTitle>
+				<DialogDescription>{t("deleteDescription")}</DialogDescription>
 				<div>
-					<Button onClick={onSubmit}>Delete</Button>
-					<Button onClick={() => setOpen(false)}>Cancel</Button>
+					<Button
+						onClick={onSubmit}
+						className="bg-destructive"
+					>
+						{t("deleteButton")}
+					</Button>
+					<Button onClick={() => setOpen(false)}>{t("cancelButton")}</Button>
 				</div>
 			</DialogContent>
 		</Dialog>

@@ -1,0 +1,6 @@
+{
+    "deleteTitle":"¿Quieres eliminar esta medición?",
+    "deleteDescription":"Esto eliminará permanentemente el registro de medición seleccionado del historial del animal.",
+    "deleteButton":"Eliminar",
+    "cancelButton":"Cancelar"
+}
