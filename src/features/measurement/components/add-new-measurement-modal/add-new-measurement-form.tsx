@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
 	measurementType: z.enum(["weight", "height", "temperature"] as [
@@ -44,6 +45,7 @@ export const AddNewMeasurementForm = ({
 }) => {
 	const { mutateAsync: createMeasurement, isPending } = useCreateMeasurement();
 	const { animalId } = useParams({ strict: false });
+	const { t } = useTranslation("addNewMeasurementForm");
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -113,7 +115,7 @@ export const AddNewMeasurementForm = ({
 					name="measurementType"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Measurement Type</FormLabel>
+							<FormLabel>{t("measurementTypeLabel")}</FormLabel>
 							<FormControl>
 								<MeasurementTypeSelect
 									value={field.value}
@@ -129,11 +131,11 @@ export const AddNewMeasurementForm = ({
 					name="value"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Value</FormLabel>
+							<FormLabel>{t("valueLabel")}</FormLabel>
 							<FormControl>
 								<div className="relative flex items-center">
 									<Input
-										placeholder="Enter a value"
+										placeholder={t("valuePlaceholder")}
 										{...field}
 										type="number"
 										step="any"
@@ -153,7 +155,7 @@ export const AddNewMeasurementForm = ({
 					name="measuredAt"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Measured At</FormLabel>
+							<FormLabel>{t("measuredAtLabel")}</FormLabel>
 							<FormControl>
 								<DateSelector
 									date={field.value ?? undefined}
@@ -169,10 +171,10 @@ export const AddNewMeasurementForm = ({
 					name="notes"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>Notes</FormLabel>
+							<FormLabel>{t("notesLabel")}</FormLabel>
 							<FormControl>
 								<Textarea
-									placeholder="Optional notes"
+									placeholder={t("notesPlaceholder")}
 									{...field}
 								/>
 							</FormControl>
@@ -185,13 +187,13 @@ export const AddNewMeasurementForm = ({
 						disabled={isPending}
 						type="submit"
 					>
-						Send
+						{t("createButton")}
 					</Button>
 					<Button
 						className="bg-destructive"
 						onClick={closeDialog}
 					>
-						Cancel
+						{t("cancelButton")}
 					</Button>
 				</div>
 			</form>

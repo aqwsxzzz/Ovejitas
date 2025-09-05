@@ -1,0 +1,10 @@
+{
+    "measurementTypeLabel": "Tipo de Medición",
+    "valueLabel": "Valor",
+    "valuePlaceholder": "Ingrese un valor",
+    "measuredAtLabel": "Fecha de Medición",
+    "notesLabel": "Notas",
+    "notesPlaceholder": "Ingrese cualquier nota adicional (opcional)",
+    "createButton": "Crear",
+    "cancelButton": "Cancelar"
+}

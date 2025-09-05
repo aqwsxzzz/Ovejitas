@@ -1,0 +1,10 @@
+{
+    "measurementTypeLabel": "Measurement Type",
+    "valueLabel": "Value",
+    "valuePlaceholder": "Enter a value",
+    "measuredAtLabel": "Measurement date",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Enter any additional notes (optional)",
+    "createButton": "Create",
+    "cancelButton": "Cancel"
+}

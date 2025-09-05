@@ -6,6 +6,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useGetBreedsBySpecieId } from "@/features/breed/api/breed-queries";
+import { useTranslation } from "react-i18next";
 
 export const BreedSelect = ({
 	value,
@@ -19,6 +20,7 @@ export const BreedSelect = ({
 	defaultValue?: string;
 }) => {
 	const { data: breedsData } = useGetBreedsBySpecieId(specieId);
+	const { t } = useTranslation("breedSelect");
 
 	return (
 		<Select
@@ -27,7 +29,7 @@ export const BreedSelect = ({
 			defaultValue={defaultValue}
 		>
 			<SelectTrigger>
-				<SelectValue placeholder="Select a specie.." />
+				<SelectValue placeholder={t("selectBreedPlaceholder")} />
 			</SelectTrigger>
 			<SelectContent>
 				{breedsData?.map((breed) => (
