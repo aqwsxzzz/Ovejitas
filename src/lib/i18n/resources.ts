@@ -13,6 +13,7 @@ import newAnimalModal from "./en/new-animal-modal.json";
 import animalCard from "./en/animal-card.json";
 import breedSelect from "./en/breed-select.json";
 import addNewMeasurementForm from "./en/add-new-measurement-form.json";
+import addNewMeasurementModal from "./en/add-new-measurement-modal.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -31,6 +32,7 @@ const resources = {
 	animalCard,
 	breedSelect,
 	addNewMeasurementForm,
+	addNewMeasurementModal,
 } as const;
 
 export default resources;

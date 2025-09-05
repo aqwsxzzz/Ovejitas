@@ -9,9 +9,11 @@ import {
 import { AddNewMeasurementForm } from "@/features/measurement/components/add-new-measurement-modal/add-new-measurement-form";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const AddNewMeasurementModal = () => {
 	const [open, setOpen] = useState<boolean>(false);
+	const { t } = useTranslation("addNewMeasurementModal");
 
 	return (
 		<Dialog
@@ -25,7 +27,7 @@ export const AddNewMeasurementModal = () => {
 			</DialogTrigger>
 			<DialogContent aria-describedby={undefined}>
 				<DialogHeader>
-					<DialogTitle>Add a New Measurement</DialogTitle>
+					<DialogTitle>{t("measurementTitle")}</DialogTitle>
 				</DialogHeader>
 				<AddNewMeasurementForm closeDialog={() => setOpen(false)} />
 			</DialogContent>

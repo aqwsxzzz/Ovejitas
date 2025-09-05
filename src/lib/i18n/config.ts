@@ -31,6 +31,8 @@ import breedSelectEN from "./en/breed-select.json";
 import breedSelectES from "./es/breed-select.json";
 import addNewMeasurementFormEN from "./en/add-new-measurement-form.json";
 import addNewMeasurementFormES from "./es/add-new-measurement-form.json";
+import addNewMeasurementModalEN from "./en/add-new-measurement-modal.json";
+import addNewMeasurementModalES from "./es/add-new-measurement-modal.json";
 
 export const defaultNS = "login";
 
@@ -56,6 +58,7 @@ i18next
 				animalCard: animalCardEN,
 				breedSelect: breedSelectEN,
 				addNewMeasurementForm: addNewMeasurementFormEN,
+				addNewMeasurementModal: addNewMeasurementModalEN,
 			},
 			es: {
 				login: loginES,
@@ -73,6 +76,7 @@ i18next
 				animalCard: animalCardES,
 				breedSelect: breedSelectES,
 				addNewMeasurementForm: addNewMeasurementFormES,
+				addNewMeasurementModal: addNewMeasurementModalES,
 			},
 		},
 		defaultNS,
