@@ -6,6 +6,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useGetSpecies } from "@/features/specie/api/specie.queries";
+import { useTranslation } from "react-i18next";
 
 export const SpecieSelect = ({
 	value,
@@ -18,6 +19,7 @@ export const SpecieSelect = ({
 }) => {
 	const include = "";
 	const { data: speciesData } = useGetSpecies({ include, withLanguage: true });
+	const { t } = useTranslation("specieSelect");
 
 	return (
 		<Select
@@ -26,7 +28,7 @@ export const SpecieSelect = ({
 			defaultValue={defaultValue}
 		>
 			<SelectTrigger>
-				<SelectValue placeholder="Select a specie.." />
+				<SelectValue placeholder={t("selectTriggerPlaceholder")} />
 			</SelectTrigger>
 			<SelectContent>
 				{speciesData?.map((specie) => (
