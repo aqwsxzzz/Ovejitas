@@ -1,0 +1,9 @@
+{
+    "addAnimalButton": "Add Animal",
+    "addAnimalTitle": "Add a new animal",
+    "addAnimalDescription": "Here you can create a new animal to join your farm!",
+    "radioGroupOptions": {
+        "singleOption": "Single",
+        "bulkOption": "Bulk"
+    }
+}

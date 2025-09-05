@@ -1,0 +1,9 @@
+{
+    "addAnimalButton": "Agregar animal",
+    "addAnimalTitle": "Agregar un nuevo animal",
+    "addAnimalDescription": "¡Aquí puedes crear un nuevo animal para unirse a tu granja!",
+    "radioGroupOptions": {
+        "singleOption": "Individual",
+        "bulkOption": "Lote"
+    }
+}

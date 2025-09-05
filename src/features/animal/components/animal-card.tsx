@@ -10,12 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "@tanstack/react-router";
 import { EditAnimalModal } from "@/features/animal/components/edit-animal-modal/edit-animal-modal";
 import { DeleteAnimalModal } from "@/features/animal/components/delete-animal-modal/delete-animal-modal";
+import { useTranslation } from "react-i18next";
 
 interface AnimalCardProps {
 	animal: IAnimal;
 }
 
 export const AnimalCard = ({ animal }: AnimalCardProps) => {
+	const { t } = useTranslation("animalCard");
+
 	const getStatusColor = (status: IAnimal["status"]) => {
 		switch (status) {
 			case "alive":
@@ -43,7 +46,7 @@ export const AnimalCard = ({ animal }: AnimalCardProps) => {
 							{animal.name}
 						</CardTitle>
 						<CardDescription className="text-xs leading-tight">
-							Tag #{animal.tagNumber} • {animal.sex}
+							{t("tagText")} {animal.tagNumber} • {animal.sex}
 						</CardDescription>
 					</div>
 					<Badge

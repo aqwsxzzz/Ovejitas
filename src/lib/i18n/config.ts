@@ -23,6 +23,10 @@ import newAnimalBulkFormEN from "./en/new-animal-bulk-form.json";
 import newAnimalBulkFormES from "./es/new-animal-bulk-form.json";
 import newAnimalFormEN from "./en/new-animal-form.json";
 import newAnimalFormES from "./es/new-animal-form.json";
+import newAnimalModalEN from "./en/new-animal-modal.json";
+import newAnimalModalES from "./es/new-animal-modal.json";
+import animalCardEN from "./en/animal-card.json";
+import animalCardES from "./es/animal-card.json";
 
 export const defaultNS = "login";
 
@@ -44,6 +48,8 @@ i18next
 				editAnimalModal: editAnimalModalEN,
 				newAnimalBulkForm: newAnimalBulkFormEN,
 				newAnimalForm: newAnimalFormEN,
+				newAnimalModal: newAnimalModalEN,
+				animalCard: animalCardEN,
 			},
 			es: {
 				login: loginES,
@@ -57,6 +63,8 @@ i18next
 				editAnimalModal: editAnimalModalES,
 				newAnimalBulkForm: newAnimalBulkFormES,
 				newAnimalForm: newAnimalFormES,
+				newAnimalModal: newAnimalModalES,
+				animalCard: animalCardES,
 			},
 		},
 		defaultNS,

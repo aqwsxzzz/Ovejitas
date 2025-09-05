@@ -9,6 +9,8 @@ import editAnimalForm from "./en/edit-animal-form.json";
 import editAnimalModal from "./en/edit-animal-modal.json";
 import newAnimalBulkForm from "./en/new-animal-bulk-form.json";
 import newAnimalForm from "./en/new-animal-form.json";
+import newAnimalModal from "./en/new-animal-modal.json";
+import animalCard from "./en/animal-card.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -23,6 +25,8 @@ const resources = {
 	editAnimalModal,
 	newAnimalBulkForm,
 	newAnimalForm,
+	newAnimalModal,
+	animalCard,
 } as const;
 
 export default resources;
