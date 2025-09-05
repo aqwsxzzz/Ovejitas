@@ -1,0 +1,40 @@
+{
+    "tabTitle1": "Información Básica",
+    "tabTitle2": "Información Opcional",
+    "specieLabel": "Especie",
+    "breedLabel": "Raza",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Ingrese un nombre",
+    "tagLabel": "Número de Identificación",
+    "tagPlaceholder": "Ingrese un número de identificación",
+    "genderLabel": "Género",
+    "genderOptionMale": "Macho",
+    "genderOptionFemale": "Hembra",
+    "genderOptionUnknown": "Desconocido",
+    "birthDateLabel": "Seleccione una fecha de nacimiento",
+    "statusLabel": "Estado",
+    "statusOptions": {
+        "alive": "Vivo",
+        "deceased": "Fallecido",
+        "sold": "Vendido"
+    },
+    "reproductiveStatusLabel": "Estado Reproductivo",
+    "reproductiveStatusOptions": {
+        "open": "Abierto",
+        "pregnant": "Gestante",
+        "lactating": "Lactante",
+        "other": "Otro"
+    },
+    "fatherLabel": "Padre",
+    "motherLabel": "Madre",
+    "acquisitionTypeLabel": "Tipo de Adquisición",
+    "acquisitionTypeOptions": {
+        "born": "Nacido",
+        "purchased": "Comprado",
+        "gifted": "Regalado",
+        "other": "Otro"
+    },
+    "acquisitionDateLabel": "Fecha de Adquisición",
+    "createButton": "Crear",
+    "cancelButton": "Cancelar"
+}

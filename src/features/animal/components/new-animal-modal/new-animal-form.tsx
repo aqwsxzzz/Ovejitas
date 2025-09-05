@@ -21,6 +21,7 @@ import { useParams } from "@tanstack/react-router";
 import { SpecieSelect } from "@/features/specie/components/specie-select";
 import { BreedSelect } from "@/features/breed/components/breed-select";
 import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-gender-select/parents-by-gender-select";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
 	specieId: z.string(),
@@ -52,6 +53,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 	const { mutateAsync: createAnimal, isPending } = useCreateAnimal();
 	const { farmId } = useParams({ strict: false });
 
+	const { t } = useTranslation("newAnimalForm");
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		// Format birthDate as YYYY-MM-DD
 		const formatDate = (date: Date) => {
@@ -115,8 +117,8 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 					className="w-full"
 				>
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="basic">Basic Info</TabsTrigger>
-						<TabsTrigger value="optional">Optional Info</TabsTrigger>
+						<TabsTrigger value="basic">{t("tabTitle1")}</TabsTrigger>
+						<TabsTrigger value="optional">{t("tabTitle2")}</TabsTrigger>
 					</TabsList>
 					<TabsContent
 						value="basic"
@@ -127,7 +129,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="specieId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Specie</FormLabel>
+									<FormLabel>{t("specieLabel")}</FormLabel>
 									<FormControl>
 										<SpecieSelect
 											value={field.value}
@@ -144,7 +146,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								name="breedId"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Breed</FormLabel>
+										<FormLabel>{t("breedLabel")}</FormLabel>
 										<FormControl>
 											<BreedSelect
 												value={field.value}
@@ -162,10 +164,10 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="name"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Name</FormLabel>
+									<FormLabel>{t("nameLabel")}</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Enter a name"
+											placeholder={t("namePlaceholder")}
 											{...field}
 										/>
 									</FormControl>
@@ -177,10 +179,10 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="tagNumber"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Tag Number</FormLabel>
+									<FormLabel>{t("tagLabel")}</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="Enter a tag number"
+											placeholder={t("tagPlaceholder")}
 											{...field}
 										/>
 									</FormControl>
@@ -197,7 +199,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="sex"
 							render={({ field }) => (
 								<FormItem>
-									<Label>Gender</Label>
+									<Label>{t("genderLabel")}</Label>
 									<RadioGroup
 										onValueChange={field.onChange}
 										className="flex"
@@ -208,21 +210,23 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 												value="male"
 												id="male"
 											/>
-											<Label htmlFor="male">Male</Label>
+											<Label htmlFor="male">{t("genderOptionMale")}</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="female"
 												id="female"
 											/>
-											<Label htmlFor="female">Female</Label>
+											<Label htmlFor="female">{t("genderOptionFemale")}</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="unknown"
 												id="unkown"
 											/>
-											<Label htmlFor="unknown">Unknown</Label>
+											<Label htmlFor="unknown">
+												{t("genderOptionUnknown")}
+											</Label>
 										</div>
 									</RadioGroup>
 								</FormItem>
@@ -235,7 +239,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								<FormItem className="space-y-2">
 									<div className="flex items-center gap-2">
 										<FormLabel className="shrink-0">
-											Select a birth date
+											{t("birthDateLabel")}
 										</FormLabel>
 										<div className="border-t border-primary/50 w-full" />
 									</div>
@@ -254,7 +258,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="status"
 							render={({ field }) => (
 								<FormItem>
-									<Label>Status</Label>
+									<Label>{t("statusLabel")}</Label>
 									<RadioGroup
 										onValueChange={field.onChange}
 										className="flex"
@@ -265,21 +269,23 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 												value="alive"
 												id="alive"
 											/>
-											<Label htmlFor="alive">Alive</Label>
+											<Label htmlFor="alive">{t("statusOptions.alive")}</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="sold"
 												id="sold"
 											/>
-											<Label htmlFor="sold">Sold</Label>
+											<Label htmlFor="sold">{t("statusOptions.sold")}</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="deceased"
 												id="deceased"
 											/>
-											<Label htmlFor="deceased">Deceased</Label>
+											<Label htmlFor="deceased">
+												{t("statusOptions.deceased")}
+											</Label>
 										</div>
 									</RadioGroup>
 								</FormItem>
@@ -290,7 +296,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="reproductiveStatus"
 							render={({ field }) => (
 								<FormItem>
-									<Label>Reproductive Status</Label>
+									<Label>{t("reproductiveStatusLabel")}</Label>
 									<RadioGroup
 										onValueChange={field.onChange}
 										className="flex"
@@ -301,28 +307,36 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 												value="open"
 												id="open"
 											/>
-											<Label htmlFor="open">Open</Label>
+											<Label htmlFor="open">
+												{t("reproductiveStatusOptions.open")}
+											</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="pregnant"
 												id="pregnant"
 											/>
-											<Label htmlFor="pregnant">Pregnant</Label>
+											<Label htmlFor="pregnant">
+												{t("reproductiveStatusOptions.pregnant")}
+											</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="lactating"
 												id="lactating"
 											/>
-											<Label htmlFor="lactating">Lactating</Label>
+											<Label htmlFor="lactating">
+												{t("reproductiveStatusOptions.lactating")}
+											</Label>
 										</div>
 										<div className="flex gap-1">
 											<RadioGroupItem
 												value="other"
 												id="other"
 											/>
-											<Label htmlFor="other">Other</Label>
+											<Label htmlFor="other">
+												{t("reproductiveStatusOptions.other")}
+											</Label>
 										</div>
 									</RadioGroup>
 								</FormItem>
@@ -333,7 +347,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="fatherId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Father</FormLabel>
+									<FormLabel>{t("fatherLabel")}</FormLabel>
 									<FormControl>
 										<ParentsByGenderSelect
 											value={field.value}
@@ -352,7 +366,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="motherId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Mother</FormLabel>
+									<FormLabel>{t("motherLabel")}</FormLabel>
 									<FormControl>
 										<ParentsByGenderSelect
 											value={field.value}
@@ -371,7 +385,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="acquisitionType"
 							render={({ field }) => (
 								<FormItem>
-									<Label>Acquisition Type</Label>
+									<Label>{t("acquisitionTypeLabel")}</Label>
 									<FormControl>
 										<RadioGroup
 											onValueChange={field.onChange}
@@ -383,21 +397,27 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 													value="born"
 													id="born"
 												/>
-												<Label htmlFor="born">Born</Label>
+												<Label htmlFor="born">
+													{t("acquisitionTypeOptions.born")}
+												</Label>
 											</div>
 											<div className="flex gap-1">
 												<RadioGroupItem
 													value="purchased"
 													id="purchased"
 												/>
-												<Label htmlFor="purchased">Purchased</Label>
+												<Label htmlFor="purchased">
+													{t("acquisitionTypeOptions.purchased")}
+												</Label>
 											</div>
 											<div className="flex gap-1">
 												<RadioGroupItem
 													value="other"
 													id="other"
 												/>
-												<Label htmlFor="other">Other</Label>
+												<Label htmlFor="other">
+													{t("acquisitionTypeOptions.other")}
+												</Label>
 											</div>
 										</RadioGroup>
 									</FormControl>
@@ -411,7 +431,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								<FormItem className="space-y-2">
 									<div className="flex items-center gap-2">
 										<FormLabel className="shrink-0">
-											Select an acquisition date
+											{t("acquisitionDateLabel")}
 										</FormLabel>
 										<div className="border-t border-primary/50 w-full" />
 									</div>
@@ -432,13 +452,13 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 						disabled={isPending}
 						type="submit"
 					>
-						Create
+						{t("createButton")}
 					</Button>
 					<Button
 						onClick={closeDialog}
 						className="bg-destructive"
 					>
-						Cancel
+						{t("cancelButton")}
 					</Button>
 				</div>
 			</form>

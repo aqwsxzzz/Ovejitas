@@ -1,0 +1,40 @@
+{
+    "tabTitle1": "Basic Info",
+    "tabTitle2": "Optional Info",
+        "specieLabel": "Specie",
+    "breedLabel": "Breed",
+    "nameLabel": "Name",
+    "namePlaceholder": "Enter a name",
+    "tagLabel": "Tag Number",
+    "tagPlaceholder": "Enter a tag number",
+    "genderLabel": "Gender",
+    "genderOptionMale": "Male",
+    "genderOptionFemale": "Female",
+    "genderOptionUnknown": "Unknown",
+    "birthDateLabel": "Select a birth date",
+    "statusLabel": "Status",
+    "statusOptions": {
+        "alive": "Alive",
+        "deceased": "Deceased",
+        "sold": "Sold"
+    },
+    "reproductiveStatusLabel": "Reproductive Status",
+    "reproductiveStatusOptions": {
+        "open": "Open",
+        "pregnant": "Pregnant",
+        "lactating": "Lactating",
+        "other": "Other"
+    },
+    "fatherLabel": "Father",
+    "motherLabel": "Mother",
+    "acquisitionTypeLabel": "Acquisition Type",
+    "acquisitionTypeOptions": {
+        "born": "Born",
+        "purchased": "Purchased",
+        "gifted": "Gifted",
+        "other": "Other"
+    },
+    "acquisitionDateLabel": "Acquisition Date",
+    "createButton": "Create",
+    "cancelButton": "Cancel"
+}
