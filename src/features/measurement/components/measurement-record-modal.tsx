@@ -10,6 +10,7 @@ import {
 import { useGetMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
 import { DeleteMeasurementModal } from "@/features/measurement/components/delete-measurement-modal/delete-measurement-modal";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
+import { useTranslation } from "react-i18next";
 
 interface MeasurementRecordModalProps {
 	farmId: string;
@@ -26,6 +27,7 @@ export const MeasurementRecordModal = ({
 		farmId,
 		animalId,
 	);
+	const { t } = useTranslation("measurementRecordModal");
 
 	const filteredData = measurementData?.filter(
 		(m) => m.measurementType === measurementType,
@@ -34,12 +36,12 @@ export const MeasurementRecordModal = ({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button className="">Record</Button>
+				<Button className="">{t("modalButtonTrigger")}</Button>
 			</DialogTrigger>
 			<DialogContent aria-describedby={undefined}>
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">
-						Measurement Records
+						{t("modalTitle")}
 					</DialogTitle>
 				</DialogHeader>
 				{isLoading ? (

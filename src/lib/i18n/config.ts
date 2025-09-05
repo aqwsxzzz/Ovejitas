@@ -35,6 +35,10 @@ import addNewMeasurementModalEN from "./en/add-new-measurement-modal.json";
 import addNewMeasurementModalES from "./es/add-new-measurement-modal.json";
 import deleteMeasurementModalEN from "./en/delete-measurement-modal.json";
 import deleteMeasurementModalES from "./es/delete-measurement-modal.json";
+import measurementTypeSelectEN from "./en/measurement-type-select.json";
+import measurementTypeSelectES from "./es/measurement-type-select.json";
+import measurementRecordModalEN from "./en/measurement-record-modal.json";
+import measurementRecordModalES from "./es/measurement-record-modal.json";
 
 export const defaultNS = "login";
 
@@ -62,6 +66,8 @@ i18next
 				addNewMeasurementForm: addNewMeasurementFormEN,
 				addNewMeasurementModal: addNewMeasurementModalEN,
 				deleteMeasurementModal: deleteMeasurementModalEN,
+				measurementTypeSelect: measurementTypeSelectEN,
+				measurementRecordModal: measurementRecordModalEN,
 			},
 			es: {
 				login: loginES,
@@ -81,6 +87,8 @@ i18next
 				addNewMeasurementForm: addNewMeasurementFormES,
 				addNewMeasurementModal: addNewMeasurementModalES,
 				deleteMeasurementModal: deleteMeasurementModalES,
+				measurementTypeSelect: measurementTypeSelectES,
+				measurementRecordModal: measurementRecordModalES,
 			},
 		},
 		defaultNS,

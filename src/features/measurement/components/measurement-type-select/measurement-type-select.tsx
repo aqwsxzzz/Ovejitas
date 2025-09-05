@@ -5,6 +5,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 export const MeasurementTypeSelect = ({
 	value,
@@ -13,10 +14,12 @@ export const MeasurementTypeSelect = ({
 	value: string;
 	onChange: (value: string) => void;
 }) => {
+	const { t } = useTranslation("measurementTypeSelect");
+
 	const measurementTypeData = [
-		{ id: 1, name: "Weight" },
-		{ id: 2, name: "Height" },
-		{ id: 3, name: "Temperature" },
+		{ id: 1, name: t("measurementTypeWeight"), value: "weight" },
+		{ id: 2, name: t("measurementTypeHeight"), value: "height" },
+		{ id: 3, name: t("measurementTypeTemperature"), value: "temperature" },
 	];
 
 	return (
@@ -25,13 +28,13 @@ export const MeasurementTypeSelect = ({
 			value={value}
 		>
 			<SelectTrigger>
-				<SelectValue placeholder="Select a type.." />
+				<SelectValue placeholder={t("selectValuePlaceholder")} />
 			</SelectTrigger>
 			<SelectContent>
 				{measurementTypeData?.map((type) => (
 					<SelectItem
 						key={type.id}
-						value={type.name.toLowerCase()}
+						value={type.value}
 					>
 						{type.name}
 					</SelectItem>
