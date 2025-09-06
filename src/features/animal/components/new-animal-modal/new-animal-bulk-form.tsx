@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
-import { SpecieSelect } from "@/features/specie/components/specie-select";
+import { SpecieSelect } from "@/features/specie/components/species-select";
 import { BreedSelect } from "@/features/breed/components/breed-select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";

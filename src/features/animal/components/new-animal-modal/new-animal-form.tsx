@@ -18,7 +18,7 @@ import { DateSelector } from "@/components/common/DateSelector";
 import { useCreateAnimal } from "@/features/animal/api/animal-queries";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
-import { SpecieSelect } from "@/features/specie/components/specie-select";
+import { SpecieSelect } from "@/features/specie/components/species-select";
 import { BreedSelect } from "@/features/breed/components/breed-select";
 import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-gender-select/parents-by-gender-select";
 import { useTranslation } from "react-i18next";
