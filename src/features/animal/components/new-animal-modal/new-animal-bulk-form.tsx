@@ -23,11 +23,11 @@ const formSchema = z.object({
 	specieId: z.string(),
 	breedId: z.string(),
 	groupName: z.string().optional(),
-	count: z.number().optional(),
+	count: z.coerce.number().optional(),
 	tagPrefix: z.string().optional(),
 	tagMode: z.enum(["manual", "sequential"]),
 	tags: z.string().optional(),
-	tagStartNumber: z.number().optional(),
+	tagStartNumber: z.coerce.number().optional(),
 });
 
 export const NewAnimalBulkForm = ({

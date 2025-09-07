@@ -1,5 +1,5 @@
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
-import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
+import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard/animals-dashboard";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 
@@ -19,13 +19,15 @@ function RouteComponent() {
 	});
 
 	if (isPending) {
+		void animalData;
 		return <div>Loading...</div>;
 	}
 
 	return (
 		<div className="flex flex-col gap-2">
 			<NewAnimalModal />
-			<AnimalCardContainer animalsList={animalData!} />
+			{/* <AnimalCardContainer animalsList={animalData!} /> */}
+			<AnimalsDashboard />
 		</div>
 	);
 }

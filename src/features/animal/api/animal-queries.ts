@@ -6,6 +6,7 @@ import {
 	editAnimalById,
 	getAnimalById,
 	getAnimalsByFarmId,
+	getAnimalsCountBySpecies,
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
@@ -22,6 +23,8 @@ export const animalQueryKeys = {
 		[...animalQueryKeys.all, "list", farmId, filters] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
+	animalsCountBySpecies: (farmId: string, language: string) =>
+		[...animalQueryKeys.all, "countBySpecies", farmId, language] as const,
 };
 
 export const useGetAnimalsByFarmId = ({
@@ -182,3 +185,11 @@ export const useCreateAnimalBulk = () => {
 		},
 	});
 };
+
+export const useGetAnimalsCountBySpecies = (language: string, farmId: string) =>
+	useQuery({
+		queryKey: animalQueryKeys.animalsCountBySpecies(farmId, language),
+		queryFn: () => getAnimalsCountBySpecies({ language }),
+		select: (data) => data.data,
+		enabled: !!farmId,
+	});

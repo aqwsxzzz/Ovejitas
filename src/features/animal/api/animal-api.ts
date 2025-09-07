@@ -2,6 +2,7 @@ import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse, IResponseDataArray } from "@/lib/axios";
 import type {
 	IAnimal,
+	IAnimalsCountBySpeciesResponse,
 	IAnimalWithIncludes,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
@@ -90,4 +91,11 @@ export const createAnimalsBulk = ({
 		method: "post",
 		url: `/animals/bulk`,
 		data: payload,
+	});
+
+export const getAnimalsCountBySpecies = ({ language }: { language: string }) =>
+	axiosHelper<IResponse<IAnimalsCountBySpeciesResponse[]>>({
+		method: "get",
+		url: `/animals/dashboard`,
+		urlParams: { language },
 	});
