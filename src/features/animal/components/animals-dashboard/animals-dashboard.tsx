@@ -10,7 +10,7 @@ export const AnimalsDashboard = () => {
 	const { data: animalData } = useGetAnimalsCountBySpecies(language, farmId!);
 
 	return (
-		<div className="flex flex-col gap-4 sm:gap-2 w-full">
+		<div className="flex flex-col gap-1 sm:gap-2 w-full">
 			{animalData?.map((animal: IAnimalsCountBySpeciesResponse) => (
 				<AnimalCountBySpeciesCard
 					key={animal.species.id}
