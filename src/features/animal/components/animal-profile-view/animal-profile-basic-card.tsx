@@ -4,7 +4,6 @@ import { useGetAnimalById } from "@/features/animal/api/animal-queries";
 import { useParams } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import type { TFunction } from "i18next";
-import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 export const AnimalProfileCard = () => {
@@ -29,10 +28,6 @@ export const AnimalProfileCard = () => {
 				return "bg-gray-100 text-gray-800 border-gray-200";
 		}
 	};
-
-	useEffect(() => {
-		console.log(animalData, "here");
-	}, [animalData]);
 
 	const calculateAgeFloor = (
 		birthDate: string,
