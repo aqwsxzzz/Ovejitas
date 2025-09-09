@@ -11,6 +11,7 @@ import { Link } from "@tanstack/react-router";
 import { EditAnimalModal } from "@/features/animal/components/edit-animal-modal/edit-animal-modal";
 import { DeleteAnimalModal } from "@/features/animal/components/delete-animal-modal/delete-animal-modal";
 import { useTranslation } from "react-i18next";
+import { useParams } from "@tanstack/react-router";
 
 interface AnimalCardProps {
 	animal: IAnimal;
@@ -18,6 +19,7 @@ interface AnimalCardProps {
 
 export const AnimalCard = ({ animal }: AnimalCardProps) => {
 	const { t } = useTranslation("animalCard");
+	const { farmId, speciesId } = useParams({ strict: false });
 
 	const getStatusColor = (status: IAnimal["status"]) => {
 		switch (status) {
@@ -32,10 +34,11 @@ export const AnimalCard = ({ animal }: AnimalCardProps) => {
 
 	return (
 		<Link
-			to="/farm/$farmId/$animalId/animal"
+			to="/farm/$farmId/species/$speciesId/$animalId/animal"
 			params={{
-				farmId: animal.farmId,
+				farmId: farmId!,
 				animalId: animal.id,
+				speciesId: speciesId!,
 			}}
 			className="no-underline"
 		>

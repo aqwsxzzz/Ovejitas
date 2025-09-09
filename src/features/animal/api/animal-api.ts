@@ -2,6 +2,7 @@ import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse, IResponseDataArray } from "@/lib/axios";
 import type {
 	IAnimal,
+	IAnimalsCountBySpeciesResponse,
 	IAnimalWithIncludes,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
@@ -16,15 +17,17 @@ export const getAnimalsByFarmId = ({
 	include,
 	withLanguage,
 	sex,
+	speciesId,
 }: {
-	include: string;
+	include?: string;
 	withLanguage: boolean;
 	sex?: string;
+	speciesId?: string;
 }) =>
 	axiosHelper<IResponse<IAnimal[]>>({
 		method: "get",
 		url: "/animals",
-		urlParams: includeQueryParam(include, withLanguage, sex),
+		urlParams: includeQueryParam({ include, withLanguage, sex, speciesId }),
 	});
 
 export const createAnimal = ({ payload }: { payload: ICreateAnimalPayload }) =>
@@ -40,7 +43,7 @@ export const getAnimalById = ({
 	withLanguage,
 }: {
 	animalId: string;
-	include: string;
+	include?: string;
 	withLanguage: boolean;
 }) => {
 	type animalWithIncludes = IAnimalWithIncludes<{
@@ -50,7 +53,7 @@ export const getAnimalById = ({
 	return axiosHelper<IResponse<animalWithIncludes>>({
 		method: "get",
 		url: `/animals/${animalId}`,
-		urlParams: includeQueryParam(include, withLanguage),
+		urlParams: includeQueryParam({ include, withLanguage }),
 	});
 };
 
@@ -90,4 +93,11 @@ export const createAnimalsBulk = ({
 		method: "post",
 		url: `/animals/bulk`,
 		data: payload,
+	});
+
+export const getAnimalsCountBySpecies = ({ language }: { language: string }) =>
+	axiosHelper<IResponse<IAnimalsCountBySpeciesResponse[]>>({
+		method: "get",
+		url: `/animals/dashboard`,
+		urlParams: { language },
 	});

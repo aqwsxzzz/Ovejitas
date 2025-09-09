@@ -6,6 +6,7 @@ import {
 	editAnimalById,
 	getAnimalById,
 	getAnimalsByFarmId,
+	getAnimalsCountBySpecies,
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
@@ -18,10 +19,12 @@ import type { IResponse } from "@/lib/axios";
 
 export const animalQueryKeys = {
 	all: ["animal"] as const,
-	animalList: (farmId: string, filters?: string) =>
+	animalList: (farmId: string, filters?: string[]) =>
 		[...animalQueryKeys.all, "list", farmId, filters] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
+	animalsCountBySpecies: (farmId: string, language: string) =>
+		[...animalQueryKeys.all, "countBySpecies", farmId, language] as const,
 };
 
 export const useGetAnimalsByFarmId = ({
@@ -29,17 +32,21 @@ export const useGetAnimalsByFarmId = ({
 	include,
 	withLanguage,
 	sex,
+	speciesId,
 }: {
 	farmId: string;
-	include: string;
+	include?: string;
 	withLanguage: boolean;
 	sex?: string;
+	speciesId?: string;
 }) =>
 	useQuery({
-		queryKey: animalQueryKeys.animalList(farmId, sex),
-		queryFn: () => getAnimalsByFarmId({ include, withLanguage, sex }),
+		queryKey: animalQueryKeys.animalList(farmId, [sex ?? "", speciesId ?? ""]),
+		queryFn: () =>
+			getAnimalsByFarmId({ include, withLanguage, sex, speciesId }),
 		select: (data) => data.data,
 		enabled: !!farmId,
+		staleTime: 10000, // 10 seconds
 	});
 
 export const useCreateAnimal = () => {
@@ -80,7 +87,7 @@ export const useGetAnimalById = ({
 	withLanguage,
 }: {
 	animalId: string;
-	include: string;
+	include?: string;
 	withLanguage: boolean;
 }) =>
 	useQuery({
@@ -182,3 +189,12 @@ export const useCreateAnimalBulk = () => {
 		},
 	});
 };
+
+export const useGetAnimalsCountBySpecies = (language: string, farmId: string) =>
+	useQuery({
+		queryKey: animalQueryKeys.animalsCountBySpecies(farmId, language),
+		queryFn: () => getAnimalsCountBySpecies({ language }),
+		select: (data) => data.data,
+		enabled: !!farmId,
+		staleTime: 10000, // 10 seconds
+	});

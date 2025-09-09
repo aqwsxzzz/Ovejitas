@@ -12,7 +12,7 @@ interface ParentsByGenderSelectProps {
 	onChange: (value: string) => void;
 	farmId: string;
 	sex: "male" | "female";
-	include: string;
+	include?: string;
 	withLanguage: boolean;
 	placeholder?: string;
 }
