@@ -13,6 +13,6 @@ export const getSpecies = ({
 	return axiosHelper<IResponse<ISpecie[]>>({
 		method: "get",
 		url: "/species?include=translations",
-		urlParams: includeQueryParam(include, withLanguage),
+		urlParams: includeQueryParam({ include, withLanguage }),
 	});
 };
