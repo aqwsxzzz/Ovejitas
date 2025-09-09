@@ -354,7 +354,6 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 											onChange={field.onChange}
 											farmId={farmId!}
 											sex="male"
-											include=""
 											withLanguage={true}
 										/>
 									</FormControl>
@@ -373,7 +372,6 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 											onChange={field.onChange}
 											farmId={farmId!}
 											sex="female"
-											include=""
 											withLanguage={true}
 										/>
 									</FormControl>

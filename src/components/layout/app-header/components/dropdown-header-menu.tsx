@@ -48,7 +48,7 @@ export const DropdownHeaderMenu = () => {
 						</DropdownMenuItem>
 					</Link>
 					<Link
-						to="/farm/$farmId/animals"
+						to="/farm/$farmId/species"
 						params={{ farmId: farmId! }}
 					>
 						<DropdownMenuItem>

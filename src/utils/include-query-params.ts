@@ -1,23 +1,22 @@
 import i18next from "i18next";
 
-export const includeQueryParam = (
-	include: string,
-	withLanguage: boolean,
-	sex?: string,
-) => {
-	const language = i18next.language.slice(0, 2);
+export const includeQueryParam = ({
+	include,
+	withLanguage,
+	sex,
+	speciesId,
+}: {
+	include?: string;
+	withLanguage: boolean;
+	sex?: string;
+	speciesId?: string;
+}) => {
+	const params: Record<string, string> = {};
 
-	if (include && withLanguage && sex) {
-		return { include, language, sex };
-	} else if (include && sex) {
-		return { include, sex };
-	} else if (include && withLanguage) {
-		return { include, language };
-	} else if (withLanguage && sex) {
-		return { language, sex };
-	} else if (withLanguage) {
-		return { language };
-	}
+	if (include) params.include = include;
+	if (withLanguage) params.language = i18next.language.slice(0, 2);
+	if (sex) params.sex = sex;
+	if (speciesId) params.speciesId = speciesId;
 
-	return "";
+	return Object.keys(params).length > 0 ? params : "";
 };
