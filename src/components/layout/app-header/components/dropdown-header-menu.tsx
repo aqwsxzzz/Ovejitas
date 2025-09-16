@@ -42,7 +42,7 @@ export const DropdownHeaderMenu = () => {
 					>
 						<DropdownMenuItem>
 							{t("dashboard")}
-							<DropdownMenuShortcut className="text-primary">
+							<DropdownMenuShortcut className="text-primary text-center w-4">
 								D
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
@@ -53,7 +53,7 @@ export const DropdownHeaderMenu = () => {
 					>
 						<DropdownMenuItem>
 							{t("animals")}
-							<DropdownMenuShortcut className="text-primary">
+							<DropdownMenuShortcut className="text-primary text-center w-4">
 								A
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
@@ -62,13 +62,19 @@ export const DropdownHeaderMenu = () => {
 						to="/farm/$farmId/farms"
 						params={{ farmId: farmId! }}
 					>
-						<DropdownMenuItem>
+						<DropdownMenuItem className="flex justify-between items-center">
 							{t("farms")}
-							<DropdownMenuShortcut className="text-primary">
+							<DropdownMenuShortcut className="text-primary text-center w-4">
 								F
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
+					<DropdownMenuItem className="flex justify-between items-center">
+						{t("invite")}
+						<DropdownMenuShortcut className="text-primary text-center w-4">
+							I
+						</DropdownMenuShortcut>
+					</DropdownMenuItem>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				{/* <DropdownMenuGroup>

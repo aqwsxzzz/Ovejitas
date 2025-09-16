@@ -3,5 +3,6 @@
     "dashboard": "Inicio",
     "animals": "Animales",
     "farms": "Granjas",
-    "Logout": "Cerrar sesión"
+    "Logout": "Cerrar sesión",
+    "invite": "Invitar"
 }
