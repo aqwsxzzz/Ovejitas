@@ -14,6 +14,7 @@ import { Menu } from "lucide-react";
 import { useParams } from "@tanstack/react-router";
 import { useLogout } from "@/features/auth/api/auth-queries";
 import { useTranslation } from "react-i18next";
+import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
 
 export const DropdownHeaderMenu = () => {
 	const { farmId } = useParams({ strict: false });
@@ -69,12 +70,7 @@ export const DropdownHeaderMenu = () => {
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
-					<DropdownMenuItem className="flex justify-between items-center">
-						{t("invite")}
-						<DropdownMenuShortcut className="text-primary text-center w-4">
-							I
-						</DropdownMenuShortcut>
-					</DropdownMenuItem>
+					<FarmInviteModal />
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator />
 				{/* <DropdownMenuGroup>
