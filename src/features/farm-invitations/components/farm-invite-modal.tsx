@@ -71,11 +71,18 @@ export const FarmInviteModal = () => {
 					</DropdownMenuShortcut>
 				</DropdownMenuItem>
 			</DialogTrigger>
-			<DialogContent>
-				<DialogTitle>Invite to Farm</DialogTitle>
-				<DialogDescription></DialogDescription>
+			<DialogContent className="flex flex-col gap-4">
+				<div className="flex flex-col gap-2">
+					<DialogTitle className="text-center">Invite to Farm</DialogTitle>
+					<DialogDescription>
+						Here you can invite a friend to your farm as a member to help you.
+					</DialogDescription>
+				</div>
 				<Form {...form}>
-					<form onSubmit={form.handleSubmit(onSubmit)}>
+					<form
+						onSubmit={form.handleSubmit(onSubmit)}
+						className="flex gap-2 flex-col"
+					>
 						<FormField
 							control={form.control}
 							name="email"
@@ -91,7 +98,7 @@ export const FarmInviteModal = () => {
 								</FormItem>
 							)}
 						/>
-						<div>
+						<div className="flex justify-around">
 							<Button
 								disabled={isPending}
 								type="submit"
