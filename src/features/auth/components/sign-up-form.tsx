@@ -21,7 +21,7 @@ const formSchema = z.object({
 	password: z.string().min(8, "Password must have at least 8 characters."),
 });
 
-export const SignUpForm = () => {
+export const SignUpForm = ({ token }: { token?: string }) => {
 	const { mutateAsync: signUp, error, isPending } = useSignUp();
 
 	const form = useForm<z.infer<typeof formSchema>>({
@@ -30,7 +30,11 @@ export const SignUpForm = () => {
 	});
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		await signUp({ payload: data });
+		if (token) {
+			await signUp({ payload: { ...data, invitationToken: token } });
+		} else {
+			await signUp({ payload: data });
+		}
 	};
 
 	const { t } = useTranslation("signup");

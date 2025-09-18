@@ -2,29 +2,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_public/_layout/signup")({
-    component: RouteComponent,
+	validateSearch: (search: Record<string, unknown>) => {
+		return {
+			token: search.token ? String(search.token) : undefined,
+		};
+	},
+	component: RouteComponent,
 });
 
 function RouteComponent() {
-    const { t } = useTranslation("signup");
-    return (
-        <Card className="md:w-[600px] w-full">
-            <CardContent>
-                <SignUpForm />
-                <Separator className="my-4" />
-                <CardFooter className="flex flex-col">
-                    <p>{t("footerTitle")}</p>
-                    <Link className="" to="/login">
-                        <Button variant="link" className="cursor-pointer">
-                            {t("footerLink")}
-                        </Button>
-                    </Link>
-                </CardFooter>
-            </CardContent>
-        </Card>
-    );
+	const { t } = useTranslation("signup");
+	const search = useSearch({ from: "/_public/_layout/signup" });
+	return (
+		<Card className="md:w-[600px] w-full">
+			<CardContent>
+				<SignUpForm token={search.token} />
+				<Separator className="my-4" />
+				<CardFooter className="flex flex-col">
+					<p>{t("footerTitle")}</p>
+					<Link
+						className=""
+						to="/login"
+					>
+						<Button
+							variant="link"
+							className="cursor-pointer"
+						>
+							{t("footerLink")}
+						</Button>
+					</Link>
+				</CardFooter>
+			</CardContent>
+		</Card>
+	);
 }

@@ -2,6 +2,7 @@ export interface ISignUpPayload {
 	displayName: string;
 	email: string;
 	password: string;
+	invitationToken?: string;
 }
 
 export interface IUser {
