@@ -4,13 +4,17 @@ import { Separator } from "@/components/ui/separator";
 import { SignUpForm } from "@/features/auth/components/sign-up-form";
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
 export const Route = createFileRoute("/_public/_layout/signup")({
-	validateSearch: (search: Record<string, unknown>) => {
-		return {
-			token: search.token ? String(search.token) : undefined,
-		};
-	},
+	// validateSearch: (search: Record<string, unknown>) => {
+	// 	return {
+	// 		token: search.token ? String(search.token) : undefined,
+	// 	};
+	// },
+	validateSearch: z.object({
+		token: z.string().optional(),
+	}),
 	component: RouteComponent,
 });
 
