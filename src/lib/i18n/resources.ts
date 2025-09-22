@@ -18,6 +18,7 @@ import deleteMeasurementModal from "./en/delete-measurement-modal.json";
 import measurementTypeSelect from "./en/measurement-type-select.json";
 import measurementRecordModal from "./en/measurement-record-modal.json";
 import specieSelect from "./en/specie-select.json";
+import sheetMenu from "./en/sheet-menu.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -41,6 +42,7 @@ const resources = {
 	measurementTypeSelect,
 	measurementRecordModal,
 	specieSelect,
+	sheetMenu,
 } as const;
 
 export default resources;

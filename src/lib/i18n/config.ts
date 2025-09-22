@@ -41,6 +41,8 @@ import measurementRecordModalEN from "./en/measurement-record-modal.json";
 import measurementRecordModalES from "./es/measurement-record-modal.json";
 import specieSelectEN from "./en/specie-select.json";
 import specieSelectES from "./es/specie-select.json";
+import sheetMenuEN from "./en/sheet-menu.json";
+import sheetMenuES from "./es/sheet-menu.json";
 
 export const defaultNS = "login";
 
@@ -71,6 +73,7 @@ i18next
 				measurementTypeSelect: measurementTypeSelectEN,
 				measurementRecordModal: measurementRecordModalEN,
 				specieSelect: specieSelectEN,
+				sheetMenu: sheetMenuEN,
 			},
 			es: {
 				login: loginES,
@@ -93,6 +96,7 @@ i18next
 				measurementTypeSelect: measurementTypeSelectES,
 				measurementRecordModal: measurementRecordModalES,
 				specieSelect: specieSelectES,
+				sheetMenu: sheetMenuES,
 			},
 		},
 		defaultNS,
