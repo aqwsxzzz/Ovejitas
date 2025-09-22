@@ -17,6 +17,7 @@ import { Route as PrivatePrivatelayoutImport } from './routes/_private/_privatel
 import { Route as PublicLayoutSignupImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginImport } from './routes/_public/_layout/login'
 import { Route as PrivatePrivatelayoutFarmFarmIdFarmsImport } from './routes/_private/_privatelayout/farm/$farmId/farms'
+import { Route as PrivatePrivatelayoutFarmFarmIdFarmMembersImport } from './routes/_private/_privatelayout/farm/$farmId/farm-members'
 import { Route as PrivatePrivatelayoutFarmFarmIdDashboardImport } from './routes/_private/_privatelayout/farm/$farmId/dashboard'
 import { Route as PrivatePrivatelayoutFarmFarmIdSpeciesIndexImport } from './routes/_private/_privatelayout/farm/$farmId/species/index'
 import { Route as PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsImport } from './routes/_private/_privatelayout/farm/$farmId/species/$speciesId/animals'
@@ -56,6 +57,13 @@ const PrivatePrivatelayoutFarmFarmIdFarmsRoute =
   PrivatePrivatelayoutFarmFarmIdFarmsImport.update({
     id: '/farm/$farmId/farms',
     path: '/farm/$farmId/farms',
+    getParentRoute: () => PrivatePrivatelayoutRoute,
+  } as any)
+
+const PrivatePrivatelayoutFarmFarmIdFarmMembersRoute =
+  PrivatePrivatelayoutFarmFarmIdFarmMembersImport.update({
+    id: '/farm/$farmId/farm-members',
+    path: '/farm/$farmId/farm-members',
     getParentRoute: () => PrivatePrivatelayoutRoute,
   } as any)
 
@@ -133,6 +141,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdDashboardImport
       parentRoute: typeof PrivatePrivatelayoutImport
     }
+    '/_private/_privatelayout/farm/$farmId/farm-members': {
+      id: '/_private/_privatelayout/farm/$farmId/farm-members'
+      path: '/farm/$farmId/farm-members'
+      fullPath: '/farm/$farmId/farm-members'
+      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmMembersImport
+      parentRoute: typeof PrivatePrivatelayoutImport
+    }
     '/_private/_privatelayout/farm/$farmId/farms': {
       id: '/_private/_privatelayout/farm/$farmId/farms'
       path: '/farm/$farmId/farms'
@@ -168,6 +183,7 @@ declare module '@tanstack/react-router' {
 
 interface PrivatePrivatelayoutRouteChildren {
   PrivatePrivatelayoutFarmFarmIdDashboardRoute: typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
+  PrivatePrivatelayoutFarmFarmIdFarmMembersRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   PrivatePrivatelayoutFarmFarmIdFarmsRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
   PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
@@ -177,6 +193,8 @@ interface PrivatePrivatelayoutRouteChildren {
 const PrivatePrivatelayoutRouteChildren: PrivatePrivatelayoutRouteChildren = {
   PrivatePrivatelayoutFarmFarmIdDashboardRoute:
     PrivatePrivatelayoutFarmFarmIdDashboardRoute,
+  PrivatePrivatelayoutFarmFarmIdFarmMembersRoute:
+    PrivatePrivatelayoutFarmFarmIdFarmMembersRoute,
   PrivatePrivatelayoutFarmFarmIdFarmsRoute:
     PrivatePrivatelayoutFarmFarmIdFarmsRoute,
   PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute:
@@ -210,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
   '/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
+  '/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   '/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   '/farm/$farmId/species': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
   '/farm/$farmId/species/$speciesId/animals': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
@@ -222,6 +241,7 @@ export interface FileRoutesByTo {
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
   '/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
+  '/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   '/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   '/farm/$farmId/species': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
   '/farm/$farmId/species/$speciesId/animals': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
@@ -236,6 +256,7 @@ export interface FileRoutesById {
   '/_public/_layout/login': typeof PublicLayoutLoginRoute
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
   '/_private/_privatelayout/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
+  '/_private/_privatelayout/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   '/_private/_privatelayout/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   '/_private/_privatelayout/farm/$farmId/species/': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
   '/_private/_privatelayout/farm/$farmId/species/$speciesId/animals': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
@@ -250,6 +271,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/farm/$farmId/dashboard'
+    | '/farm/$farmId/farm-members'
     | '/farm/$farmId/farms'
     | '/farm/$farmId/species'
     | '/farm/$farmId/species/$speciesId/animals'
@@ -261,6 +283,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/farm/$farmId/dashboard'
+    | '/farm/$farmId/farm-members'
     | '/farm/$farmId/farms'
     | '/farm/$farmId/species'
     | '/farm/$farmId/species/$speciesId/animals'
@@ -273,6 +296,7 @@ export interface FileRouteTypes {
     | '/_public/_layout/login'
     | '/_public/_layout/signup'
     | '/_private/_privatelayout/farm/$farmId/dashboard'
+    | '/_private/_privatelayout/farm/$farmId/farm-members'
     | '/_private/_privatelayout/farm/$farmId/farms'
     | '/_private/_privatelayout/farm/$farmId/species/'
     | '/_private/_privatelayout/farm/$farmId/species/$speciesId/animals'
@@ -314,6 +338,7 @@ export const routeTree = rootRoute
       "filePath": "_private/_privatelayout.tsx",
       "children": [
         "/_private/_privatelayout/farm/$farmId/dashboard",
+        "/_private/_privatelayout/farm/$farmId/farm-members",
         "/_private/_privatelayout/farm/$farmId/farms",
         "/_private/_privatelayout/farm/$farmId/species/",
         "/_private/_privatelayout/farm/$farmId/species/$speciesId/animals",
@@ -337,6 +362,10 @@ export const routeTree = rootRoute
     },
     "/_private/_privatelayout/farm/$farmId/dashboard": {
       "filePath": "_private/_privatelayout/farm/$farmId/dashboard.tsx",
+      "parent": "/_private/_privatelayout"
+    },
+    "/_private/_privatelayout/farm/$farmId/farm-members": {
+      "filePath": "_private/_privatelayout/farm/$farmId/farm-members.tsx",
       "parent": "/_private/_privatelayout"
     },
     "/_private/_privatelayout/farm/$farmId/farms": {

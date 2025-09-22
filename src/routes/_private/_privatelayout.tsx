@@ -1,4 +1,4 @@
-import { AppHeader } from "@/components/layout/app-header/app-header";
+import { SheetMainMenu } from "@/components/layout/app-header/components/sheet-menu";
 import { getUserProfile } from "@/features/auth/api/auth-api";
 import {
 	authQueryKeys,
@@ -39,7 +39,7 @@ function PrivateLayout() {
 
 	return (
 		<div className="bg-background h-screen w-screen flex flex-col">
-			<AppHeader userData={userData} />
+			<SheetMainMenu userData={userData} />
 			<div className="p-2 flex flex-col gap-2">
 				<Outlet />
 			</div>
