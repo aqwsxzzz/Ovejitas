@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import {
 	Sheet,
 	SheetContent,
+	SheetDescription,
 	SheetHeader,
 	SheetTitle,
 	SheetTrigger,
@@ -56,6 +57,7 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 				<SheetHeader className="text-center">
 					<SheetTitle>{t("menuTitle")}</SheetTitle>
 				</SheetHeader>
+				<SheetDescription className="sr-only"></SheetDescription>
 
 				<div className="flex flex-col space-y-4 mt-8">
 					<Link
