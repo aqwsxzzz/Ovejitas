@@ -1,27 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-// import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
-
-// Dummy data for demonstration
-const activeMembers = [
-	{ id: 1, name: "Alice Johnson", status: "Owner" },
-	{ id: 2, name: "Bob Smith", status: "Member" },
-];
-const pendingInvites = [
-	{
-		id: 1,
-		name: "carol@email.com",
-		status: "Pending",
-		inviteLink: "https://example.com/invite/abc123",
-	},
-	{
-		id: 2,
-		name: "dave@email.com",
-		status: "Cancelled",
-		inviteLink: "https://example.com/invite/def456",
-	},
-];
+import { useGetFarmMembers } from "@/features/farm-members/api/farm-members-queries";
+import { useGetFarmInvitationsList } from "@/features/farm-invitations/api/farm-invitations-queries";
+import { toast } from "sonner";
+import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/farm-members",
@@ -30,16 +13,21 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-	// const [inviteOpen, setInviteOpen] = useState(false);
+	const { farmId } = useParams({ strict: false });
+	const { data: membersData } = useGetFarmMembers({ farmId: farmId! });
+	const { data: invitationsData } = useGetFarmInvitationsList({
+		farmId: farmId!,
+	});
+	//const [inviteOpen, setInviteOpen] = useState(false);
 
 	return (
-		<div className="p-6 max-w-3xl mx-auto">
+		<div className="flex flex-col p-6">
 			{/* Header */}
 			<div className="flex items-center justify-between mb-8">
 				<h1 className="text-2xl font-bold text-primary">Farm Members</h1>
 				{/* Uncomment when modal is ready */}
-				{/* <FarmInviteModal open={inviteOpen} onOpenChange={setInviteOpen} /> */}
-				<Button className="bg-primary text-primary-foreground">Invite</Button>
+				<FarmInviteModal />
+				{/* <Button className="bg-primary text-primary-foreground">Invite</Button> */}
 			</div>
 
 			{/* Active Members Section */}
@@ -47,22 +35,22 @@ function RouteComponent() {
 				<h2 className="text-lg font-semibold text-card-foreground mb-4">
 					Active Members
 				</h2>
-				{activeMembers.length === 0 ? (
+				{membersData && membersData.length === 0 ? (
 					<div className="text-muted-foreground">No active members yet.</div>
 				) : (
 					<ul className="divide-y divide-border">
-						{activeMembers.map((member) => (
+						{membersData?.map((member) => (
 							<li
 								key={member.id}
 								className="flex items-center justify-between py-3"
 							>
 								<span className="font-medium text-foreground">
-									{member.name}
+									{member.user.displayName} ( {member.user.email} )
 								</span>
 								<Badge
-									variant={member.status === "Owner" ? "default" : "secondary"}
+									variant={member.role === "owner" ? "default" : "secondary"}
 								>
-									{member.status}
+									{member.role}
 								</Badge>
 							</li>
 						))}
@@ -75,18 +63,21 @@ function RouteComponent() {
 				<h2 className="text-lg font-semibold text-card-foreground mb-4">
 					Pending Invitations
 				</h2>
-				{pendingInvites.length === 0 ? (
+				{invitationsData && invitationsData.length === 0 ? (
 					<div className="text-muted-foreground">No pending invitations.</div>
 				) : (
 					<ul className="divide-y divide-border">
-						{pendingInvites.map((invite) => (
+						{invitationsData?.map((invite) => (
 							<li
 								key={invite.id}
 								className="flex items-center justify-between py-3"
 							>
-								<div className="flex flex-col">
-									<span className="font-medium text-foreground">
-										{invite.name}
+								<div className="flex flex-col max-w-3/4">
+									<span
+										className="font-medium text-foreground overflow-hidden"
+										onClick={() => toast.info(invite.email)}
+									>
+										{invite.email}
 									</span>
 									<span className="text-xs text-muted-foreground">
 										{invite.status}
@@ -95,11 +86,14 @@ function RouteComponent() {
 								<Button
 									size="sm"
 									variant="outline"
-									onClick={() =>
-										navigator.clipboard.writeText(invite.inviteLink)
-									}
+									onClick={() => {
+										navigator.clipboard.writeText(
+											`${import.meta.env.VITE_BASIC_URL}/signup?token=${invite.token}`,
+										);
+										toast.success("Invitation link copied to clipboard");
+									}}
 								>
-									Copy Invitation Link
+									Link
 								</Button>
 							</li>
 						))}

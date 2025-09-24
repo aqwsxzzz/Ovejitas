@@ -1,6 +1,9 @@
-import { sendFarmInvitation } from "@/features/farm-invitations/api/farm-invitations-api";
+import {
+	getFarmInvitationList,
+	sendFarmInvitation,
+} from "@/features/farm-invitations/api/farm-invitations-api";
 import type { IFarmInvitationPayload } from "@/features/farm-invitations/types/farm-invitations-types";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const farmInvitationsQueryKeys = {
@@ -23,3 +26,12 @@ export const useSendFarmInvitation = () => {
 		},
 	});
 };
+
+export const useGetFarmInvitationsList = ({ farmId }: { farmId: string }) =>
+	useQuery({
+		queryKey: farmInvitationsQueryKeys.invitationsList(farmId),
+		queryFn: () => getFarmInvitationList({ farmId }),
+		select: (data) => data.data,
+		enabled: !!farmId,
+		staleTime: 10000, // 10 seconds
+	});

@@ -8,10 +8,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-	DropdownMenuItem,
-	DropdownMenuShortcut,
-} from "@/components/ui/dropdown-menu";
-import {
 	Form,
 	FormControl,
 	FormField,
@@ -76,18 +72,7 @@ export const FarmInviteModal = () => {
 			onOpenChange={handleOpenChange}
 		>
 			<DialogTrigger asChild>
-				<DropdownMenuItem
-					className="flex justify-between items-center"
-					onSelect={(e) => {
-						e.preventDefault();
-						e.stopPropagation();
-					}}
-				>
-					{t("invite")}
-					<DropdownMenuShortcut className="text-primary text-center w-4">
-						I
-					</DropdownMenuShortcut>
-				</DropdownMenuItem>
+				<Button>{t("invite")}</Button>
 			</DialogTrigger>
 			<DialogContent className="flex flex-col gap-4">
 				<div className="flex flex-col gap-2">

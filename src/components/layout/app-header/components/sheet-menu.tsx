@@ -8,7 +8,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, Home, LogOut, Dog } from "lucide-react";
+import { ChevronLeft, Home, LogOut, Dog, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "@tanstack/react-router";
 import { useLogout } from "@/features/auth/api/auth-queries";
@@ -77,6 +77,7 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 					<Link
 						to="/farm/$farmId/species"
 						params={{ farmId: farmId! }}
+						onClick={() => setOpen(false)}
 					>
 						<Button
 							variant="ghost"
@@ -84,6 +85,20 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 						>
 							<Dog className="w-5 h-5 mr-3" />
 							{t("animals")}
+						</Button>
+					</Link>
+
+					<Link
+						to="/farm/$farmId/farm-members"
+						params={{ farmId: farmId! }}
+						onClick={() => setOpen(false)}
+					>
+						<Button
+							variant="ghost"
+							className="justify-start h-12 px-4"
+						>
+							<Users className="w-5 h-5 mr-3" />
+							{t("farmMembers")}
 						</Button>
 					</Link>
 

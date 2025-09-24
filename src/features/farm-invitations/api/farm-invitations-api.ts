@@ -15,3 +15,10 @@ export const sendFarmInvitation = ({
 		url: "/invitations",
 		data: payload,
 	});
+
+export const getFarmInvitationList = ({ farmId }: { farmId: string }) =>
+	axiosHelper<IResponse<IFarmInvitationResponse[]>>({
+		method: "get",
+		url: "/invitations",
+		urlParams: { farmId },
+	});
