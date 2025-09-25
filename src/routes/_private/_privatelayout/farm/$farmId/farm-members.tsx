@@ -5,6 +5,7 @@ import { useGetFarmMembers } from "@/features/farm-members/api/farm-members-quer
 import { useGetFarmInvitationsList } from "@/features/farm-invitations/api/farm-invitations-queries";
 import { toast } from "sonner";
 import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/farm-members",
@@ -18,25 +19,23 @@ function RouteComponent() {
 	const { data: invitationsData } = useGetFarmInvitationsList({
 		farmId: farmId!,
 	});
+	const { t } = useTranslation("farmMembers");
 	//const [inviteOpen, setInviteOpen] = useState(false);
 
 	return (
-		<div className="flex flex-col p-6">
-			{/* Header */}
-			<div className="flex items-center justify-between mb-8">
-				<h1 className="text-2xl font-bold text-primary">Farm Members</h1>
-				{/* Uncomment when modal is ready */}
+		<div className="flex flex-col gap-2	">
+			<div className="flex items-center justify-between mb-8 sticky top-0 bg-card z-10 py-4 px-6 shadow">
+				<h1 className="text-2xl font-bold text-primary">{t("title")}</h1>
 				<FarmInviteModal />
-				{/* <Button className="bg-primary text-primary-foreground">Invite</Button> */}
 			</div>
 
 			{/* Active Members Section */}
 			<section className="mb-8 bg-card rounded-lg shadow p-4">
 				<h2 className="text-lg font-semibold text-card-foreground mb-4">
-					Active Members
+					{t("activeMembers")}
 				</h2>
 				{membersData && membersData.length === 0 ? (
-					<div className="text-muted-foreground">No active members yet.</div>
+					<div className="text-muted-foreground">{t("noActiveMembers")}</div>
 				) : (
 					<ul className="divide-y divide-border">
 						{membersData?.map((member) => (
@@ -61,10 +60,12 @@ function RouteComponent() {
 			{/* Pending Invitations Section */}
 			<section className="bg-card rounded-lg shadow p-4">
 				<h2 className="text-lg font-semibold text-card-foreground mb-4">
-					Pending Invitations
+					{t("pendingInvitations")}
 				</h2>
 				{invitationsData && invitationsData.length === 0 ? (
-					<div className="text-muted-foreground">No pending invitations.</div>
+					<div className="text-muted-foreground">
+						{t("noPendingInvitations")}
+					</div>
 				) : (
 					<ul className="divide-y divide-border">
 						{invitationsData?.map((invite) => (
@@ -90,7 +91,7 @@ function RouteComponent() {
 										navigator.clipboard.writeText(
 											`${import.meta.env.VITE_BASIC_URL}/signup?token=${invite.token}`,
 										);
-										toast.success("Invitation link copied to clipboard");
+										toast.success(t("linkcopied"));
 									}}
 								>
 									Link

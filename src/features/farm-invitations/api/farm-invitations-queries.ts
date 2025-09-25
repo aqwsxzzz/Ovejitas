@@ -2,8 +2,12 @@ import {
 	getFarmInvitationList,
 	sendFarmInvitation,
 } from "@/features/farm-invitations/api/farm-invitations-api";
-import type { IFarmInvitationPayload } from "@/features/farm-invitations/types/farm-invitations-types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import type {
+	IFarmInvitationPayload,
+	IFarmInvitationResponse,
+} from "@/features/farm-invitations/types/farm-invitations-types";
+import type { IResponse } from "@/lib/axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const farmInvitationsQueryKeys = {
@@ -13,7 +17,7 @@ export const farmInvitationsQueryKeys = {
 };
 
 export const useSendFarmInvitation = () => {
-	//const queryClient =  useQueryClient();
+	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: ({ payload }: { payload: IFarmInvitationPayload }) =>
@@ -21,8 +25,21 @@ export const useSendFarmInvitation = () => {
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: () => {
+		onSuccess: (response, { payload }) => {
 			toast.success("Invitation sent successfully");
+			queryClient.setQueryData<IResponse<IFarmInvitationResponse[]>>(
+				farmInvitationsQueryKeys.invitationsList(payload.farmId),
+
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+					return {
+						...oldData,
+						data: [...oldData.data, response.data],
+					};
+				},
+			);
 		},
 	});
 };

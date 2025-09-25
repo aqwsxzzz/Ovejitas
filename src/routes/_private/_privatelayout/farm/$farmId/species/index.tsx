@@ -4,6 +4,7 @@ import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import i18next from "i18next";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/",
@@ -18,6 +19,7 @@ function RouteComponent() {
 		language,
 		farmId!,
 	);
+	const { t } = useTranslation("speciesIndex");
 
 	if (isPending) {
 		void animalData;
@@ -26,7 +28,10 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<NewAnimalModal />
+			<div className="flex items-center justify-between mb-8 sticky top-0 bg-card z-10 py-4 px-6 shadow">
+				<h1 className="text-2xl font-bold text-primary">{t("title")}</h1>
+				<NewAnimalModal />
+			</div>
 			<AnimalsDashboard animal={animalData!} />
 		</div>
 	);
