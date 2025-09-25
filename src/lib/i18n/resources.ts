@@ -19,6 +19,8 @@ import measurementTypeSelect from "./en/measurement-type-select.json";
 import measurementRecordModal from "./en/measurement-record-modal.json";
 import specieSelect from "./en/specie-select.json";
 import sheetMenu from "./en/sheet-menu.json";
+import speciesIndex from "./en/species-index.json";
+import farmMembers from "./en/farm-members.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -43,6 +45,8 @@ const resources = {
 	measurementRecordModal,
 	specieSelect,
 	sheetMenu,
+	speciesIndex,
+	farmMembers,
 } as const;
 
 export default resources;

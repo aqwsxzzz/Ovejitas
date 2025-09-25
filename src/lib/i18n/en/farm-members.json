@@ -1,0 +1,8 @@
+{
+    "title": "Members",
+    "activeMembers": "Active Members",  
+    "pendingInvitations": "Pending Invitations",
+    "noActiveMembers": "No active members",
+    "noPendingInvitations": "No pending invitations",
+    "linkcopied": "Invitation link copied to clipboard"
+}

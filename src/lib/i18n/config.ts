@@ -43,6 +43,10 @@ import specieSelectEN from "./en/specie-select.json";
 import specieSelectES from "./es/specie-select.json";
 import sheetMenuEN from "./en/sheet-menu.json";
 import sheetMenuES from "./es/sheet-menu.json";
+import speciesIndexEN from "./en/species-index.json";
+import speciesIndexES from "./es/species-index.json";
+import farmMembersEN from "./en/farm-members.json";
+import farmMembersES from "./es/farm-members.json";
 
 export const defaultNS = "login";
 
@@ -74,6 +78,8 @@ i18next
 				measurementRecordModal: measurementRecordModalEN,
 				specieSelect: specieSelectEN,
 				sheetMenu: sheetMenuEN,
+				speciesIndex: speciesIndexEN,
+				farmMembers: farmMembersEN,
 			},
 			es: {
 				login: loginES,
@@ -97,6 +103,8 @@ i18next
 				measurementRecordModal: measurementRecordModalES,
 				specieSelect: specieSelectES,
 				sheetMenu: sheetMenuES,
+				speciesIndex: speciesIndexES,
+				farmMembers: farmMembersES,
 			},
 		},
 		defaultNS,
