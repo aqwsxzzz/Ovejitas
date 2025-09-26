@@ -1,3 +1,4 @@
+import { CardStyleHeader } from "@/components/common/card-style-header";
 import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
 import { useGetAnimalsCountBySpecies } from "@/features/animal/api/animal-queries";
 import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard/animals-dashboard";
@@ -28,10 +29,10 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-col gap-2">
-			<div className="flex items-center justify-between mb-8 sticky top-0 bg-card z-10 py-4 px-6 shadow">
-				<h1 className="text-2xl font-bold text-primary">{t("title")}</h1>
-				<NewAnimalModal />
-			</div>
+			<CardStyleHeader
+				title={t("title")}
+				Modal={NewAnimalModal}
+			/>
 			<AnimalsDashboard animal={animalData!} />
 		</div>
 	);
