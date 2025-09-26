@@ -15,9 +15,10 @@ import { useParams } from "@tanstack/react-router";
 
 interface AnimalCardProps {
 	animal: IAnimal;
+	sex: IAnimal["sex"] | "";
 }
 
-export const AnimalCard = ({ animal }: AnimalCardProps) => {
+export const AnimalCard = ({ animal, sex }: AnimalCardProps) => {
 	const { t } = useTranslation("animalCard");
 	const { farmId, speciesId } = useParams({ strict: false });
 
@@ -66,7 +67,11 @@ export const AnimalCard = ({ animal }: AnimalCardProps) => {
 					</div>
 					<div onClick={(e) => e.preventDefault()}>
 						<EditAnimalModal animal={animal} />
-						<DeleteAnimalModal animal={animal} />
+						<DeleteAnimalModal
+							animal={animal}
+							sex={sex}
+							speciesId={speciesId!}
+						/>
 					</div>
 				</CardContent>
 			</Card>

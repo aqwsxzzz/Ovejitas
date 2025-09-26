@@ -34,7 +34,10 @@ function RouteComponent() {
 
 				<NewAnimalModal />
 			</div>
-			<AnimalCardContainer animalsList={animalsData!} />
+			<AnimalCardContainer
+				animalsList={animalsData!}
+				sex=""
+			/>
 		</div>
 	);
 }

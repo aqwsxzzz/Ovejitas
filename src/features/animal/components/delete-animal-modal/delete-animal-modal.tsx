@@ -15,9 +15,15 @@ import { useTranslation } from "react-i18next";
 
 interface DeleteAnimalProps {
 	animal: IAnimal;
+	sex: IAnimal["sex"] | "";
+	speciesId: IAnimal["speciesId"] | "";
 }
 
-export const DeleteAnimalModal = ({ animal }: DeleteAnimalProps) => {
+export const DeleteAnimalModal = ({
+	animal,
+	sex,
+	speciesId,
+}: DeleteAnimalProps) => {
 	const { t } = useTranslation("deleteAnimalModal");
 	const [open, setOpen] = useState(false);
 	const { farmId } = useParams({ strict: false });
@@ -26,6 +32,8 @@ export const DeleteAnimalModal = ({ animal }: DeleteAnimalProps) => {
 		const response = await deleteAnimal({
 			farmId: farmId!,
 			animalId: animal.id,
+			sex,
+			speciesId,
 		});
 		if (response.status === "success") setOpen(false);
 	};

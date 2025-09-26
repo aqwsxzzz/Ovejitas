@@ -75,7 +75,7 @@ export interface IDeleteAnimal {
 }
 
 export interface IDeleteResponse {
-	message: string;
+	data: null;
 }
 
 export interface IAnimalsCountBySpeciesResponse {

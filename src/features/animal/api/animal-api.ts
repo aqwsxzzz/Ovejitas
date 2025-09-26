@@ -72,16 +72,10 @@ export const editAnimalById = ({
 		data: payload,
 	});
 
-export const deleteAnimalById = ({
-	farmId,
-	animalId,
-}: {
-	farmId: string;
-	animalId: string;
-}) =>
+export const deleteAnimalById = ({ animalId }: { animalId: string }) =>
 	axiosHelper<IResponse<IDeleteResponse>>({
 		method: "delete",
-		url: `/farms/${farmId}/animals/${animalId}`,
+		url: `/animals/${animalId}`,
 	});
 
 export const createAnimalsBulk = ({

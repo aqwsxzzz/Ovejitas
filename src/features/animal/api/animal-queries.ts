@@ -136,15 +136,22 @@ export const useDeleteAnimalById = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ farmId, animalId }: { farmId: string; animalId: string }) =>
-			deleteAnimalById({ farmId, animalId }),
+		mutationFn: ({
+			animalId,
+		}: {
+			farmId: string;
+			animalId: string;
+			sex: IAnimal["sex"] | "";
+			speciesId: IAnimal["speciesId"] | "";
+		}) => deleteAnimalById({ animalId }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (_, { farmId, animalId }) => {
+		onSuccess: (_, { farmId, animalId, sex, speciesId }) => {
 			toast.success("Animal deleted successfully");
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
-				animalQueryKeys.animalList(farmId),
+				animalQueryKeys.animalList(farmId, [sex, speciesId]),
+
 				(oldData) => {
 					if (!oldData) {
 						return;
