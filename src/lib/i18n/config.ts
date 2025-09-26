@@ -47,6 +47,8 @@ import speciesIndexEN from "./en/species-index.json";
 import speciesIndexES from "./es/species-index.json";
 import farmMembersEN from "./en/farm-members.json";
 import farmMembersES from "./es/farm-members.json";
+import parentsByGenderSelectEN from "./en/parents-by-gender-select.json";
+import parentsByGenderSelectES from "./es/parents-by-gender-select.json";
 
 export const defaultNS = "login";
 
@@ -80,6 +82,7 @@ i18next
 				sheetMenu: sheetMenuEN,
 				speciesIndex: speciesIndexEN,
 				farmMembers: farmMembersEN,
+				parentsByGenderSelect: parentsByGenderSelectEN,
 			},
 			es: {
 				login: loginES,
@@ -105,6 +108,7 @@ i18next
 				sheetMenu: sheetMenuES,
 				speciesIndex: speciesIndexES,
 				farmMembers: farmMembersES,
+				parentsByGenderSelect: parentsByGenderSelectES,
 			},
 		},
 		defaultNS,
