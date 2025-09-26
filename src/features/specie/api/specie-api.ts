@@ -16,3 +16,19 @@ export const getSpecies = ({
 		urlParams: includeQueryParam({ include, withLanguage }),
 	});
 };
+
+export const getSpeciesBySpecieId = ({
+	include,
+	withLanguage,
+	speciesId,
+}: {
+	include: string;
+	withLanguage: boolean;
+	speciesId: string;
+}) => {
+	return axiosHelper<IResponse<ISpecie>>({
+		method: "get",
+		url: `/species/${speciesId}`,
+		urlParams: includeQueryParam({ include, withLanguage }),
+	});
+};

@@ -13,11 +13,13 @@ import { useState } from "react";
 import type { IUser } from "@/features/auth/types/auth-types";
 import { useLogout } from "@/features/auth/api/auth-queries";
 import { useTranslation } from "react-i18next";
+import { Link, useParams } from "@tanstack/react-router";
 
 export function SheetMainMenu({ userData }: { userData: IUser }) {
 	const { mutateAsync: logout } = useLogout();
 	const [open, setOpen] = useState<boolean>(false);
 	const { t } = useTranslation("sheetMenu");
+	const { farmId } = useParams({ strict: false });
 	return (
 		<Sheet
 			open={open}
@@ -64,33 +66,46 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 				<SheetDescription className="sr-only"></SheetDescription>
 
 				<div className="flex flex-col space-y-4 mt-8">
-					<Button
-						variant="ghost"
-						className="justify-start h-12 px-4"
-						onClick={() => setOpen(false)}
+					<Link
+						to="/farm/$farmId/dashboard"
+						params={{ farmId: farmId! }}
 					>
-						<Home className="w-5 h-5 mr-3" />
-						{t("dashboard")}
-					</Button>
+						<Button
+							variant="ghost"
+							className="justify-start h-12 px-4"
+							onClick={() => setOpen(false)}
+						>
+							<Home className="w-5 h-5 mr-3" />
+							{t("dashboard")}
+						</Button>
+					</Link>
 
-					<Button
-						variant="ghost"
-						className="justify-start h-12 px-4"
-						onClick={() => setOpen(false)}
+					<Link
+						to="/farm/$farmId/species"
+						params={{ farmId: farmId! }}
 					>
-						<Dog className="w-5 h-5 mr-3" />
-						{t("animals")}
-					</Button>
-
-					<Button
-						variant="ghost"
-						className="justify-start h-12 px-4"
-						onClick={() => setOpen(false)}
+						<Button
+							variant="ghost"
+							className="justify-start h-12 px-4"
+							onClick={() => setOpen(false)}
+						>
+							<Dog className="w-5 h-5 mr-3" />
+							{t("animals")}
+						</Button>
+					</Link>
+					<Link
+						to="/farm/$farmId/farm-members"
+						params={{ farmId: farmId! }}
 					>
-						<Users className="w-5 h-5 mr-3" />
-						{t("farmMembers")}
-					</Button>
-
+						<Button
+							variant="ghost"
+							className="justify-start h-12 px-4"
+							onClick={() => setOpen(false)}
+						>
+							<Users className="w-5 h-5 mr-3" />
+							{t("farmMembers")}
+						</Button>
+					</Link>
 					<Separator />
 					<Button
 						variant="ghost"
