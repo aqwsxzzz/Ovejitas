@@ -34,6 +34,7 @@ export const FarmInviteModal = () => {
 	const [open, setOpen] = useState<boolean>(false);
 	const [token, setToken] = useState<boolean>(false);
 	const [tokenData, setTokenData] = useState<string | null>(null);
+	const [email, setEmail] = useState<string | null>(null);
 	const { farmId } = useParams({ strict: false });
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,6 +48,7 @@ export const FarmInviteModal = () => {
 	const resetStates = () => {
 		setToken(false);
 		setTokenData(null);
+		setEmail(null);
 		form.reset();
 	};
 
@@ -62,6 +64,7 @@ export const FarmInviteModal = () => {
 		if (response.status == "success") {
 			setToken(true);
 			setTokenData(response.data.token);
+			setEmail(data.email);
 			form.reset();
 		}
 	};
@@ -127,7 +130,7 @@ export const FarmInviteModal = () => {
 								<div className="flex w-full max-w-xl gap-2">
 									<Input
 										className="flex-1"
-										value={`${import.meta.env.VITE_BASIC_URL}/signup?token=${tokenData}`}
+										value={`${import.meta.env.VITE_BASIC_URL}/signup?token=${tokenData}&email=${email}`}
 										readOnly
 										onClick={(e) => e.currentTarget.select()}
 										ref={inputRef}

@@ -14,6 +14,7 @@ export const Route = createFileRoute("/_public/_layout/signup")({
 	// },
 	validateSearch: z.object({
 		token: z.string().optional(),
+		email: z.string().email().optional(),
 	}),
 	component: RouteComponent,
 });
@@ -24,7 +25,10 @@ function RouteComponent() {
 	return (
 		<Card className="md:w-[600px] w-full">
 			<CardContent>
-				<SignUpForm token={search.token} />
+				<SignUpForm
+					token={search.token}
+					email={search.email}
+				/>
 				<Separator className="my-4" />
 				<CardFooter className="flex flex-col">
 					<p>{t("footerTitle")}</p>

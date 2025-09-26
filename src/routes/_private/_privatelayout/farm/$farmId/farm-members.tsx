@@ -89,7 +89,7 @@ function RouteComponent() {
 									variant="outline"
 									onClick={() => {
 										navigator.clipboard.writeText(
-											`${import.meta.env.VITE_BASIC_URL}/signup?token=${invite.token}`,
+											`${import.meta.env.VITE_BASIC_URL}/signup?token=${invite.token}&email=${invite.email}`,
 										);
 										toast.success(t("linkcopied"));
 									}}

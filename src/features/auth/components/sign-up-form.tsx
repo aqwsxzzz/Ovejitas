@@ -21,12 +21,18 @@ const formSchema = z.object({
 	password: z.string().min(8, "Password must have at least 8 characters."),
 });
 
-export const SignUpForm = ({ token }: { token?: string }) => {
+export const SignUpForm = ({
+	token,
+	email,
+}: {
+	token?: string;
+	email?: string;
+}) => {
 	const { mutateAsync: signUp, error, isPending } = useSignUp();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { email: "", displayName: "", password: "" },
+		defaultValues: { email: email ?? "", displayName: "", password: "" },
 	});
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -54,6 +60,7 @@ export const SignUpForm = ({ token }: { token?: string }) => {
 								<Input
 									placeholder={t("emailPlaceholder")}
 									{...field}
+									readOnly={email !== undefined}
 								/>
 							</FormControl>
 							<FormMessage />
