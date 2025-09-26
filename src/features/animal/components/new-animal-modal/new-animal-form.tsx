@@ -54,6 +54,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 	const { farmId } = useParams({ strict: false });
 
 	const { t } = useTranslation("newAnimalForm");
+	const { t: tParents } = useTranslation("parentsByGenderSelect");
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		// Format birthDate as YYYY-MM-DD
 		const formatDate = (date: Date) => {
@@ -355,6 +356,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 											farmId={farmId!}
 											sex="male"
 											withLanguage={true}
+											placeholder={tParents("malePlaceholder")}
 										/>
 									</FormControl>
 								</FormItem>
@@ -373,6 +375,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 											farmId={farmId!}
 											sex="female"
 											withLanguage={true}
+											placeholder={tParents("femalePlaceholder")}
 										/>
 									</FormControl>
 								</FormItem>

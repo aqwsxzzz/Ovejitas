@@ -24,7 +24,7 @@ export const ParentsByGenderSelect = ({
 	sex,
 	include,
 	withLanguage,
-	placeholder = "Select a parent...",
+	placeholder,
 }: ParentsByGenderSelectProps) => {
 	const { data: animalsData } = useGetAnimalsByFarmId({
 		farmId,

@@ -1,6 +1,6 @@
 {
-    "tabTitle1": "Información Básica",
-    "tabTitle2": "Información Opcional",
+    "tabTitle1": "Requerido",
+    "tabTitle2": "Opcional",
     "specieLabel": "Especie",
     "breedLabel": "Raza",
     "nameLabel": "Nombre",
