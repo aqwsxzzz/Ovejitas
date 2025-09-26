@@ -65,7 +65,7 @@ export const SignUpForm = ({
 											to="/signup"
 											className="ml-2 text-blue-600 underline text-xs"
 										>
-											Not me?
+											{t("notMeLink")}
 										</Link>{" "}
 									</div>
 								) : (

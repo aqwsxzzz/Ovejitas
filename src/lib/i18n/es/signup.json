@@ -9,5 +9,6 @@
     "footerLink": "Inicia sesión aquí",
     "emailInputLabel": "Correo electrónico",
     "passwordInputLabel": "Contraseña",
-    "displayNameInputLabel": "Nombre"
+    "displayNameInputLabel": "Nombre",
+    "notMeLink": "¿No soy yo?"
 }

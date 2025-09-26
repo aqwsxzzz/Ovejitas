@@ -9,5 +9,6 @@
     "footerLink": "Log in here",
     "emailInputLabel": "Email",
     "passwordInputLabel": "Password",
-    "displayNameInputLabel": "Name"
+    "displayNameInputLabel": "Name",
+    "notMeLink": "Not me?"
 }
