@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/features/auth/api/auth-queries";
 import { useTranslation } from "react-i18next";
 import { Loader } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const formSchema = z.object({
 	email: z.string().email(),
@@ -57,11 +58,22 @@ export const SignUpForm = ({
 						<FormItem>
 							<FormLabel>{t("emailInputLabel")}</FormLabel>
 							<FormControl>
-								<Input
-									placeholder={t("emailPlaceholder")}
-									{...field}
-									readOnly={email !== undefined}
-								/>
+								{email ? (
+									<div className="bg-muted text-muted-foreground px-3 py-2 rounded">
+										{email}
+										<Link
+											to="/signup"
+											className="ml-2 text-blue-600 underline text-xs"
+										>
+											Not me?
+										</Link>{" "}
+									</div>
+								) : (
+									<Input
+										placeholder={t("emailPlaceholder")}
+										{...field}
+									/>
+								)}
 							</FormControl>
 							<FormMessage />
 						</FormItem>
