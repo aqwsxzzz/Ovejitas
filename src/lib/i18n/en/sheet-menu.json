@@ -3,7 +3,7 @@
     "dashboard": "Dashboard",
     "animals": "Animals",
     "farms": "Farms",
-    "Logout": "Logout",
+    "logout": "Logout",
     "invite": "Invite",
     "farmMembers": "Members"  
 }

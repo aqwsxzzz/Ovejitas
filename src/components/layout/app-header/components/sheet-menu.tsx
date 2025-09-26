@@ -7,21 +7,17 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet";
-import { Link } from "@tanstack/react-router";
-import { ChevronLeft, Home, LogOut, Dog, Users } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useParams } from "@tanstack/react-router";
-import { useLogout } from "@/features/auth/api/auth-queries";
+import { Home, LogOut, Dog, Users, ChevronLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 import type { IUser } from "@/features/auth/types/auth-types";
+import { useLogout } from "@/features/auth/api/auth-queries";
+import { useTranslation } from "react-i18next";
 
 export function SheetMainMenu({ userData }: { userData: IUser }) {
-	const { t } = useTranslation("sheetMenu");
-	const { farmId } = useParams({ strict: false });
 	const { mutateAsync: logout } = useLogout();
 	const [open, setOpen] = useState<boolean>(false);
-
+	const { t } = useTranslation("sheetMenu");
 	return (
 		<Sheet
 			open={open}
@@ -29,11 +25,19 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 		>
 			<SheetTrigger asChild>
 				<Button
-					variant="outline"
-					className="fixed right-0 top-1/2 -translate-y-1/2 w-12 h-24 rounded-l-full rounded-r-none border-r-0 bg-background hover:bg-primary group transition-all duration-200 z-50"
-					aria-label="Open menu"
+					variant="default"
+					className={`fixed top-1/2 -translate-y-1/2 z-50 w-8 h-16 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 ${
+						open
+							? "right-[160px] sm:right-[384px] rounded-l-lg rounded-r-none"
+							: "right-0 rounded-l-lg rounded-r-none"
+					}`}
+					aria-label={open ? "Close menu" : "Open menu"}
 				>
-					<ChevronLeft className="w-5 h-5 text-primary group-hover:text-white transition-all duration-200" />
+					<ChevronLeft
+						className={`w-5 h-5 text-primary-foreground transition-transform duration-300 ${
+							open ? "rotate-180" : "rotate-0"
+						}`}
+					/>
 				</Button>
 			</SheetTrigger>
 
@@ -60,47 +64,32 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 				<SheetDescription className="sr-only"></SheetDescription>
 
 				<div className="flex flex-col space-y-4 mt-8">
-					<Link
-						to="/farm/$farmId/dashboard"
-						params={{ farmId: farmId! }}
+					<Button
+						variant="ghost"
+						className="justify-start h-12 px-4"
 						onClick={() => setOpen(false)}
 					>
-						<Button
-							variant="ghost"
-							className="justify-start h-12 px-4"
-						>
-							<Home className="w-5 h-5 mr-3" />
-							{t("dashboard")}
-						</Button>
-					</Link>
+						<Home className="w-5 h-5 mr-3" />
+						{t("dashboard")}
+					</Button>
 
-					<Link
-						to="/farm/$farmId/species"
-						params={{ farmId: farmId! }}
+					<Button
+						variant="ghost"
+						className="justify-start h-12 px-4"
 						onClick={() => setOpen(false)}
 					>
-						<Button
-							variant="ghost"
-							className="justify-start h-12 px-4"
-						>
-							<Dog className="w-5 h-5 mr-3" />
-							{t("animals")}
-						</Button>
-					</Link>
+						<Dog className="w-5 h-5 mr-3" />
+						{t("animals")}
+					</Button>
 
-					<Link
-						to="/farm/$farmId/farm-members"
-						params={{ farmId: farmId! }}
+					<Button
+						variant="ghost"
+						className="justify-start h-12 px-4"
 						onClick={() => setOpen(false)}
 					>
-						<Button
-							variant="ghost"
-							className="justify-start h-12 px-4"
-						>
-							<Users className="w-5 h-5 mr-3" />
-							{t("farmMembers")}
-						</Button>
-					</Link>
+						<Users className="w-5 h-5 mr-3" />
+						{t("farmMembers")}
+					</Button>
 
 					<Separator />
 					<Button
@@ -109,7 +98,7 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 						className="text-destructive font-semibold"
 					>
 						<LogOut className="w-5 h-5 mr-3" />
-						{t("Logout")}
+						{t("logout")}
 					</Button>
 				</div>
 			</SheetContent>
