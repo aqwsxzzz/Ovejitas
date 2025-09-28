@@ -68,36 +68,38 @@ function RouteComponent() {
 					</div>
 				) : (
 					<ul className="divide-y divide-border">
-						{invitationsData?.map((invite) => (
-							<li
-								key={invite.id}
-								className="flex items-center justify-between py-3"
-							>
-								<div className="flex flex-col max-w-3/4">
-									<span
-										className="font-medium text-foreground overflow-hidden"
-										onClick={() => toast.info(invite.email)}
-									>
-										{invite.email}
-									</span>
-									<span className="text-xs text-muted-foreground">
-										{invite.status}
-									</span>
-								</div>
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => {
-										navigator.clipboard.writeText(
-											`${import.meta.env.VITE_BASIC_URL}/signup?token=${invite.token}&email=${invite.email}`,
-										);
-										toast.success(t("linkcopied"));
-									}}
+						{invitationsData
+							?.filter((invite) => invite.status === "pending")
+							.map((invite) => (
+								<li
+									key={invite.id}
+									className="flex items-center justify-between py-3"
 								>
-									Link
-								</Button>
-							</li>
-						))}
+									<div className="flex flex-col max-w-3/4">
+										<span
+											className="font-medium text-foreground overflow-hidden"
+											onClick={() => toast.info(invite.email)}
+										>
+											{invite.email}
+										</span>
+										<span className="text-xs text-muted-foreground">
+											{invite.status}
+										</span>
+									</div>
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => {
+											navigator.clipboard.writeText(
+												`${import.meta.env.VITE_BASIC_URL}/signup?token=${invite.token}&email=${invite.email}`,
+											);
+											toast.success(t("linkcopied"));
+										}}
+									>
+										Link
+									</Button>
+								</li>
+							))}
 					</ul>
 				)}
 			</section>
