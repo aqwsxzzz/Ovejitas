@@ -6,6 +6,7 @@ import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/ne
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
+import FarmAnimalsEmpyState from "@/routes/_public/assets/FarmAnimalsEmpyState.svg";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/",
@@ -23,7 +24,6 @@ function RouteComponent() {
 	const { t } = useTranslation("speciesIndex");
 
 	if (isPending) {
-		void animalData;
 		return <FarmAnimalSpinner />;
 	}
 
@@ -33,7 +33,18 @@ function RouteComponent() {
 				title={t("title")}
 				Modal={NewAnimalModal}
 			/>
-			<AnimalsDashboard animal={animalData!} />
+			{animalData && animalData.length > 0 && (
+				<AnimalsDashboard animal={animalData!} />
+			)}
+			{animalData && animalData.length === 0 && (
+				<div className="text-muted-foreground p-4 pt-12 flex justify-center">
+					<img
+						src={FarmAnimalsEmpyState}
+						alt="Farm empty illustration"
+						style={{ width: "350px", maxWidth: "100%" }}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }
