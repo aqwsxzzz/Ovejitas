@@ -10,12 +10,14 @@ import {
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
+	IAnimalsCountBySpeciesResponse,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IEditAnimalPayload,
 } from "@/features/animal/types/animal-types";
 import { toast } from "sonner";
 import type { IResponse } from "@/lib/axios";
+import i18next from "i18next";
 
 export const animalQueryKeys = {
 	all: ["animal"] as const,
@@ -51,29 +53,53 @@ export const useGetAnimalsByFarmId = ({
 
 export const useCreateAnimal = () => {
 	const queryClient = useQueryClient();
-
 	return useMutation({
 		mutationFn: ({
 			payload,
 		}: {
 			payload: ICreateAnimalPayload;
 			farmId: string;
+			sex?: IAnimal["sex"] | "";
+			speciesId?: IAnimal["speciesId"] | "";
 		}) => createAnimal({ payload }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
 		onSuccess: (response, { farmId }) => {
 			toast.success("Animal created successfully");
-			queryClient.setQueryData<IResponse<IAnimal[]>>(
-				animalQueryKeys.animalList(farmId),
+
+			queryClient.setQueryData<IResponse<IAnimalsCountBySpeciesResponse[]>>(
+				animalQueryKeys.animalsCountBySpecies(
+					farmId,
+					i18next.language.slice(0, 2),
+				),
 
 				(oldData) => {
 					if (!oldData) {
 						return;
 					}
+					let exist = false;
+					const newData = oldData.data.map((item) => {
+						if (item.species.id == response.data.speciesId) {
+							exist = true;
+							return { ...item, count: item.count + 1 };
+						}
+						return item;
+					});
+
+					if (!exist) {
+						newData.push({
+							count: 1,
+							species: {
+								id: response.data.speciesId,
+								name: response.data.species.translations[0].name,
+							},
+						});
+					}
+
 					return {
 						...oldData,
-						data: [...oldData.data, response.data],
+						data: newData,
 					};
 				},
 			);
