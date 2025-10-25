@@ -19,7 +19,9 @@ function RouteComponent() {
 		useGetAnimalsByFarmId({
 			farmId: farmId!,
 			withLanguage: true,
-			speciesId: speciesId!,
+			filters: {
+				speciesId
+			}
 		});
 	const { data: speciesData, isPending: isPendingSpecies } =
 		useGetSpeciesBySpecieId({
@@ -35,7 +37,7 @@ function RouteComponent() {
 	return (
 		<div className="flex flex-col gap-2">
 			<CardStyleHeader
-				title={speciesData!.translations[0].name}
+				title={speciesData?.translations?.[0].name || ''}
 				Modal={NewAnimalModal}
 			/>
 			<div className="flex items-center gap-4">

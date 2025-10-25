@@ -85,6 +85,9 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 				language,
 			},
 			farmId: farmId!,
+			filters: {
+				speciesId: data.specieId,
+			}
 		});
 
 		if (response.status === "success") {

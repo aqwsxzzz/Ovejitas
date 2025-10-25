@@ -98,3 +98,8 @@ export interface IAnimalsCountBySpeciesResponse {
 		name: string;
 	};
 }
+
+export interface IAnimalListFilters {
+	sex?: IAnimal["sex"] | "";
+	speciesId?: string | "";
+}

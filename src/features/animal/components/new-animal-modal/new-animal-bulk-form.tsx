@@ -72,6 +72,9 @@ export const NewAnimalBulkForm = ({
 					tags: tagsArray ?? null,
 				},
 				farmId: farmId!,
+				filters: {
+					speciesId: data.specieId,
+				}
 			});
 			if (response.status === "success") {
 				closeDialog();
@@ -87,7 +90,11 @@ export const NewAnimalBulkForm = ({
 					tagStartNumber: data.tagStartNumber ?? null,
 					count: data.count ?? null,
 				},
+				
 				farmId: farmId!,
+				filters: {
+					speciesId: data.specieId,
+				}
 			});
 			if (response.status === "success") {
 				closeDialog();
