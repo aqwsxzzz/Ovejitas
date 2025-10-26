@@ -12,6 +12,7 @@ import { EditAnimalModal } from "@/features/animal/components/edit-animal-modal/
 import { DeleteAnimalModal } from "@/features/animal/components/delete-animal-modal/delete-animal-modal";
 import { useTranslation } from "react-i18next";
 import { useParams } from "@tanstack/react-router";
+import { HealthStatusIndicator } from "@/components/common/health-status-indicator";
 
 interface AnimalCardProps {
 	animal: IAnimal;
@@ -45,13 +46,16 @@ export const AnimalCard = ({ animal, sex }: AnimalCardProps) => {
 		>
 			<Card className="border-2 p-2 flex flex-col gap-1 min-h-0 max-w-full">
 				<CardHeader className="p-2 pb-0 flex flex-row items-center justify-between">
-					<div>
-						<CardTitle className="text-lg font-bold leading-tight">
-							{animal.name}
-						</CardTitle>
-						<CardDescription className="text-xs leading-tight">
-							{t("tagText")} {animal.tagNumber} • {animal.sex}
-						</CardDescription>
+					<div className="flex items-center gap-2">
+						<HealthStatusIndicator status={animal.status} />
+						<div>
+							<CardTitle className="text-lg font-bold leading-tight">
+								{animal.name}
+							</CardTitle>
+							<CardDescription className="text-xs leading-tight">
+								{t("tagText")} {animal.tagNumber} • {animal.sex}
+							</CardDescription>
+						</div>
 					</div>
 					<Badge
 						variant="secondary"
