@@ -6,7 +6,6 @@ import { useGetFarmInvitationsList } from "@/features/farm-invitations/api/farm-
 import { toast } from "sonner";
 import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
 import { useTranslation } from "react-i18next";
-import { CardStyleHeader } from "@/components/common/card-style-header";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/farm-members",
@@ -24,11 +23,13 @@ function RouteComponent() {
 	//const [inviteOpen, setInviteOpen] = useState(false);
 
 	return (
-		<div className="flex flex-col gap-2	">
-			<CardStyleHeader
-				title={t("title")}
-				Modal={FarmInviteModal}
-			/>
+		<div className="flex flex-col gap-6 p-4">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<h1 className="text-h1 text-foreground">{t("title")}</h1>
+				<FarmInviteModal />
+			</div>
+
 			{/* Active Members Section */}
 			<section className="mb-8 bg-card rounded-lg shadow p-4">
 				<h2 className="text-lg font-semibold text-card-foreground mb-4">

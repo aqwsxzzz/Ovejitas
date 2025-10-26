@@ -1,4 +1,3 @@
-import { CardStyleHeader } from "@/components/common/card-style-header";
 import { AnimalCardSkeletonList } from "@/components/common/skeleton-loaders";
 import { SearchBar } from "@/components/common/search-bar";
 import { FilterChips, type FilterOption } from "@/components/common/filter-chips";
@@ -6,9 +5,10 @@ import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, useParams, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import type { IAnimal } from "@/features/animal/types/animal-types";
+import { CircleChevronLeft } from "lucide-react";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/animals",
@@ -76,30 +76,40 @@ function RouteComponent() {
 
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
-			<div className="flex flex-col gap-2">
-				<CardStyleHeader
-					title="Loading..."
-					Modal={NewAnimalModal}
-					backLink={{
-						to: "/farm/$farmId/species",
-						params: { farmId: farmId! }
-					}}
-				/>
+			<div className="flex flex-col gap-6 p-4">
+				{/* Header */}
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-3">
+						<Link
+							to="/farm/$farmId/species"
+							params={{ farmId: farmId! }}
+						>
+							<CircleChevronLeft className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
+						</Link>
+						<h1 className="text-h1 text-foreground">Loading...</h1>
+					</div>
+					<NewAnimalModal />
+				</div>
 				<AnimalCardSkeletonList count={5} />
 			</div>
 		);
 	}
 
 	return (
-		<div className="flex flex-col gap-2">
-			<CardStyleHeader
-				title={speciesData?.translations?.[0].name || ''}
-				Modal={NewAnimalModal}
-				backLink={{
-					to: "/farm/$farmId/species",
-					params: { farmId: farmId! }
-				}}
-			/>
+		<div className="flex flex-col gap-6 p-4">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<div className="flex items-center gap-3">
+					<Link
+						to="/farm/$farmId/species"
+						params={{ farmId: farmId! }}
+					>
+						<CircleChevronLeft className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
+					</Link>
+					<h1 className="text-h1 text-foreground">{speciesData?.translations?.[0].name || ''}</h1>
+				</div>
+				<NewAnimalModal />
+			</div>
 
 			{/* Search and Filters */}
 			<div className="flex flex-col gap-3">

@@ -1,4 +1,3 @@
-import { CardStyleHeader } from "@/components/common/card-style-header";
 import { SpeciesCardSkeletonList } from "@/components/common/skeleton-loaders";
 import { useGetAnimalsCountBySpecies } from "@/features/animal/api/animal-queries";
 import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard/animals-dashboard";
@@ -25,22 +24,24 @@ function RouteComponent() {
 
 	if (isPending) {
 		return (
-			<div className="flex flex-col gap-2">
-				<CardStyleHeader
-					title={t("title")}
-					Modal={NewAnimalModal}
-				/>
+			<div className="flex flex-col gap-6 p-4">
+				{/* Header */}
+				<div className="flex items-center justify-between">
+					<h1 className="text-h1 text-foreground">{t("title")}</h1>
+					<NewAnimalModal />
+				</div>
 				<SpeciesCardSkeletonList count={3} />
 			</div>
 		);
 	}
 
 	return (
-		<div className="flex flex-col gap-2">
-			<CardStyleHeader
-				title={t("title")}
-				Modal={NewAnimalModal}
-			/>
+		<div className="flex flex-col gap-6 p-4">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<h1 className="text-h1 text-foreground">{t("title")}</h1>
+				<NewAnimalModal />
+			</div>
 			{animalData && animalData.length > 0 && (
 				<AnimalsDashboard animal={animalData!} />
 			)}

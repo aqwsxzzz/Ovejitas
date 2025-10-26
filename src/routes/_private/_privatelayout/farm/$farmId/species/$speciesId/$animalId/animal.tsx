@@ -3,6 +3,7 @@ import { AnimalProfileHealthCard } from "@/features/animal/components/animal-pro
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { CircleChevronLeft, HeartPulse, Baby, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useGetAnimalById } from "@/features/animal/api/animal-queries";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal",
@@ -11,15 +12,28 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-	const { farmId, speciesId } = useParams({ strict: false });
+	const { farmId, speciesId, animalId } = useParams({ strict: false });
+	const { data: animalData } = useGetAnimalById({
+		animalId: animalId!,
+		include: "breed,species",
+		withLanguage: true,
+	});
+
 	return (
-		<div className="p-4 flex flex-col gap-4">
-			<Link
-				to="/farm/$farmId/species/$speciesId/animals"
-				params={{ farmId: farmId!, speciesId: speciesId! }}
-			>
-				<CircleChevronLeft />
-			</Link>
+		<div className="flex flex-col gap-6 p-4">
+			{/* Header */}
+			<div className="flex items-center gap-3">
+				<Link
+					to="/farm/$farmId/species/$speciesId/animals"
+					params={{ farmId: farmId!, speciesId: speciesId! }}
+				>
+					<CircleChevronLeft className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
+				</Link>
+				<h1 className="text-h1 text-foreground">
+					{animalData?.name || "Animal Details"}
+				</h1>
+			</div>
+
 			<AnimalProfileCard />
 
 			{/* Quick Action Buttons */}
