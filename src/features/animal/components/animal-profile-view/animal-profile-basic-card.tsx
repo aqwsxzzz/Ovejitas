@@ -52,33 +52,23 @@ export const AnimalProfileCard = () => {
 	}
 
 	return (
-		<Card className="rounded-card shadow-card overflow-hidden">
-			{/* Photo-first: Large header image */}
-			<div className="relative w-full h-48 bg-muted">
-				<img
-					src={"/placeholder.svg"}
-					alt={animalData.name ?? "Animal photo"}
-					className="w-full h-full object-cover"
-				/>
-				{/* Status badge overlay */}
-				<div className="absolute top-4 right-4">
-					<Badge variant={getHealthStatusVariant(animalData.status ?? "")}>
-						{animalData.status}
-					</Badge>
-				</div>
-			</div>
-
+		<Card className="rounded-card shadow-card">
 			<CardContent className="p-4 space-y-4">
-				{/* Name and breed with health indicator */}
-				<div className="flex items-start gap-3">
+				{/* Name and breed with health indicator and status badge */}
+				<div className="flex items-center gap-3">
 					<HealthStatusIndicator
 						status={animalData.status}
 						className="mt-1"
 					/>
 					<div className="flex-1">
-						<h2 className="text-h1 font-display font-bold text-foreground">
-							{animalData.name}
-						</h2>
+						<div className="flex items-center gap-2 flex-wrap">
+							<h2 className="text-h1 font-display font-bold text-foreground">
+								{animalData.name}
+							</h2>
+							<Badge variant={getHealthStatusVariant(animalData.status ?? "")}>
+								{animalData.status}
+							</Badge>
+						</div>
 						<p className="text-small text-muted-foreground">
 							{animalData.breed.name}
 						</p>

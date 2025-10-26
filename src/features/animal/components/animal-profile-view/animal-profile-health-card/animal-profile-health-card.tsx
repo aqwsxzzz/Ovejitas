@@ -7,25 +7,19 @@ import { useTranslation } from "react-i18next";
 export const AnimalProfileHealthCard = () => {
 	const { t } = useTranslation("animalProfileHealthCard");
 	return (
-		<Card className="pt-0 border-primary">
-			<CardHeader className="pt-0">
-				<CardTitle className="pt-0 -mt-2">
-					<Badge className=" bg-secondary text-primary border-primary">
+		<Card className="rounded-card shadow-card">
+			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+				<CardTitle className="flex items-center gap-2">
+					<Badge variant="secondary" className="border-primary">
 						{t("headerTitle")}
 					</Badge>
 				</CardTitle>
+				<AddNewMeasurementModal />
 			</CardHeader>
-			<CardContent className="flex flex-col gap-4">
-				<div className="flex justify-end">
-					<AddNewMeasurementModal />
-				</div>
-				<div className="flex flex-col justify-between items-center gap-4">
-					<div className="flex justify-between gap-2">
-						<HealthCardIndividualInfo measurementType="weight" />
-						<HealthCardIndividualInfo measurementType="height" />
-					</div>
-					<HealthCardIndividualInfo measurementType="temperature" />
-				</div>
+			<CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<HealthCardIndividualInfo measurementType="weight" />
+				<HealthCardIndividualInfo measurementType="height" />
+				<HealthCardIndividualInfo measurementType="temperature" />
 			</CardContent>
 		</Card>
 	);
