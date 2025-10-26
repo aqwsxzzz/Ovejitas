@@ -5,10 +5,10 @@ import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
-import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import type { IAnimal } from "@/features/animal/types/animal-types";
-import { CircleChevronLeft } from "lucide-react";
+import { PageHeader } from "@/components/common/page-header";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/animals",
@@ -77,19 +77,15 @@ function RouteComponent() {
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
 			<div className="flex flex-col gap-6 p-4">
-				{/* Header */}
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<Link
-							to="/farm/$farmId/species"
-							params={{ farmId: farmId! }}
-						>
-							<CircleChevronLeft className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
-						</Link>
-						<h1 className="text-h1 text-foreground">Loading...</h1>
-					</div>
-					<NewAnimalModal />
-				</div>
+				<PageHeader
+					title="Loading..."
+					description="Search and filter your animals"
+					backLink={{
+						to: "/farm/$farmId/species",
+						params: { farmId: farmId! }
+					}}
+					action={<NewAnimalModal />}
+				/>
 				<AnimalCardSkeletonList count={5} />
 			</div>
 		);
@@ -97,19 +93,15 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-col gap-6 p-4">
-			{/* Header */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
-					<Link
-						to="/farm/$farmId/species"
-						params={{ farmId: farmId! }}
-					>
-						<CircleChevronLeft className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
-					</Link>
-					<h1 className="text-h1 text-foreground">{speciesData?.translations?.[0].name || ''}</h1>
-				</div>
-				<NewAnimalModal />
-			</div>
+			<PageHeader
+				title={speciesData?.translations?.[0].name || ''}
+				description="Search and filter your animals"
+				backLink={{
+					to: "/farm/$farmId/species",
+					params: { farmId: farmId! }
+				}}
+				action={<NewAnimalModal />}
+			/>
 
 			{/* Search and Filters */}
 			<div className="flex flex-col gap-3">

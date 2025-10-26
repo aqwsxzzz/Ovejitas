@@ -1,9 +1,10 @@
 import { AnimalProfileCard } from "@/features/animal/components/animal-profile-view/animal-profile-basic-card";
 import { AnimalProfileHealthCard } from "@/features/animal/components/animal-profile-view/animal-profile-health-card/animal-profile-health-card";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { CircleChevronLeft, HeartPulse, Baby, FileText } from "lucide-react";
+import { createFileRoute, useParams } from "@tanstack/react-router";
+import { HeartPulse, Baby, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
+import { PageHeader } from "@/components/common/page-header";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal",
@@ -21,18 +22,14 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-col gap-6 p-4">
-			{/* Header */}
-			<div className="flex items-center gap-3">
-				<Link
-					to="/farm/$farmId/species/$speciesId/animals"
-					params={{ farmId: farmId!, speciesId: speciesId! }}
-				>
-					<CircleChevronLeft className="h-6 w-6 text-primary hover:text-primary/80 transition-colors" />
-				</Link>
-				<h1 className="text-h1 text-foreground">
-					{animalData?.name || "Animal Details"}
-				</h1>
-			</div>
+			<PageHeader
+				title={animalData?.name || "Animal Details"}
+				description="View and manage animal information"
+				backLink={{
+					to: "/farm/$farmId/species/$speciesId/animals",
+					params: { farmId: farmId!, speciesId: speciesId! }
+				}}
+			/>
 
 			<AnimalProfileCard />
 

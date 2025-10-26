@@ -6,6 +6,7 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import FarmAnimalsEmpyState from "@/routes/_public/assets/FarmAnimalsEmpyState.svg";
+import { PageHeader } from "@/components/common/page-header";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/",
@@ -25,11 +26,11 @@ function RouteComponent() {
 	if (isPending) {
 		return (
 			<div className="flex flex-col gap-6 p-4">
-				{/* Header */}
-				<div className="flex items-center justify-between">
-					<h1 className="text-h1 text-foreground">{t("title")}</h1>
-					<NewAnimalModal />
-				</div>
+				<PageHeader
+					title={t("title")}
+					description="Browse your animals by species"
+					action={<NewAnimalModal />}
+				/>
 				<SpeciesCardSkeletonList count={3} />
 			</div>
 		);
@@ -37,11 +38,11 @@ function RouteComponent() {
 
 	return (
 		<div className="flex flex-col gap-6 p-4">
-			{/* Header */}
-			<div className="flex items-center justify-between">
-				<h1 className="text-h1 text-foreground">{t("title")}</h1>
-				<NewAnimalModal />
-			</div>
+			<PageHeader
+				title={t("title")}
+				description="Browse your animals by species"
+				action={<NewAnimalModal />}
+			/>
 			{animalData && animalData.length > 0 && (
 				<AnimalsDashboard animal={animalData!} />
 			)}

@@ -1,4 +1,5 @@
 import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
+import { PageHeader } from "@/components/common/page-header";
 import { StatsWidget } from "@/components/common/stats-widget";
 import { ActivityFeed } from "@/components/common/activity-feed";
 import { QuickActionCard } from "@/components/common/quick-action-card";
@@ -65,13 +66,10 @@ function RouteComponent() {
 
 	return (
 		<div className="max-w-6xl mx-auto space-y-6 pb-6">
-			{/* Header */}
-			<div className="space-y-2">
-				<h1 className="text-h1 text-foreground">Dashboard</h1>
-				<p className="text-small text-muted-foreground">
-					Welcome back to your digital farmhouse
-				</p>
-			</div>
+			<PageHeader
+				title="Dashboard"
+				description="Welcome back to your digital farmhouse"
+			/>
 
 			{/* Stats Grid */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">

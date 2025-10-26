@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CheckSquare, Calendar, Bell, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/common/page-header";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/tasks"
@@ -11,12 +12,10 @@ export const Route = createFileRoute(
 function RouteComponent() {
 	return (
 		<div className="flex flex-col gap-4 p-4 max-w-4xl mx-auto pb-24">
-			<div className="text-center space-y-2">
-				<h1 className="text-h1 text-foreground">Tasks</h1>
-				<p className="text-small text-muted-foreground">
-					Task management coming soon
-				</p>
-			</div>
+			<PageHeader
+				title="Tasks"
+				description="Task management coming soon"
+			/>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
 				<Card className="rounded-card shadow-card">
