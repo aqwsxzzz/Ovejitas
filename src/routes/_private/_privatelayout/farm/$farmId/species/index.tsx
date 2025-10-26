@@ -1,6 +1,5 @@
 import { CardStyleHeader } from "@/components/common/card-style-header";
 import { SpeciesCardSkeletonList } from "@/components/common/skeleton-loaders";
-import { FAB } from "@/components/common/fab";
 import { useGetAnimalsCountBySpecies } from "@/features/animal/api/animal-queries";
 import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard/animals-dashboard";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
@@ -8,7 +7,6 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import FarmAnimalsEmpyState from "@/routes/_public/assets/FarmAnimalsEmpyState.svg";
-import { Plus } from "lucide-react";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/",
@@ -24,7 +22,6 @@ function RouteComponent() {
 		farmId!,
 	);
 	const { t } = useTranslation("speciesIndex");
-	// TODO: Wire FAB to NewAnimalModal (modal currently managed by CardStyleHeader)
 
 	if (isPending) {
 		return (
@@ -39,33 +36,23 @@ function RouteComponent() {
 	}
 
 	return (
-		<>
-			<div className="flex flex-col gap-2 pb-20">
-				<CardStyleHeader
-					title={t("title")}
-					Modal={NewAnimalModal}
-				/>
-				{animalData && animalData.length > 0 && (
-					<AnimalsDashboard animal={animalData!} />
-				)}
-				{animalData && animalData.length === 0 && (
-					<div className="text-muted-foreground p-4 pt-12 flex justify-center">
-						<img
-							src={FarmAnimalsEmpyState}
-							alt="Farm empty illustration"
-							style={{ width: "350px", maxWidth: "100%" }}
-						/>
-					</div>
-				)}
-			</div>
-			<FAB
-				icon={Plus}
-				onClick={() => {
-					// TODO: Trigger NewAnimalModal
-					console.log("Add animal clicked");
-				}}
-				ariaLabel="Add new animal"
+		<div className="flex flex-col gap-2">
+			<CardStyleHeader
+				title={t("title")}
+				Modal={NewAnimalModal}
 			/>
-		</>
+			{animalData && animalData.length > 0 && (
+				<AnimalsDashboard animal={animalData!} />
+			)}
+			{animalData && animalData.length === 0 && (
+				<div className="text-muted-foreground p-4 pt-12 flex justify-center">
+					<img
+						src={FarmAnimalsEmpyState}
+						alt="Farm empty illustration"
+						style={{ width: "350px", maxWidth: "100%" }}
+					/>
+				</div>
+			)}
+		</div>
 	);
 }

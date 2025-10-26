@@ -6,8 +6,7 @@ import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { CircleChevronLeft } from "lucide-react";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 
@@ -78,14 +77,14 @@ function RouteComponent() {
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
 			<div className="flex flex-col gap-2">
-				<div className="flex items-center gap-4">
-					<Link
-						to="/farm/$farmId/species"
-						params={{ farmId: farmId! }}
-					>
-						<CircleChevronLeft />
-					</Link>
-				</div>
+				<CardStyleHeader
+					title="Loading..."
+					Modal={NewAnimalModal}
+					backLink={{
+						to: "/farm/$farmId/species",
+						params: { farmId: farmId! }
+					}}
+				/>
 				<AnimalCardSkeletonList count={5} />
 			</div>
 		);
@@ -96,15 +95,11 @@ function RouteComponent() {
 			<CardStyleHeader
 				title={speciesData?.translations?.[0].name || ''}
 				Modal={NewAnimalModal}
+				backLink={{
+					to: "/farm/$farmId/species",
+					params: { farmId: farmId! }
+				}}
 			/>
-			<div className="flex items-center gap-4">
-				<Link
-					to="/farm/$farmId/species"
-					params={{ farmId: farmId! }}
-				>
-					<CircleChevronLeft />
-				</Link>
-			</div>
 
 			{/* Search and Filters */}
 			<div className="flex flex-col gap-3">
