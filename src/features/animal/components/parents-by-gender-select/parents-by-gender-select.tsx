@@ -30,7 +30,9 @@ export const ParentsByGenderSelect = ({
 		farmId,
 		include,
 		withLanguage,
-		sex,
+		filters: {
+			sex
+		}
 	});
 
 	return (

@@ -1,5 +1,4 @@
-import { CardStyleHeader } from "@/components/common/card-style-header";
-import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
+import { SpeciesCardSkeletonList } from "@/components/common/skeleton-loaders";
 import { useGetAnimalsCountBySpecies } from "@/features/animal/api/animal-queries";
 import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard/animals-dashboard";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
@@ -7,6 +6,7 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
 import FarmAnimalsEmpyState from "@/routes/_public/assets/FarmAnimalsEmpyState.svg";
+import { PageHeader } from "@/components/common/page-header";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/",
@@ -24,14 +24,24 @@ function RouteComponent() {
 	const { t } = useTranslation("speciesIndex");
 
 	if (isPending) {
-		return <FarmAnimalSpinner />;
+		return (
+			<div className="flex flex-col gap-6 p-4">
+				<PageHeader
+					title={t("title")}
+					description="Browse your animals by species"
+					action={<NewAnimalModal />}
+				/>
+				<SpeciesCardSkeletonList count={3} />
+			</div>
+		);
 	}
 
 	return (
-		<div className="flex flex-col gap-2">
-			<CardStyleHeader
+		<div className="flex flex-col gap-6 p-4">
+			<PageHeader
 				title={t("title")}
-				Modal={NewAnimalModal}
+				description="Browse your animals by species"
+				action={<NewAnimalModal />}
 			/>
 			{animalData && animalData.length > 0 && (
 				<AnimalsDashboard animal={animalData!} />

@@ -32,8 +32,10 @@ export const DeleteAnimalModal = ({
 		const response = await deleteAnimal({
 			farmId: farmId!,
 			animalId: animal.id,
-			sex,
-			speciesId,
+			filters: {
+				sex,
+				speciesId,
+			}
 		});
 		if (response.status === "success") setOpen(false);
 	};

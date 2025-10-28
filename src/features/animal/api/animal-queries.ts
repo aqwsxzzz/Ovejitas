@@ -10,17 +10,29 @@ import {
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
+	IAnimalListFilters,
+	IAnimalsCountBySpeciesResponse,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IEditAnimalPayload,
 } from "@/features/animal/types/animal-types";
 import { toast } from "sonner";
 import type { IResponse } from "@/lib/axios";
+import i18next from "i18next";
+
+const normalizeFilters = (filters?: Partial<IAnimalListFilters>): string[] => {
+	return [filters?.sex ?? "", filters?.speciesId ?? ""];
+};
 
 export const animalQueryKeys = {
 	all: ["animal"] as const,
-	animalList: (farmId: string, filters?: string[]) =>
-		[...animalQueryKeys.all, "list", farmId, filters] as const,
+	animalList: (farmId: string, filters?: Partial<IAnimalListFilters>) =>
+		[
+			...animalQueryKeys.all,
+			"list",
+			farmId,
+			normalizeFilters(filters),
+		] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
 	animalsCountBySpecies: (farmId: string, language: string) =>
@@ -31,19 +43,22 @@ export const useGetAnimalsByFarmId = ({
 	farmId,
 	include,
 	withLanguage,
-	sex,
-	speciesId,
+	filters,
 }: {
 	farmId: string;
 	include?: string;
 	withLanguage: boolean;
-	sex?: string;
-	speciesId?: string;
+	filters?: Partial<IAnimalListFilters>;
 }) =>
 	useQuery({
-		queryKey: animalQueryKeys.animalList(farmId, [sex ?? "", speciesId ?? ""]),
+		queryKey: animalQueryKeys.animalList(farmId, filters),
 		queryFn: () =>
-			getAnimalsByFarmId({ include, withLanguage, sex, speciesId }),
+			getAnimalsByFarmId({
+				include,
+				withLanguage,
+				sex: filters?.sex,
+				speciesId: filters?.speciesId,
+			}),
 		select: (data) => data.data,
 		enabled: !!farmId,
 		staleTime: 10000, // 10 seconds
@@ -51,22 +66,58 @@ export const useGetAnimalsByFarmId = ({
 
 export const useCreateAnimal = () => {
 	const queryClient = useQueryClient();
-
 	return useMutation({
 		mutationFn: ({
 			payload,
 		}: {
 			payload: ICreateAnimalPayload;
 			farmId: string;
+			filters?: Partial<IAnimalListFilters>;
 		}) => createAnimal({ payload }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (response, { farmId }) => {
+		onSuccess: (response, { farmId, filters }) => {
 			toast.success("Animal created successfully");
-			queryClient.setQueryData<IResponse<IAnimal[]>>(
-				animalQueryKeys.animalList(farmId),
 
+			queryClient.setQueryData<IResponse<IAnimalsCountBySpeciesResponse[]>>(
+				animalQueryKeys.animalsCountBySpecies(
+					farmId,
+					i18next.language.slice(0, 2),
+				),
+
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+					let exist = false;
+					const newData = oldData.data.map((item) => {
+						if (item.species.id == response.data.speciesId) {
+							exist = true;
+							return { ...item, count: item.count + 1 };
+						}
+						return item;
+					});
+
+					if (!exist) {
+						newData.push({
+							count: 1,
+							species: {
+								id: response.data.speciesId,
+								name: response.data.species.translations[0].name,
+							},
+						});
+					}
+
+					return {
+						...oldData,
+						data: newData,
+					};
+				},
+			);
+
+			queryClient.setQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId, filters),
 				(oldData) => {
 					if (!oldData) {
 						return;
@@ -108,14 +159,15 @@ export const useEditAnimalById = () => {
 			payload: IEditAnimalPayload;
 			farmId: string;
 			animalId: string;
+			filters?: Partial<IAnimalListFilters>;
 		}) => editAnimalById({ payload, farmId, animalId }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (response, { farmId }) => {
+		onSuccess: (response, { farmId, filters }) => {
 			toast.success("Animal edited successfully");
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
-				animalQueryKeys.animalList(farmId),
+				animalQueryKeys.animalList(farmId, filters),
 				(oldData) => {
 					if (!oldData) {
 						return;
@@ -141,16 +193,15 @@ export const useDeleteAnimalById = () => {
 		}: {
 			farmId: string;
 			animalId: string;
-			sex: IAnimal["sex"] | "";
-			speciesId: IAnimal["speciesId"] | "";
+			filters?: Partial<IAnimalListFilters>;
 		}) => deleteAnimalById({ animalId }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (_, { farmId, animalId, sex, speciesId }) => {
+		onSuccess: (_, { farmId, animalId, filters }) => {
 			toast.success("Animal deleted successfully");
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
-				animalQueryKeys.animalList(farmId, [sex, speciesId]),
+				animalQueryKeys.animalList(farmId, filters),
 
 				(oldData) => {
 					if (!oldData) {
@@ -175,14 +226,15 @@ export const useCreateAnimalBulk = () => {
 		}: {
 			payload: ICreateAnimalBulkPayload;
 			farmId: string;
+			filters?: Partial<IAnimalListFilters>;
 		}) => createAnimalsBulk({ payload }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (response, { farmId }) => {
+		onSuccess: (response, { farmId, filters }) => {
 			toast.success("Animals created successfully");
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
-				animalQueryKeys.animalList(farmId),
+				animalQueryKeys.animalList(farmId, filters),
 				(oldData) => {
 					if (!oldData) {
 						return;

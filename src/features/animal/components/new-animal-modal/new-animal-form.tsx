@@ -22,6 +22,7 @@ import { SpecieSelect } from "@/features/specie/components/species-select";
 import { BreedSelect } from "@/features/breed/components/breed-select";
 import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-gender-select/parents-by-gender-select";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 
 const formSchema = z.object({
 	specieId: z.string(),
@@ -52,6 +53,7 @@ const formSchema = z.object({
 export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 	const { mutateAsync: createAnimal, isPending } = useCreateAnimal();
 	const { farmId } = useParams({ strict: false });
+	const language = i18next.language.slice(0, 2);
 
 	const { t } = useTranslation("newAnimalForm");
 	const { t: tParents } = useTranslation("parentsByGenderSelect");
@@ -79,8 +81,13 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 				acquisitionDate: data.acquisitionDate
 					? formatDate(data.acquisitionDate)
 					: null,
+				groupName: null,
+				language,
 			},
 			farmId: farmId!,
+			filters: {
+				speciesId: data.specieId,
+			},
 		});
 
 		if (response.status === "success") {

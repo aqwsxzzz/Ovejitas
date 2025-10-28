@@ -23,6 +23,17 @@ export interface IAnimal {
 		measuredBy: string;
 		notes: string | null;
 	};
+	species: {
+		id: string;
+		translations: [
+			{
+				id: string;
+				language: string;
+				name: string;
+				speciesId: string;
+			},
+		];
+	};
 }
 export type IAnimalWithIncludes<T = Record<string, unknown>> = IAnimal & T;
 export interface IAnimalPayload {
@@ -42,6 +53,8 @@ export interface ICreateAnimalPayload {
 	motherId: string | null;
 	acquisitionType: "born" | "purchased" | "other";
 	acquisitionDate: string | null;
+	groupName: string | null;
+	language: string;
 }
 
 export interface ICreateAnimalBulkPayload {
@@ -84,4 +97,9 @@ export interface IAnimalsCountBySpeciesResponse {
 		id: string;
 		name: string;
 	};
+}
+
+export interface IAnimalListFilters {
+	sex?: IAnimal["sex"] | "";
+	speciesId?: string | "";
 }

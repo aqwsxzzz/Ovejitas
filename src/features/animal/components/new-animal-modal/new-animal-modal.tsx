@@ -13,24 +13,35 @@ import { NewAnimalForm } from "@/features/animal/components/new-animal-modal/new
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export const NewAnimalModal = () => {
-	const [open, setOpen] = useState<boolean>(false);
+interface NewAnimalModalProps {
+	open?: boolean;
+	onOpenChange?: (open: boolean) => void;
+}
+
+export const NewAnimalModal = ({ open: controlledOpen, onOpenChange }: NewAnimalModalProps = {}) => {
+	const [internalOpen, setInternalOpen] = useState<boolean>(false);
 	const [createMode, setCreateMode] = useState<"single" | "bulk">("single");
 	const { t } = useTranslation("newAnimalModal");
 
+	// Use controlled state if provided, otherwise use internal state
+	const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+	const handleOpenChange = onOpenChange || setInternalOpen;
+
 	return (
 		<Dialog
-			open={open}
-			onOpenChange={setOpen}
+			open={isOpen}
+			onOpenChange={handleOpenChange}
 		>
-			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					className="bg-primary text-primary-foreground w-fit ml-auto"
-				>
-					{t("addAnimalButton")}
-				</Button>
-			</DialogTrigger>
+			{!onOpenChange && (
+				<DialogTrigger asChild>
+					<Button
+						variant="outline"
+						className="bg-primary text-primary-foreground w-fit ml-auto"
+					>
+						{t("addAnimalButton")}
+					</Button>
+				</DialogTrigger>
+			)}
 			<DialogContent className="max-h-[90vh] overflow-y-auto p-4">
 				<DialogTitle>{t("addAnimalTitle")}</DialogTitle>
 				<DialogDescription>{t("addAnimalDescription")}</DialogDescription>
@@ -57,9 +68,9 @@ export const NewAnimalModal = () => {
 					</div>
 				</RadioGroup>
 				{createMode === "single" ? (
-					<NewAnimalForm closeDialog={() => setOpen(false)} />
+					<NewAnimalForm closeDialog={() => handleOpenChange(false)} />
 				) : (
-					<NewAnimalBulkForm closeDialog={() => setOpen(false)} />
+					<NewAnimalBulkForm closeDialog={() => handleOpenChange(false)} />
 				)}
 			</DialogContent>
 		</Dialog>
