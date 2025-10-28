@@ -1,4 +1,9 @@
-import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useParams,
+	Link,
+	useNavigate,
+} from "@tanstack/react-router";
 import { PageHeader } from "@/components/common/page-header";
 import { StatsWidget } from "@/components/common/stats-widget";
 import { ActivityFeed } from "@/components/common/activity-feed";
@@ -13,7 +18,6 @@ import {
 	CheckCircle2,
 } from "lucide-react";
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
-import i18next from "i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/dashboard",
@@ -27,9 +31,7 @@ function RouteComponent() {
 	const { data: animalData, isLoading } = useGetAnimalsByFarmId({
 		farmId: farmId!,
 		include: "species.translations,breed",
-		animalFilters: {
-			language: i18next.language.slice(0, 2) as "es" | "en",
-		},
+		withLanguage: true,
 	});
 
 	const totalAnimals = animalData?.length || 0;
@@ -76,7 +78,10 @@ function RouteComponent() {
 
 			{/* Stats Grid */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<Link to="/farm/$farmId/species" params={{ farmId: farmId! }}>
+				<Link
+					to="/farm/$farmId/species"
+					params={{ farmId: farmId! }}
+				>
 					<StatsWidget
 						icon={Beef}
 						iconColor="text-primary"
@@ -103,9 +108,7 @@ function RouteComponent() {
 				<StatsWidget
 					icon={AlertTriangle}
 					iconColor={healthAlerts > 0 ? "text-error" : "text-success"}
-					borderColor={
-						healthAlerts > 0 ? "border-l-error" : "border-l-success"
-					}
+					borderColor={healthAlerts > 0 ? "border-l-error" : "border-l-success"}
 					label="Health Alerts"
 					value={healthAlerts}
 					trend={
@@ -125,7 +128,12 @@ function RouteComponent() {
 						iconColor="text-primary"
 						title="Add Animal"
 						description="Register a new animal to your farm"
-						onClick={() => navigate({ to: "/farm/$farmId/species", params: { farmId: farmId! } })}
+						onClick={() =>
+							navigate({
+								to: "/farm/$farmId/species",
+								params: { farmId: farmId! },
+							})
+						}
 					/>
 					<QuickActionCard
 						icon={Stethoscope}
