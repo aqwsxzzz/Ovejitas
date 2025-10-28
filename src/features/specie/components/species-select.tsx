@@ -18,8 +18,10 @@ export const SpecieSelect = ({
 	defaultValue?: string;
 }) => {
 	const include = "";
-	const { data: speciesData } = useGetSpecies({ include, withLanguage: true });
+	const { data: speciesData, isPending } = useGetSpecies({ include, withLanguage: true });
 	const { t } = useTranslation("specieSelect");
+
+
 
 	return (
 		<Select
@@ -31,14 +33,17 @@ export const SpecieSelect = ({
 				<SelectValue placeholder={t("selectTriggerPlaceholder")} />
 			</SelectTrigger>
 			<SelectContent>
-				{speciesData?.map((specie) => (
-					<SelectItem
-						key={specie.id}
-						value={specie.id}
-					>
-						{specie.translations[0].name}
-					</SelectItem>
-				))}
+				{isPending && <SelectItem value="loading" disabled>Loading...</SelectItem>}
+				{!isPending && speciesData
+					?.filter(specie => specie.translations?.[0]?.name)
+					?.map((specie) => (
+						<SelectItem
+							key={specie.id}
+							value={specie.id}
+						>
+							{specie.translations![0].name}
+						</SelectItem>
+					))}
 			</SelectContent>
 		</Select>
 	);

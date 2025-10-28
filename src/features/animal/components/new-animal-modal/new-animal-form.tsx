@@ -85,8 +85,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 				language,
 			},
 			farmId: farmId!,
-			animalFilters: {
-				language: language as "es" | "en",
+			filters: {
 				speciesId: data.specieId,
 			},
 		});

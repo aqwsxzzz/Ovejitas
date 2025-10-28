@@ -114,6 +114,10 @@ export const EditAnimalForm = ({
 				acquisitionDate: formatDate(data.acquisitionDate),
 			},
 			farmId: farmId!,
+			filters: {
+				speciesId: animal.speciesId,
+				sex: animal.sex,
+			},
 			animalId: animal.id,
 		});
 		if (response.status == "success") {

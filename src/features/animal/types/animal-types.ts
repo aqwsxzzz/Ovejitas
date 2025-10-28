@@ -99,7 +99,7 @@ export interface IAnimalsCountBySpeciesResponse {
 	};
 }
 
-export interface IAnimalsBulkCreationResponse {
-	created: IAnimal[];
-	failed: Record<string, string>[];
+export interface IAnimalListFilters {
+	sex?: IAnimal["sex"] | "";
+	speciesId?: string | "";
 }
