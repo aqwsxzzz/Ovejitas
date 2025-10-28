@@ -98,3 +98,8 @@ export interface IAnimalsCountBySpeciesResponse {
 		name: string;
 	};
 }
+
+export interface IAnimalsBulkCreationResponse {
+	created: IAnimal[];
+	failed: Record<string, string>[];
+}

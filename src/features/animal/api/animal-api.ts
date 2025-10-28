@@ -12,22 +12,22 @@ import type {
 import { includeQueryParam } from "@/utils/include-query-params";
 import type { IBreed } from "@/features/breed/types/breed-types";
 import type { ISpecie } from "@/features/specie/types/specie-types";
+import type { IAnimalFilters } from "@/features/animal/api/animal-queries";
 
 export const getAnimalsByFarmId = ({
 	include,
-	withLanguage,
-	sex,
-	speciesId,
+	animalFilters,
 }: {
 	include?: string;
-	withLanguage: boolean;
-	sex?: string;
-	speciesId?: string;
+	animalFilters: IAnimalFilters;
 }) =>
 	axiosHelper<IResponse<IAnimal[]>>({
 		method: "get",
 		url: "/animals",
-		urlParams: includeQueryParam({ include, withLanguage, sex, speciesId }),
+		urlParams: {
+			include,
+			...animalFilters,
+		},
 	});
 
 export const createAnimal = ({ payload }: { payload: ICreateAnimalPayload }) =>

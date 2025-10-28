@@ -4,6 +4,7 @@ import { cowHead } from "@lucide/lab";
 import { Sun } from "lucide-react";
 import { Icon } from "lucide-react";
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
+import i18next from "i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/dashboard",
@@ -16,7 +17,9 @@ function RouteComponent() {
 	const { data: animalData } = useGetAnimalsByFarmId({
 		farmId: farmId!,
 		include: "species.translations,breed",
-		withLanguage: true,
+		animalFilters: {
+			language: i18next.language.slice(0, 2) as "es" | "en",
+		},
 	});
 
 	return (

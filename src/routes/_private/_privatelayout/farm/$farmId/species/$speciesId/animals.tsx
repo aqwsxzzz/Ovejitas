@@ -5,6 +5,7 @@ import { AnimalCardContainer } from "@/features/animal/components/animal-card-co
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import i18next from "i18next";
 import { CircleChevronLeft } from "lucide-react";
 
 export const Route = createFileRoute(
@@ -18,8 +19,10 @@ function RouteComponent() {
 	const { data: animalsData, isPending: isPendingAnimals } =
 		useGetAnimalsByFarmId({
 			farmId: farmId!,
-			withLanguage: true,
-			speciesId: speciesId!,
+			animalFilters: {
+				speciesId: speciesId!,
+				language: i18next.language.slice(0, 2) as "es" | "en",
+			},
 		});
 	const { data: speciesData, isPending: isPendingSpecies } =
 		useGetSpeciesBySpecieId({
