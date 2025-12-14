@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import type { IAnimalsCountBySpeciesResponse } from "@/features/animal/types/animal-types";
 import { Link, useParams } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 interface AnimalCardProps {
 	animal: IAnimalsCountBySpeciesResponse;
@@ -37,6 +38,7 @@ function getFarmAnimalEmoji(name: string): string {
 
 export const AnimalCountBySpeciesCard = ({ animal }: AnimalCardProps) => {
 	const { farmId } = useParams({ strict: false });
+	const { t } = useTranslation("animalsCountBySpeciesCard");
 
 	return (
 		<Card className="w-full max-w-3xl mx-auto my-2 px-3 py-2 rounded-md border border-border bg-background shadow-sm hover:shadow transition min-h-0">
@@ -66,7 +68,7 @@ export const AnimalCountBySpeciesCard = ({ animal }: AnimalCardProps) => {
 						className="gap-2 h-8 px-3 text-xs bg-transparent flex-none"
 					>
 						<Eye className="h-3 w-3" />
-						View Details
+						{t("viewDetailsButton")}
 					</Button>
 				</Link>
 			</div>

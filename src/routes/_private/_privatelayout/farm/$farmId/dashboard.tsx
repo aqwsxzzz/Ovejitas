@@ -18,6 +18,7 @@ import {
 	CheckCircle2,
 } from "lucide-react";
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/dashboard",
@@ -36,6 +37,7 @@ function RouteComponent() {
 
 	const totalAnimals = animalData?.length || 0;
 	const healthAlerts = 0; // TODO: Calculate from animal health data
+	const { t } = useTranslation("dashboard");
 
 	// Mock recent activity data
 	const recentActivity = [
@@ -43,11 +45,11 @@ function RouteComponent() {
 			id: "1",
 			icon: Plus,
 			iconColor: "bg-success/10 text-success",
-			title: "New animal added",
-			description: "Sheep #247 added to the flock",
-			timestamp: "2 hours ago",
+			title: t("recentActivities.animalAdded.title"),
+			description: t("recentActivities.animalAdded.description"),
+			timestamp: t("recentActivities.animalAdded.timestamp"),
 			action: {
-				label: "View",
+				label: t("recentActivities.animalAdded.viewButton"),
 				onClick: () => console.log("View animal"),
 			},
 		},
@@ -55,25 +57,25 @@ function RouteComponent() {
 			id: "2",
 			icon: Stethoscope,
 			iconColor: "bg-info/10 text-info",
-			title: "Health check completed",
-			description: "5 animals checked by Dr. Smith",
-			timestamp: "5 hours ago",
+			title: t("recentActivities.healthCheck.title"),
+			description: t("recentActivities.healthCheck.description"),
+			timestamp: t("recentActivities.healthCheck.timestamp"),
 		},
 		{
 			id: "3",
 			icon: CheckCircle2,
 			iconColor: "bg-primary/10 text-primary",
-			title: "Task completed",
-			description: "Morning feeding completed",
-			timestamp: "8 hours ago",
+			title: t("recentActivities.tasks.title"),
+			description: t("recentActivities.tasks.description"),
+			timestamp: t("recentActivities.tasks.timestamp"),
 		},
 	];
 
 	return (
 		<div className="max-w-6xl mx-auto space-y-6 pb-6">
 			<PageHeader
-				title="Dashboard"
-				description="Welcome back to your digital farmhouse"
+				title={t("title")}
+				description={t("dashboardSubtitle")}
 			/>
 
 			{/* Stats Grid */}
@@ -86,11 +88,14 @@ function RouteComponent() {
 						icon={Beef}
 						iconColor="text-primary"
 						borderColor="border-l-primary"
-						label="Total Animals"
+						label={t("resumes.resumeAnimalsCard.label")}
 						value={isLoading ? "..." : totalAnimals}
 						trend={
 							totalAnimals > 0
-								? { value: "+2 this week", direction: "up" }
+								? {
+										value: t("resumes.resumeAnimalsCard.trendValue"),
+										direction: "up",
+									}
 								: undefined
 						}
 					/>
@@ -100,20 +105,26 @@ function RouteComponent() {
 					icon={Cloud}
 					iconColor="text-info"
 					borderColor="border-l-info"
-					label="Weather"
+					label={t("resumes.resumeWeatherCard.label")}
 					value="24°C"
-					trend={{ value: "Sunny", direction: "neutral" }}
+					trend={{
+						value: t("resumes.resumeWeatherCard.trendValue"),
+						direction: "neutral",
+					}}
 				/>
 
 				<StatsWidget
 					icon={AlertTriangle}
 					iconColor={healthAlerts > 0 ? "text-error" : "text-success"}
 					borderColor={healthAlerts > 0 ? "border-l-error" : "border-l-success"}
-					label="Health Alerts"
+					label={t("resumes.resumeHealthCard.label")}
 					value={healthAlerts}
 					trend={
 						healthAlerts === 0
-							? { value: "All healthy", direction: "neutral" }
+							? {
+									value: t("resumes.resumeHealthCard.trendValue"),
+									direction: "neutral",
+								}
 							: undefined
 					}
 				/>
@@ -121,13 +132,15 @@ function RouteComponent() {
 
 			{/* Quick Actions */}
 			<div>
-				<h2 className="text-h2 text-foreground mb-4">Quick Actions</h2>
+				<h2 className="text-h2 text-foreground mb-4">
+					{t("quickActions.title")}
+				</h2>
 				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
 					<QuickActionCard
 						icon={Plus}
 						iconColor="text-primary"
-						title="Add Animal"
-						description="Register a new animal to your farm"
+						title={t("quickActions.addAnimal.title")}
+						description={t("quickActions.addAnimal.description")}
 						onClick={() =>
 							navigate({
 								to: "/farm/$farmId/species",
@@ -138,15 +151,15 @@ function RouteComponent() {
 					<QuickActionCard
 						icon={Stethoscope}
 						iconColor="text-info"
-						title="Health Check"
-						description="Record health observations"
+						title={t("quickActions.healthCheck.title")}
+						description={t("quickActions.healthCheck.description")}
 						onClick={() => console.log("Health check")}
 					/>
 					<QuickActionCard
 						icon={Heart}
 						iconColor="text-breeding"
-						title="Breeding Log"
-						description="Track breeding activities"
+						title={t("quickActions.breedingLog.title")}
+						description={t("quickActions.breedingLog.description")}
 						onClick={() => console.log("Breeding log")}
 					/>
 				</div>
@@ -154,10 +167,12 @@ function RouteComponent() {
 
 			{/* Recent Activity */}
 			<div>
-				<h2 className="text-h2 text-foreground mb-4">Recent Activity</h2>
+				<h2 className="text-h2 text-foreground mb-4">
+					{t("recentActivities.title")}
+				</h2>
 				<ActivityFeed
 					items={recentActivity}
-					emptyMessage="No recent activity to show"
+					emptyMessage={t("recentActivities.noActivityMessage")}
 				/>
 			</div>
 		</div>

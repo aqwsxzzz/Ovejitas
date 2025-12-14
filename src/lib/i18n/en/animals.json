@@ -1,0 +1,10 @@
+{
+    "searchSubtitle": "Search and filter your animals",
+    "searchInputPlaceholder": "Search animals by name or tag...",
+    "filterButtonsAll": "All",
+    "filterButtonsAlive": "Alive",
+    "filterButtonsSold": "Sold",
+    "filterButtonsDeceased": "Deceased"  ,
+    "noAnimalsMatch": "No animals match your search or filters",
+    "noAnimalsFound": "No animals found"
+}

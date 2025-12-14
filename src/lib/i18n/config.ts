@@ -49,6 +49,12 @@ import farmMembersEN from "./en/farm-members.json";
 import farmMembersES from "./es/farm-members.json";
 import parentsByGenderSelectEN from "./en/parents-by-gender-select.json";
 import parentsByGenderSelectES from "./es/parents-by-gender-select.json";
+import animalsCountBySpeciesCardEN from "./en/animals-count-by-species-card.json";
+import animalsCountBySpeciesCardES from "./es/animals-count-by-species-card.json";
+import animalsEN from "./en/animals.json";
+import animalsES from "./es/animals.json";
+import dashboardEN from "./en/dashboard.json";
+import dashboardES from "./es/dashboard.json";
 
 export const defaultNS = "login";
 
@@ -83,6 +89,9 @@ i18next
 				speciesIndex: speciesIndexEN,
 				farmMembers: farmMembersEN,
 				parentsByGenderSelect: parentsByGenderSelectEN,
+				animalsCountBySpeciesCard: animalsCountBySpeciesCardEN,
+				animals: animalsEN,
+				dashboard: dashboardEN,
 			},
 			es: {
 				login: loginES,
@@ -109,6 +118,9 @@ i18next
 				speciesIndex: speciesIndexES,
 				farmMembers: farmMembersES,
 				parentsByGenderSelect: parentsByGenderSelectES,
+				animalsCountBySpeciesCard: animalsCountBySpeciesCardES,
+				animals: animalsES,
+				dashboard: dashboardES,
 			},
 		},
 		defaultNS,

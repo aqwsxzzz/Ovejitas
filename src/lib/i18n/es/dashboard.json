@@ -1,0 +1,56 @@
+{
+    "title": "Inicio",
+    "dashboardSubtitle": "Bienvenido de nuevo a tu granja digital",
+    "resumes": {
+
+        "resumeAnimalsCard": {
+            "label": "Total de animales",
+            "trendValue": "+2 esta semana"
+        },
+        "resumeWeatherCard": {
+            "label": "Clima",
+            "value": "24°C",
+            "trendValue": "Soleado"
+        },
+        "resumeHealthCard": {
+            "label": "Alertas de salud",
+            "trendValue": "Todos sanos"
+        }
+    },
+    "quickActions": {
+        "title": "Acciones rápidas",
+        "addAnimal": {
+            "title": "Agregar animal",
+            "description": "Registra un nuevo animal en tu granja"
+        },
+        "healthCheck": {
+            "title": "Chequeo de salud",
+            "description": "Registra las observaciones del chequeo de salud"
+        },
+        "breedingLog": {
+            "title": "Registro de reproducción",
+            "description": "Registra las actividades de reproducción"
+        }
+    },
+    "recentActivities": {
+        "title": "Actividades recientes",
+        "noActivityMessage": "No hay actividad reciente para mostrar",
+        "animalAdded": {
+            "title": "Nuevo animal agregado",
+            "description": "Oveja #247 agregada al rebaño",
+            "timestamp": "Hace 2 horas",
+            "viewButton" : "Ver"
+        },
+        "healthCheck": {
+            "title": "Chequeo de salud completado",
+            "description": "5 animales revisados por el Dr. Smith",
+            "timestamp": "Hace 1 día"
+        },
+        "tasks": {
+            "title": "Tarea completada",
+            "description": "Alimentación matutina completada",
+            "timestamp": "Hace 8 horas"
+        }
+    }
+
+}

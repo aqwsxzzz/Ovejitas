@@ -1,0 +1,56 @@
+{
+    "title": "Dashboard",
+    "dashboardSubtitle": "Welcome back to your digital farmhouse",
+    "resumes": {
+
+        "resumeAnimalsCard": {
+            "label": "Total Animals",
+            "trendValue": "+2 this week"
+        },
+        "resumeWeatherCard": {
+            "label": "Weather",
+            "value": "24°C",
+            "trendValue": "Sunny"
+        },
+        "resumeHealthCard": {
+            "label": "Health Alerts",
+            "trendValue": "All healthy"
+        }
+    },
+    "quickActions": {
+        "title": "Quick Actions",
+        "addAnimal": {
+            "title": "Add Animal",
+            "description": "Register a new animal to your farm"
+        },
+        "healthCheck": {
+            "title": "Health Check",
+            "description": "record health check observations"
+        },
+        "breedingLog": {
+            "title": "Breeding Log",
+            "description": "Track breeding activities"
+        }
+    },
+    "recentActivities": {
+        "title": "Recent Activities",
+        "noActivityMessage": "No recent activity to show",
+        "animalAdded": {
+            "title": "New Animal Added",
+            "description": "Sheep #247 added to the flock",
+            "timestamp": "2 hours ago",
+            "viewButton" : "View"
+        },
+        "healthCheck": {
+            "title": "Health check completed",
+            "description": "5 animals checked by Dr. Smith",
+            "timestamp": "1 day ago"
+        },
+        "tasks": {
+            "title": "Task completed",
+            "description": "Morning feeding completed",
+            "timestamp": "8 hours ago"
+        }
+    }
+
+}

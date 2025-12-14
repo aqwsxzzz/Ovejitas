@@ -12,6 +12,7 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { PageHeader } from "@/components/common/page-header";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/animals",
@@ -39,6 +40,8 @@ function RouteComponent() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedFilter, setSelectedFilter] = useState("all");
 
+	const { t } = useTranslation("animals");
+
 	// Calculate filter options with counts
 	const filterOptions: FilterOption[] = useMemo(() => {
 		if (!animalsData) return [];
@@ -53,12 +56,16 @@ function RouteComponent() {
 		).length;
 
 		return [
-			{ label: "All", value: "all", count: animalsData.length },
-			{ label: "Alive", value: "alive", count: aliveCount },
-			{ label: "Sold", value: "sold", count: soldCount },
-			{ label: "Deceased", value: "deceased", count: deceasedCount },
+			{ label: t("filterButtonsAll"), value: "all", count: animalsData.length },
+			{ label: t("filterButtonsAlive"), value: "alive", count: aliveCount },
+			{ label: t("filterButtonsSold"), value: "sold", count: soldCount },
+			{
+				label: t("filterButtonsDeceased"),
+				value: "deceased",
+				count: deceasedCount,
+			},
 		];
-	}, [animalsData]);
+	}, [animalsData, t]);
 
 	// Filter and search animals
 	const filteredAnimals = useMemo(() => {
@@ -91,7 +98,7 @@ function RouteComponent() {
 			<div className="flex flex-col gap-6 p-4">
 				<PageHeader
 					title="Loading..."
-					description="Search and filter your animals"
+					description={t("searchInputPlaceholder")}
 					backLink={{
 						to: "/farm/$farmId/species",
 						params: { farmId: farmId! },
@@ -107,7 +114,7 @@ function RouteComponent() {
 		<div className="flex flex-col gap-6 p-4">
 			<PageHeader
 				title={speciesData?.translations?.[0].name || ""}
-				description="Search and filter your animals"
+				description={t("searchSubtitle")}
 				backLink={{
 					to: "/farm/$farmId/species",
 					params: { farmId: farmId! },
@@ -120,7 +127,7 @@ function RouteComponent() {
 				<SearchBar
 					value={searchQuery}
 					onChange={setSearchQuery}
-					placeholder="Search by name or tag..."
+					placeholder={t("searchInputPlaceholder")}
 				/>
 				<FilterChips
 					options={filterOptions}
@@ -138,8 +145,8 @@ function RouteComponent() {
 			) : (
 				<div className="text-center text-muted-foreground p-8">
 					{searchQuery || selectedFilter !== "all"
-						? "No animals match your search or filter"
-						: "No animals found"}
+						? t("noAnimalsMatch")
+						: t("noAnimalsFound")}
 				</div>
 			)}
 		</div>

@@ -22,6 +22,9 @@ import sheetMenu from "./en/sheet-menu.json";
 import speciesIndex from "./en/species-index.json";
 import farmMembers from "./en/farm-members.json";
 import parentsByGenderSelect from "./en/parents-by-gender-select.json";
+import animalsCountBySpeciesCard from "./en/animals-count-by-species-card.json";
+import animals from "./en/animals.json";
+import dashboard from "./en/dashboard.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -49,6 +52,9 @@ const resources = {
 	speciesIndex,
 	farmMembers,
 	parentsByGenderSelect,
+	animalsCountBySpeciesCard,
+	animals,
+	dashboard,
 } as const;
 
 export default resources;
