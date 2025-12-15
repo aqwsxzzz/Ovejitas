@@ -26,6 +26,7 @@ import animalsCountBySpeciesCard from "./en/animals-count-by-species-card.json";
 import animals from "./en/animals.json";
 import dashboard from "./en/dashboard.json";
 import tasks from "./en/tasks-tab.json";
+import privateLayout from "./en/private-layout.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -57,6 +58,7 @@ const resources = {
 	animals,
 	dashboard,
 	tasks,
+	privateLayout,
 } as const;
 
 export default resources;

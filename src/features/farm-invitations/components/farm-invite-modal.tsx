@@ -77,7 +77,10 @@ export const FarmInviteModal = () => {
 			<DialogTrigger asChild>
 				<Button>{t("invite")}</Button>
 			</DialogTrigger>
-			<DialogContent className="flex flex-col gap-4">
+			<DialogContent
+				className="flex flex-col gap-4"
+				onOpenAutoFocus={(e) => e.preventDefault()}
+			>
 				<div className="flex flex-col gap-2">
 					<DialogTitle className="text-center">Invite to Farm</DialogTitle>
 					{!token && (
@@ -127,7 +130,7 @@ export const FarmInviteModal = () => {
 								<p className="mb-1 text-sm text-muted-foreground">
 									Copy and share this invitation link with your friend:
 								</p>
-								<div className="flex w-full max-w-xl gap-2">
+								<div className="flex w-full gap-2 justify-center max-w-[90%]">
 									<Input
 										className="flex-1"
 										value={`${import.meta.env.VITE_BASIC_URL}/signup?token=${tokenData}&email=${email}`}

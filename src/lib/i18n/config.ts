@@ -57,6 +57,8 @@ import dashboardEN from "./en/dashboard.json";
 import dashboardES from "./es/dashboard.json";
 import tasksEN from "./en/tasks-tab.json";
 import tasksES from "./es/tasks-tab.json";
+import privateLayoutEN from "./en/private-layout.json";
+import privateLayoutES from "./es/private-layout.json";
 
 export const defaultNS = "login";
 
@@ -95,6 +97,7 @@ i18next
 				animals: animalsEN,
 				dashboard: dashboardEN,
 				tasks: tasksEN,
+				privateLayout: privateLayoutEN,
 			},
 			es: {
 				login: loginES,
@@ -125,6 +128,7 @@ i18next
 				animals: animalsES,
 				dashboard: dashboardES,
 				tasks: tasksES,
+				privateLayout: privateLayoutES,
 			},
 		},
 		defaultNS,

@@ -28,7 +28,7 @@ function RouteComponent() {
 			<div className="flex flex-col gap-6 p-4">
 				<PageHeader
 					title={t("title")}
-					description="Browse your animals by species"
+					description={t("subtitle")}
 					action={<NewAnimalModal />}
 				/>
 				<SpeciesCardSkeletonList count={3} />
@@ -40,7 +40,7 @@ function RouteComponent() {
 		<div className="flex flex-col gap-6 p-4">
 			<PageHeader
 				title={t("title")}
-				description="Browse your animals by species"
+				description={t("subtitle")}
 				action={<NewAnimalModal />}
 			/>
 			{animalData && animalData.length > 0 && (

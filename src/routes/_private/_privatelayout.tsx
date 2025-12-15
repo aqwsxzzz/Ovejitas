@@ -8,6 +8,8 @@ import type { IUser } from "@/features/auth/types/auth-types";
 import type { IResponse } from "@/lib/axios";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { toast } from "sonner";
+import i18next from "i18next";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_private/_privatelayout")({
 	loader: async ({ context }) => {
@@ -19,7 +21,7 @@ export const Route = createFileRoute("/_private/_privatelayout")({
 			});
 		} catch (error) {
 			void error;
-			toast.error("You must be logged in to keep going.");
+			toast.error(i18next.t("privateLayout:notLoggedErrorMsg"));
 			return redirect({ to: "/login" });
 		}
 	},
@@ -29,12 +31,13 @@ export const Route = createFileRoute("/_private/_privatelayout")({
 
 function PrivateLayout() {
 	const { data: userData, isLoading } = useGetUserProfile();
+	const { t } = useTranslation("privateLayout");
 
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>{t("isLoadingMsg")}</div>;
 	}
 	if (!userData) {
-		return <div>Something went wrong</div>;
+		return <div>{t("noUserDataErrorMsg")}</div>;
 	}
 
 	return (

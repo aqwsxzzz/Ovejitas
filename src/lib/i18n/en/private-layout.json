@@ -1,0 +1,5 @@
+{
+    "notLoggedErrorMsg": "You must be logged in to keep going",
+    "isLoadingMsg": "Loading...",
+    "noUserDataErrorMsg": "Something went wrong..."
+}
