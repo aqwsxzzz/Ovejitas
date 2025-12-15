@@ -55,6 +55,8 @@ import animalsEN from "./en/animals.json";
 import animalsES from "./es/animals.json";
 import dashboardEN from "./en/dashboard.json";
 import dashboardES from "./es/dashboard.json";
+import tasksEN from "./en/tasks-tab.json";
+import tasksES from "./es/tasks-tab.json";
 
 export const defaultNS = "login";
 
@@ -92,6 +94,7 @@ i18next
 				animalsCountBySpeciesCard: animalsCountBySpeciesCardEN,
 				animals: animalsEN,
 				dashboard: dashboardEN,
+				tasks: tasksEN,
 			},
 			es: {
 				login: loginES,
@@ -121,6 +124,7 @@ i18next
 				animalsCountBySpeciesCard: animalsCountBySpeciesCardES,
 				animals: animalsES,
 				dashboard: dashboardES,
+				tasks: tasksES,
 			},
 		},
 		defaultNS,

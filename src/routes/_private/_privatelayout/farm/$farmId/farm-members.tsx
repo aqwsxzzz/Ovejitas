@@ -27,7 +27,7 @@ function RouteComponent() {
 		<div className="flex flex-col gap-6 p-4">
 			<PageHeader
 				title={t("title")}
-				description="Manage farm members and send invitations"
+				description={t("subtitle")}
 				action={<FarmInviteModal />}
 			/>
 

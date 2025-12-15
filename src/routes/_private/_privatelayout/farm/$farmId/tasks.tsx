@@ -2,19 +2,22 @@ import { createFileRoute } from "@tanstack/react-router";
 import { CheckSquare, Calendar, Bell, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/common/page-header";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
-	"/_private/_privatelayout/farm/$farmId/tasks"
+	"/_private/_privatelayout/farm/$farmId/tasks",
 )({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const { t } = useTranslation("tasks");
+
 	return (
 		<div className="flex flex-col gap-4 p-4 max-w-4xl mx-auto pb-24">
 			<PageHeader
-				title="Tasks"
-				description="Task management coming soon"
+				title={t("title")}
+				description={t("subtitle")}
 			/>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -22,12 +25,12 @@ function RouteComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-h2">
 							<CheckSquare className="w-5 h-5 text-primary" />
-							Daily Tasks
+							{t("dailyTasks.title")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-small text-muted-foreground">
-							Track your daily farm activities and checklists
+							{t("dailyTasks.subtitle")}
 						</p>
 					</CardContent>
 				</Card>
@@ -36,12 +39,12 @@ function RouteComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-h2">
 							<Calendar className="w-5 h-5 text-primary" />
-							Scheduled Activities
+							{t("scheduledActivities.title")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-small text-muted-foreground">
-							Manage scheduled farm activities and events
+							{t("scheduledActivities.subtitle")}
 						</p>
 					</CardContent>
 				</Card>
@@ -50,12 +53,12 @@ function RouteComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-h2">
 							<Bell className="w-5 h-5 text-primary" />
-							Maintenance Reminders
+							{t("maintenanceReminders.title")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-small text-muted-foreground">
-							Set up reminders for equipment and facility maintenance
+							{t("maintenanceReminders.subtitle")}
 						</p>
 					</CardContent>
 				</Card>
@@ -64,12 +67,12 @@ function RouteComponent() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2 text-h2">
 							<FileText className="w-5 h-5 text-primary" />
-							Reports
+							{t("reports.title")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<p className="text-small text-muted-foreground">
-							View and generate task completion reports
+							{t("reports.subtitle")}
 						</p>
 					</CardContent>
 				</Card>

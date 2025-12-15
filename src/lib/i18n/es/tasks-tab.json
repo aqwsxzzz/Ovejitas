@@ -1,0 +1,20 @@
+{
+    "title": "Tareas",
+    "subtitle":"La gestión de tareas llegará pronto",
+    "dailyTasks": {
+        "title": "Tareas diarias",
+        "subtitle": "Sigue tus actividades y listas diarias de la granja"
+    },
+    "scheduledActivities": {
+        "title": "Actividades programadas",
+        "subtitle": "Gestiona las actividades y eventos planificados de la granja"
+    },
+    "maintenanceReminders": {
+        "title": "Recordatorios de mantenimiento",
+        "subtitle": "Configura recordatorios para el mantenimiento de equipos e instalaciones"
+    },
+    "reports": {
+        "title": "Informes",
+        "subtitle": "Consulta y genera informes de cumplimiento de tareas"
+    }
+}

@@ -1,5 +1,6 @@
 {
     "title": "Miembros",
+    "subtitle":"Gestiona miembros y envía invitaciones",
     "activeMembers": "Miembros activos",
     "pendingInvitations": "Invitaciones pendientes",
     "noActiveMembers": "No hay miembros activos",

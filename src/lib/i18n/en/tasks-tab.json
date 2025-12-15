@@ -1,0 +1,20 @@
+{
+    "title": "Tasks",
+    "subtitle":"Task management coming soon",
+    "dailyTasks": {
+        "title": "Daily Tasks",
+        "subtitle": "Track your daily farm activities and checklists"
+    },
+    "scheduledActivities": {
+        "title": "Scheduled Activities",
+        "subtitle": "Manage scheduled farm activities and events"
+    },
+    "maintenanceReminders": {
+        "title": "Maintenance Reminders",
+        "subtitle": "Set up reminders for equipment and facility maintenance"
+    },
+    "reports": {
+        "title": "Reports",
+        "subtitle": "View and generate task completion reports"
+    }
+}

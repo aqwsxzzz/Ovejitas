@@ -1,5 +1,6 @@
 {
     "title": "Members",
+    "subtitle":"Manage farm members and send invitations",
     "activeMembers": "Active Members",  
     "pendingInvitations": "Pending Invitations",
     "noActiveMembers": "No active members",

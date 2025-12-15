@@ -25,6 +25,7 @@ import parentsByGenderSelect from "./en/parents-by-gender-select.json";
 import animalsCountBySpeciesCard from "./en/animals-count-by-species-card.json";
 import animals from "./en/animals.json";
 import dashboard from "./en/dashboard.json";
+import tasks from "./en/tasks-tab.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -55,6 +56,7 @@ const resources = {
 	animalsCountBySpeciesCard,
 	animals,
 	dashboard,
+	tasks,
 } as const;
 
 export default resources;
