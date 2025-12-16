@@ -1,0 +1,9 @@
+{
+    "ariaLabel": "Main navigation",
+    "tabs": {
+        "dashboard": "Dashboard",
+        "animals": "Animals",
+        "tasks": "Tasks",
+        "profile": "Profile"
+    }
+}

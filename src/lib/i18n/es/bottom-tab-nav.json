@@ -1,0 +1,9 @@
+{
+    "ariaLabel": "Navegación principal",
+    "tabs": {
+        "dashboard": "Inicio",
+        "animals": "Animales",
+        "tasks": "Tareas",
+        "profile": "Perfil"
+    }
+}

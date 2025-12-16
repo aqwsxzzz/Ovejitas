@@ -28,6 +28,7 @@ import animals from "./en/animals.json";
 import dashboard from "./en/dashboard.json";
 import tasks from "./en/tasks-tab.json";
 import privateLayout from "./en/private-layout.json";
+import bottomTabNav from "./en/bottom-tab-nav.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -61,6 +62,7 @@ const resources = {
 	dashboard,
 	tasks,
 	privateLayout,
+	bottomTabNav,
 } as const;
 
 export default resources;
