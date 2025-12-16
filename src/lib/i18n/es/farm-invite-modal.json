@@ -1,0 +1,11 @@
+{
+    "title": "Invitar a la granja",
+    "description": "Aquí puedes invitar a un amigo a tu granja como miembro para que te ayude.",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "Ingresa el correo",
+    "createButton": "Crear invitación",
+    "cancelButton": "Cancelar",
+    "copyInstructions": "Copia y comparte este enlace de invitación con tu amigo:",
+    "copyButton": "Copiar",
+    "copySuccess": "¡Enlace de invitación copiado!"
+}

@@ -13,6 +13,8 @@ import animalProfileBasicCardEN from "./en/animal-profile-basic-card.json";
 import animalProfileBasicCardES from "./es/animal-profile-basic-card.json";
 import dropdownMenuHeaderEN from "./en/dropdown-menu-header.json";
 import dropdownMenuHeaderES from "./es/dropdown-menu-header.json";
+import farmInviteModalEN from "./en/farm-invite-modal.json";
+import farmInviteModalES from "./es/farm-invite-modal.json";
 import deleteAnimalModalEN from "./en/delete-animal-modal.json";
 import deleteAnimalModalES from "./es/delete-animal-modal.json";
 import editAnimalFormEN from "./en/edit-animal-form.json";
@@ -92,6 +94,7 @@ i18next
 				sheetMenu: sheetMenuEN,
 				speciesIndex: speciesIndexEN,
 				farmMembers: farmMembersEN,
+				farmInviteModal: farmInviteModalEN,
 				parentsByGenderSelect: parentsByGenderSelectEN,
 				animalsCountBySpeciesCard: animalsCountBySpeciesCardEN,
 				animals: animalsEN,
@@ -123,6 +126,7 @@ i18next
 				sheetMenu: sheetMenuES,
 				speciesIndex: speciesIndexES,
 				farmMembers: farmMembersES,
+				farmInviteModal: farmInviteModalES,
 				parentsByGenderSelect: parentsByGenderSelectES,
 				animalsCountBySpeciesCard: animalsCountBySpeciesCardES,
 				animals: animalsES,

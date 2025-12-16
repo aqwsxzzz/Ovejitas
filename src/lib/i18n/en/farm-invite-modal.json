@@ -1,0 +1,11 @@
+{
+    "title": "Invite to Farm",
+    "description": "Here you can invite a friend to your farm as a member to help you.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Enter email",
+    "createButton": "Create Invitation",
+    "cancelButton": "Cancel",
+    "copyInstructions": "Copy and share this invitation link with your friend:",
+    "copyButton": "Copy",
+    "copySuccess": "Invitation link copied!"
+}

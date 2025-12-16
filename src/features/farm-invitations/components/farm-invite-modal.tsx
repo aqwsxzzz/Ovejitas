@@ -30,6 +30,7 @@ const formSchema = z.object({
 
 export const FarmInviteModal = () => {
 	const { t } = useTranslation("dropdownMenuHeader");
+	const { t: tInvite } = useTranslation("farmInviteModal");
 	const { mutateAsync: sendInvitation, isPending } = useSendFarmInvitation();
 	const [open, setOpen] = useState<boolean>(false);
 	const [token, setToken] = useState<boolean>(false);
@@ -82,11 +83,9 @@ export const FarmInviteModal = () => {
 				onOpenAutoFocus={(e) => e.preventDefault()}
 			>
 				<div className="flex flex-col gap-2">
-					<DialogTitle className="text-center">Invite to Farm</DialogTitle>
+					<DialogTitle className="text-center">{tInvite("title")}</DialogTitle>
 					{!token && (
-						<DialogDescription>
-							Here you can invite a friend to your farm as a member to help you.
-						</DialogDescription>
+						<DialogDescription>{tInvite("description")}</DialogDescription>
 					)}
 				</div>
 				<Form {...form}>
@@ -101,10 +100,10 @@ export const FarmInviteModal = () => {
 									name="email"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Email</FormLabel>
+											<FormLabel>{tInvite("emailLabel")}</FormLabel>
 											<FormControl>
 												<Input
-													placeholder="Enter email"
+													placeholder={tInvite("emailPlaceholder")}
 													{...field}
 													autoComplete="off"
 												/>
@@ -117,10 +116,12 @@ export const FarmInviteModal = () => {
 										disabled={isPending}
 										type="submit"
 									>
-										Create Invitation
+										{tInvite("createButton")}
 									</Button>
 									<DialogClose asChild>
-										<Button className="bg-destructive">Cancel</Button>
+										<Button className="bg-destructive">
+											{tInvite("cancelButton")}
+										</Button>
 									</DialogClose>
 								</div>
 							</div>
@@ -128,7 +129,7 @@ export const FarmInviteModal = () => {
 						{token && (
 							<div className="w-full flex flex-col items-center gap-2">
 								<p className="mb-1 text-sm text-muted-foreground">
-									Copy and share this invitation link with your friend:
+									{tInvite("copyInstructions")}
 								</p>
 								<div className="flex w-full gap-2 justify-center max-w-[90%]">
 									<Input
@@ -146,14 +147,14 @@ export const FarmInviteModal = () => {
 												navigator.clipboard
 													.writeText(inputRef.current.value)
 													.then(() => {
-														toast.success("Invitation link copied!");
+														toast.success(tInvite("copySuccess"));
 														handleOpenChange(false);
 													});
 											}
 										}}
 										variant="outline"
 									>
-										Copy
+										{tInvite("copyButton")}
 									</Button>
 								</div>
 							</div>
