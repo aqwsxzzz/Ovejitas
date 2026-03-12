@@ -1,5 +1,3 @@
-export interface IBreed {
-	id: string;
-	speciesId: string;
-	name: string;
-}
+import type { Breed } from "@/features/breed/types/breed";
+
+export type IBreed = Breed;
