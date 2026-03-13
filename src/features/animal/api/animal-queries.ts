@@ -264,7 +264,7 @@ export const useDeleteAnimalById = () => {
 			toast.error(error.message);
 		},
 		onSuccess: (_, { farmId, animalId, filters }) => {
-			toast.success("Animal deleted successfully");
+			toast.success(i18next.t("deleteAnimalModal:toast.deleteSuccess"));
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
 				animalQueryKeys.animalList(farmId, filters),
 
