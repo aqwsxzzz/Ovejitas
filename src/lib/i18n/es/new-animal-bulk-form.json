@@ -17,6 +17,13 @@
     "failedItemsTitle": "Elementos fallidos",
     "failedTagNumberHeader": "Número de etiqueta",
     "failedReasonHeader": "Razón",
+    "validation": {
+        "specieRequired": "Por favor, seleccione una especie.",
+        "breedRequired": "Por favor, seleccione una raza.",
+        "tagsRequired": "Por favor, ingrese al menos una etiqueta.",
+        "quantityRequired": "Por favor, ingrese una cantidad.",
+        "tagStartingNumberRequired": "Por favor, ingrese un número de inicio para la etiqueta."
+    },
     "createButton": "Crear",
     "cancelButton": "Cancelar"
 }

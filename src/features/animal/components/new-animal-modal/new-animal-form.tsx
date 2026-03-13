@@ -24,32 +24,6 @@ import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-g
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
-const formSchema = z.object({
-	specieId: z.string(),
-	breedId: z.string(),
-	name: z.string().optional(),
-	tagNumber: z.string(),
-	sex: z.enum(["female", "male", "unknown"]) as z.ZodType<IAnimal["sex"]>,
-	birthDate: z.date().optional(),
-	status: z.enum(["alive", "deceased", "sold"]).nullable() as z.ZodType<
-		IAnimal["status"]
-	>,
-	reproductiveStatus: z.enum(["open", "pregnant", "lactating", "other"] as [
-		IAnimal["reproductiveStatus"],
-		IAnimal["reproductiveStatus"],
-		IAnimal["reproductiveStatus"],
-		IAnimal["reproductiveStatus"],
-	]),
-	fatherId: z.string().optional(),
-	motherId: z.string().optional(),
-	acquisitionType: z.enum(["born", "purchased", "other"] as [
-		IAnimal["acquisitionType"],
-		IAnimal["acquisitionType"],
-		IAnimal["acquisitionType"],
-	]),
-	acquisitionDate: z.date().optional(),
-});
-
 export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 	const { mutateAsync: createAnimal, isPending } = useCreateAnimal();
 	const { farmId } = useParams({ strict: false });
@@ -57,6 +31,38 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 
 	const { t } = useTranslation("newAnimalForm");
 	const { t: tParents } = useTranslation("parentsByGenderSelect");
+	const formSchema = z.object({
+		specieId: z.string().min(1, {
+			message: t("validation.specieRequired"),
+		}),
+		breedId: z.string().min(1, {
+			message: t("validation.breedRequired"),
+		}),
+		name: z.string().optional(),
+		tagNumber: z
+			.string()
+			.trim()
+			.min(1, { message: t("validation.tagNumberRequired") }),
+		sex: z.enum(["female", "male", "unknown"]) as z.ZodType<IAnimal["sex"]>,
+		birthDate: z.date().optional(),
+		status: z.enum(["alive", "deceased", "sold"]).nullable() as z.ZodType<
+			IAnimal["status"]
+		>,
+		reproductiveStatus: z.enum(["open", "pregnant", "lactating", "other"] as [
+			IAnimal["reproductiveStatus"],
+			IAnimal["reproductiveStatus"],
+			IAnimal["reproductiveStatus"],
+			IAnimal["reproductiveStatus"],
+		]),
+		fatherId: z.string().optional(),
+		motherId: z.string().optional(),
+		acquisitionType: z.enum(["born", "purchased", "other"] as [
+			IAnimal["acquisitionType"],
+			IAnimal["acquisitionType"],
+			IAnimal["acquisitionType"],
+		]),
+		acquisitionDate: z.date().optional(),
+	});
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		// Format birthDate as YYYY-MM-DD
 		const formatDate = (date: Date) => {
@@ -137,7 +143,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="specieId"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>{t("specieLabel")}</FormLabel>
+									<FormLabel>{t("specieLabel") + " *"}</FormLabel>
 									<FormControl>
 										<SpecieSelect
 											value={field.value}
@@ -145,6 +151,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 											defaultValue={field.value}
 										/>
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>
@@ -154,7 +161,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 								name="breedId"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>{t("breedLabel")}</FormLabel>
+										<FormLabel>{t("breedLabel") + " *"}</FormLabel>
 										<FormControl>
 											<BreedSelect
 												value={field.value}
@@ -163,6 +170,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 												defaultValue={field.value}
 											/>
 										</FormControl>
+										<FormMessage />
 									</FormItem>
 								)}
 							/>
@@ -187,13 +195,14 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 							name="tagNumber"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>{t("tagLabel")}</FormLabel>
+									<FormLabel>{t("tagLabel") + " *"}</FormLabel>
 									<FormControl>
 										<Input
 											placeholder={t("tagPlaceholder")}
 											{...field}
 										/>
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>

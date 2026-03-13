@@ -19,9 +19,74 @@ import type {
 import { toast } from "sonner";
 import type { IResponse } from "@/lib/axios";
 import i18next from "i18next";
+import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 const normalizeFilters = (filters?: Partial<IAnimalListFilters>): string[] => {
 	return [filters?.sex ?? "", filters?.speciesId ?? ""];
+};
+
+const includesAny = (value: string, patterns: string[]): boolean =>
+	patterns.some((pattern) => value.includes(pattern));
+
+const getAnimalCreateErrorToastMessage = (
+	error: unknown,
+	mode: "single" | "bulk",
+): string => {
+	const genericKey =
+		mode === "single" ? "toast.createError" : "toast.bulkCreateError";
+
+	if (!(error instanceof ApiRequestError)) {
+		return i18next.t(`newAnimalModal:${genericKey}`);
+	}
+
+	const normalizedMessage = error.message.toLowerCase();
+
+	if (error.code === "network_error") {
+		return i18next.t("newAnimalModal:toast.errors.network");
+	}
+
+	if (error.code === "unauthorized_error") {
+		return i18next.t("newAnimalModal:toast.errors.unauthorized");
+	}
+
+	if (error.code === "forbidden_error") {
+		return i18next.t("newAnimalModal:toast.errors.forbidden");
+	}
+
+	if (
+		error.code === "conflict_error" ||
+		includesAny(normalizedMessage, [
+			"already exists",
+			"duplicate",
+			"duplicated",
+			"ya existe",
+			"duplicado",
+		])
+	) {
+		return i18next.t(
+			mode === "single"
+				? "newAnimalModal:toast.errors.tagAlreadyExists"
+				: "newAnimalModal:toast.errors.bulkTagsAlreadyExist",
+		);
+	}
+
+	if (includesAny(normalizedMessage, ["breed", "raza"])) {
+		return i18next.t("newAnimalModal:toast.errors.invalidBreed");
+	}
+
+	if (includesAny(normalizedMessage, ["species", "specie", "especie"])) {
+		return i18next.t("newAnimalModal:toast.errors.invalidSpecies");
+	}
+
+	if (error.code === "validation_error") {
+		return i18next.t(
+			mode === "single"
+				? "newAnimalModal:toast.errors.singleValidation"
+				: "newAnimalModal:toast.errors.bulkValidation",
+		);
+	}
+
+	return i18next.t(`newAnimalModal:${genericKey}`);
 };
 
 export const animalQueryKeys = {
@@ -75,10 +140,10 @@ export const useCreateAnimal = () => {
 			filters?: Partial<IAnimalListFilters>;
 		}) => createAnimal({ payload }),
 		onError: (error) => {
-			toast.error(error.message);
+			toast.error(getAnimalCreateErrorToastMessage(error, "single"));
 		},
 		onSuccess: (response, { farmId, filters }) => {
-			toast.success("Animal created successfully");
+			toast.success(i18next.t("newAnimalModal:toast.createSuccess"));
 
 			queryClient.setQueryData<IResponse<IAnimalsCountBySpeciesResponse[]>>(
 				animalQueryKeys.animalsCountBySpecies(
@@ -229,16 +294,21 @@ export const useCreateAnimalBulk = () => {
 			filters?: Partial<IAnimalListFilters>;
 		}) => createAnimalsBulk({ payload }),
 		onError: (error) => {
-			toast.error(error.message);
+			toast.error(getAnimalCreateErrorToastMessage(error, "bulk"));
 		},
 		onSuccess: (response, { farmId, filters }) => {
 			const createdCount = response.data.created.length;
 			const failedCount = response.data.failed.length;
 
 			if (failedCount > 0) {
-				toast.success(`${createdCount} animals created, ${failedCount} failed`);
+				toast.success(
+					i18next.t("newAnimalModal:toast.bulkCreatePartialSuccess", {
+						createdCount,
+						failedCount,
+					}),
+				);
 			} else {
-				toast.success("Animals created successfully");
+				toast.success(i18next.t("newAnimalModal:toast.bulkCreateSuccess"));
 			}
 
 			queryClient.setQueryData<IResponse<IAnimal[]>>(

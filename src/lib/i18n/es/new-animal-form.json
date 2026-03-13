@@ -35,6 +35,11 @@
         "other": "Otro"
     },
     "acquisitionDateLabel": "Fecha de Adquisición",
+    "validation": {
+        "specieRequired": "Por favor, seleccione una especie.",
+        "breedRequired": "Por favor, seleccione una raza.",
+        "tagNumberRequired": "Por favor, ingrese un número de identificación."
+    },
     "createButton": "Crear",
     "cancelButton": "Cancelar"
 }

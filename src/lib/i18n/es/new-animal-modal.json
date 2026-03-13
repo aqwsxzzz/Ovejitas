@@ -2,6 +2,24 @@
     "addAnimalButton": "Agregar",
     "addAnimalTitle": "Agregar un nuevo animal",
     "addAnimalDescription": "¡Aquí puedes crear un nuevo animal para unirse a tu granja!",
+    "toast": {
+        "createSuccess": "Animal creado con éxito.",
+        "createError": "No pudimos crear el animal. Inténtalo de nuevo.",
+        "bulkCreateSuccess": "Los animales se crearon con éxito.",
+        "bulkCreatePartialSuccess": "Se crearon {{createdCount}} animales y no se pudieron crear {{failedCount}}.",
+        "bulkCreateError": "No pudimos crear los animales. Inténtalo de nuevo.",
+        "errors": {
+            "network": "No pudimos conectarnos con el servidor. Revisa tu conexión e inténtalo de nuevo.",
+            "unauthorized": "Tu sesión expiró. Inicia sesión de nuevo e intenta crear el animal.",
+            "forbidden": "No tienes permisos para crear animales en esta granja.",
+            "tagAlreadyExists": "Este número de identificación ya está registrado. Ingresa uno diferente.",
+            "bulkTagsAlreadyExist": "Uno o más números de identificación ya están registrados. Revisa las etiquetas e inténtalo de nuevo.",
+            "invalidBreed": "La raza seleccionada no es válida para este animal. Revisa la raza e inténtalo de nuevo.",
+            "invalidSpecies": "La especie seleccionada no es válida. Revisa la especie e inténtalo de nuevo.",
+            "singleValidation": "Algunos datos del animal son inválidos o están incompletos. Revisa los campos obligatorios e inténtalo de nuevo.",
+            "bulkValidation": "Algunos datos de la creación por lote son inválidos o están incompletos. Revisa las etiquetas y los valores de secuencia e inténtalo de nuevo."
+        }
+    },
     "radioGroupOptions": {
         "singleOption": "Individual",
         "bulkOption": "Lote"

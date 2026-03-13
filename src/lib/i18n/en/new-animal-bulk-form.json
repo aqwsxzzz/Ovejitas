@@ -17,6 +17,13 @@
     "failedItemsTitle": "Failed items",
     "failedTagNumberHeader": "Tag number",
     "failedReasonHeader": "Reason",
+    "validation": {
+        "specieRequired": "Please select a species.",
+        "breedRequired": "Please select a breed.",
+        "tagsRequired": "Please enter at least one tag.",
+        "quantityRequired": "Please enter a quantity.",
+        "tagStartingNumberRequired": "Please enter a starting tag number."
+    },
     "createButton": "Create",
     "cancelButton": "Cancel"
 }

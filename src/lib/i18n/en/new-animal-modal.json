@@ -2,6 +2,24 @@
     "addAnimalButton": "Add Animal",
     "addAnimalTitle": "Add a new animal",
     "addAnimalDescription": "Here you can create a new animal to join your farm!",
+    "toast": {
+        "createSuccess": "Animal created successfully.",
+        "createError": "We couldn't create the animal. Please try again.",
+        "bulkCreateSuccess": "Animals created successfully.",
+        "bulkCreatePartialSuccess": "{{createdCount}} animals were created and {{failedCount}} could not be created.",
+        "bulkCreateError": "We couldn't create the animals. Please try again.",
+        "errors": {
+            "network": "We couldn't connect to the server. Check your connection and try again.",
+            "unauthorized": "Your session expired. Sign in again and try creating the animal.",
+            "forbidden": "You don't have permission to create animals in this farm.",
+            "tagAlreadyExists": "This tag number is already registered. Enter a different tag number.",
+            "bulkTagsAlreadyExist": "One or more tag numbers are already registered. Review the tags and try again.",
+            "invalidBreed": "The selected breed is not valid for this animal. Review the breed and try again.",
+            "invalidSpecies": "The selected species is not valid. Review the species and try again.",
+            "singleValidation": "Some animal information is invalid or incomplete. Review the required fields and try again.",
+            "bulkValidation": "Some bulk creation data is invalid or incomplete. Review the tags and sequence values and try again."
+        }
+    },
     "radioGroupOptions": {
         "singleOption": "Single",
         "bulkOption": "Bulk"

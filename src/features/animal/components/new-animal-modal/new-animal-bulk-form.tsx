@@ -24,16 +24,68 @@ import { useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const formSchema = z.object({
-	specieId: z.string(),
-	breedId: z.string(),
-	groupName: z.string().optional(),
-	count: z.coerce.number().optional(),
-	tagPrefix: z.string().optional(),
-	tagMode: z.enum(["manual", "sequential"]),
-	tags: z.string().optional(),
-	tagStartNumber: z.coerce.number().optional(),
-});
+const optionalNumberField = z.preprocess((value) => {
+	if (value === "" || value === null || value === undefined) {
+		return undefined;
+	}
+
+	if (typeof value === "number") {
+		return Number.isNaN(value) ? undefined : value;
+	}
+
+	const parsedValue = Number(value);
+	return Number.isNaN(parsedValue) ? undefined : parsedValue;
+}, z.number().optional());
+
+const createFormSchema = (messages: {
+	specieRequired: string;
+	breedRequired: string;
+	tagsRequired: string;
+	quantityRequired: string;
+	tagStartingNumberRequired: string;
+}) =>
+	z
+		.object({
+			specieId: z.string().min(1, {
+				message: messages.specieRequired,
+			}),
+			breedId: z.string().min(1, {
+				message: messages.breedRequired,
+			}),
+			groupName: z.string().optional(),
+			count: optionalNumberField,
+			tagPrefix: z.string().optional(),
+			tagMode: z.enum(["manual", "sequential"]),
+			tags: z.string().optional(),
+			tagStartNumber: optionalNumberField,
+		})
+		.superRefine((data, ctx) => {
+			if (data.tagMode === "manual" && !data.tags?.trim()) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: messages.tagsRequired,
+					path: ["tags"],
+				});
+			}
+
+			if (data.tagMode === "sequential") {
+				if (data.count === undefined) {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: messages.quantityRequired,
+						path: ["count"],
+					});
+				}
+
+				if (data.tagStartNumber === undefined) {
+					ctx.addIssue({
+						code: z.ZodIssueCode.custom,
+						message: messages.tagStartingNumberRequired,
+						path: ["tagStartNumber"],
+					});
+				}
+			}
+		});
 
 export const NewAnimalBulkForm = ({
 	closeDialog,
@@ -46,7 +98,20 @@ export const NewAnimalBulkForm = ({
 		failedItems: ICreateAnimalBulkFailedItem[];
 	} | null>(null);
 
-	const form = useForm<z.infer<typeof formSchema>>({
+	const { t } = useTranslation("newAnimalBulkForm");
+	const formSchema = createFormSchema({
+		specieRequired: t("validation.specieRequired"),
+		breedRequired: t("validation.breedRequired"),
+		tagsRequired: t("validation.tagsRequired"),
+		quantityRequired: t("validation.quantityRequired"),
+		tagStartingNumberRequired: t("validation.tagStartingNumberRequired"),
+	});
+
+	const form = useForm<
+		z.input<typeof formSchema>,
+		unknown,
+		z.output<typeof formSchema>
+	>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			specieId: "",
@@ -59,8 +124,6 @@ export const NewAnimalBulkForm = ({
 			tagStartNumber: 0,
 		},
 	});
-
-	const { t } = useTranslation("newAnimalBulkForm");
 	const selectedSpecieId = form.watch("specieId");
 	const tagMode = form.watch("tagMode");
 
@@ -73,7 +136,7 @@ export const NewAnimalBulkForm = ({
 		failedItems: responseData.failed,
 	});
 
-	const onSubmit = async (data: z.infer<typeof formSchema>) => {
+	const onSubmit = async (data: z.output<typeof formSchema>) => {
 		setBulkCreateResult(null);
 
 		if (tagMode === "manual") {
@@ -142,7 +205,7 @@ export const NewAnimalBulkForm = ({
 					name="specieId"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>{t("specieLabel")}</FormLabel>
+							<FormLabel>{t("specieLabel") + " *"}</FormLabel>
 							<FormControl>
 								<SpecieSelect
 									value={field.value}
@@ -150,6 +213,7 @@ export const NewAnimalBulkForm = ({
 									defaultValue={field.value}
 								/>
 							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>
@@ -159,7 +223,7 @@ export const NewAnimalBulkForm = ({
 						name="breedId"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>{t("breedLabel")}</FormLabel>
+								<FormLabel>{t("breedLabel") + " *"}</FormLabel>
 								<FormControl>
 									<BreedSelect
 										value={field.value}
@@ -168,6 +232,7 @@ export const NewAnimalBulkForm = ({
 										defaultValue={field.value}
 									/>
 								</FormControl>
+								<FormMessage />
 							</FormItem>
 						)}
 					/>
@@ -261,7 +326,7 @@ export const NewAnimalBulkForm = ({
 							const { value, onChange, onBlur, name, ref } = field;
 							return (
 								<FormItem>
-									<FormLabel>{t("tagsLabel")}</FormLabel>
+									<FormLabel>{t("tagsLabel") + " *"}</FormLabel>
 									<FormControl>
 										<Input
 											placeholder={t("tagsPlaceholder")}
@@ -293,7 +358,7 @@ export const NewAnimalBulkForm = ({
 												type="number"
 												min={1}
 												max={100}
-												value={value}
+												value={typeof value === "number" ? value : ""}
 												onChange={onChange}
 												onBlur={onBlur}
 												name={name}
@@ -317,7 +382,7 @@ export const NewAnimalBulkForm = ({
 										<FormControl>
 											<Input
 												placeholder={t("tagStartingNumberPlaceholder")}
-												value={value ?? ""}
+												value={typeof value === "number" ? value : ""}
 												onChange={onChange}
 												onBlur={onBlur}
 												name={name}
