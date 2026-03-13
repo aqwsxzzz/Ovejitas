@@ -67,6 +67,16 @@ export interface ICreateAnimalBulkPayload {
 	tags?: string[] | null;
 }
 
+export interface ICreateAnimalBulkFailedItem {
+	tagNumber: string;
+	reason: string;
+}
+
+export interface ICreateAnimalBulkResponse {
+	created: IAnimal[];
+	failed: ICreateAnimalBulkFailedItem[];
+}
+
 export interface IEditAnimalPayload {
 	speciesId: string;
 	breedId: string;

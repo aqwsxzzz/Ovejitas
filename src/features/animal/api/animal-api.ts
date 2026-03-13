@@ -1,10 +1,11 @@
 import { axiosHelper } from "@/lib/axios/axios-helper";
-import type { IResponse, IResponseDataArray } from "@/lib/axios";
+import type { IResponse } from "@/lib/axios";
 import type {
 	IAnimal,
 	IAnimalsCountBySpeciesResponse,
 	IAnimalWithIncludes,
 	ICreateAnimalBulkPayload,
+	ICreateAnimalBulkResponse,
 	ICreateAnimalPayload,
 	IDeleteResponse,
 	IEditAnimalPayload,
@@ -83,7 +84,7 @@ export const createAnimalsBulk = ({
 }: {
 	payload: ICreateAnimalBulkPayload;
 }) =>
-	axiosHelper<IResponseDataArray<IAnimal[]>>({
+	axiosHelper<IResponse<ICreateAnimalBulkResponse>>({
 		method: "post",
 		url: `/animals/bulk`,
 		data: payload,

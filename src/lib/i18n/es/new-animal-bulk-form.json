@@ -13,6 +13,10 @@
     "quantityLabel": "Cantidad",
     "tagStartingNumberLabel": "Número de inicio de secuencia",
     "tagStartingNumberPlaceholder": "Número de inicio para etiquetas (por ejemplo, 1001)",
+    "resultSummary": "Creados: {{createdCount}} | Fallidos: {{failedCount}}",
+    "failedItemsTitle": "Elementos fallidos",
+    "failedTagNumberHeader": "Número de etiqueta",
+    "failedReasonHeader": "Razón",
     "createButton": "Crear",
     "cancelButton": "Cancelar"
 }

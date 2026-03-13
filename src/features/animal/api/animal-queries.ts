@@ -232,7 +232,15 @@ export const useCreateAnimalBulk = () => {
 			toast.error(error.message);
 		},
 		onSuccess: (response, { farmId, filters }) => {
-			toast.success("Animals created successfully");
+			const createdCount = response.data.created.length;
+			const failedCount = response.data.failed.length;
+
+			if (failedCount > 0) {
+				toast.success(`${createdCount} animals created, ${failedCount} failed`);
+			} else {
+				toast.success("Animals created successfully");
+			}
+
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
 				animalQueryKeys.animalList(farmId, filters),
 				(oldData) => {

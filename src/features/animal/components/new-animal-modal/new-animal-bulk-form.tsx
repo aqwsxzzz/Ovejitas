@@ -16,7 +16,12 @@ import { BreedSelect } from "@/features/breed/components/breed-select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useCreateAnimalBulk } from "@/features/animal/api/animal-queries";
+import type {
+	ICreateAnimalBulkFailedItem,
+	ICreateAnimalBulkResponse,
+} from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
@@ -35,6 +40,12 @@ export const NewAnimalBulkForm = ({
 }: {
 	closeDialog: () => void;
 }) => {
+	const [bulkCreateResult, setBulkCreateResult] = useState<{
+		createdCount: number;
+		failedCount: number;
+		failedItems: ICreateAnimalBulkFailedItem[];
+	} | null>(null);
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -56,7 +67,15 @@ export const NewAnimalBulkForm = ({
 	const { mutateAsync: createAnimalBulk, isPending } = useCreateAnimalBulk();
 	const { farmId } = useParams({ strict: false });
 
+	const mapBulkCreateResult = (responseData: ICreateAnimalBulkResponse) => ({
+		createdCount: responseData.created.length,
+		failedCount: responseData.failed.length,
+		failedItems: responseData.failed,
+	});
+
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
+		setBulkCreateResult(null);
+
 		if (tagMode === "manual") {
 			const tagsArray = data.tags
 				?.split(" ")
@@ -74,12 +93,18 @@ export const NewAnimalBulkForm = ({
 				farmId: farmId!,
 				filters: {
 					speciesId: data.specieId,
-				}
+				},
 			});
+
+			setBulkCreateResult(mapBulkCreateResult(response.data));
 			if (response.status === "success") {
-				closeDialog();
+				if (response.data.failed.length === 0) {
+					closeDialog();
+				}
 			}
+			return;
 		}
+
 		if (tagMode === "sequential") {
 			const response = await createAnimalBulk({
 				payload: {
@@ -90,17 +115,20 @@ export const NewAnimalBulkForm = ({
 					tagStartNumber: data.tagStartNumber ?? null,
 					count: data.count ?? null,
 				},
-				
 				farmId: farmId!,
 				filters: {
 					speciesId: data.specieId,
-				}
+				},
 			});
+
+			setBulkCreateResult(mapBulkCreateResult(response.data));
 			if (response.status === "success") {
-				closeDialog();
+				if (response.data.failed.length === 0) {
+					closeDialog();
+				}
 			}
+			return;
 		}
-		closeDialog();
 	};
 
 	return (
@@ -311,12 +339,43 @@ export const NewAnimalBulkForm = ({
 						{t("createButton")}
 					</Button>
 					<Button
+						type="button"
 						onClick={closeDialog}
 						className="bg-destructive"
 					>
 						{t("cancelButton")}
 					</Button>
 				</div>
+				{bulkCreateResult ? (
+					<div className="mt-2 rounded-md border p-3">
+						<p className="text-sm font-medium">
+							{t("resultSummary", {
+								createdCount: bulkCreateResult.createdCount,
+								failedCount: bulkCreateResult.failedCount,
+							})}
+						</p>
+						{bulkCreateResult.failedCount > 0 ? (
+							<div className="mt-2">
+								<p className="text-sm font-medium">{t("failedItemsTitle")}</p>
+								<div className="mt-2 max-h-40 overflow-y-auto rounded-md border">
+									<div className="grid grid-cols-2 gap-2 border-b bg-muted px-3 py-2 text-xs font-semibold">
+										<span>{t("failedTagNumberHeader")}</span>
+										<span>{t("failedReasonHeader")}</span>
+									</div>
+									{bulkCreateResult.failedItems.map((item) => (
+										<div
+											className="grid grid-cols-2 gap-2 border-b px-3 py-2 text-xs last:border-b-0"
+											key={`${item.tagNumber}-${item.reason}`}
+										>
+											<span>{item.tagNumber}</span>
+											<span>{item.reason}</span>
+										</div>
+									))}
+								</div>
+							</div>
+						) : null}
+					</div>
+				) : null}
 			</form>
 		</Form>
 	);

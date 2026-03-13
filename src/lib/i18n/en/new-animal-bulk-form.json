@@ -13,6 +13,10 @@
     "quantityLabel": "Quantity",
     "tagStartingNumberLabel": "Tag Starting Number",
     "tagStartingNumberPlaceholder": "Starting number for tags (e.g. 1001)",
+    "resultSummary": "Created: {{createdCount}} | Failed: {{failedCount}}",
+    "failedItemsTitle": "Failed items",
+    "failedTagNumberHeader": "Tag number",
+    "failedReasonHeader": "Reason",
     "createButton": "Create",
     "cancelButton": "Cancel"
 }
