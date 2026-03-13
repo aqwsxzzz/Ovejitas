@@ -1,11 +1,28 @@
 {
     "missingAnimal": "Animal not found",
+    "unknownAnimalName": "Unnamed animal",
+    "unknownStatus": "Unknown",
+    "missingData": "No data",
+    "notAvailable": "N/A",
     "AgeTitle": "Age",
     "WeightTitle": "Weight",
+    "ReproductiveStatusTitle": "Reproductive Status",
+    "TagNumberTitle": "Tag Number",
     "LocationTitle": "Location",
     "LastCheckupTitle": "Last Checkup",
     "Year": "year",
     "Month": "month",
-    "MonthExtension": "s"
+    "MonthExtension": "s",
+    "statusOptions": {
+        "alive": "Alive",
+        "deceased": "Deceased",
+        "sold": "Sold"
+    },
+    "reproductiveStatusOptions": {
+        "open": "Open",
+        "pregnant": "Pregnant",
+        "lactating": "Lactating",
+        "other": "Other"
+    }
 
 }

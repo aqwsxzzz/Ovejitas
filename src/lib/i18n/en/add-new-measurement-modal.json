@@ -1,3 +1,6 @@
 {
-    "measurementTitle": "Add a New Measurement"
+    "measurementTitle": "Add a New Measurement",
+    "toast": {
+        "createSuccess": "Measurement created successfully"
+    }
 }

@@ -1,6 +1,7 @@
 import login from "./en/login.json";
 import signup from "./en/signup.json";
 import animalProfileHealthCard from "./en/animal-profile-health-card.json";
+import animalProfilePage from "./en/animal-profile-page.json";
 import healthCardIndividualInfo from "./en/health-card-individual-info.json";
 import animalProfileBasicCard from "./en/animal-profile-basic-card.json";
 import dropdownMenuHeader from "./en/dropdown-menu-header.json";
@@ -35,6 +36,7 @@ const resources = {
 	login,
 	signup,
 	animalProfileHealthCard,
+	animalProfilePage,
 	healthCardIndividualInfo,
 	animalProfileBasicCard,
 	dropdownMenuHeader,

@@ -7,6 +7,8 @@ import signupEN from "./en/signup.json";
 import signupES from "./es/signup.json";
 import animalProfileHealthCardEN from "./en/animal-profile-health-card.json";
 import animalProfileHealthCardES from "./es/animal-profile-health-card.json";
+import animalProfilePageEN from "./en/animal-profile-page.json";
+import animalProfilePageES from "./es/animal-profile-page.json";
 import healthCardIndividualInfoEN from "./en/health-card-individual-info.json";
 import healthCardIndividualInfoES from "./es/health-card-individual-info.json";
 import animalProfileBasicCardEN from "./en/animal-profile-basic-card.json";
@@ -76,6 +78,7 @@ i18next
 				login: loginEN,
 				signup: signupEN,
 				animalProfileHealthCard: animalProfileHealthCardEN,
+				animalProfilePage: animalProfilePageEN,
 				healthCardIndividualInfo: healthCardIndividualInfoEN,
 				animalProfileBasicCard: animalProfileBasicCardEN,
 				dropdownMenuHeader: dropdownMenuHeaderEN,
@@ -109,6 +112,7 @@ i18next
 				login: loginES,
 				signup: signupES,
 				animalProfileHealthCard: animalProfileHealthCardES,
+				animalProfilePage: animalProfilePageES,
 				healthCardIndividualInfo: healthCardIndividualInfoES,
 				animalProfileBasicCard: animalProfileBasicCardES,
 				dropdownMenuHeader: dropdownMenuHeaderES,

@@ -8,6 +8,7 @@ import type {
 	ICreateMeasurementPayload,
 	IMeasurement,
 } from "@/features/measurement/types/measurement-types";
+import i18next from "i18next";
 import { toast } from "sonner";
 import type { IResponse } from "@/lib/axios";
 
@@ -42,7 +43,7 @@ export const useCreateMeasurement = () => {
 			toast.error(error.message);
 		},
 		onSuccess: (response, { animalId }) => {
-			toast.success("Measurement created successfully");
+			toast.success(i18next.t("addNewMeasurementModal:toast.createSuccess"));
 			queryClient.setQueryData<IResponse<IMeasurement[]>>(
 				measurementQueryKeys.measurementListByAnimalId(animalId),
 				(oldData) => {

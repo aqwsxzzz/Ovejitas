@@ -47,7 +47,7 @@ export const MeasurementRecordModal = ({
 				{isLoading ? (
 					<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
 				) : (!isLoading && measurementData?.length == 0) || null ? (
-					"No data"
+					t("missingData")
 				) : (
 					filteredData!.map((data) => {
 						return (

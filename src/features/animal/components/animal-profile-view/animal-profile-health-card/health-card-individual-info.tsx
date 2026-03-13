@@ -49,15 +49,20 @@ export const HealthCardIndividualInfo = ({
 			<div className="flex flex-col gap-2">
 				<div>
 					<p className="text-caption text-muted-foreground uppercase tracking-wide mb-1">
-						Value
+						{t("valueTitle")}
 					</p>
 					{isLoading ? (
 						<div className="h-6 bg-muted rounded animate-pulse w-24"></div>
 					) : !isLoading && (!filteredData || filteredData.length === 0) ? (
-						<p className="text-body text-muted-foreground">{t("missingData")}</p>
+						<p className="text-body text-muted-foreground">
+							{t("missingData")}
+						</p>
 					) : (
 						<p className="text-h1 font-bold text-foreground">
-							{filteredData?.[0]?.value} <span className="text-body text-muted-foreground">{filteredData?.[0]?.unit}</span>
+							{filteredData?.[0]?.value}{" "}
+							<span className="text-body text-muted-foreground">
+								{filteredData?.[0]?.unit}
+							</span>
 						</p>
 					)}
 				</div>
@@ -69,7 +74,9 @@ export const HealthCardIndividualInfo = ({
 					{isLoading ? (
 						<div className="h-5 bg-muted rounded animate-pulse w-20"></div>
 					) : !isLoading && (!filteredData || filteredData.length === 0) ? (
-						<p className="text-small text-muted-foreground">{t("missingData")}</p>
+						<p className="text-small text-muted-foreground">
+							{t("missingData")}
+						</p>
 					) : (
 						<p className="text-small text-foreground">
 							{formatDateByMonth(filteredData![0].measuredAt)}

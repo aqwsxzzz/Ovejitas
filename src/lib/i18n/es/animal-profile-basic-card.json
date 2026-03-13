@@ -1,10 +1,27 @@
 {
     "missingAnimal": "No se encontró el animal",
+    "unknownAnimalName": "Animal sin nombre",
+    "unknownStatus": "Desconocido",
+    "missingData": "No hay datos",
+    "notAvailable": "N/D",
     "AgeTitle": "Edad",
     "WeightTitle": "Peso",
+    "ReproductiveStatusTitle": "Estado Reproductivo",
+    "TagNumberTitle": "Número de Identificación",
     "LocationTitle": "Ubicacion",
     "LastCheckupTitle": "Ultimo chequeo",
     "Year": "año",
     "Month": "mes",
-    "MonthExtension": "es"
+    "MonthExtension": "es",
+    "statusOptions": {
+        "alive": "Vivo",
+        "deceased": "Fallecido",
+        "sold": "Vendido"
+    },
+    "reproductiveStatusOptions": {
+        "open": "Abierto",
+        "pregnant": "Gestante",
+        "lactating": "Lactante",
+        "other": "Otro"
+    }
 }

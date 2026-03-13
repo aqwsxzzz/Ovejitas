@@ -1,4 +1,5 @@
 {
     "modalTitle": "Measurement Records",
-    "modalButtonTrigger": "Record"
+    "modalButtonTrigger": "Record",
+    "missingData": "No data"
 }

@@ -5,6 +5,7 @@ import { HeartPulse, Baby, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
 import { PageHeader } from "@/components/common/page-header";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal",
@@ -13,6 +14,7 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+	const { t } = useTranslation("animalProfilePage");
 	const { farmId, speciesId, animalId } = useParams({ strict: false });
 	const { data: animalData } = useGetAnimalById({
 		animalId: animalId!,
@@ -23,11 +25,11 @@ function RouteComponent() {
 	return (
 		<div className="flex flex-col gap-6 p-4">
 			<PageHeader
-				title={animalData?.name || "Animal Details"}
-				description="View and manage animal information"
+				title={animalData?.name || t("defaultTitle")}
+				description={t("description")}
 				backLink={{
 					to: "/farm/$farmId/species/$speciesId/animals",
-					params: { farmId: farmId!, speciesId: speciesId! }
+					params: { farmId: farmId!, speciesId: speciesId! },
 				}}
 			/>
 
@@ -41,7 +43,9 @@ function RouteComponent() {
 					onClick={() => console.log("Health Check")}
 				>
 					<HeartPulse className="h-6 w-6 text-info" />
-					<span className="text-caption font-medium">Health Check</span>
+					<span className="text-caption font-medium">
+						{t("quickActions.healthCheck")}
+					</span>
 				</Button>
 				<Button
 					variant="outline"
@@ -49,7 +53,9 @@ function RouteComponent() {
 					onClick={() => console.log("Breeding Log")}
 				>
 					<Baby className="h-6 w-6 text-breeding" />
-					<span className="text-caption font-medium">Breeding</span>
+					<span className="text-caption font-medium">
+						{t("quickActions.breeding")}
+					</span>
 				</Button>
 				<Button
 					variant="outline"
@@ -57,7 +63,9 @@ function RouteComponent() {
 					onClick={() => console.log("Notes")}
 				>
 					<FileText className="h-6 w-6 text-warning" />
-					<span className="text-caption font-medium">Notes</span>
+					<span className="text-caption font-medium">
+						{t("quickActions.notes")}
+					</span>
 				</Button>
 			</div>
 

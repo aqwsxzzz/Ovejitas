@@ -1,4 +1,5 @@
 {
     "modalTitle": "Historial de Medición",
-    "modalButtonTrigger": "Historial"
+    "modalButtonTrigger": "Historial",
+    "missingData": "No hay datos"
 }

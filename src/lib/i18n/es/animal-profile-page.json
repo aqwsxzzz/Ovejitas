@@ -1,0 +1,9 @@
+{
+    "defaultTitle": "Detalles del Animal",
+    "description": "Visualiza y gestiona la informacion del animal",
+    "quickActions": {
+        "healthCheck": "Chequeo de Salud",
+        "breeding": "Reproduccion",
+        "notes": "Notas"
+    }
+}

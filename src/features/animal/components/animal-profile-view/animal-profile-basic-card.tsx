@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { HealthStatusIndicator } from "@/components/common/health-status-indicator";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
+import type { IAnimal } from "@/features/animal/types/animal-types";
 import { useParams } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import type { TFunction } from "i18next";
@@ -16,6 +17,24 @@ export const AnimalProfileCard = () => {
 		withLanguage: true,
 	});
 	const { t } = useTranslation("animalProfileBasicCard");
+
+	const getLocalizedStatus = (status: IAnimal["status"]) => {
+		if (!status) {
+			return t("unknownStatus");
+		}
+
+		return t(`statusOptions.${status}`);
+	};
+
+	const getLocalizedReproductiveStatus = (
+		reproductiveStatus: IAnimal["reproductiveStatus"] | null,
+	) => {
+		if (!reproductiveStatus) {
+			return t("missingData");
+		}
+
+		return t(`reproductiveStatusOptions.${reproductiveStatus}`);
+	};
 
 	const getHealthStatusVariant = (
 		status: string,
@@ -63,14 +82,14 @@ export const AnimalProfileCard = () => {
 					<div className="flex-1">
 						<div className="flex items-center gap-2 flex-wrap">
 							<h2 className="text-h1 font-display font-bold text-foreground">
-								{animalData.name}
+								{animalData.name ?? t("unknownAnimalName")}
 							</h2>
 							<Badge variant={getHealthStatusVariant(animalData.status ?? "")}>
-								{animalData.status}
+								{getLocalizedStatus(animalData.status)}
 							</Badge>
 						</div>
 						<p className="text-small text-muted-foreground">
-							{animalData.breed.name}
+							{animalData.breed.name ?? t("missingData")}
 						</p>
 					</div>
 				</div>
@@ -84,7 +103,7 @@ export const AnimalProfileCard = () => {
 						<p className="font-semibold text-foreground">
 							{animalData.birthDate
 								? calculateAgeFloor(animalData.birthDate, t)
-								: "No Data"}
+								: t("missingData")}
 						</p>
 					</div>
 					<div>
@@ -92,23 +111,25 @@ export const AnimalProfileCard = () => {
 							{t("WeightTitle")}
 						</p>
 						<p className="font-semibold text-foreground">
-							{animalData.lastMeasurement?.value || "N/A"}
+							{animalData.lastMeasurement
+								? `${animalData.lastMeasurement.value} ${animalData.lastMeasurement.unit}`
+								: t("notAvailable")}
 						</p>
 					</div>
 					<div>
 						<p className="text-muted-foreground text-caption uppercase tracking-wide mb-1">
-							Reproductive Status
+							{t("ReproductiveStatusTitle")}
 						</p>
 						<p className="font-semibold text-foreground">
-							{animalData.reproductiveStatus}
+							{getLocalizedReproductiveStatus(animalData.reproductiveStatus)}
 						</p>
 					</div>
 					<div>
 						<p className="text-muted-foreground text-caption uppercase tracking-wide mb-1">
-							Tag Number
+							{t("TagNumberTitle")}
 						</p>
 						<p className="font-semibold text-foreground font-mono">
-							{animalData.tagNumber}
+							{animalData.tagNumber || t("notAvailable")}
 						</p>
 					</div>
 				</div>
