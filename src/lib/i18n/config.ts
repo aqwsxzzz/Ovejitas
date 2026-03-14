@@ -65,6 +65,8 @@ import privateLayoutEN from "./en/private-layout.json";
 import privateLayoutES from "./es/private-layout.json";
 import bottomTabNavEN from "./en/bottom-tab-nav.json";
 import bottomTabNavES from "./es/bottom-tab-nav.json";
+import expensesEN from "./en/expenses.json";
+import expensesES from "./es/expenses.json";
 
 export const defaultNS = "login";
 
@@ -107,6 +109,7 @@ i18next
 				tasks: tasksEN,
 				privateLayout: privateLayoutEN,
 				bottomTabNav: bottomTabNavEN,
+				expenses: expensesEN,
 			},
 			es: {
 				login: loginES,
@@ -141,6 +144,7 @@ i18next
 				tasks: tasksES,
 				privateLayout: privateLayoutES,
 				bottomTabNav: bottomTabNavES,
+				expenses: expensesES,
 			},
 		},
 		defaultNS,

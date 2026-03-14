@@ -1,0 +1,125 @@
+{
+  "page": {
+    "title": "Expenses",
+    "description": "Track and manage farm expenses",
+    "loading": "Loading expenses...",
+    "retry": "Retry",
+    "empty": "No expenses found with the selected filters."
+  },
+  "modal": {
+    "newButton": "New Expense",
+    "newTitle": "New Expense",
+    "newDescription": "Create a new expense record",
+    "editTitle": "Edit Expense",
+    "editDescription": "Update expense details"
+  },
+  "deleteDialog": {
+    "title": "Delete expense?",
+    "description": "This action cannot be undone and will remove this expense record.",
+    "cancel": "Cancel",
+    "confirm": "Delete"
+  },
+  "filters": {
+    "categoryPlaceholder": "Category",
+    "statusPlaceholder": "Status",
+    "paymentMethodPlaceholder": "Payment method",
+    "allCategories": "All categories",
+    "allStatuses": "All statuses",
+    "allPaymentMethods": "All payment methods",
+    "clear": "Clear filters"
+  },
+  "list": {
+    "vendor": "Vendor",
+    "paymentMethod": "Payment method",
+    "category": "Category",
+    "notProvided": "-"
+  },
+  "summary": {
+    "total": "Total expenses",
+    "pending": "Pending amount",
+    "records": "Records"
+  },
+  "form": {
+    "actions": {
+      "cancel": "Cancel",
+      "create": "Create expense",
+      "save": "Save changes"
+    },
+    "sections": {
+      "quantityDetails": "Quantity details",
+      "additionalDetails": "Additional details",
+      "farmContext": "Farm context (optional)"
+    },
+    "fields": {
+      "date": "Date",
+      "amount": "Amount",
+      "category": "Category",
+      "description": "Description",
+      "vendor": "Vendor",
+      "invoiceNumber": "Invoice number",
+      "paymentMethod": "Payment method",
+      "status": "Status",
+      "quantity": "Quantity",
+      "quantityUnit": "Quantity unit",
+      "unitCost": "Unit cost",
+      "species": "Species",
+      "breed": "Breed",
+      "animal": "Animal",
+      "lotId": "Lot ID"
+    },
+    "placeholders": {
+      "optional": "Optional",
+      "none": "None",
+      "selectSpeciesFirst": "Select species first",
+      "noLots": "No lots available"
+    },
+    "validation": {
+      "amountRequired": "Amount is required",
+      "amountNonNegative": "Amount must be a valid number greater than or equal to 0",
+      "quantityNonNegative": "Quantity must be greater than or equal to 0",
+      "unitCostNonNegative": "Unit cost must be greater than or equal to 0",
+      "quantityUnitRequired": "Quantity unit is required when quantity is provided",
+      "amountMustMatch": "Amount must match quantity x unit cost ({{expectedAmount}})"
+    }
+  },
+  "enums": {
+    "category": {
+      "feed": "Feed",
+      "veterinary": "Veterinary",
+      "transport": "Transport",
+      "equipment": "Equipment",
+      "labor": "Labor",
+      "utilities": "Utilities",
+      "maintenance": "Maintenance",
+      "other": "Other"
+    },
+    "paymentMethod": {
+      "cash": "Cash",
+      "bank_transfer": "Bank transfer",
+      "credit_card": "Credit card",
+      "debit_card": "Debit card",
+      "check": "Check",
+      "other": "Other"
+    },
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "reimbursed": "Reimbursed"
+    },
+    "quantityUnit": {
+      "kg": "Kg",
+      "liters": "Liters",
+      "units": "Units",
+      "boxes": "Boxes",
+      "bags": "Bags",
+      "doses": "Doses",
+      "hours": "Hours",
+      "other": "Other"
+    }
+  },
+  "toast": {
+    "createSuccess": "Expense created successfully",
+    "updateSuccess": "Expense updated successfully",
+    "deleteSuccess": "Expense deleted successfully"
+  }
+}

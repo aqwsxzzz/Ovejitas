@@ -3,6 +3,7 @@
     "tabs": {
         "dashboard": "Inicio",
         "animals": "Animales",
+        "expenses": "Gastos",
         "tasks": "Tareas",
         "profile": "Perfil"
     }
