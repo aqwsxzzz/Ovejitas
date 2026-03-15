@@ -193,6 +193,10 @@ export const useCreateAnimal = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -323,6 +327,10 @@ export const useCreateAnimalBulk = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };

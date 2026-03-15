@@ -10,6 +10,20 @@ import { getBreedDisplayName } from "@/features/breed/types/breed";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+const OTHER_BREED_LABELS = [
+	"other",
+	"others",
+	"otro",
+	"otros",
+	"otra",
+	"otras",
+];
+
+const isOtherBreedLabel = (label: string): boolean => {
+	const normalizedLabel = label.trim().toLowerCase();
+	return OTHER_BREED_LABELS.includes(normalizedLabel);
+};
+
 export const BreedSelect = ({
 	value,
 	onChange,
@@ -31,15 +45,26 @@ export const BreedSelect = ({
 	});
 	const { t, i18n } = useTranslation("breedSelect");
 	const language = i18n.language.slice(0, 2);
-	const sortedBreeds = useMemo(
-		() =>
-			[...breedsData].sort((left, right) =>
-				getBreedDisplayName(left, language).localeCompare(
-					getBreedDisplayName(right, language),
-				),
-			),
-		[breedsData, language],
-	);
+	const sortedBreeds = useMemo(() => {
+		const breeds = [...breedsData];
+
+		return breeds.sort((left, right) => {
+			const leftLabel = getBreedDisplayName(left, language);
+			const rightLabel = getBreedDisplayName(right, language);
+			const leftIsOther = isOtherBreedLabel(leftLabel);
+			const rightIsOther = isOtherBreedLabel(rightLabel);
+
+			if (leftIsOther && !rightIsOther) {
+				return 1;
+			}
+
+			if (!leftIsOther && rightIsOther) {
+				return -1;
+			}
+
+			return leftLabel.localeCompare(rightLabel);
+		});
+	}, [breedsData, language]);
 
 	return (
 		<div>

@@ -20,6 +20,8 @@ import {
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import { countAnimalsAddedInPastDays } from "@/features/dashboard/utils/count-animals-added-in-period";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/dashboard",
@@ -30,6 +32,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
 	const { farmId } = useParams({ strict: false });
 	const navigate = useNavigate();
+	const [isAddAnimalOpen, setIsAddAnimalOpen] = useState(false);
 	const { data: animalData, isLoading } = useGetAnimalsByFarmId({
 		farmId: farmId!,
 		include: "species.translations,breed",
@@ -74,130 +77,131 @@ function RouteComponent() {
 	}));
 
 	return (
-		<ScrollablePageLayout
-			className="max-w-6xl mx-auto pb-6"
-			header={
-				<PageHeader
-					title={t("title")}
-					description={t("dashboardSubtitle")}
-				/>
-			}
-		>
-			<div className="space-y-6">
-				{/* Stats Grid */}
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-					<Link
-						className="block h-full"
-						to="/farm/$farmId/species"
-						params={{ farmId: farmId! }}
-					>
+		<>
+			<ScrollablePageLayout
+				className="max-w-6xl mx-auto pb-6"
+				header={
+					<PageHeader
+						title={t("title")}
+						description={t("dashboardSubtitle")}
+					/>
+				}
+			>
+				<div className="space-y-6">
+					{/* Stats Grid */}
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+						<Link
+							className="block h-full"
+							to="/farm/$farmId/species"
+							params={{ farmId: farmId! }}
+						>
+							<StatsWidget
+								icon={Beef}
+								iconColor="text-primary"
+								borderColor="border-l-primary"
+								label={t("resumes.resumeAnimalsCard.label")}
+								value={isLoading ? "..." : totalAnimals}
+								trend={
+									!isLoading
+										? {
+												value: t("resumes.resumeAnimalsCard.trendValue", {
+													count: animalsAddedLast7Days,
+												}),
+												direction: animalsAddedLast7Days > 0 ? "up" : "neutral",
+											}
+										: undefined
+								}
+								className="h-full"
+							/>
+						</Link>
+
 						<StatsWidget
-							icon={Beef}
-							iconColor="text-primary"
-							borderColor="border-l-primary"
-							label={t("resumes.resumeAnimalsCard.label")}
-							value={isLoading ? "..." : totalAnimals}
+							icon={Cloud}
+							iconColor="text-info"
+							borderColor="border-l-info"
+							label={t("resumes.resumeWeatherCard.label")}
+							value="24°C"
+							trend={{
+								value: t("resumes.resumeWeatherCard.trendValue"),
+								direction: "neutral",
+							}}
+						/>
+
+						<StatsWidget
+							icon={AlertTriangle}
+							iconColor={healthAlerts > 0 ? "text-error" : "text-success"}
+							borderColor={
+								healthAlerts > 0 ? "border-l-error" : "border-l-success"
+							}
+							label={t("resumes.resumeHealthCard.label")}
+							value={healthAlerts}
 							trend={
-								!isLoading
+								healthAlerts === 0
 									? {
-											value: t("resumes.resumeAnimalsCard.trendValue", {
-												count: animalsAddedLast7Days,
-											}),
-											direction: animalsAddedLast7Days > 0 ? "up" : "neutral",
+											value: t("resumes.resumeHealthCard.trendValue"),
+											direction: "neutral",
 										}
 									: undefined
 							}
-							className="h-full"
 						/>
-					</Link>
+					</div>
 
-					<StatsWidget
-						icon={Cloud}
-						iconColor="text-info"
-						borderColor="border-l-info"
-						label={t("resumes.resumeWeatherCard.label")}
-						value="24°C"
-						trend={{
-							value: t("resumes.resumeWeatherCard.trendValue"),
-							direction: "neutral",
-						}}
-					/>
+					{/* Quick Actions */}
+					<div>
+						<h2 className="mb-4 text-h2 text-foreground">
+							{t("quickActions.title")}
+						</h2>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+							<QuickActionCard
+								icon={Plus}
+								iconColor="text-primary"
+								title={t("quickActions.addAnimal.title")}
+								description={t("quickActions.addAnimal.description")}
+								onClick={() => setIsAddAnimalOpen(true)}
+							/>
+							<QuickActionCard
+								icon={Stethoscope}
+								iconColor="text-info"
+								title={t("quickActions.healthCheck.title")}
+								description={t("quickActions.healthCheck.description")}
+								onClick={() =>
+									navigate({
+										to: "/farm/$farmId/species",
+										params: { farmId: farmId! },
+									})
+								}
+							/>
+							<QuickActionCard
+								icon={Heart}
+								iconColor="text-breeding"
+								title={t("quickActions.breedingLog.title")}
+								description={t("quickActions.breedingLog.description")}
+								onClick={() =>
+									navigate({
+										to: "/farm/$farmId/species",
+										params: { farmId: farmId! },
+									})
+								}
+							/>
+						</div>
+					</div>
 
-					<StatsWidget
-						icon={AlertTriangle}
-						iconColor={healthAlerts > 0 ? "text-error" : "text-success"}
-						borderColor={
-							healthAlerts > 0 ? "border-l-error" : "border-l-success"
-						}
-						label={t("resumes.resumeHealthCard.label")}
-						value={healthAlerts}
-						trend={
-							healthAlerts === 0
-								? {
-										value: t("resumes.resumeHealthCard.trendValue"),
-										direction: "neutral",
-									}
-								: undefined
-						}
-					/>
-				</div>
-
-				{/* Quick Actions */}
-				<div>
-					<h2 className="mb-4 text-h2 text-foreground">
-						{t("quickActions.title")}
-					</h2>
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-						<QuickActionCard
-							icon={Plus}
-							iconColor="text-primary"
-							title={t("quickActions.addAnimal.title")}
-							description={t("quickActions.addAnimal.description")}
-							onClick={() =>
-								navigate({
-									to: "/farm/$farmId/species",
-									params: { farmId: farmId! },
-								})
-							}
-						/>
-						<QuickActionCard
-							icon={Stethoscope}
-							iconColor="text-info"
-							title={t("quickActions.healthCheck.title")}
-							description={t("quickActions.healthCheck.description")}
-							onClick={() =>
-								navigate({
-									to: "/farm/$farmId/species",
-									params: { farmId: farmId! },
-								})
-							}
-						/>
-						<QuickActionCard
-							icon={Heart}
-							iconColor="text-breeding"
-							title={t("quickActions.breedingLog.title")}
-							description={t("quickActions.breedingLog.description")}
-							onClick={() =>
-								navigate({
-									to: "/farm/$farmId/species",
-									params: { farmId: farmId! },
-								})
-							}
+					{/* Recent Activity */}
+					<div>
+						<h2 className="mb-4 text-h2 text-foreground">
+							{t("recentActivities.title")}
+						</h2>
+						<ActivityFeed
+							items={recentActivity}
+							emptyMessage={t("recentActivities.noActivityMessage")}
 						/>
 					</div>
 				</div>
-
-				{/* Recent Activity */}
-				<div>
-					<h2 className="mb-4 text-h2 text-foreground">
-						{t("recentActivities.title")}
-					</h2>
-					<ActivityFeed
-						items={recentActivity}
-						emptyMessage={t("recentActivities.noActivityMessage")}
-					/>
-				</div>
-			</div>
-		</ScrollablePageLayout>
+			</ScrollablePageLayout>
+			<NewAnimalModal
+				open={isAddAnimalOpen}
+				onOpenChange={setIsAddAnimalOpen}
+			/>
+		</>
 	);
 }
