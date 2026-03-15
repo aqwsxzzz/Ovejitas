@@ -3,6 +3,7 @@ import { MeasurementRecordModal } from "@/features/measurement/components/measur
 import type { IMeasurement } from "@/features/measurement/types/measurement-types";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
 import { useParams } from "@tanstack/react-router";
+import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { Scale, Ruler, Thermometer, type LucideIcon } from "lucide-react";
 
@@ -32,6 +33,19 @@ export const HealthCardIndividualInfo = ({
 		(m) => m.measurementType === measurementType,
 	);
 
+	const latestMeasurement = filteredData?.reduce<IMeasurement | null>(
+		(latest, current) => {
+			if (!latest) {
+				return current;
+			}
+
+			return dayjs(current.measuredAt).isAfter(dayjs(latest.measuredAt))
+				? current
+				: latest;
+		},
+		null,
+	);
+
 	const Icon = measurementConfig[measurementType].icon;
 	const iconColor = measurementConfig[measurementType].color;
 
@@ -53,15 +67,15 @@ export const HealthCardIndividualInfo = ({
 					</p>
 					{isLoading ? (
 						<div className="h-6 bg-muted rounded animate-pulse w-24"></div>
-					) : !isLoading && (!filteredData || filteredData.length === 0) ? (
+					) : !isLoading && !latestMeasurement ? (
 						<p className="text-body text-muted-foreground">
 							{t("missingData")}
 						</p>
 					) : (
 						<p className="text-h1 font-bold text-foreground">
-							{filteredData?.[0]?.value}{" "}
+							{latestMeasurement?.value}{" "}
 							<span className="text-body text-muted-foreground">
-								{filteredData?.[0]?.unit}
+								{latestMeasurement?.unit}
 							</span>
 						</p>
 					)}
@@ -73,13 +87,13 @@ export const HealthCardIndividualInfo = ({
 					</p>
 					{isLoading ? (
 						<div className="h-5 bg-muted rounded animate-pulse w-20"></div>
-					) : !isLoading && (!filteredData || filteredData.length === 0) ? (
+					) : !isLoading && !latestMeasurement ? (
 						<p className="text-small text-muted-foreground">
 							{t("missingData")}
 						</p>
 					) : (
 						<p className="text-small text-foreground">
-							{formatDateByMonth(filteredData![0].measuredAt)}
+							{formatDateByMonth(latestMeasurement!.measuredAt)}
 						</p>
 					)}
 				</div>
