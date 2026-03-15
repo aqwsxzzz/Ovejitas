@@ -185,6 +185,7 @@ function RouteComponent() {
 			<NewAnimalModal
 				open={isNewAnimalModalOpen}
 				onOpenChange={setIsNewAnimalModalOpen}
+				preselectedSpecieId={speciesId}
 			/>
 			<FAB
 				icon={Plus}

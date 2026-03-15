@@ -24,7 +24,13 @@ import { ParentsByGenderSelect } from "@/features/animal/components/parents-by-g
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 
-export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
+export const NewAnimalForm = ({
+	closeDialog,
+	preselectedSpecieId,
+}: {
+	closeDialog: () => void;
+	preselectedSpecieId?: string;
+}) => {
 	const { mutateAsync: createAnimal, isPending } = useCreateAnimal();
 	const { farmId } = useParams({ strict: false });
 	const language = i18next.language.slice(0, 2);
@@ -103,7 +109,7 @@ export const NewAnimalForm = ({ closeDialog }: { closeDialog: () => void }) => {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			specieId: "",
+			specieId: preselectedSpecieId ?? "",
 			breedId: "",
 			name: "",
 			tagNumber: "",

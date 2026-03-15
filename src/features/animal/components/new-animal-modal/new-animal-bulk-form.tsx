@@ -89,8 +89,10 @@ const createFormSchema = (messages: {
 
 export const NewAnimalBulkForm = ({
 	closeDialog,
+	preselectedSpecieId,
 }: {
 	closeDialog: () => void;
+	preselectedSpecieId?: string;
 }) => {
 	const [bulkCreateResult, setBulkCreateResult] = useState<{
 		createdCount: number;
@@ -114,7 +116,7 @@ export const NewAnimalBulkForm = ({
 	>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			specieId: "",
+			specieId: preselectedSpecieId ?? "",
 			breedId: "",
 			groupName: "",
 			count: undefined,

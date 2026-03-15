@@ -16,9 +16,14 @@ import { useTranslation } from "react-i18next";
 interface NewAnimalModalProps {
 	open?: boolean;
 	onOpenChange?: (open: boolean) => void;
+	preselectedSpecieId?: string;
 }
 
-export const NewAnimalModal = ({ open: controlledOpen, onOpenChange }: NewAnimalModalProps = {}) => {
+export const NewAnimalModal = ({
+	open: controlledOpen,
+	onOpenChange,
+	preselectedSpecieId,
+}: NewAnimalModalProps = {}) => {
 	const [internalOpen, setInternalOpen] = useState<boolean>(false);
 	const [createMode, setCreateMode] = useState<"single" | "bulk">("single");
 	const { t } = useTranslation("newAnimalModal");
@@ -68,9 +73,15 @@ export const NewAnimalModal = ({ open: controlledOpen, onOpenChange }: NewAnimal
 					</div>
 				</RadioGroup>
 				{createMode === "single" ? (
-					<NewAnimalForm closeDialog={() => handleOpenChange(false)} />
+					<NewAnimalForm
+						closeDialog={() => handleOpenChange(false)}
+						preselectedSpecieId={preselectedSpecieId}
+					/>
 				) : (
-					<NewAnimalBulkForm closeDialog={() => handleOpenChange(false)} />
+					<NewAnimalBulkForm
+						closeDialog={() => handleOpenChange(false)}
+						preselectedSpecieId={preselectedSpecieId}
+					/>
 				)}
 			</DialogContent>
 		</Dialog>
