@@ -1,6 +1,23 @@
 {
     "title": "Tareas",
-    "subtitle":"La gestión de tareas llegará pronto",
+    "subtitle": "Gestiona la ejecucion diaria y los seguimientos de la granja",
+    "actions": {
+        "reset": "Reiniciar progreso"
+    },
+    "progress": {
+        "label": "Avance",
+        "count": "{{completed}} de {{total}} tareas completadas"
+    },
+    "checklist": {
+        "dailyFeed": "Chequeo de alimentacion matutina",
+        "dailyWater": "Inspeccion de bebederos",
+        "scheduledVet": "Revisar citas veterinarias proximas",
+        "scheduledBreeding": "Validar cronograma reproductivo",
+        "maintenanceFencing": "Inspeccionar puntos debiles del cercado",
+        "maintenanceWater": "Probar presion de bomba de agua",
+        "reportWeekly": "Completar reporte semanal de operaciones",
+        "reportExpenses": "Conciliar registros de gastos"
+    },
     "dailyTasks": {
         "title": "Tareas diarias",
         "subtitle": "Sigue tus actividades y listas diarias de la granja"

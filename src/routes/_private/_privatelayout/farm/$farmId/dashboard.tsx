@@ -16,7 +16,6 @@ import {
 	Plus,
 	Stethoscope,
 	Heart,
-	CheckCircle2,
 } from "lucide-react";
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import { useTranslation } from "react-i18next";
@@ -37,40 +36,37 @@ function RouteComponent() {
 	});
 
 	const totalAnimals = animalData?.length || 0;
-	const healthAlerts = 0; // TODO: Calculate from animal health data
+	const healthAlerts =
+		animalData?.filter((animal) => animal.status !== "alive").length || 0;
 	const { t } = useTranslation("dashboard");
 
-	// Mock recent activity data
-	const recentActivity = [
-		{
-			id: "1",
-			icon: Plus,
-			iconColor: "bg-success/10 text-success",
-			title: t("recentActivities.animalAdded.title"),
-			description: t("recentActivities.animalAdded.description"),
-			timestamp: t("recentActivities.animalAdded.timestamp"),
-			action: {
-				label: t("recentActivities.animalAdded.viewButton"),
-				onClick: () => console.log("View animal"),
-			},
+	const recentActivity = (animalData ?? []).slice(0, 3).map((animal) => ({
+		id: animal.id,
+		icon: animal.status === "alive" ? Plus : Stethoscope,
+		iconColor:
+			animal.status === "alive"
+				? "bg-success/10 text-success"
+				: "bg-warning/10 text-warning",
+		title: t("recentActivities.animalSnapshot.title"),
+		description: t("recentActivities.animalSnapshot.description", {
+			name: animal.name ?? t("recentActivities.animalSnapshot.unnamed"),
+			tag: animal.tagNumber,
+			status: t(`recentActivities.status.${animal.status ?? "unknown"}`),
+		}),
+		timestamp: t("recentActivities.animalSnapshot.timestamp"),
+		action: {
+			label: t("recentActivities.animalAdded.viewButton"),
+			onClick: () =>
+				navigate({
+					to: "/farm/$farmId/species/$speciesId/$animalId/animal",
+					params: {
+						farmId: farmId!,
+						speciesId: animal.speciesId,
+						animalId: animal.id,
+					},
+				}),
 		},
-		{
-			id: "2",
-			icon: Stethoscope,
-			iconColor: "bg-info/10 text-info",
-			title: t("recentActivities.healthCheck.title"),
-			description: t("recentActivities.healthCheck.description"),
-			timestamp: t("recentActivities.healthCheck.timestamp"),
-		},
-		{
-			id: "3",
-			icon: CheckCircle2,
-			iconColor: "bg-primary/10 text-primary",
-			title: t("recentActivities.tasks.title"),
-			description: t("recentActivities.tasks.description"),
-			timestamp: t("recentActivities.tasks.timestamp"),
-		},
-	];
+	}));
 
 	return (
 		<ScrollablePageLayout
@@ -160,14 +156,24 @@ function RouteComponent() {
 							iconColor="text-info"
 							title={t("quickActions.healthCheck.title")}
 							description={t("quickActions.healthCheck.description")}
-							onClick={() => console.log("Health check")}
+							onClick={() =>
+								navigate({
+									to: "/farm/$farmId/species",
+									params: { farmId: farmId! },
+								})
+							}
 						/>
 						<QuickActionCard
 							icon={Heart}
 							iconColor="text-breeding"
 							title={t("quickActions.breedingLog.title")}
 							description={t("quickActions.breedingLog.description")}
-							onClick={() => console.log("Breeding log")}
+							onClick={() =>
+								navigate({
+									to: "/farm/$farmId/species",
+									params: { farmId: farmId! },
+								})
+							}
 						/>
 					</div>
 				</div>

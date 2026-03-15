@@ -9,14 +9,16 @@ import {
 import { EditAnimalForm } from "@/features/animal/components/edit-animal-modal/edit-animal-form";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { Pencil } from "lucide-react";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 interface EditAnimalModalProps {
 	animal: IAnimal;
+	trigger?: ReactNode;
 }
 
-export const EditAnimalModal = ({ animal }: EditAnimalModalProps) => {
+export const EditAnimalModal = ({ animal, trigger }: EditAnimalModalProps) => {
 	const [open, setOpen] = useState<boolean>(false);
 	const { t } = useTranslation("editAnimalModal");
 
@@ -26,12 +28,14 @@ export const EditAnimalModal = ({ animal }: EditAnimalModalProps) => {
 			onOpenChange={setOpen}
 		>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					className="bg-primary text-primary-foreground"
-				>
-					<Pencil />
-				</Button>
+				{trigger ?? (
+					<Button
+						variant="outline"
+						className="bg-primary text-primary-foreground"
+					>
+						<Pencil />
+					</Button>
+				)}
 			</DialogTrigger>
 			<DialogContent className="max-h-[90vh] overflow-y-auto p-4">
 				<DialogTitle>{t("editTitle")}</DialogTitle>

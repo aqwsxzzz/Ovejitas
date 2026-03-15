@@ -3,15 +3,20 @@ import type { IAnimalsCountBySpeciesResponse } from "@/features/animal/types/ani
 
 interface AnimalDashboardProps {
 	animal: IAnimalsCountBySpeciesResponse[];
+	attentionCountBySpecies?: Record<string, number>;
 }
 
-export const AnimalsDashboard = ({ animal }: AnimalDashboardProps) => {
+export const AnimalsDashboard = ({
+	animal,
+	attentionCountBySpecies,
+}: AnimalDashboardProps) => {
 	return (
 		<div className="flex flex-col gap-1 sm:gap-2 w-full">
 			{animal?.map((animal: IAnimalsCountBySpeciesResponse) => (
 				<AnimalCountBySpeciesCard
 					key={animal.species.id}
 					animal={animal}
+					attentionCount={attentionCountBySpecies?.[animal.species.id] ?? 0}
 				/>
 			))}
 		</div>

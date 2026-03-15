@@ -1,6 +1,23 @@
 {
     "title": "Tasks",
-    "subtitle":"Task management coming soon",
+    "subtitle":"Manage daily farm execution and follow-up",
+    "actions": {
+        "reset": "Reset progress"
+    },
+    "progress": {
+        "label": "Completion",
+        "count": "{{completed}} of {{total}} tasks done"
+    },
+    "checklist": {
+        "dailyFeed": "Morning feed check",
+        "dailyWater": "Water trough inspection",
+        "scheduledVet": "Review upcoming vet appointments",
+        "scheduledBreeding": "Validate breeding schedule",
+        "maintenanceFencing": "Inspect fence weak points",
+        "maintenanceWater": "Test water pump pressure",
+        "reportWeekly": "Complete weekly operations report",
+        "reportExpenses": "Reconcile expense records"
+    },
     "dailyTasks": {
         "title": "Daily Tasks",
         "subtitle": "Track your daily farm activities and checklists"

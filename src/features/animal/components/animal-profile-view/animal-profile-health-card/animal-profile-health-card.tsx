@@ -7,10 +7,16 @@ import { useTranslation } from "react-i18next";
 export const AnimalProfileHealthCard = () => {
 	const { t } = useTranslation("animalProfileHealthCard");
 	return (
-		<Card className="rounded-card shadow-card">
+		<Card
+			id="health-records"
+			className="rounded-card shadow-card"
+		>
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
 				<CardTitle className="flex items-center gap-2">
-					<Badge variant="secondary" className="border-primary">
+					<Badge
+						variant="secondary"
+						className="border-primary"
+					>
 						{t("headerTitle")}
 					</Badge>
 				</CardTitle>

@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { HealthStatusIndicator } from "@/components/common/health-status-indicator";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
@@ -72,10 +73,22 @@ export const AnimalProfileCard = () => {
 	}
 
 	return (
-		<Card className="rounded-card shadow-card">
+		<Card
+			id="animal-overview"
+			className="rounded-card shadow-card"
+		>
 			<CardContent className="p-4 space-y-4">
 				{/* Name and breed with health indicator and status badge */}
 				<div className="flex items-center gap-3">
+					<Avatar className="size-12 border border-border">
+						<AvatarFallback className="text-xl bg-primary/10 text-primary">
+							{animalData.sex === "male"
+								? "🐏"
+								: animalData.sex === "female"
+									? "🐑"
+									: "🐾"}
+						</AvatarFallback>
+					</Avatar>
 					<HealthStatusIndicator
 						status={animalData.status}
 						className="mt-1"
@@ -94,6 +107,9 @@ export const AnimalProfileCard = () => {
 								animalData.breed,
 								i18n.language.slice(0, 2),
 							) || t("missingData")}
+						</p>
+						<p className="text-caption text-muted-foreground">
+							{t("profileImageHint")}
 						</p>
 					</div>
 				</div>

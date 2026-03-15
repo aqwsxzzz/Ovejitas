@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import type { IAnimalsCountBySpeciesResponse } from "@/features/animal/types/animal-types";
 import { Link, useParams } from "@tanstack/react-router";
@@ -7,6 +8,7 @@ import { useTranslation } from "react-i18next";
 
 interface AnimalCardProps {
 	animal: IAnimalsCountBySpeciesResponse;
+	attentionCount: number;
 }
 
 function getFarmAnimalEmoji(name: string): string {
@@ -36,7 +38,10 @@ function getFarmAnimalEmoji(name: string): string {
 	}
 }
 
-export const AnimalCountBySpeciesCard = ({ animal }: AnimalCardProps) => {
+export const AnimalCountBySpeciesCard = ({
+	animal,
+	attentionCount,
+}: AnimalCardProps) => {
 	const { farmId } = useParams({ strict: false });
 	const { t } = useTranslation("animalsCountBySpeciesCard");
 
@@ -57,6 +62,12 @@ export const AnimalCountBySpeciesCard = ({ animal }: AnimalCardProps) => {
 				<p className="flex-none text-lg font-bold text-primary px-2">
 					{animal.count}
 				</p>
+
+				<Badge variant={attentionCount > 0 ? "warning" : "success"}>
+					{attentionCount > 0
+						? t("needsAttention", { count: attentionCount })
+						: t("allHealthy")}
+				</Badge>
 
 				{/* View Details Button */}
 				<Link

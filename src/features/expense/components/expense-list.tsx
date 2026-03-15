@@ -20,6 +20,7 @@ interface ExpenseListProps {
 	expenses: IExpense[];
 	farmId: string;
 	filters: Partial<IExpenseListFilters>;
+	currencyCode: string;
 }
 
 const parseDecimal = (value: unknown): number | undefined => {
@@ -61,6 +62,7 @@ export const ExpenseList = ({
 	expenses,
 	farmId,
 	filters,
+	currencyCode,
 }: ExpenseListProps) => {
 	const { t, i18n } = useTranslation("expenses");
 
@@ -68,10 +70,10 @@ export const ExpenseList = ({
 		() =>
 			new Intl.NumberFormat(i18n.language, {
 				style: "currency",
-				currency: "USD",
+				currency: currencyCode,
 				maximumFractionDigits: 2,
 			}),
-		[i18n.language],
+		[i18n.language, currencyCode],
 	);
 
 	const dateFormatter = useMemo(
@@ -103,7 +105,7 @@ export const ExpenseList = ({
 										{dateFormatter.format(new Date(`${expense.date}T00:00:00`))}
 									</p>
 									<p className="text-lg font-semibold">
-										{currencyFormatter.format(expense.amount)}
+										{currencyFormatter.format(displayAmount)}
 									</p>
 								</div>
 								<div className="flex gap-2">
@@ -122,7 +124,7 @@ export const ExpenseList = ({
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
 								<div>
 									<p className="text-muted-foreground">{t("list.vendor")}</p>
-									{currencyFormatter.format(displayAmount)}
+									<p>{expense.vendor || t("list.notProvided")}</p>
 								</div>
 								<div>
 									<p className="text-muted-foreground">

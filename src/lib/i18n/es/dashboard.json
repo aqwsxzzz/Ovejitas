@@ -35,6 +35,18 @@
     "recentActivities": {
         "title": "Actividades recientes",
         "noActivityMessage": "No hay actividad reciente para mostrar",
+        "status": {
+            "alive": "vivo",
+            "deceased": "fallecido",
+            "sold": "vendido",
+            "unknown": "desconocido"
+        },
+        "animalSnapshot": {
+            "title": "Estado actual de animales",
+            "description": "{{name}} (Etiqueta #{{tag}}) esta actualmente {{status}}",
+            "timestamp": "Datos en vivo de la granja",
+            "unnamed": "Animal sin nombre"
+        },
         "animalAdded": {
             "title": "Nuevo animal agregado",
             "description": "Oveja #247 agregada al rebaño",

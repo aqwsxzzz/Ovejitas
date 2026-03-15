@@ -1,9 +1,13 @@
 import { SpeciesCardSkeletonList } from "@/components/common/skeleton-loaders";
-import { useGetAnimalsCountBySpecies } from "@/features/animal/api/animal-queries";
+import {
+	useGetAnimalsByFarmId,
+	useGetAnimalsCountBySpecies,
+} from "@/features/animal/api/animal-queries";
 import { AnimalsDashboard } from "@/features/animal/components/animals-dashboard/animals-dashboard";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import i18next from "i18next";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import FarmAnimalsEmpyState from "@/routes/_public/assets/FarmAnimalsEmpyState.svg";
 import { PageHeader } from "@/components/common/page-header";
@@ -21,7 +25,25 @@ function RouteComponent() {
 		language,
 		farmId!,
 	);
+	const { data: allAnimalsData } = useGetAnimalsByFarmId({
+		farmId: farmId!,
+		withLanguage: true,
+	});
 	const { t } = useTranslation("speciesIndex");
+
+	const attentionCountBySpecies = useMemo(() => {
+		if (!allAnimalsData) {
+			return {};
+		}
+
+		return allAnimalsData.reduce<Record<string, number>>((acc, animal) => {
+			if (animal.status !== "alive") {
+				acc[animal.speciesId] = (acc[animal.speciesId] ?? 0) + 1;
+			}
+
+			return acc;
+		}, {});
+	}, [allAnimalsData]);
 
 	if (isPending) {
 		return (
@@ -44,7 +66,10 @@ function RouteComponent() {
 				action={<NewAnimalModal />}
 			/>
 			{animalData && animalData.length > 0 && (
-				<AnimalsDashboard animal={animalData!} />
+				<AnimalsDashboard
+					animal={animalData}
+					attentionCountBySpecies={attentionCountBySpecies}
+				/>
 			)}
 			{animalData && animalData.length === 0 && (
 				<div className="text-muted-foreground p-4 pt-12 flex justify-center">

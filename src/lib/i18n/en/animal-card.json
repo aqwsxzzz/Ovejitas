@@ -1,3 +1,9 @@
 {
-    "tagText": "Tag #"
+    "tagText": "Tag #",
+    "statusOptions": {
+        "alive": "Alive",
+        "deceased": "Deceased",
+        "sold": "Sold",
+        "unknown": "Unknown"
+    }
 }

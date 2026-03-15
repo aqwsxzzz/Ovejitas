@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 interface ExpenseSummaryStripProps {
 	expenses: IExpense[];
+	currencyCode: string;
 }
 
 const parseDecimal = (value: unknown): number | undefined => {
@@ -42,17 +43,20 @@ const resolveExpenseAmount = (expense: IExpense): number => {
 	return 0;
 };
 
-export const ExpenseSummaryStrip = ({ expenses }: ExpenseSummaryStripProps) => {
+export const ExpenseSummaryStrip = ({
+	expenses,
+	currencyCode,
+}: ExpenseSummaryStripProps) => {
 	const { t, i18n } = useTranslation("expenses");
 
 	const currencyFormatter = useMemo(
 		() =>
 			new Intl.NumberFormat(i18n.language, {
 				style: "currency",
-				currency: "USD",
+				currency: currencyCode,
 				maximumFractionDigits: 2,
 			}),
-		[i18n.language],
+		[i18n.language, currencyCode],
 	);
 
 	const summary = useMemo(() => {

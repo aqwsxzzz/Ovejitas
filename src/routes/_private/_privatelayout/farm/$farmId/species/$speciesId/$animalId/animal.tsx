@@ -1,9 +1,11 @@
 import { AnimalProfileCard } from "@/features/animal/components/animal-profile-view/animal-profile-basic-card";
 import { AnimalProfileHealthCard } from "@/features/animal/components/animal-profile-view/animal-profile-health-card/animal-profile-health-card";
+import { EditAnimalModal } from "@/features/animal/components/edit-animal-modal/edit-animal-modal";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { HeartPulse, Baby, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
+import { AddNewMeasurementModal } from "@/features/measurement/components/add-new-measurement-modal/add-new-measurement-modal";
 import { PageHeader } from "@/components/common/page-header";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +24,13 @@ function RouteComponent() {
 		withLanguage: true,
 	});
 
+	const scrollToSection = (sectionId: string) => {
+		document.getElementById(sectionId)?.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+		});
+	};
+
 	return (
 		<div className="flex flex-col gap-6 p-4">
 			<PageHeader
@@ -37,30 +46,50 @@ function RouteComponent() {
 
 			{/* Quick Action Buttons */}
 			<div className="grid grid-cols-3 gap-3">
+				<AddNewMeasurementModal
+					trigger={
+						<Button
+							variant="outline"
+							className="flex flex-col items-center gap-2 h-auto py-4 w-full"
+						>
+							<HeartPulse className="h-6 w-6 text-info" />
+							<span className="text-caption font-medium">
+								{t("quickActions.healthCheck")}
+							</span>
+						</Button>
+					}
+				/>
+				{animalData ? (
+					<EditAnimalModal
+						animal={animalData}
+						trigger={
+							<Button
+								variant="outline"
+								className="flex flex-col items-center gap-2 h-auto py-4 w-full"
+							>
+								<Baby className="h-6 w-6 text-breeding" />
+								<span className="text-caption font-medium">
+									{t("quickActions.breeding")}
+								</span>
+							</Button>
+						}
+					/>
+				) : (
+					<Button
+						variant="outline"
+						className="flex flex-col items-center gap-2 h-auto py-4"
+						disabled
+					>
+						<Baby className="h-6 w-6 text-breeding" />
+						<span className="text-caption font-medium">
+							{t("quickActions.breeding")}
+						</span>
+					</Button>
+				)}
 				<Button
 					variant="outline"
 					className="flex flex-col items-center gap-2 h-auto py-4"
-					onClick={() => console.log("Health Check")}
-				>
-					<HeartPulse className="h-6 w-6 text-info" />
-					<span className="text-caption font-medium">
-						{t("quickActions.healthCheck")}
-					</span>
-				</Button>
-				<Button
-					variant="outline"
-					className="flex flex-col items-center gap-2 h-auto py-4"
-					onClick={() => console.log("Breeding Log")}
-				>
-					<Baby className="h-6 w-6 text-breeding" />
-					<span className="text-caption font-medium">
-						{t("quickActions.breeding")}
-					</span>
-				</Button>
-				<Button
-					variant="outline"
-					className="flex flex-col items-center gap-2 h-auto py-4"
-					onClick={() => console.log("Notes")}
+					onClick={() => scrollToSection("health-records")}
 				>
 					<FileText className="h-6 w-6 text-warning" />
 					<span className="text-caption font-medium">

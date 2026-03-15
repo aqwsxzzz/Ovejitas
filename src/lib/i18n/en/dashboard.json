@@ -35,6 +35,18 @@
     "recentActivities": {
         "title": "Recent Activities",
         "noActivityMessage": "No recent activity to show",
+        "status": {
+            "alive": "alive",
+            "deceased": "deceased",
+            "sold": "sold",
+            "unknown": "unknown"
+        },
+        "animalSnapshot": {
+            "title": "Animal status snapshot",
+            "description": "{{name}} (Tag #{{tag}}) is currently {{status}}",
+            "timestamp": "Live farm data",
+            "unnamed": "Unnamed animal"
+        },
         "animalAdded": {
             "title": "New Animal Added",
             "description": "Sheep #247 added to the flock",

@@ -23,14 +23,18 @@ export const AnimalCard = ({ animal, sex }: AnimalCardProps) => {
 	const { t } = useTranslation("animalCard");
 	const { farmId, speciesId } = useParams({ strict: false });
 
-	const getStatusColor = (status: IAnimal["status"]) => {
+	const getStatusVariant = (
+		status: IAnimal["status"],
+	): "success" | "error" | "info" | "secondary" => {
 		switch (status) {
 			case "alive":
-				return "bg-green-500/10 text-green-700 hover:bg-green-500/20";
+				return "success";
 			case "deceased":
-				return "bg-red-500/10 text-red-700 hover:bg-red-500/20";
+				return "error";
 			case "sold":
-				return "bg-blue-500/10 text-blue-700 hover:bg-blue-500/20";
+				return "info";
+			default:
+				return "secondary";
 		}
 	};
 
@@ -57,11 +61,8 @@ export const AnimalCard = ({ animal, sex }: AnimalCardProps) => {
 							</CardDescription>
 						</div>
 					</div>
-					<Badge
-						variant="secondary"
-						className={getStatusColor(animal.status)}
-					>
-						{animal.status}
+					<Badge variant={getStatusVariant(animal.status)}>
+						{t(`statusOptions.${animal.status ?? "unknown"}`)}
 					</Badge>
 				</CardHeader>
 				<CardContent className="p-2 pt-1 flex flex-row gap-2 justify-between items-center">

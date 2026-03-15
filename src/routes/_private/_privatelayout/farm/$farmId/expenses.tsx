@@ -5,8 +5,10 @@ import { useGetExpenses } from "@/features/expense/api/expense-queries";
 import { ExpenseFilterBar } from "@/features/expense/components/expense-filter-bar";
 import { ExpenseFormModal } from "@/features/expense/components/expense-form-modal";
 import { ExpenseList } from "@/features/expense/components/expense-list";
+import { ExpenseListSkeleton } from "@/features/expense/components/expense-list-skeleton";
 import { ExpenseSummaryStrip } from "@/features/expense/components/expense-summary-strip";
 import type { IExpenseListFilters } from "@/features/expense/types/expense-types";
+import { useGetFarmById } from "@/features/farm/api/farm-queries";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +22,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
 	const { t } = useTranslation("expenses");
 	const { farmId } = useParams({ strict: false });
+	const { data: farmData } = useGetFarmById(farmId!);
 	const [filters, setFilters] = useState<Partial<IExpenseListFilters>>({});
 	const {
 		data: expenses = [],
@@ -28,6 +31,7 @@ function RouteComponent() {
 		error,
 		refetch,
 	} = useGetExpenses({ farmId: farmId!, filters });
+	const currencyCode = farmData?.currencyCode ?? "USD";
 
 	return (
 		<ScrollablePageLayout
@@ -52,11 +56,14 @@ function RouteComponent() {
 			}
 		>
 			<div className="flex flex-col gap-4">
-				{!isPending && !isError && <ExpenseSummaryStrip expenses={expenses} />}
-
-				{isPending && (
-					<div className="text-muted-foreground py-8">{t("page.loading")}</div>
+				{!isPending && !isError && (
+					<ExpenseSummaryStrip
+						expenses={expenses}
+						currencyCode={currencyCode}
+					/>
 				)}
+
+				{isPending && <ExpenseListSkeleton />}
 
 				{isError && (
 					<div className="rounded-card border p-4 flex flex-col gap-2">
@@ -83,6 +90,7 @@ function RouteComponent() {
 						expenses={expenses}
 						farmId={farmId!}
 						filters={filters}
+						currencyCode={currencyCode}
 					/>
 				)}
 			</div>
