@@ -62,7 +62,6 @@ const formSchema = z.object({
 		IAnimal["sex"],
 		IAnimal["sex"],
 	]),
-	birthDate: z.date(),
 	status: z.enum(["alive", "deceased", "sold"]).nullable() as z.ZodType<
 		IAnimal["status"]
 	>,
@@ -79,7 +78,8 @@ const formSchema = z.object({
 		IAnimal["acquisitionType"],
 		IAnimal["acquisitionType"],
 	]),
-	acquisitionDate: z.date(),
+	birthDate: z.date().optional(),
+	acquisitionDate: z.date().optional(),
 });
 
 export const EditAnimalForm = ({
@@ -91,8 +91,11 @@ export const EditAnimalForm = ({
 	const { farmId } = useParams({ strict: false });
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
-		// Format birthDate as YYYY-MM-DD
-		const formatDate = (date: Date) => {
+		const formatDate = (date?: Date) => {
+			if (!date) {
+				return null;
+			}
+
 			const year = date.getFullYear();
 			const month = String(date.getMonth() + 1).padStart(2, "0");
 			const day = String(date.getDate()).padStart(2, "0");
