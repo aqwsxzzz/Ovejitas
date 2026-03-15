@@ -46,40 +46,48 @@ export const AnimalCountBySpeciesCard = ({
 	const { t } = useTranslation("animalsCountBySpeciesCard");
 
 	return (
-		<Card className="w-full max-w-3xl mx-auto my-2 px-3 py-2 rounded-md border border-border bg-background shadow-sm hover:shadow transition min-h-0">
-			<div className="flex flex-row items-center gap-3 w-full">
+		<Card className="w-full max-w-3xl mx-auto my-2 px-3 rounded-md border border-border bg-background shadow-sm hover:shadow transition">
+			<div className="flex flex-row items-center gap-2 sm:gap-3 w-full h-14">
 				{/* Icon */}
 				<div className="flex-none text-2xl flex items-center justify-center bg-muted rounded-md w-10 h-10">
 					{getFarmAnimalEmoji(animal.species.name)}
 				</div>
 
 				{/* Species Name */}
-				<h3 className="flex-1 font-medium text-base text-card-foreground truncate">
+				<h3 className="flex-1 min-w-0 font-medium text-base text-card-foreground truncate hidden sm:block">
 					{animal.species.name}
 				</h3>
 
 				{/* Quantity */}
-				<p className="flex-none text-lg font-bold text-primary px-2">
-					{animal.count}
-				</p>
+				<div className="flex-none w-[3ch] text-center">
+					<p className="text-lg font-bold text-primary leading-none tabular-nums">
+						{animal.count}
+					</p>
+				</div>
 
-				<Badge variant={attentionCount > 0 ? "warning" : "success"}>
-					{attentionCount > 0
-						? t("needsAttention", { count: attentionCount })
-						: t("allHealthy")}
-				</Badge>
+				<div className="flex-1 min-w-0 flex justify-center sm:flex-none sm:w-[10.5rem]">
+					<Badge
+						className="w-[9.25rem] sm:w-full justify-center"
+						variant={attentionCount > 0 ? "warning" : "success"}
+					>
+						{attentionCount > 0
+							? t("needsAttention", { count: attentionCount })
+							: t("allHealthy")}
+					</Badge>
+				</div>
 
 				{/* View Details Button */}
 				<Link
+					className="flex-none flex items-center"
 					to="/farm/$farmId/species/$speciesId/animals"
 					params={{ farmId: farmId!, speciesId: animal.species.id }}
 				>
 					<Button
 						variant="outline"
-						className="gap-2 h-8 px-3 text-xs bg-transparent flex-none"
+						className="gap-1.5 h-8 px-1.5 sm:px-3 text-xs bg-transparent"
 					>
-						<Eye className="h-3 w-3" />
-						{t("viewDetailsButton")}
+						<Eye className="h-3 w-3 flex-none" />
+						<span className="hidden sm:inline">{t("viewDetailsButton")}</span>
 					</Button>
 				</Link>
 			</div>
