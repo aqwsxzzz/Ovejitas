@@ -32,28 +32,31 @@ export function StatsWidget({
 			onClick={onClick}
 			className={cn(
 				"rounded-widget shadow-widget bg-card p-4 border-l-4 transition-all",
-				"min-h-[88px] flex items-center gap-4",
+				"min-h-[88px] flex items-start gap-4",
 				borderColor,
 				onClick && "cursor-pointer hover:shadow-lg hover:scale-[1.02]",
-				className
+				className,
 			)}
 		>
 			<div className={cn("flex-shrink-0", iconColor)}>
-				<Icon className="w-8 h-8" aria-hidden="true" />
+				<Icon
+					className="w-8 h-8"
+					aria-hidden="true"
+				/>
 			</div>
 
 			<div className="flex-1 min-w-0">
-				<div className="flex items-baseline gap-2">
-					<span className="text-display font-bold text-foreground truncate">
+				<div className="flex flex-wrap items-end gap-x-2 gap-y-1">
+					<span className="text-display font-bold text-foreground leading-none break-words">
 						{value}
 					</span>
 					{trend && (
 						<span
 							className={cn(
-								"text-small font-medium",
+								"text-small font-medium leading-tight break-words",
 								trend.direction === "up" && "text-success",
 								trend.direction === "down" && "text-error",
-								trend.direction === "neutral" && "text-muted-foreground"
+								trend.direction === "neutral" && "text-muted-foreground",
 							)}
 						>
 							{trend.direction === "up" && "↑"}

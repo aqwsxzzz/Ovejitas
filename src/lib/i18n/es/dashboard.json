@@ -5,7 +5,7 @@
 
         "resumeAnimalsCard": {
             "label": "Total de animales",
-            "trendValue": "+2 esta semana"
+            "trendValue": "{{count}} agregados en los ultimos 7 dias"
         },
         "resumeWeatherCard": {
             "label": "Clima",

@@ -5,7 +5,7 @@
 
         "resumeAnimalsCard": {
             "label": "Total Animals",
-            "trendValue": "+2 this week"
+            "trendValue": "{{count}} added in last 7 days"
         },
         "resumeWeatherCard": {
             "label": "Weather",

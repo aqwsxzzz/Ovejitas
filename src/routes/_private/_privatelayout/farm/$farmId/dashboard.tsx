@@ -18,6 +18,7 @@ import {
 	Heart,
 } from "lucide-react";
 import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
+import { countAnimalsAddedInPastDays } from "@/features/dashboard/utils/count-animals-added-in-period";
 import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
@@ -36,6 +37,10 @@ function RouteComponent() {
 	});
 
 	const totalAnimals = animalData?.length || 0;
+	const animalsAddedLast7Days = countAnimalsAddedInPastDays(
+		animalData ?? [],
+		7,
+	);
 	const healthAlerts =
 		animalData?.filter((animal) => animal.status !== "alive").length || 0;
 	const { t } = useTranslation("dashboard");
@@ -82,6 +87,7 @@ function RouteComponent() {
 				{/* Stats Grid */}
 				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<Link
+						className="block h-full"
 						to="/farm/$farmId/species"
 						params={{ farmId: farmId! }}
 					>
@@ -92,13 +98,16 @@ function RouteComponent() {
 							label={t("resumes.resumeAnimalsCard.label")}
 							value={isLoading ? "..." : totalAnimals}
 							trend={
-								totalAnimals > 0
+								!isLoading
 									? {
-											value: t("resumes.resumeAnimalsCard.trendValue"),
-											direction: "up",
+											value: t("resumes.resumeAnimalsCard.trendValue", {
+												count: animalsAddedLast7Days,
+											}),
+											direction: animalsAddedLast7Days > 0 ? "up" : "neutral",
 										}
 									: undefined
 							}
+							className="h-full"
 						/>
 					</Link>
 
