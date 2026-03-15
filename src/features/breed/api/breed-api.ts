@@ -1,13 +1,20 @@
 import { axiosHelper } from "@/lib/axios/axios-helper";
+import { ApiRequestError } from "@/lib/axios/axios-helper";
 import type {
 	Breed,
+	CreateBreedPayload,
+	CreateBreedTranslationPayload,
 	BreedOrder,
 	BreedOrderField,
+	BreedTranslation,
 } from "@/features/breed/types/breed";
+import { getBreedDisplayName } from "@/features/breed/types/breed";
 import type { IBreed } from "@/features/breed/types/breed-types";
+import i18next from "i18next";
 
 const BREEDS_API_PATH = "/breeds";
-const ALLOWED_ORDER_FIELDS: BreedOrderField[] = ["name", "id", "createdAt"];
+const BREED_TRANSLATIONS_API_PATH = "/breed-translations";
+const ALLOWED_ORDER_FIELDS: BreedOrderField[] = ["id", "createdAt"];
 
 type ApiEnvelope<T> = {
 	status: "success" | "error";
@@ -52,7 +59,7 @@ const validateBreedOrder = (order: string): BreedOrder => {
 			(direction !== "asc" && direction !== "desc")
 		) {
 			throw new Error(
-				"Invalid order value. Use name/id/createdAt with asc or desc.",
+				"Invalid order value. Use id/createdAt with asc or desc.",
 			);
 		}
 	}
@@ -60,27 +67,147 @@ const validateBreedOrder = (order: string): BreedOrder => {
 	return order as BreedOrder;
 };
 
+const normalizeBreed = (breed: Breed, language: string): Breed => ({
+	...breed,
+	name: getBreedDisplayName(breed, language),
+});
+
+type GetBreedsBySpeciesOptions = {
+	order?: string;
+	includeTranslations?: boolean;
+	withLanguage?: boolean;
+	language?: string;
+};
+
+type GetBreedsBySpeciesParams = {
+	speciesId: string;
+	order?: string;
+	include?: "translations";
+	language?: string;
+};
+
+const fetchBreeds = async (params: GetBreedsBySpeciesParams) =>
+	axiosHelper<unknown, GetBreedsBySpeciesParams>({
+		method: "get",
+		url: BREEDS_API_PATH,
+		urlParams: params,
+	});
+
+const shouldFallbackToLegacyBreedQuery = (error: unknown): boolean => {
+	if (!(error instanceof ApiRequestError)) {
+		return false;
+	}
+
+	if (error.statusCode !== 500) {
+		return false;
+	}
+
+	const normalizedMessage = error.message.trim().toLowerCase();
+	return (
+		normalizedMessage.includes("database") ||
+		normalizedMessage.includes("error")
+	);
+};
+
 export const getBreedsBySpecies = async (
 	speciesId: string,
-	order?: string,
+	options?: GetBreedsBySpeciesOptions,
 ): Promise<Breed[]> => {
 	if (!speciesId.trim()) {
 		throw new Error("Species is required to load breeds.");
 	}
 
-	const response = await axiosHelper<
-		unknown,
-		{ speciesId: string; order?: string }
-	>({
-		method: "get",
-		url: BREEDS_API_PATH,
-		urlParams: {
+	const {
+		order,
+		includeTranslations = true,
+		withLanguage = true,
+		language,
+	} = options ?? {};
+	const selectedLanguage = (language ?? i18next.language).slice(0, 2);
+	const orderParam = order ? validateBreedOrder(order) : undefined;
+
+	const queryParams: GetBreedsBySpeciesParams = {
+		speciesId,
+		...(orderParam ? { order: orderParam } : {}),
+		...(includeTranslations ? { include: "translations" as const } : {}),
+		...(includeTranslations && withLanguage
+			? { language: selectedLanguage }
+			: {}),
+	};
+
+	let response: unknown;
+
+	try {
+		response = await fetchBreeds(queryParams);
+	} catch (error) {
+		if (!includeTranslations || !shouldFallbackToLegacyBreedQuery(error)) {
+			throw error;
+		}
+
+		response = await fetchBreeds({
 			speciesId,
-			...(order ? { order: validateBreedOrder(order) } : {}),
-		},
+			...(orderParam ? { order: orderParam } : {}),
+		});
+	}
+
+	return extractDataFromEnvelope<Breed[]>(response).map((breed) =>
+		normalizeBreed(breed, selectedLanguage),
+	);
+};
+
+export const createBreed = async (
+	payload: CreateBreedPayload,
+): Promise<Breed> => {
+	if (!payload.speciesId.trim()) {
+		throw new Error("Species is required to create a breed.");
+	}
+
+	if (!payload.name.trim()) {
+		throw new Error("Breed name is required.");
+	}
+
+	if (!payload.language.trim()) {
+		throw new Error("Language is required to create a breed.");
+	}
+
+	const response = await axiosHelper<unknown, unknown, CreateBreedPayload>({
+		method: "post",
+		url: BREEDS_API_PATH,
+		data: payload,
 	});
 
-	return extractDataFromEnvelope<Breed[]>(response);
+	return normalizeBreed(
+		extractDataFromEnvelope<Breed>(response),
+		payload.language.slice(0, 2),
+	);
+};
+
+export const createBreedTranslation = async (
+	payload: CreateBreedTranslationPayload,
+): Promise<BreedTranslation> => {
+	if (!payload.breedId.trim()) {
+		throw new Error("Breed is required to create a translation.");
+	}
+
+	if (!payload.name.trim()) {
+		throw new Error("Translation name is required.");
+	}
+
+	if (!payload.language.trim()) {
+		throw new Error("Language is required to create a translation.");
+	}
+
+	const response = await axiosHelper<
+		unknown,
+		unknown,
+		CreateBreedTranslationPayload
+	>({
+		method: "post",
+		url: BREED_TRANSLATIONS_API_PATH,
+		data: payload,
+	});
+
+	return extractDataFromEnvelope<BreedTranslation>(response);
 };
 
 export const getBreedsBySpecieId = async ({

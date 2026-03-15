@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { HealthStatusIndicator } from "@/components/common/health-status-indicator";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
 import type { IAnimal } from "@/features/animal/types/animal-types";
+import { getBreedDisplayName } from "@/features/breed/types/breed";
 import { useParams } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import type { TFunction } from "i18next";
@@ -16,7 +17,7 @@ export const AnimalProfileCard = () => {
 		include,
 		withLanguage: true,
 	});
-	const { t } = useTranslation("animalProfileBasicCard");
+	const { t, i18n } = useTranslation("animalProfileBasicCard");
 
 	const getLocalizedStatus = (status: IAnimal["status"]) => {
 		if (!status) {
@@ -89,7 +90,10 @@ export const AnimalProfileCard = () => {
 							</Badge>
 						</div>
 						<p className="text-small text-muted-foreground">
-							{animalData.breed.name ?? t("missingData")}
+							{getBreedDisplayName(
+								animalData.breed,
+								i18n.language.slice(0, 2),
+							) || t("missingData")}
 						</p>
 					</div>
 				</div>

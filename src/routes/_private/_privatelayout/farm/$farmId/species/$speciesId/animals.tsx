@@ -95,60 +95,68 @@ function RouteComponent() {
 
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
-			<div className="flex flex-col gap-6 p-4">
+			<div className="flex h-full min-h-0 flex-col p-4">
+				<div className="sticky top-0 z-10 shrink-0 space-y-6 bg-background pb-4">
+					<PageHeader
+						title="Loading..."
+						description={t("searchInputPlaceholder")}
+						backLink={{
+							to: "/farm/$farmId/species",
+							params: { farmId: farmId! },
+						}}
+						action={<NewAnimalModal />}
+					/>
+				</div>
+				<div className="min-h-0 flex-1 overflow-y-auto pb-4">
+					<AnimalCardSkeletonList count={5} />
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex h-full min-h-0 flex-col p-4">
+			<div className="sticky top-0 z-10 shrink-0 space-y-6 bg-background pb-4">
 				<PageHeader
-					title="Loading..."
-					description={t("searchInputPlaceholder")}
+					title={speciesData?.translations?.[0].name || ""}
+					description={t("searchSubtitle")}
 					backLink={{
 						to: "/farm/$farmId/species",
 						params: { farmId: farmId! },
 					}}
 					action={<NewAnimalModal />}
 				/>
-				<AnimalCardSkeletonList count={5} />
-			</div>
-		);
-	}
 
-	return (
-		<div className="flex flex-col gap-6 p-4">
-			<PageHeader
-				title={speciesData?.translations?.[0].name || ""}
-				description={t("searchSubtitle")}
-				backLink={{
-					to: "/farm/$farmId/species",
-					params: { farmId: farmId! },
-				}}
-				action={<NewAnimalModal />}
-			/>
-
-			{/* Search and Filters */}
-			<div className="flex flex-col gap-3">
-				<SearchBar
-					value={searchQuery}
-					onChange={setSearchQuery}
-					placeholder={t("searchInputPlaceholder")}
-				/>
-				<FilterChips
-					options={filterOptions}
-					selected={selectedFilter}
-					onSelect={setSelectedFilter}
-				/>
+				{/* Search and Filters */}
+				<div className="flex flex-col gap-3">
+					<SearchBar
+						value={searchQuery}
+						onChange={setSearchQuery}
+						placeholder={t("searchInputPlaceholder")}
+					/>
+					<FilterChips
+						options={filterOptions}
+						selected={selectedFilter}
+						onSelect={setSelectedFilter}
+					/>
+				</div>
 			</div>
 
 			{/* Animals List */}
-			{filteredAnimals.length > 0 ? (
-				<AnimalCardContainer
-					animalsList={filteredAnimals}
-					sex=""
-				/>
-			) : (
-				<div className="text-center text-muted-foreground p-8">
-					{searchQuery || selectedFilter !== "all"
-						? t("noAnimalsMatch")
-						: t("noAnimalsFound")}
-				</div>
-			)}
+			<div className="min-h-0 flex-1 overflow-y-auto pb-4">
+				{filteredAnimals.length > 0 ? (
+					<AnimalCardContainer
+						animalsList={filteredAnimals}
+						sex=""
+					/>
+				) : (
+					<div className="p-8 text-center text-muted-foreground">
+						{searchQuery || selectedFilter !== "all"
+							? t("noAnimalsMatch")
+							: t("noAnimalsFound")}
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

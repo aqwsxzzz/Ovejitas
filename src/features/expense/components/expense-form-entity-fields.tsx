@@ -13,7 +13,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import type { IAnimal } from "@/features/animal/types/animal-types";
-import type { Breed } from "@/features/breed/types/breed";
+import { getBreedDisplayName, type Breed } from "@/features/breed/types/breed";
 import type { ExpenseFormValues } from "@/features/expense/components/expense-form-schema";
 import type { ISpecie } from "@/features/specie/types/specie-types";
 import type { UseFormReturn } from "react-hook-form";
@@ -36,7 +36,8 @@ export const ExpenseFormEntityFields = ({
 	selectedSpeciesId,
 	lotOptions,
 }: ExpenseFormEntityFieldsProps) => {
-	const { t } = useTranslation("expenses");
+	const { t, i18n } = useTranslation("expenses");
+	const language = i18n.language.slice(0, 2);
 
 	return (
 		<details className="border rounded-card p-3">
@@ -117,7 +118,7 @@ export const ExpenseFormEntityFields = ({
 												key={breed.id}
 												value={breed.id}
 											>
-												{breed.name}
+												{getBreedDisplayName(breed, language)}
 											</SelectItem>
 										))}
 									</SelectContent>

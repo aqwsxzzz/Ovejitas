@@ -117,11 +117,11 @@ export const NewAnimalBulkForm = ({
 			specieId: "",
 			breedId: "",
 			groupName: "",
-			count: 1,
+			count: undefined,
 			tagPrefix: "",
 			tagMode: "manual",
 			tags: "",
-			tagStartNumber: 0,
+			tagStartNumber: undefined,
 		},
 	});
 	const selectedSpecieId = form.watch("specieId");
@@ -349,7 +349,7 @@ export const NewAnimalBulkForm = ({
 							control={form.control}
 							name="count"
 							render={({ field }) => {
-								const { value, onChange, onBlur, name, ref } = field;
+								const { value, onBlur, name, ref } = field;
 								return (
 									<FormItem>
 										<FormLabel>{t("quantityLabel")}</FormLabel>
@@ -359,7 +359,12 @@ export const NewAnimalBulkForm = ({
 												min={1}
 												max={100}
 												value={typeof value === "number" ? value : ""}
-												onChange={onChange}
+												onChange={(event) => {
+													const nextValue = event.target.value;
+													field.onChange(
+														nextValue === "" ? undefined : Number(nextValue),
+													);
+												}}
 												onBlur={onBlur}
 												name={name}
 												ref={ref}
@@ -375,15 +380,21 @@ export const NewAnimalBulkForm = ({
 							control={form.control}
 							name="tagStartNumber"
 							render={({ field }) => {
-								const { value, onChange, onBlur, name, ref } = field;
+								const { value, onBlur, name, ref } = field;
 								return (
 									<FormItem>
 										<FormLabel>{t("tagStartingNumberLabel")}</FormLabel>
 										<FormControl>
 											<Input
+												type="number"
 												placeholder={t("tagStartingNumberPlaceholder")}
 												value={typeof value === "number" ? value : ""}
-												onChange={onChange}
+												onChange={(event) => {
+													const nextValue = event.target.value;
+													field.onChange(
+														nextValue === "" ? undefined : Number(nextValue),
+													);
+												}}
 												onBlur={onBlur}
 												name={name}
 												ref={ref}

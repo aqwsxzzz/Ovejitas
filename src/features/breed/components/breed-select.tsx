@@ -6,6 +6,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useGetBreedsBySpeciesId } from "@/features/breed/api/breed-queries";
+import { getBreedDisplayName } from "@/features/breed/types/breed";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export const BreedSelect = ({
@@ -23,8 +25,21 @@ export const BreedSelect = ({
 		data: breedsData = [],
 		isPending,
 		error,
-	} = useGetBreedsBySpeciesId(specieId, "name:asc");
-	const { t } = useTranslation("breedSelect");
+	} = useGetBreedsBySpeciesId(specieId, {
+		includeTranslations: true,
+		withLanguage: true,
+	});
+	const { t, i18n } = useTranslation("breedSelect");
+	const language = i18n.language.slice(0, 2);
+	const sortedBreeds = useMemo(
+		() =>
+			[...breedsData].sort((left, right) =>
+				getBreedDisplayName(left, language).localeCompare(
+					getBreedDisplayName(right, language),
+				),
+			),
+		[breedsData, language],
+	);
 
 	return (
 		<div>
@@ -61,12 +76,12 @@ export const BreedSelect = ({
 							No breeds available
 						</SelectItem>
 					)}
-					{breedsData.map((breed) => (
+					{sortedBreeds.map((breed) => (
 						<SelectItem
 							key={breed.id}
 							value={breed.id}
 						>
-							{breed.name}
+							{getBreedDisplayName(breed, language)}
 						</SelectItem>
 					))}
 				</SelectContent>
