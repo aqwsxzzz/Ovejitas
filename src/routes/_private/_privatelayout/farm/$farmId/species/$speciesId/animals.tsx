@@ -8,6 +8,7 @@ import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
 import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
+import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import type { IAnimal } from "@/features/animal/types/animal-types";
@@ -95,8 +96,8 @@ function RouteComponent() {
 
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
-			<div className="flex h-full min-h-0 flex-col p-4">
-				<div className="sticky top-0 z-10 shrink-0 space-y-6 bg-background pb-4">
+			<ScrollablePageLayout
+				header={
 					<PageHeader
 						title="Loading..."
 						description={t("searchInputPlaceholder")}
@@ -106,57 +107,53 @@ function RouteComponent() {
 						}}
 						action={<NewAnimalModal />}
 					/>
-				</div>
-				<div className="min-h-0 flex-1 overflow-y-auto pb-4">
-					<AnimalCardSkeletonList count={5} />
-				</div>
-			</div>
+				}
+			>
+				<AnimalCardSkeletonList count={5} />
+			</ScrollablePageLayout>
 		);
 	}
 
 	return (
-		<div className="flex h-full min-h-0 flex-col p-4">
-			<div className="sticky top-0 z-10 shrink-0 space-y-6 bg-background pb-4">
-				<PageHeader
-					title={speciesData?.translations?.[0].name || ""}
-					description={t("searchSubtitle")}
-					backLink={{
-						to: "/farm/$farmId/species",
-						params: { farmId: farmId! },
-					}}
-					action={<NewAnimalModal />}
-				/>
-
-				{/* Search and Filters */}
-				<div className="flex flex-col gap-3">
-					<SearchBar
-						value={searchQuery}
-						onChange={setSearchQuery}
-						placeholder={t("searchInputPlaceholder")}
+		<ScrollablePageLayout
+			header={
+				<div className="flex flex-col gap-6">
+					<PageHeader
+						title={speciesData?.translations?.[0].name || ""}
+						description={t("searchSubtitle")}
+						backLink={{
+							to: "/farm/$farmId/species",
+							params: { farmId: farmId! },
+						}}
+						action={<NewAnimalModal />}
 					/>
-					<FilterChips
-						options={filterOptions}
-						selected={selectedFilter}
-						onSelect={setSelectedFilter}
-					/>
-				</div>
-			</div>
-
-			{/* Animals List */}
-			<div className="min-h-0 flex-1 overflow-y-auto pb-4">
-				{filteredAnimals.length > 0 ? (
-					<AnimalCardContainer
-						animalsList={filteredAnimals}
-						sex=""
-					/>
-				) : (
-					<div className="p-8 text-center text-muted-foreground">
-						{searchQuery || selectedFilter !== "all"
-							? t("noAnimalsMatch")
-							: t("noAnimalsFound")}
+					<div className="flex flex-col gap-3">
+						<SearchBar
+							value={searchQuery}
+							onChange={setSearchQuery}
+							placeholder={t("searchInputPlaceholder")}
+						/>
+						<FilterChips
+							options={filterOptions}
+							selected={selectedFilter}
+							onSelect={setSelectedFilter}
+						/>
 					</div>
-				)}
-			</div>
-		</div>
+				</div>
+			}
+		>
+			{filteredAnimals.length > 0 ? (
+				<AnimalCardContainer
+					animalsList={filteredAnimals}
+					sex=""
+				/>
+			) : (
+				<div className="p-8 text-center text-muted-foreground">
+					{searchQuery || selectedFilter !== "all"
+						? t("noAnimalsMatch")
+						: t("noAnimalsFound")}
+				</div>
+			)}
+		</ScrollablePageLayout>
 	);
 }

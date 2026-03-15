@@ -43,9 +43,7 @@ function PrivateLayout() {
 	return (
 		<div className="bg-background h-screen w-screen flex flex-col">
 			<div className="flex-1 overflow-auto pb-20">
-				<div className="p-4 flex flex-col gap-4">
-					<Outlet />
-				</div>
+				<Outlet />
 			</div>
 			<BottomTabNav />
 		</div>
