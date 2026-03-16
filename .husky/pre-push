@@ -1,1 +1,25 @@
 npm run build
+
+# Version sync check
+PKG_VERSION=$(node -p "require('./package.json').version")
+LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+
+if [ -z "$LATEST_TAG" ]; then
+  echo ""
+  echo "⚠️  No git tags found. package.json version is $PKG_VERSION."
+  echo "   Consider running 'npm version <patch|minor|major>' to create your first release tag."
+elif [ "$PKG_VERSION" != "$LATEST_TAG" ]; then
+  echo ""
+  echo "⚠️  Version mismatch detected:"
+  echo "   package.json : $PKG_VERSION"
+  echo "   Latest tag   : $LATEST_TAG"
+  echo ""
+  exec < /dev/tty
+  printf "   Fix the version mismatch before pushing? [y/N] "
+  read -r REPLY
+  if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+    echo "   Push aborted. Run 'npm version <patch|minor|major>' then push again."
+    exit 1
+  fi
+  echo "   Proceeding with push despite version mismatch."
+fi
