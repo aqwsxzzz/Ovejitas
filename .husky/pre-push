@@ -4,6 +4,46 @@ npm run build
 PKG_VERSION=$(node -p "require('./package.json').version")
 LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
 
+generate_changelog_entry() {
+  CHANGELOG_FILE="CHANGELOG.md"
+  TODAY=$(date +%Y-%m-%d)
+
+  if [ -n "$LATEST_TAG" ]; then
+    RELEASE_NOTES=$(git log "v$LATEST_TAG"..HEAD --pretty=format:"- %s (%h)")
+  else
+    RELEASE_NOTES=$(git log --pretty=format:"- %s (%h)")
+  fi
+
+  if [ -z "$RELEASE_NOTES" ]; then
+    RELEASE_NOTES="- Initial release"
+  fi
+
+  if [ -f "$CHANGELOG_FILE" ]; then
+    {
+      echo "# Changelog"
+      echo ""
+      echo "## v$NEW_VERSION - $TODAY"
+      echo ""
+      printf "%s\n" "$RELEASE_NOTES"
+      echo ""
+      if grep -q "^# Changelog" "$CHANGELOG_FILE"; then
+        tail -n +2 "$CHANGELOG_FILE"
+      else
+        cat "$CHANGELOG_FILE"
+      fi
+    } > "$CHANGELOG_FILE.tmp" && mv "$CHANGELOG_FILE.tmp" "$CHANGELOG_FILE"
+  else
+    {
+      echo "# Changelog"
+      echo ""
+      echo "## v$NEW_VERSION - $TODAY"
+      echo ""
+      printf "%s\n" "$RELEASE_NOTES"
+      echo ""
+    } > "$CHANGELOG_FILE"
+  fi
+}
+
 bump_version() {
   exec < /dev/tty
   echo ""
@@ -13,10 +53,11 @@ bump_version() {
     patch|minor|major)
       npm version "$BUMP" --no-git-tag-version
       NEW_VERSION=$(node -p "require('./package.json').version")
-      git add package.json package-lock.json 2>/dev/null
+      generate_changelog_entry
+      git add package.json package-lock.json CHANGELOG.md 2>/dev/null
       git commit -m "chore(release): v$NEW_VERSION"
       git tag -a "v$NEW_VERSION" -m "v$NEW_VERSION"
-      echo "   ✔ Bumped to v$NEW_VERSION and created tag."
+      echo "   Updated CHANGELOG.md, bumped to v$NEW_VERSION, and created tag."
       ;;
     skip)
       echo "   Proceeding without version bump."

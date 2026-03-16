@@ -31,8 +31,12 @@ User intent: ${input:Optional commit intent — prefix with 'new-branch' to crea
 1. Run status and diff review first.
 2. Infer the best commit scope and propose up to 3 Conventional Commit messages.
 3. Apply semantic versioning policy and report current -> next version impact.
-4. If a bump is required, run release gating steps before push guidance.
-5. Run repository validation commands relevant to release (`npm run lint`, `npm run build`) unless user explicitly requests skip.
-6. If there is exactly one clear commit path, proceed to stage and commit using the best message.
-7. If there is ambiguity (multiple unrelated changes), ask one concise clarification question before committing.
-8. Return: branch used (new or existing), final message, files committed, SemVer decision, validation results, commit hash, and push command.
+4. If a bump is required, update `CHANGELOG.md` and run release gating steps before push guidance.
+5. Release notes policy:
+  - For `minor` and `major` bumps, create `docs/release-notes/vX.Y.md` with app-user explanations (what changed and how it works).
+  - For `patch` bumps, create `docs/release-notes/vX.Y.Z.md` only when there is at least one user-visible fix in scopes: `expenses`, `animals`, `dashboard`, `farm`, `auth`, `breed`, `farm-members`, `measurement`.
+  - Skip patch release notes for internal-only fixes and explicitly report the skip reason.
+6. Run repository validation commands relevant to release (`npm run lint`, `npm run build`) unless user explicitly requests skip.
+7. If there is exactly one clear commit path, proceed to stage and commit using the best message.
+8. If there is ambiguity (multiple unrelated changes), ask one concise clarification question before committing.
+9. Return: branch used (new or existing), final message, files committed, SemVer decision, release notes decision (created file path or skip reason), validation results, commit hash, and push command.
