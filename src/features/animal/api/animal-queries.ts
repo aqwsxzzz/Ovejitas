@@ -12,6 +12,7 @@ import type {
 	IAnimal,
 	IAnimalListFilters,
 	IAnimalsCountBySpeciesResponse,
+	ICreateAnimalBulkResponse,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IEditAnimalPayload,
@@ -87,6 +88,56 @@ const getAnimalCreateErrorToastMessage = (
 	}
 
 	return i18next.t(`newAnimalModal:${genericKey}`);
+};
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null;
+
+const isAnimalArray = (value: unknown): value is IAnimal[] =>
+	Array.isArray(value);
+
+const isBulkFailedArray = (value: unknown): boolean => Array.isArray(value);
+
+const getRecoverableBulkCreateResponse = (
+	error: unknown,
+): IResponse<ICreateAnimalBulkResponse> | null => {
+	if (!(error instanceof ApiRequestError) || !isObject(error.details)) {
+		return null;
+	}
+
+	const details = error.details;
+
+	if (isObject(details.data)) {
+		const nestedData = details.data;
+		if (
+			isAnimalArray(nestedData.created) &&
+			isBulkFailedArray(nestedData.failed)
+		) {
+			return {
+				status: "success",
+				message:
+					typeof details.message === "string" ? details.message : error.message,
+				data: {
+					created: nestedData.created,
+					failed: nestedData.failed as ICreateAnimalBulkResponse["failed"],
+				},
+			};
+		}
+	}
+
+	if (isAnimalArray(details.created) && isBulkFailedArray(details.failed)) {
+		return {
+			status: "success",
+			message:
+				typeof details.message === "string" ? details.message : error.message,
+			data: {
+				created: details.created,
+				failed: details.failed as ICreateAnimalBulkResponse["failed"],
+			},
+		};
+	}
+
+	return null;
 };
 
 export const animalQueryKeys = {
@@ -165,11 +216,15 @@ export const useCreateAnimal = () => {
 					});
 
 					if (!exist) {
+						const createdSpeciesName =
+							response.data.species?.translations?.[0]?.name ??
+							response.data.speciesId;
+
 						newData.push({
 							count: 1,
 							species: {
 								id: response.data.speciesId,
-								name: response.data.species.translations[0].name,
+								name: createdSpeciesName,
 							},
 						});
 					}
@@ -290,14 +345,80 @@ export const useCreateAnimalBulk = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({
+		onMutate: ({ farmId, filters }) => {
+			const currentAnimalList = queryClient.getQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId, filters),
+			);
+
+			return {
+				previousAnimalCount: currentAnimalList?.data.length,
+			};
+		},
+		mutationFn: async ({
 			payload,
 		}: {
 			payload: ICreateAnimalBulkPayload;
 			farmId: string;
 			filters?: Partial<IAnimalListFilters>;
-		}) => createAnimalsBulk({ payload }),
-		onError: (error) => {
+		}) => {
+			try {
+				return await createAnimalsBulk({ payload });
+			} catch (error) {
+				const recoverableResponse = getRecoverableBulkCreateResponse(error);
+
+				if (recoverableResponse) {
+					return recoverableResponse;
+				}
+
+				throw error;
+			}
+		},
+		onError: async (error, { farmId, filters }, context) => {
+			const isPotentialFalseConflictError =
+				error instanceof ApiRequestError &&
+				(error.code === "conflict_error" ||
+					includesAny(error.message.toLowerCase(), [
+						"already exists",
+						"duplicate",
+						"duplicated",
+						"ya existe",
+						"duplicado",
+					]));
+
+			if (isPotentialFalseConflictError) {
+				void queryClient.invalidateQueries({
+					queryKey: [...animalQueryKeys.all, "list", farmId],
+				});
+
+				void queryClient.invalidateQueries({
+					queryKey: [...animalQueryKeys.all, "countBySpecies", farmId],
+				});
+
+				const refreshedAnimalList = await queryClient.fetchQuery({
+					queryKey: animalQueryKeys.animalList(farmId, filters),
+					queryFn: () =>
+						getAnimalsByFarmId({
+							withLanguage: true,
+							sex: filters?.sex,
+							speciesId: filters?.speciesId,
+						}),
+				});
+
+				const previousCount = context?.previousAnimalCount;
+				const currentCount = refreshedAnimalList.data.length;
+
+				if (typeof previousCount === "number" && currentCount > previousCount) {
+					const createdCount = currentCount - previousCount;
+					toast.success(
+						i18next.t("newAnimalModal:toast.bulkCreatePartialSuccess", {
+							createdCount,
+							failedCount: 0,
+						}),
+					);
+					return;
+				}
+			}
+
 			toast.error(getAnimalCreateErrorToastMessage(error, "bulk"));
 		},
 		onSuccess: (response, { farmId, filters }) => {
@@ -328,8 +449,72 @@ export const useCreateAnimalBulk = () => {
 				},
 			);
 
+			queryClient.setQueryData<IResponse<IAnimalsCountBySpeciesResponse[]>>(
+				animalQueryKeys.animalsCountBySpecies(
+					farmId,
+					i18next.language.slice(0, 2),
+				),
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+
+					const countsBySpecies = response.data.created.reduce<
+						Record<string, { count: number; name: string }>
+					>((acc, animal) => {
+						const speciesId = animal.speciesId;
+						const speciesName =
+							animal.species?.translations?.[0]?.name ?? speciesId;
+
+						if (!acc[speciesId]) {
+							acc[speciesId] = { count: 0, name: speciesName };
+						}
+
+						acc[speciesId].count += 1;
+						if (!acc[speciesId].name && speciesName) {
+							acc[speciesId].name = speciesName;
+						}
+
+						return acc;
+					}, {});
+
+					const newData = [...oldData.data];
+
+					for (const [speciesId, value] of Object.entries(countsBySpecies)) {
+						const existingIndex = newData.findIndex(
+							(item) => item.species.id === speciesId,
+						);
+
+						if (existingIndex >= 0) {
+							newData[existingIndex] = {
+								...newData[existingIndex],
+								count: newData[existingIndex].count + value.count,
+							};
+							continue;
+						}
+
+						newData.push({
+							count: value.count,
+							species: {
+								id: speciesId,
+								name: value.name,
+							},
+						});
+					}
+
+					return {
+						...oldData,
+						data: newData,
+					};
+				},
+			);
+
 			void queryClient.invalidateQueries({
 				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "countBySpecies", farmId],
 			});
 		},
 	});
