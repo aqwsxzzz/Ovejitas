@@ -132,6 +132,17 @@ export const NewAnimalBulkForm = ({
 	const { mutateAsync: createAnimalBulk, isPending } = useCreateAnimalBulk();
 	const { farmId } = useParams({ strict: false });
 
+	const createSequentialTags = ({
+		prefix,
+		start,
+		count,
+	}: {
+		prefix: string;
+		start: number;
+		count: number;
+	}) =>
+		Array.from({ length: count }, (_, index) => `${prefix}${start + index}`);
+
 	const mapBulkCreateResult = (responseData: ICreateAnimalBulkResponse) => ({
 		createdCount: responseData.created.length,
 		failedCount: responseData.failed.length,
@@ -171,14 +182,22 @@ export const NewAnimalBulkForm = ({
 		}
 
 		if (tagMode === "sequential") {
+			const count = data.count ?? 0;
+			const tagStartNumber = data.tagStartNumber ?? 0;
+			const tagPrefix = (data.tagPrefix ?? "").trim();
+			const sequentialTags = createSequentialTags({
+				prefix: tagPrefix,
+				start: tagStartNumber,
+				count,
+			});
+
 			const response = await createAnimalBulk({
 				payload: {
 					speciesId: data.specieId,
 					breedId: data.breedId,
 					groupName: data.groupName ?? null,
-					tagPrefix: data.tagPrefix ?? null,
-					tagStartNumber: data.tagStartNumber ?? null,
-					count: data.count ?? null,
+					tagPrefix: null,
+					tags: sequentialTags,
 				},
 				farmId: farmId!,
 				filters: {
