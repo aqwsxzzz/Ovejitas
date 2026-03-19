@@ -6,14 +6,18 @@ import { includeQueryParam } from "@/utils/include-query-params";
 export const getSpecies = ({
 	include,
 	withLanguage,
+	page = 1,
+	limit = 100,
 }: {
 	include: string;
 	withLanguage: boolean;
+	page?: number;
+	limit?: number;
 }) => {
 	return axiosHelper<IResponse<ISpecie[]>>({
 		method: "get",
 		url: "/species?include=translations",
-		urlParams: includeQueryParam({ include, withLanguage }),
+		urlParams: includeQueryParam({ include, withLanguage, page, limit }),
 	});
 };
 

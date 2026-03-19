@@ -19,16 +19,27 @@ export const getAnimalsByFarmId = ({
 	withLanguage,
 	sex,
 	speciesId,
+	page,
+	limit,
 }: {
 	include?: string;
 	withLanguage: boolean;
 	sex?: string;
 	speciesId?: string;
+	page?: number;
+	limit?: number;
 }) =>
 	axiosHelper<IResponse<IAnimal[]>>({
 		method: "get",
 		url: "/animals",
-		urlParams: includeQueryParam({ include, withLanguage, sex, speciesId }),
+		urlParams: includeQueryParam({
+			include,
+			withLanguage,
+			sex,
+			speciesId,
+			page,
+			limit,
+		}),
 	});
 
 export const createAnimal = ({ payload }: { payload: ICreateAnimalPayload }) =>

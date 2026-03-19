@@ -9,8 +9,12 @@ import type {
 
 export const getExpenses = ({
 	filters,
+	page,
+	limit,
 }: {
 	filters?: Partial<IExpenseListFilters>;
+	page?: number;
+	limit?: number;
 }) =>
 	axiosHelper<IResponse<IExpense[]>>({
 		method: "get",
@@ -19,6 +23,8 @@ export const getExpenses = ({
 			category: filters?.category,
 			paymentMethod: filters?.paymentMethod,
 			status: filters?.status,
+			page,
+			limit,
 		},
 	});
 

@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import {
 	createAnimal,
 	createAnimalsBulk,
@@ -12,6 +17,7 @@ import type {
 	IAnimal,
 	IAnimalListFilters,
 	IAnimalsCountBySpeciesResponse,
+	ICreateAnimalBulkResponse,
 	ICreateAnimalBulkPayload,
 	ICreateAnimalPayload,
 	IEditAnimalPayload,
@@ -24,6 +30,9 @@ import { ApiRequestError } from "@/lib/axios/axios-helper";
 const normalizeFilters = (filters?: Partial<IAnimalListFilters>): string[] => {
 	return [filters?.sex ?? "", filters?.speciesId ?? ""];
 };
+
+const DEFAULT_LIST_PAGE_SIZE = 20;
+const LEGACY_LIST_PAGE_SIZE = 100;
 
 const includesAny = (value: string, patterns: string[]): boolean =>
 	patterns.some((pattern) => value.includes(pattern));
@@ -89,6 +98,56 @@ const getAnimalCreateErrorToastMessage = (
 	return i18next.t(`newAnimalModal:${genericKey}`);
 };
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+	typeof value === "object" && value !== null;
+
+const isAnimalArray = (value: unknown): value is IAnimal[] =>
+	Array.isArray(value);
+
+const isBulkFailedArray = (value: unknown): boolean => Array.isArray(value);
+
+const getRecoverableBulkCreateResponse = (
+	error: unknown,
+): IResponse<ICreateAnimalBulkResponse> | null => {
+	if (!(error instanceof ApiRequestError) || !isObject(error.details)) {
+		return null;
+	}
+
+	const details = error.details;
+
+	if (isObject(details.data)) {
+		const nestedData = details.data;
+		if (
+			isAnimalArray(nestedData.created) &&
+			isBulkFailedArray(nestedData.failed)
+		) {
+			return {
+				status: "success",
+				message:
+					typeof details.message === "string" ? details.message : error.message,
+				data: {
+					created: nestedData.created,
+					failed: nestedData.failed as ICreateAnimalBulkResponse["failed"],
+				},
+			};
+		}
+	}
+
+	if (isAnimalArray(details.created) && isBulkFailedArray(details.failed)) {
+		return {
+			status: "success",
+			message:
+				typeof details.message === "string" ? details.message : error.message,
+			data: {
+				created: details.created,
+				failed: details.failed as ICreateAnimalBulkResponse["failed"],
+			},
+		};
+	}
+
+	return null;
+};
+
 export const animalQueryKeys = {
 	all: ["animal"] as const,
 	animalList: (farmId: string, filters?: Partial<IAnimalListFilters>) =>
@@ -98,6 +157,11 @@ export const animalQueryKeys = {
 			farmId,
 			normalizeFilters(filters),
 		] as const,
+	animalListPage: (
+		farmId: string,
+		filters: Partial<IAnimalListFilters> | undefined,
+		limit: number,
+	) => [...animalQueryKeys.animalList(farmId, filters), "page", limit] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
 	animalsCountBySpecies: (farmId: string, language: string) =>
@@ -123,10 +187,107 @@ export const useGetAnimalsByFarmId = ({
 				withLanguage,
 				sex: filters?.sex,
 				speciesId: filters?.speciesId,
+				page: 1,
+				limit: LEGACY_LIST_PAGE_SIZE,
 			}),
 		select: (data) => data.data,
 		enabled: !!farmId,
 		staleTime: 10000, // 10 seconds
+	});
+
+export const useGetInfiniteAnimalsByFarmId = ({
+	farmId,
+	include,
+	withLanguage,
+	filters,
+	limit = DEFAULT_LIST_PAGE_SIZE,
+}: {
+	farmId: string;
+	include?: string;
+	withLanguage: boolean;
+	filters?: Partial<IAnimalListFilters>;
+	limit?: number;
+}) =>
+	useInfiniteQuery({
+		queryKey: animalQueryKeys.animalListPage(farmId, filters, limit),
+		queryFn: ({ pageParam }) =>
+			getAnimalsByFarmId({
+				include,
+				withLanguage,
+				sex: filters?.sex,
+				speciesId: filters?.speciesId,
+				page: pageParam,
+				limit,
+			}),
+		initialPageParam: 1,
+		getNextPageParam: (lastPage) => {
+			const pagination = lastPage.meta?.pagination;
+			if (!pagination) {
+				return undefined;
+			}
+
+			return pagination.page < pagination.totalPages
+				? pagination.page + 1
+				: undefined;
+		},
+		select: (data) => {
+			const items = data.pages.flatMap((page) => page.data);
+			const latestPagination = data.pages.at(-1)?.meta?.pagination;
+
+			return {
+				items,
+				total: latestPagination?.total ?? items.length,
+				totalPages: latestPagination?.totalPages ?? 1,
+			};
+		},
+		enabled: !!farmId,
+		staleTime: 10000,
+	});
+
+export const useGetAnimalsByFarmIdPage = ({
+	farmId,
+	include,
+	withLanguage,
+	filters,
+	page,
+	limit,
+}: {
+	farmId: string;
+	include?: string;
+	withLanguage: boolean;
+	filters?: Partial<IAnimalListFilters>;
+	page: number;
+	limit: number;
+}) =>
+	useQuery({
+		queryKey: [
+			...animalQueryKeys.animalList(farmId, filters),
+			"paged",
+			page,
+			limit,
+		],
+		queryFn: () =>
+			getAnimalsByFarmId({
+				include,
+				withLanguage,
+				sex: filters?.sex,
+				speciesId: filters?.speciesId,
+				page,
+				limit,
+			}),
+		select: (data) => {
+			const pagination = data.meta?.pagination;
+
+			return {
+				items: data.data,
+				page: pagination?.page ?? page,
+				limit: pagination?.limit ?? limit,
+				total: pagination?.total ?? data.data.length,
+				totalPages: pagination?.totalPages ?? 1,
+			};
+		},
+		enabled: !!farmId,
+		staleTime: 10000,
 	});
 
 export const useCreateAnimal = () => {
@@ -165,11 +326,15 @@ export const useCreateAnimal = () => {
 					});
 
 					if (!exist) {
+						const createdSpeciesName =
+							response.data.species?.translations?.[0]?.name ??
+							response.data.speciesId;
+
 						newData.push({
 							count: 1,
 							species: {
 								id: response.data.speciesId,
-								name: response.data.species.translations[0].name,
+								name: createdSpeciesName,
 							},
 						});
 					}
@@ -249,6 +414,10 @@ export const useEditAnimalById = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -282,6 +451,10 @@ export const useDeleteAnimalById = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -290,14 +463,82 @@ export const useCreateAnimalBulk = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({
+		onMutate: ({ farmId, filters }) => {
+			const currentAnimalList = queryClient.getQueryData<IResponse<IAnimal[]>>(
+				animalQueryKeys.animalList(farmId, filters),
+			);
+
+			return {
+				previousAnimalCount: currentAnimalList?.data.length,
+			};
+		},
+		mutationFn: async ({
 			payload,
 		}: {
 			payload: ICreateAnimalBulkPayload;
 			farmId: string;
 			filters?: Partial<IAnimalListFilters>;
-		}) => createAnimalsBulk({ payload }),
-		onError: (error) => {
+		}) => {
+			try {
+				return await createAnimalsBulk({ payload });
+			} catch (error) {
+				const recoverableResponse = getRecoverableBulkCreateResponse(error);
+
+				if (recoverableResponse) {
+					return recoverableResponse;
+				}
+
+				throw error;
+			}
+		},
+		onError: async (error, { farmId, filters }, context) => {
+			const isPotentialFalseConflictError =
+				error instanceof ApiRequestError &&
+				(error.code === "conflict_error" ||
+					includesAny(error.message.toLowerCase(), [
+						"already exists",
+						"duplicate",
+						"duplicated",
+						"ya existe",
+						"duplicado",
+					]));
+
+			if (isPotentialFalseConflictError) {
+				void queryClient.invalidateQueries({
+					queryKey: [...animalQueryKeys.all, "list", farmId],
+				});
+
+				void queryClient.invalidateQueries({
+					queryKey: [...animalQueryKeys.all, "countBySpecies", farmId],
+				});
+
+				const refreshedAnimalList = await queryClient.fetchQuery({
+					queryKey: animalQueryKeys.animalList(farmId, filters),
+					queryFn: () =>
+						getAnimalsByFarmId({
+							withLanguage: true,
+							sex: filters?.sex,
+							speciesId: filters?.speciesId,
+							page: 1,
+							limit: LEGACY_LIST_PAGE_SIZE,
+						}),
+				});
+
+				const previousCount = context?.previousAnimalCount;
+				const currentCount = refreshedAnimalList.data.length;
+
+				if (typeof previousCount === "number" && currentCount > previousCount) {
+					const createdCount = currentCount - previousCount;
+					toast.success(
+						i18next.t("newAnimalModal:toast.bulkCreatePartialSuccess", {
+							createdCount,
+							failedCount: 0,
+						}),
+					);
+					return;
+				}
+			}
+
 			toast.error(getAnimalCreateErrorToastMessage(error, "bulk"));
 		},
 		onSuccess: (response, { farmId, filters }) => {
@@ -328,8 +569,72 @@ export const useCreateAnimalBulk = () => {
 				},
 			);
 
+			queryClient.setQueryData<IResponse<IAnimalsCountBySpeciesResponse[]>>(
+				animalQueryKeys.animalsCountBySpecies(
+					farmId,
+					i18next.language.slice(0, 2),
+				),
+				(oldData) => {
+					if (!oldData) {
+						return;
+					}
+
+					const countsBySpecies = response.data.created.reduce<
+						Record<string, { count: number; name: string }>
+					>((acc, animal) => {
+						const speciesId = animal.speciesId;
+						const speciesName =
+							animal.species?.translations?.[0]?.name ?? speciesId;
+
+						if (!acc[speciesId]) {
+							acc[speciesId] = { count: 0, name: speciesName };
+						}
+
+						acc[speciesId].count += 1;
+						if (!acc[speciesId].name && speciesName) {
+							acc[speciesId].name = speciesName;
+						}
+
+						return acc;
+					}, {});
+
+					const newData = [...oldData.data];
+
+					for (const [speciesId, value] of Object.entries(countsBySpecies)) {
+						const existingIndex = newData.findIndex(
+							(item) => item.species.id === speciesId,
+						);
+
+						if (existingIndex >= 0) {
+							newData[existingIndex] = {
+								...newData[existingIndex],
+								count: newData[existingIndex].count + value.count,
+							};
+							continue;
+						}
+
+						newData.push({
+							count: value.count,
+							species: {
+								id: speciesId,
+								name: value.name,
+							},
+						});
+					}
+
+					return {
+						...oldData,
+						data: newData,
+					};
+				},
+			);
+
 			void queryClient.invalidateQueries({
 				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "countBySpecies", farmId],
 			});
 		},
 	});

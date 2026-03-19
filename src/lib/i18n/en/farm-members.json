@@ -5,5 +5,12 @@
     "pendingInvitations": "Pending Invitations",
     "noActiveMembers": "No active members",
     "noPendingInvitations": "No pending invitations",
-    "linkcopied": "Invitation link copied to clipboard"
+    "linkcopied": "Invitation link copied to clipboard",
+    "loadMore": "Load more",
+    "loading": "Loading...",
+    "showingCount": "Showing {{visible}} of {{total}}",
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "pageLabel": "Page {{page}} of {{totalPages}}"
 }

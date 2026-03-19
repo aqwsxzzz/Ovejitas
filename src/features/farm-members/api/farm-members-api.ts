@@ -2,8 +2,20 @@ import type { IFarmMember } from "@/features/farm-invitations/types/farm-invitat
 import type { IResponse } from "@/lib/axios";
 import { axiosHelper } from "@/lib/axios/axios-helper";
 
-export const getFarmMembers = ({ farmId }: { farmId: string }) =>
+export const getFarmMembers = ({
+	farmId,
+	page,
+	limit,
+}: {
+	farmId: string;
+	page?: number;
+	limit?: number;
+}) =>
 	axiosHelper<IResponse<IFarmMember[]>>({
 		method: "get",
 		url: `/farm-members/${farmId}/members`,
+		urlParams: {
+			page,
+			limit,
+		},
 	});

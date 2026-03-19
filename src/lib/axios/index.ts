@@ -14,9 +14,18 @@ export const setDefaultHeaders = (token: string | null) => {
 };
 
 export interface IResponse<T> {
-	status: "success" | "fail";
+	status: "success" | "fail" | "error";
 	data: T;
 	message: string;
+	meta?: {
+		timestamp?: string;
+		pagination?: {
+			page: number;
+			limit: number;
+			total: number;
+			totalPages: number;
+		};
+	};
 }
 
 export interface IResponseDataArray<T> {

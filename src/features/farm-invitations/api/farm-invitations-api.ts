@@ -16,9 +16,17 @@ export const sendFarmInvitation = ({
 		data: payload,
 	});
 
-export const getFarmInvitationList = ({ farmId }: { farmId: string }) =>
+export const getFarmInvitationList = ({
+	farmId,
+	page,
+	limit,
+}: {
+	farmId: string;
+	page?: number;
+	limit?: number;
+}) =>
 	axiosHelper<IResponse<IFarmInvitationResponse[]>>({
 		method: "get",
 		url: "/invitations",
-		urlParams: { farmId },
+		urlParams: { farmId, page, limit },
 	});
