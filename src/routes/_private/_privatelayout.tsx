@@ -42,7 +42,10 @@ function PrivateLayout() {
 
 	return (
 		<div className="bg-background h-screen w-screen flex flex-col">
-			<div className="flex-1 overflow-auto pb-20">
+			<div
+				id="app-scroll-container"
+				className="flex-1 overflow-auto pb-20"
+			>
 				<Outlet />
 			</div>
 			<BottomTabNav />

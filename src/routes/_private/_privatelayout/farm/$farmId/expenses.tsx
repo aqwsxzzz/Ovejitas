@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/common/page-header";
 import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout";
 import { Button } from "@/components/ui/button";
-import { useGetExpenses } from "@/features/expense/api/expense-queries";
+import { useGetExpensesPage } from "@/features/expense/api/expense-queries";
 import { ExpenseFilterBar } from "@/features/expense/components/expense-filter-bar";
 import { ExpenseFormModal } from "@/features/expense/components/expense-form-modal";
 import { ExpenseList } from "@/features/expense/components/expense-list";
@@ -20,17 +20,38 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+	const pageSizeOptions = [5, 10, 20, 50];
+	const scrollToTop = () => {
+		const scrollContainer = document.getElementById("app-scroll-container");
+		if (scrollContainer) {
+			scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+			return;
+		}
+
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
 	const { t } = useTranslation("expenses");
 	const { farmId } = useParams({ strict: false });
 	const { data: farmData } = useGetFarmById(farmId!);
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
 	const [filters, setFilters] = useState<Partial<IExpenseListFilters>>({});
 	const {
-		data: expenses = [],
+		data: pagedExpenses,
 		isPending,
 		isError,
 		error,
 		refetch,
-	} = useGetExpenses({ farmId: farmId!, filters });
+		isFetching,
+	} = useGetExpensesPage({
+		farmId: farmId!,
+		filters,
+		page,
+		limit: pageSize,
+	});
+	const expenses = pagedExpenses?.items ?? [];
+	const totalExpenses = pagedExpenses?.total ?? expenses.length;
+	const totalPages = pagedExpenses?.totalPages ?? 1;
 	const currencyCode = farmData?.currencyCode ?? "USD";
 
 	return (
@@ -50,7 +71,11 @@ function RouteComponent() {
 					/>
 					<ExpenseFilterBar
 						filters={filters}
-						onChange={setFilters}
+						onChange={(nextFilters) => {
+							setFilters(nextFilters);
+							setPage(1);
+							scrollToTop();
+						}}
 					/>
 				</div>
 			}
@@ -86,12 +111,66 @@ function RouteComponent() {
 				)}
 
 				{!isPending && !isError && expenses.length > 0 && (
-					<ExpenseList
-						expenses={expenses}
-						farmId={farmId!}
-						filters={filters}
-						currencyCode={currencyCode}
-					/>
+					<div className="space-y-3">
+						<ExpenseList
+							expenses={expenses}
+							farmId={farmId!}
+							filters={filters}
+							currencyCode={currencyCode}
+						/>
+						<div className="flex flex-wrap items-center gap-2">
+							<label className="text-caption text-muted-foreground">
+								{t("page.perPage")}
+							</label>
+							<select
+								className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+								value={pageSize}
+								onChange={(event) => {
+									setPageSize(Number(event.target.value));
+									setPage(1);
+									scrollToTop();
+								}}
+							>
+								{pageSizeOptions.map((option) => (
+									<option
+										key={option}
+										value={option}
+									>
+										{option}
+									</option>
+								))}
+							</select>
+							<Button
+								variant="outline"
+								onClick={() => {
+									setPage((previous) => Math.max(previous - 1, 1));
+									scrollToTop();
+								}}
+								disabled={page <= 1 || isFetching}
+							>
+								{t("page.previous")}
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => {
+									setPage((previous) => Math.min(previous + 1, totalPages));
+									scrollToTop();
+								}}
+								disabled={page >= totalPages || isFetching}
+							>
+								{t("page.next")}
+							</Button>
+							<span className="text-caption text-muted-foreground">
+								{t("page.pageLabel", { page, totalPages })}
+							</span>
+						</div>
+						<p className="text-caption text-muted-foreground">
+							{t("page.showingCount", {
+								visible: expenses.length,
+								total: totalExpenses,
+							})}
+						</p>
+					</div>
 				)}
 			</div>
 		</ScrollablePageLayout>

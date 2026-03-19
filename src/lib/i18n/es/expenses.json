@@ -4,7 +4,13 @@
     "description": "Gestiona y controla los gastos de la granja",
     "loading": "Cargando gastos...",
     "retry": "Reintentar",
-    "empty": "No se encontraron gastos con los filtros seleccionados."
+    "empty": "No se encontraron gastos con los filtros seleccionados.",
+    "loadMore": "Cargar mas gastos",
+    "showingCount": "Mostrando {{visible}} de {{total}} gastos",
+    "perPage": "Por pagina",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageLabel": "Pagina {{page}} de {{totalPages}}"
   },
   "modal": {
     "newButton": "Nuevo gasto",

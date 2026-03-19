@@ -8,13 +8,21 @@ import type {
 
 export const getMeasurementsByAnimalId = ({
 	animalId,
+	page,
+	limit,
 }: {
 	farmId: string;
 	animalId: string;
+	page?: number;
+	limit?: number;
 }) =>
 	axiosHelper<IResponse<IMeasurement[]>>({
 		method: "get",
 		url: `/animals/${animalId}/measurements`,
+		urlParams: {
+			page,
+			limit,
+		},
 	});
 
 export const createMeasurement = ({

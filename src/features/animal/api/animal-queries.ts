@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import {
 	createAnimal,
 	createAnimalsBulk,
@@ -25,6 +30,9 @@ import { ApiRequestError } from "@/lib/axios/axios-helper";
 const normalizeFilters = (filters?: Partial<IAnimalListFilters>): string[] => {
 	return [filters?.sex ?? "", filters?.speciesId ?? ""];
 };
+
+const DEFAULT_LIST_PAGE_SIZE = 20;
+const LEGACY_LIST_PAGE_SIZE = 100;
 
 const includesAny = (value: string, patterns: string[]): boolean =>
 	patterns.some((pattern) => value.includes(pattern));
@@ -149,6 +157,11 @@ export const animalQueryKeys = {
 			farmId,
 			normalizeFilters(filters),
 		] as const,
+	animalListPage: (
+		farmId: string,
+		filters: Partial<IAnimalListFilters> | undefined,
+		limit: number,
+	) => [...animalQueryKeys.animalList(farmId, filters), "page", limit] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
 	animalsCountBySpecies: (farmId: string, language: string) =>
@@ -174,10 +187,107 @@ export const useGetAnimalsByFarmId = ({
 				withLanguage,
 				sex: filters?.sex,
 				speciesId: filters?.speciesId,
+				page: 1,
+				limit: LEGACY_LIST_PAGE_SIZE,
 			}),
 		select: (data) => data.data,
 		enabled: !!farmId,
 		staleTime: 10000, // 10 seconds
+	});
+
+export const useGetInfiniteAnimalsByFarmId = ({
+	farmId,
+	include,
+	withLanguage,
+	filters,
+	limit = DEFAULT_LIST_PAGE_SIZE,
+}: {
+	farmId: string;
+	include?: string;
+	withLanguage: boolean;
+	filters?: Partial<IAnimalListFilters>;
+	limit?: number;
+}) =>
+	useInfiniteQuery({
+		queryKey: animalQueryKeys.animalListPage(farmId, filters, limit),
+		queryFn: ({ pageParam }) =>
+			getAnimalsByFarmId({
+				include,
+				withLanguage,
+				sex: filters?.sex,
+				speciesId: filters?.speciesId,
+				page: pageParam,
+				limit,
+			}),
+		initialPageParam: 1,
+		getNextPageParam: (lastPage) => {
+			const pagination = lastPage.meta?.pagination;
+			if (!pagination) {
+				return undefined;
+			}
+
+			return pagination.page < pagination.totalPages
+				? pagination.page + 1
+				: undefined;
+		},
+		select: (data) => {
+			const items = data.pages.flatMap((page) => page.data);
+			const latestPagination = data.pages.at(-1)?.meta?.pagination;
+
+			return {
+				items,
+				total: latestPagination?.total ?? items.length,
+				totalPages: latestPagination?.totalPages ?? 1,
+			};
+		},
+		enabled: !!farmId,
+		staleTime: 10000,
+	});
+
+export const useGetAnimalsByFarmIdPage = ({
+	farmId,
+	include,
+	withLanguage,
+	filters,
+	page,
+	limit,
+}: {
+	farmId: string;
+	include?: string;
+	withLanguage: boolean;
+	filters?: Partial<IAnimalListFilters>;
+	page: number;
+	limit: number;
+}) =>
+	useQuery({
+		queryKey: [
+			...animalQueryKeys.animalList(farmId, filters),
+			"paged",
+			page,
+			limit,
+		],
+		queryFn: () =>
+			getAnimalsByFarmId({
+				include,
+				withLanguage,
+				sex: filters?.sex,
+				speciesId: filters?.speciesId,
+				page,
+				limit,
+			}),
+		select: (data) => {
+			const pagination = data.meta?.pagination;
+
+			return {
+				items: data.data,
+				page: pagination?.page ?? page,
+				limit: pagination?.limit ?? limit,
+				total: pagination?.total ?? data.data.length,
+				totalPages: pagination?.totalPages ?? 1,
+			};
+		},
+		enabled: !!farmId,
+		staleTime: 10000,
 	});
 
 export const useCreateAnimal = () => {
@@ -304,6 +414,10 @@ export const useEditAnimalById = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -337,6 +451,10 @@ export const useDeleteAnimalById = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -401,6 +519,8 @@ export const useCreateAnimalBulk = () => {
 							withLanguage: true,
 							sex: filters?.sex,
 							speciesId: filters?.speciesId,
+							page: 1,
+							limit: LEGACY_LIST_PAGE_SIZE,
 						}),
 				});
 

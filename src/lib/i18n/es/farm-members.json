@@ -5,5 +5,12 @@
     "pendingInvitations": "Invitaciones pendientes",
     "noActiveMembers": "No hay miembros activos",
     "noPendingInvitations": "No hay invitaciones pendientes",
-    "linkcopied": "Enlace de invitación copiado al portapapeles"
+    "linkcopied": "Enlace de invitación copiado al portapapeles",
+    "loadMore": "Cargar mas",
+    "loading": "Cargando...",
+    "showingCount": "Mostrando {{visible}} de {{total}}",
+    "perPage": "Por pagina",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageLabel": "Pagina {{page}} de {{totalPages}}"
 }

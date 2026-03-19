@@ -4,7 +4,13 @@
     "description": "Track and manage farm expenses",
     "loading": "Loading expenses...",
     "retry": "Retry",
-    "empty": "No expenses found with the selected filters."
+    "empty": "No expenses found with the selected filters.",
+    "loadMore": "Load more expenses",
+    "showingCount": "Showing {{visible}} of {{total}} expenses",
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "pageLabel": "Page {{page}} of {{totalPages}}"
   },
   "modal": {
     "newButton": "New Expense",

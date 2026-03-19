@@ -77,6 +77,8 @@ type GetBreedsBySpeciesOptions = {
 	includeTranslations?: boolean;
 	withLanguage?: boolean;
 	language?: string;
+	page?: number;
+	limit?: number;
 };
 
 type GetBreedsBySpeciesParams = {
@@ -84,6 +86,8 @@ type GetBreedsBySpeciesParams = {
 	order?: string;
 	include?: "translations";
 	language?: string;
+	page?: number;
+	limit?: number;
 };
 
 const fetchBreeds = async (params: GetBreedsBySpeciesParams) =>
@@ -122,6 +126,8 @@ export const getBreedsBySpecies = async (
 		includeTranslations = true,
 		withLanguage = true,
 		language,
+		page = 1,
+		limit = 100,
 	} = options ?? {};
 	const selectedLanguage = (language ?? i18next.language).slice(0, 2);
 	const orderParam = order ? validateBreedOrder(order) : undefined;
@@ -133,6 +139,8 @@ export const getBreedsBySpecies = async (
 		...(includeTranslations && withLanguage
 			? { language: selectedLanguage }
 			: {}),
+		page,
+		limit,
 	};
 
 	let response: unknown;
@@ -147,6 +155,8 @@ export const getBreedsBySpecies = async (
 		response = await fetchBreeds({
 			speciesId,
 			...(orderParam ? { order: orderParam } : {}),
+			page,
+			limit,
 		});
 	}
 

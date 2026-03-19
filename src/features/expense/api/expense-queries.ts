@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { IResponse } from "@/lib/axios";
 import {
@@ -24,6 +29,9 @@ const normalizeFilters = (filters?: Partial<IExpenseListFilters>): string[] => {
 	];
 };
 
+const DEFAULT_LIST_PAGE_SIZE = 20;
+const LEGACY_LIST_PAGE_SIZE = 100;
+
 export const expenseQueryKeys = {
 	all: ["expense"] as const,
 	expenseList: (farmId: string, filters?: Partial<IExpenseListFilters>) =>
@@ -33,6 +41,12 @@ export const expenseQueryKeys = {
 			farmId,
 			normalizeFilters(filters),
 		] as const,
+	expenseListPage: (
+		farmId: string,
+		filters: Partial<IExpenseListFilters> | undefined,
+		limit: number,
+	) =>
+		[...expenseQueryKeys.expenseList(farmId, filters), "page", limit] as const,
 	expenseById: (expenseId: string) =>
 		[...expenseQueryKeys.all, "byId", expenseId] as const,
 };
@@ -46,8 +60,88 @@ export const useGetExpenses = ({
 }) =>
 	useQuery({
 		queryKey: expenseQueryKeys.expenseList(farmId, filters),
-		queryFn: () => getExpenses({ filters }),
+		queryFn: () =>
+			getExpenses({ filters, page: 1, limit: LEGACY_LIST_PAGE_SIZE }),
 		select: (data) => data.data,
+		enabled: !!farmId,
+	});
+
+export const useGetInfiniteExpenses = ({
+	farmId,
+	filters,
+	limit = DEFAULT_LIST_PAGE_SIZE,
+}: {
+	farmId: string;
+	filters?: Partial<IExpenseListFilters>;
+	limit?: number;
+}) =>
+	useInfiniteQuery({
+		queryKey: expenseQueryKeys.expenseListPage(farmId, filters, limit),
+		queryFn: ({ pageParam }) =>
+			getExpenses({
+				filters,
+				page: pageParam,
+				limit,
+			}),
+		initialPageParam: 1,
+		getNextPageParam: (lastPage) => {
+			const pagination = lastPage.meta?.pagination;
+			if (!pagination) {
+				return undefined;
+			}
+
+			return pagination.page < pagination.totalPages
+				? pagination.page + 1
+				: undefined;
+		},
+		select: (data) => {
+			const items = data.pages.flatMap((page) => page.data);
+			const latestPagination = data.pages.at(-1)?.meta?.pagination;
+
+			return {
+				items,
+				total: latestPagination?.total ?? items.length,
+				totalPages: latestPagination?.totalPages ?? 1,
+			};
+		},
+		enabled: !!farmId,
+	});
+
+export const useGetExpensesPage = ({
+	farmId,
+	filters,
+	page,
+	limit,
+}: {
+	farmId: string;
+	filters?: Partial<IExpenseListFilters>;
+	page: number;
+	limit: number;
+}) =>
+	useQuery({
+		queryKey: [
+			...expenseQueryKeys.expenseList(farmId, filters),
+			"paged",
+			page,
+			limit,
+		],
+		queryFn: () =>
+			getExpenses({
+				filters,
+				page,
+				limit,
+			}),
+		select: (data) => {
+			const pagination = data.meta?.pagination;
+
+			return {
+				items: data.data,
+				page: pagination?.page ?? page,
+				limit: pagination?.limit ?? limit,
+				total: pagination?.total ?? data.data.length,
+				totalPages: pagination?.totalPages ?? 1,
+			};
+		},
 		enabled: !!farmId,
 	});
 
@@ -88,6 +182,10 @@ export const useCreateExpense = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...expenseQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -125,6 +223,10 @@ export const useUpdateExpenseById = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...expenseQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
@@ -158,6 +260,10 @@ export const useDeleteExpenseById = () => {
 					};
 				},
 			);
+
+			void queryClient.invalidateQueries({
+				queryKey: [...expenseQueryKeys.all, "list", farmId],
+			});
 		},
 	});
 };
