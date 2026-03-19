@@ -6,14 +6,16 @@ import {
 	type FilterOption,
 } from "@/components/common/filter-chips";
 import { Button } from "@/components/ui/button";
-import { useGetAnimalsByFarmIdPage } from "@/features/animal/api/animal-queries";
+import {
+	useGetAnimalsByFarmIdPage,
+	useSearchAnimalsPaged,
+} from "@/features/animal/api/animal-queries";
 import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
 import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout";
 import { createFileRoute, useParams } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import type { IAnimal } from "@/features/animal/types/animal-types";
+import { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
@@ -39,24 +41,43 @@ function RouteComponent() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedFilter, setSelectedFilter] = useState("all");
+	const [selectedStatus, setSelectedStatus] = useState("all");
+	const [selectedSex, setSelectedSex] = useState("all");
 	const [isNewAnimalModalOpen, setIsNewAnimalModalOpen] = useState(false);
+	const effectiveQ =
+		searchQuery.trim() || (selectedStatus !== "all" ? selectedStatus : "");
+	const isSearchActive = effectiveQ.length > 0;
+	const sexFilter =
+		selectedSex !== "all"
+			? (selectedSex as "female" | "male" | "unknown")
+			: undefined;
 	const {
 		data: pagedAnimals,
-		isPending: isPendingAnimals,
-		isFetching,
+		isPending: isPendingList,
+		isFetching: isFetchingList,
 	} = useGetAnimalsByFarmIdPage({
 		farmId: farmId!,
 		withLanguage: true,
-		filters: {
-			speciesId,
-		},
+		filters: { speciesId, sex: sexFilter },
+		page,
+		limit: pageSize,
+		enabled: !isSearchActive,
+	});
+	const {
+		data: searchedAnimals,
+		isPending: isPendingSearch,
+		isFetching: isFetchingSearch,
+	} = useSearchAnimalsPaged({
+		filters: { q: effectiveQ, speciesId, sex: sexFilter },
 		page,
 		limit: pageSize,
 	});
-	const animalsData = pagedAnimals?.items ?? [];
-	const totalAnimals = pagedAnimals?.total ?? animalsData.length;
-	const totalPages = pagedAnimals?.totalPages ?? 1;
+	const activeData = isSearchActive ? searchedAnimals : pagedAnimals;
+	const animalsData = activeData?.items ?? [];
+	const totalAnimals = activeData?.total ?? 0;
+	const totalPages = activeData?.totalPages ?? 1;
+	const isPendingAnimals = isSearchActive ? isPendingSearch : isPendingList;
+	const isFetching = isFetchingList || isFetchingSearch;
 	const { data: speciesData, isPending: isPendingSpecies } =
 		useGetSpeciesBySpecieId({
 			include: "translations",
@@ -65,50 +86,18 @@ function RouteComponent() {
 		});
 
 	const { t } = useTranslation("animals");
-	const filterOptions: FilterOption[] = useMemo(() => {
-		if (!animalsData) return [];
-		const aliveCount = animalsData.filter(
-			(a: IAnimal) => a.status === "alive",
-		).length;
-		const deceasedCount = animalsData.filter(
-			(a: IAnimal) => a.status === "deceased",
-		).length;
-		const soldCount = animalsData.filter(
-			(a: IAnimal) => a.status === "sold",
-		).length;
-
-		return [
-			{ label: t("filterButtonsAll"), value: "all", count: animalsData.length },
-			{ label: t("filterButtonsAlive"), value: "alive", count: aliveCount },
-			{ label: t("filterButtonsSold"), value: "sold", count: soldCount },
-			{
-				label: t("filterButtonsDeceased"),
-				value: "deceased",
-				count: deceasedCount,
-			},
-		];
-	}, [animalsData, t]);
-
-	const filteredAnimals = useMemo(() => {
-		if (!animalsData) return [];
-
-		let filtered = animalsData;
-		if (selectedFilter !== "all") {
-			filtered = filtered.filter(
-				(animal: IAnimal) => animal.status === selectedFilter,
-			);
-		}
-		if (searchQuery.trim()) {
-			const query = searchQuery.toLowerCase();
-			filtered = filtered.filter(
-				(animal: IAnimal) =>
-					animal.name?.toLowerCase().includes(query) ||
-					animal.tagNumber.toLowerCase().includes(query),
-			);
-		}
-
-		return filtered;
-	}, [animalsData, selectedFilter, searchQuery]);
+	const statusOptions: FilterOption[] = [
+		{ label: t("filterButtonsAll"), value: "all" },
+		{ label: t("filterButtonsAlive"), value: "alive" },
+		{ label: t("filterButtonsSold"), value: "sold" },
+		{ label: t("filterButtonsDeceased"), value: "deceased" },
+	];
+	const sexOptions: FilterOption[] = [
+		{ label: t("filterButtonsAll"), value: "all" },
+		{ label: t("filterButtonsFemale"), value: "female" },
+		{ label: t("filterButtonsMale"), value: "male" },
+		{ label: t("filterButtonsUnknown"), value: "unknown" },
+	];
 
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
@@ -158,10 +147,19 @@ function RouteComponent() {
 								placeholder={t("searchInputPlaceholder")}
 							/>
 							<FilterChips
-								options={filterOptions}
-								selected={selectedFilter}
+								options={statusOptions}
+								selected={selectedStatus}
 								onSelect={(value) => {
-									setSelectedFilter(value);
+									setSelectedStatus(value);
+									setPage(1);
+									scrollToTop();
+								}}
+							/>
+							<FilterChips
+								options={sexOptions}
+								selected={selectedSex}
+								onSelect={(value) => {
+									setSelectedSex(value);
 									setPage(1);
 									scrollToTop();
 								}}
@@ -170,10 +168,10 @@ function RouteComponent() {
 					</div>
 				}
 			>
-				{filteredAnimals.length > 0 ? (
+				{animalsData.length > 0 ? (
 					<div className="space-y-3">
 						<AnimalCardContainer
-							animalsList={filteredAnimals}
+							animalsList={animalsData}
 							sex=""
 						/>
 						<div className="flex flex-wrap items-center gap-2 pt-2">
@@ -225,16 +223,14 @@ function RouteComponent() {
 						</div>
 						<p className="text-caption text-muted-foreground">
 							{t("showingCount", {
-								visible: filteredAnimals.length,
+								visible: animalsData.length,
 								total: totalAnimals,
 							})}
 						</p>
 					</div>
 				) : (
 					<div className="p-8 text-center text-muted-foreground">
-						{searchQuery || selectedFilter !== "all"
-							? t("noAnimalsMatch")
-							: t("noAnimalsFound")}
+						{searchQuery ? t("noAnimalsMatch") : t("noAnimalsFound")}
 					</div>
 				)}
 			</ScrollablePageLayout>

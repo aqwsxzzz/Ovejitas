@@ -12,10 +12,12 @@ import {
 	getAnimalById,
 	getAnimalsByFarmId,
 	getAnimalsCountBySpecies,
+	searchAnimals,
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
 	IAnimalListFilters,
+	IAnimalSearchFilters,
 	IAnimalsCountBySpeciesResponse,
 	ICreateAnimalBulkResponse,
 	ICreateAnimalBulkPayload,
@@ -166,6 +168,15 @@ export const animalQueryKeys = {
 		[...animalQueryKeys.all, "byId", animalId] as const,
 	animalsCountBySpecies: (farmId: string, language: string) =>
 		[...animalQueryKeys.all, "countBySpecies", farmId, language] as const,
+	animalSearch: (filters: IAnimalSearchFilters, limit: number) =>
+		[
+			...animalQueryKeys.all,
+			"search",
+			filters.q,
+			filters.sex ?? "",
+			filters.speciesId ?? "",
+			limit,
+		] as const,
 };
 
 export const useGetAnimalsByFarmId = ({
@@ -251,6 +262,7 @@ export const useGetAnimalsByFarmIdPage = ({
 	filters,
 	page,
 	limit,
+	enabled = true,
 }: {
 	farmId: string;
 	include?: string;
@@ -258,6 +270,7 @@ export const useGetAnimalsByFarmIdPage = ({
 	filters?: Partial<IAnimalListFilters>;
 	page: number;
 	limit: number;
+	enabled?: boolean;
 }) =>
 	useQuery({
 		queryKey: [
@@ -286,7 +299,7 @@ export const useGetAnimalsByFarmIdPage = ({
 				totalPages: pagination?.totalPages ?? 1,
 			};
 		},
-		enabled: !!farmId,
+		enabled: !!farmId && enabled,
 		staleTime: 10000,
 	});
 
@@ -640,6 +653,47 @@ export const useCreateAnimalBulk = () => {
 	});
 };
 
+export const useSearchAnimalsPaged = ({
+	filters,
+	include,
+	page,
+	limit,
+}: {
+	filters: IAnimalSearchFilters;
+	include?: string;
+	page: number;
+	limit: number;
+}) => {
+	const language = i18next.language.slice(0, 2);
+
+	return useQuery({
+		queryKey: [...animalQueryKeys.animalSearch(filters, limit), "paged", page],
+		queryFn: () =>
+			searchAnimals({
+				q: filters.q,
+				language,
+				include,
+				sex: filters.sex,
+				speciesId: filters.speciesId,
+				page,
+				limit,
+			}),
+		select: (data) => {
+			const pagination = data.meta?.pagination;
+
+			return {
+				items: data.data,
+				page: pagination?.page ?? page,
+				limit: pagination?.limit ?? limit,
+				total: pagination?.total ?? data.data.length,
+				totalPages: pagination?.totalPages ?? 1,
+			};
+		},
+		enabled: filters.q.length > 0,
+		staleTime: 10000,
+	});
+};
+
 export const useGetAnimalsCountBySpecies = (language: string, farmId: string) =>
 	useQuery({
 		queryKey: animalQueryKeys.animalsCountBySpecies(farmId, language),
@@ -648,3 +702,51 @@ export const useGetAnimalsCountBySpecies = (language: string, farmId: string) =>
 		enabled: !!farmId,
 		staleTime: 10000, // 10 seconds
 	});
+
+export const useInfiniteSearchAnimals = ({
+	filters,
+	include,
+	limit = DEFAULT_LIST_PAGE_SIZE,
+}: {
+	filters: IAnimalSearchFilters;
+	include?: string;
+	limit?: number;
+}) => {
+	const language = i18next.language.slice(0, 2);
+
+	return useInfiniteQuery({
+		queryKey: animalQueryKeys.animalSearch(filters, limit),
+		queryFn: ({ pageParam }) =>
+			searchAnimals({
+				q: filters.q,
+				language,
+				include,
+				sex: filters.sex,
+				speciesId: filters.speciesId,
+				page: pageParam,
+				limit,
+			}),
+		initialPageParam: 1,
+		getNextPageParam: (lastPage) => {
+			const pagination = lastPage.meta?.pagination;
+			if (!pagination) {
+				return undefined;
+			}
+			return pagination.page < pagination.totalPages
+				? pagination.page + 1
+				: undefined;
+		},
+		select: (data) => {
+			const items = data.pages.flatMap((page) => page.data);
+			const latestPagination = data.pages.at(-1)?.meta?.pagination;
+
+			return {
+				items,
+				total: latestPagination?.total ?? items.length,
+				totalPages: latestPagination?.totalPages ?? 1,
+			};
+		},
+		enabled: filters.q.length > 0,
+		staleTime: 10000,
+	});
+};

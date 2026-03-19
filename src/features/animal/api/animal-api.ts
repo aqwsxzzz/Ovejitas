@@ -107,3 +107,34 @@ export const getAnimalsCountBySpecies = ({ language }: { language: string }) =>
 		url: `/animals/dashboard`,
 		urlParams: { language },
 	});
+
+export const searchAnimals = ({
+	q,
+	language,
+	include,
+	sex,
+	speciesId,
+	page,
+	limit,
+}: {
+	q: string;
+	language: string;
+	include?: string;
+	sex?: string;
+	speciesId?: string;
+	page?: number;
+	limit?: number;
+}) => {
+	const params: Record<string, string> = { q, language };
+	if (include) params.include = include;
+	if (sex) params.sex = sex;
+	if (speciesId) params.speciesId = speciesId;
+	if (typeof page === "number") params.page = String(page);
+	if (typeof limit === "number") params.limit = String(limit);
+
+	return axiosHelper<IResponse<IAnimal[]>>({
+		method: "get",
+		url: `/animals/search`,
+		urlParams: params,
+	});
+};

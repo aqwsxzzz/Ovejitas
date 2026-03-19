@@ -113,3 +113,9 @@ export interface IAnimalListFilters {
 	sex?: IAnimal["sex"] | "";
 	speciesId?: string | "";
 }
+
+export interface IAnimalSearchFilters {
+	q: string;
+	sex?: IAnimal["sex"] | "";
+	speciesId?: string | "";
+}

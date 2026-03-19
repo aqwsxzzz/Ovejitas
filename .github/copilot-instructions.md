@@ -147,6 +147,23 @@ Default rules:
 7. Prefer `useActionState` for form actions when appropriate.
 8. Prefer `startTransition` for non-urgent state updates.
 
+## 9. Data Fetching Philosophy (Server-first, Just-in-time)
+
+This project follows a **"ask the BE for exactly what you need"** principle. All agents must respect this.
+
+Core rule: **Never load more data than the current view requires.**
+
+- Always prefer dedicated BE endpoints that filter, search, and paginate server-side over fetching full lists and slicing them client-side.
+- Use `useInfiniteQuery` or paged `useQuery` for any list that can grow. Avoid one-shot queries that fetch all records.
+- Do not build client-side search/filter logic over an in-memory list. If a BE search or filter endpoint exists, use it. If it doesn't exist yet, flag it to the user and ask for it before implementing a client-side workaround.
+- Never expand `limit` values to work around missing BE filtering. That is a red flag, not a solution.
+- Scope query params tightly: only send `include`, `language`, `sex`, `speciesId`, and other filters when they are actually needed by the view.
+
+Decision gate before writing any data-fetching code:
+1. Does a BE endpoint exist that returns exactly this data filtered/searched/paginated at the server level?
+2. If yes, use it. Wire it up in `*-api.ts` and `*-queries.ts`.
+3. If no, stop. Tell the user: "This needs a new BE endpoint. Do not implement client-side filtering as a workaround."
+
 ## 8. TypeScript Best Practices
 - Apply this rule whenever writing or editing TypeScript types, interfaces, generics, type guards, error handling patterns, or tsconfig configuration.
 - Follow TypeScript 5.x strict-mode best practices and favor patterns that improve type safety at compile-time.
