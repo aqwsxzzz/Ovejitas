@@ -6,13 +6,13 @@ import {
 	type FilterOption,
 } from "@/components/common/filter-chips";
 import { Button } from "@/components/ui/button";
-import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
+import { useGetAnimalsByFarmIdPage } from "@/features/animal/api/animal-queries";
 import { AnimalCardContainer } from "@/features/animal/components/animal-card-container";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { useGetSpeciesBySpecieId } from "@/features/specie/api/specie.queries";
 import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout";
 import { createFileRoute, useParams } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { PageHeader } from "@/components/common/page-header";
 import { useTranslation } from "react-i18next";
@@ -25,27 +25,44 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-	const PAGE_SIZE = 40;
+	const pageSizeOptions = [5, 10, 20, 50];
+	const scrollToTop = () => {
+		const scrollContainer = document.getElementById("app-scroll-container");
+		if (scrollContainer) {
+			scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+			return;
+		}
+
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	};
 	const { farmId, speciesId } = useParams({ strict: false });
-	const { data: animalsData, isPending: isPendingAnimals } =
-		useGetAnimalsByFarmId({
-			farmId: farmId!,
-			withLanguage: true,
-			filters: {
-				speciesId,
-			},
-		});
+	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [selectedFilter, setSelectedFilter] = useState("all");
+	const [isNewAnimalModalOpen, setIsNewAnimalModalOpen] = useState(false);
+	const {
+		data: pagedAnimals,
+		isPending: isPendingAnimals,
+		isFetching,
+	} = useGetAnimalsByFarmIdPage({
+		farmId: farmId!,
+		withLanguage: true,
+		filters: {
+			speciesId,
+		},
+		page,
+		limit: pageSize,
+	});
+	const animalsData = pagedAnimals?.items ?? [];
+	const totalAnimals = pagedAnimals?.total ?? animalsData.length;
+	const totalPages = pagedAnimals?.totalPages ?? 1;
 	const { data: speciesData, isPending: isPendingSpecies } =
 		useGetSpeciesBySpecieId({
 			include: "translations",
 			withLanguage: true,
 			speciesId: speciesId!,
 		});
-
-	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedFilter, setSelectedFilter] = useState("all");
-	const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-	const [isNewAnimalModalOpen, setIsNewAnimalModalOpen] = useState(false);
 
 	const { t } = useTranslation("animals");
 	const filterOptions: FilterOption[] = useMemo(() => {
@@ -93,11 +110,6 @@ function RouteComponent() {
 		return filtered;
 	}, [animalsData, selectedFilter, searchQuery]);
 
-	const showAllFiltered = searchQuery.trim() || selectedFilter !== "all";
-	const visibleAnimals = showAllFiltered
-		? filteredAnimals
-		: filteredAnimals.slice(0, visibleCount);
-
 	if (isPendingAnimals || isPendingSpecies) {
 		return (
 			<ScrollablePageLayout
@@ -138,13 +150,21 @@ function RouteComponent() {
 						<div className="flex flex-col gap-3">
 							<SearchBar
 								value={searchQuery}
-								onChange={setSearchQuery}
+								onChange={(value) => {
+									setSearchQuery(value);
+									setPage(1);
+									scrollToTop();
+								}}
 								placeholder={t("searchInputPlaceholder")}
 							/>
 							<FilterChips
 								options={filterOptions}
 								selected={selectedFilter}
-								onSelect={setSelectedFilter}
+								onSelect={(value) => {
+									setSelectedFilter(value);
+									setPage(1);
+									scrollToTop();
+								}}
 							/>
 						</div>
 					</div>
@@ -153,23 +173,60 @@ function RouteComponent() {
 				{filteredAnimals.length > 0 ? (
 					<div className="space-y-3">
 						<AnimalCardContainer
-							animalsList={visibleAnimals}
+							animalsList={filteredAnimals}
 							sex=""
 						/>
-						{!showAllFiltered && visibleCount < filteredAnimals.length && (
-							<div className="pt-2">
-								<Button
-									variant="outline"
-									onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-								>
-									{t("loadMore")}
-								</Button>
-							</div>
-						)}
+						<div className="flex flex-wrap items-center gap-2 pt-2">
+							<label className="text-caption text-muted-foreground">
+								{t("perPage")}
+							</label>
+							<select
+								className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+								value={pageSize}
+								onChange={(event) => {
+									setPageSize(Number(event.target.value));
+									setPage(1);
+									scrollToTop();
+								}}
+							>
+								{pageSizeOptions.map((option) => (
+									<option
+										key={option}
+										value={option}
+									>
+										{option}
+									</option>
+								))}
+							</select>
+
+							<Button
+								variant="outline"
+								onClick={() => {
+									setPage((previous) => Math.max(previous - 1, 1));
+									scrollToTop();
+								}}
+								disabled={page <= 1 || isFetching}
+							>
+								{t("previous")}
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => {
+									setPage((previous) => Math.min(previous + 1, totalPages));
+									scrollToTop();
+								}}
+								disabled={page >= totalPages || isFetching}
+							>
+								{t("next")}
+							</Button>
+							<span className="text-caption text-muted-foreground">
+								{t("pageLabel", { page, totalPages })}
+							</span>
+						</div>
 						<p className="text-caption text-muted-foreground">
 							{t("showingCount", {
-								visible: visibleAnimals.length,
-								total: filteredAnimals.length,
+								visible: filteredAnimals.length,
+								total: totalAnimals,
 							})}
 						</p>
 					</div>

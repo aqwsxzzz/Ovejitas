@@ -1,5 +1,12 @@
 {
     "modalTitle": "Measurement Records",
     "modalButtonTrigger": "Record",
-    "missingData": "No data"
+    "missingData": "No data",
+    "loadMore": "Load more records",
+    "loading": "Loading...",
+    "showingCount": "Showing {{visible}} of {{total}} records",
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "pageLabel": "Page {{page}} of {{totalPages}}"
 }

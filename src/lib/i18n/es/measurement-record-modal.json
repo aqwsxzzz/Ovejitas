@@ -1,5 +1,12 @@
 {
     "modalTitle": "Historial de Medición",
     "modalButtonTrigger": "Historial",
-    "missingData": "No hay datos"
+    "missingData": "No hay datos",
+    "loadMore": "Cargar mas registros",
+    "loading": "Cargando...",
+    "showingCount": "Mostrando {{visible}} de {{total}} registros",
+    "perPage": "Por pagina",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageLabel": "Pagina {{page}} de {{totalPages}}"
 }
