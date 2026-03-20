@@ -13,12 +13,14 @@ import {
 	getAnimalById,
 	getAnimalsByFarmId,
 	getAnimalsCountBySpecies,
+	getAnimalStats,
 	searchAnimals,
 } from "@/features/animal/api/animal-api";
 import type {
 	IAnimal,
 	IAnimalListFilters,
 	IAnimalSearchFilters,
+	IAnimalStatsResponse,
 	IAnimalsCountBySpeciesResponse,
 	ICreateAnimalBulkResponse,
 	ICreateAnimalBulkPayload,
@@ -167,6 +169,8 @@ export const animalQueryKeys = {
 	) => [...animalQueryKeys.animalList(farmId, filters), "page", limit] as const,
 	animalById: (animalId: string) =>
 		[...animalQueryKeys.all, "byId", animalId] as const,
+	animalStats: (farmId: string, language: string) =>
+		[...animalQueryKeys.all, "stats", farmId, language] as const,
 	animalsCountBySpecies: (farmId: string, language: string) =>
 		[...animalQueryKeys.all, "countBySpecies", farmId, language] as const,
 	animalSearch: (filters: IAnimalSearchFilters, limit: number) =>
@@ -376,6 +380,10 @@ export const useCreateAnimal = () => {
 			void queryClient.invalidateQueries({
 				queryKey: [...animalQueryKeys.all, "list", farmId],
 			});
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "stats", farmId],
+			});
 		},
 	});
 };
@@ -468,6 +476,10 @@ export const useDeleteAnimalById = () => {
 
 			void queryClient.invalidateQueries({
 				queryKey: [...animalQueryKeys.all, "list", farmId],
+			});
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "stats", farmId],
 			});
 		},
 	});
@@ -650,7 +662,23 @@ export const useCreateAnimalBulk = () => {
 			void queryClient.invalidateQueries({
 				queryKey: [...animalQueryKeys.all, "countBySpecies", farmId],
 			});
+
+			void queryClient.invalidateQueries({
+				queryKey: [...animalQueryKeys.all, "stats", farmId],
+			});
 		},
+	});
+};
+
+export const useGetAnimalStats = (farmId: string) => {
+	const language = i18next.language.slice(0, 2);
+
+	return useQuery({
+		queryKey: animalQueryKeys.animalStats(farmId, language),
+		queryFn: () => getAnimalStats({ language }),
+		select: (data): IAnimalStatsResponse => data.data,
+		enabled: !!farmId,
+		staleTime: 10000,
 	});
 };
 

@@ -17,8 +17,10 @@ import {
 	Stethoscope,
 	Heart,
 } from "lucide-react";
-import { useGetAnimalsByFarmId } from "@/features/animal/api/animal-queries";
-import { countAnimalsAddedInPastDays } from "@/features/dashboard/utils/count-animals-added-in-period";
+import {
+	useGetAnimalStats,
+	useGetAnimalsByFarmId,
+} from "@/features/animal/api/animal-queries";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
@@ -33,17 +35,16 @@ function RouteComponent() {
 	const { farmId } = useParams({ strict: false });
 	const navigate = useNavigate();
 	const [isAddAnimalOpen, setIsAddAnimalOpen] = useState(false);
-	const { data: animalData, isLoading } = useGetAnimalsByFarmId({
+	const { data: animalData } = useGetAnimalsByFarmId({
 		farmId: farmId!,
 		include: "species.translations,breed",
 		withLanguage: true,
 	});
 
-	const totalAnimals = animalData?.length || 0;
-	const animalsAddedLast7Days = countAnimalsAddedInPastDays(
-		animalData ?? [],
-		7,
-	);
+	const { data: animalStats, isLoading: isAnimalStatsLoading } =
+		useGetAnimalStats(farmId!);
+	const totalAnimals = animalStats?.total ?? 0;
+	const animalsAddedLast7Days = animalStats?.lastSevenDays ?? 0;
 	const healthAlerts =
 		animalData?.filter((animal) => animal.status !== "alive").length || 0;
 	const { t } = useTranslation("dashboard");
@@ -100,9 +101,9 @@ function RouteComponent() {
 								iconColor="text-primary"
 								borderColor="border-l-primary"
 								label={t("resumes.resumeAnimalsCard.label")}
-								value={isLoading ? "..." : totalAnimals}
+								value={isAnimalStatsLoading ? "..." : totalAnimals}
 								trend={
-									!isLoading
+									!isAnimalStatsLoading
 										? {
 												value: t("resumes.resumeAnimalsCard.trendValue", {
 													count: animalsAddedLast7Days,
