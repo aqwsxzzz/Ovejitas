@@ -41,6 +41,14 @@ Only use `useEffect` when item 7 is true.
 - Do not add testing frameworks, test dependencies, or test-related scripts by default.
 - Prefer lightweight validation via typecheck/build/lint and manual verification notes when needed.
 
+## 5.5 Enhance Over Patch
+- When facing a bug or limitation, prefer enhancing the system and architecture over implementing a temporary workaround.
+- Patching works but leaves technical debt; enhancement solves the root cause and improves the foundation.
+- Classic example: debounce + local state fixes focus-loss on search inputs, but URL search params enhance the system (adds bookmarkability, back/forward navigation, persistence).
+- Caveat: sometimes the right architecture doesn't exist yet or requires significant refactoring — in those cases, a short-term patch with a comment/ticket for future enhancement is acceptable.
+- When choosing to patch, explicitly mark it as temporary and document the ideal enhancement path.
+- This prevents the codebase from accumulating workarounds that should have been architectural improvements.
+
 ## 6. React Single Responsibility Rule
 - Apply this rule whenever creating or editing any React component, hook, service, or utility file.
 - Every file, function, component, and hook must do one thing. If it can only be described with "and", split it.
@@ -146,6 +154,23 @@ Default rules:
 6. Prefer `use()` over legacy context access patterns when supported by the codebase.
 7. Prefer `useActionState` for form actions when appropriate.
 8. Prefer `startTransition` for non-urgent state updates.
+
+## 9. Data Fetching Philosophy (Server-first, Just-in-time)
+
+This project follows a **"ask the BE for exactly what you need"** principle. All agents must respect this.
+
+Core rule: **Never load more data than the current view requires.**
+
+- Always prefer dedicated BE endpoints that filter, search, and paginate server-side over fetching full lists and slicing them client-side.
+- Use `useInfiniteQuery` or paged `useQuery` for any list that can grow. Avoid one-shot queries that fetch all records.
+- Do not build client-side search/filter logic over an in-memory list. If a BE search or filter endpoint exists, use it. If it doesn't exist yet, flag it to the user and ask for it before implementing a client-side workaround.
+- Never expand `limit` values to work around missing BE filtering. That is a red flag, not a solution.
+- Scope query params tightly: only send `include`, `language`, `sex`, `speciesId`, and other filters when they are actually needed by the view.
+
+Decision gate before writing any data-fetching code:
+1. Does a BE endpoint exist that returns exactly this data filtered/searched/paginated at the server level?
+2. If yes, use it. Wire it up in `*-api.ts` and `*-queries.ts`.
+3. If no, stop. Tell the user: "This needs a new BE endpoint. Do not implement client-side filtering as a workaround."
 
 ## 8. TypeScript Best Practices
 - Apply this rule whenever writing or editing TypeScript types, interfaces, generics, type guards, error handling patterns, or tsconfig configuration.
