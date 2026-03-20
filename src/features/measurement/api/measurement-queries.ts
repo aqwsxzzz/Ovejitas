@@ -1,6 +1,7 @@
 import {
 	createMeasurement,
 	deleteMeasurementById,
+	getLatestMeasurementsByAnimalId,
 	getMeasurementsByAnimalId,
 } from "@/features/measurement/api/measurement-api";
 import {
@@ -12,6 +13,7 @@ import {
 import type {
 	ICreateMeasurementPayload,
 	IMeasurement,
+	MeasurementType,
 } from "@/features/measurement/types/measurement-types";
 import i18next from "i18next";
 import { toast } from "sonner";
@@ -22,45 +24,80 @@ const LEGACY_LIST_PAGE_SIZE = 100;
 
 export const measurementQueryKeys = {
 	all: ["measurement"] as const,
-	measurementListByAnimalId: (animalId: string) =>
-		[...measurementQueryKeys.all, "list", animalId] as const,
-	measurementListByAnimalIdPage: (animalId: string, limit: number) =>
+	animal: (animalId: string) =>
+		[...measurementQueryKeys.all, "animal", animalId] as const,
+	measurementListByAnimalId: (
+		animalId: string,
+		measurementType?: MeasurementType,
+	) =>
 		[
-			...measurementQueryKeys.measurementListByAnimalId(animalId),
+			...measurementQueryKeys.animal(animalId),
+			"list",
+			measurementType ?? "all",
+		] as const,
+	measurementListByAnimalIdPage: (
+		animalId: string,
+		limit: number,
+		measurementType?: MeasurementType,
+	) =>
+		[
+			...measurementQueryKeys.measurementListByAnimalId(
+				animalId,
+				measurementType,
+			),
 			"page",
 			limit,
 		] as const,
+	latestByAnimalId: (animalId: string) =>
+		[...measurementQueryKeys.animal(animalId), "latest"] as const,
 };
 
 export const useGetMeasurementsByAnimalId = (
 	farmId: string,
 	animalId: string,
+	measurementType?: MeasurementType,
 ) =>
 	useQuery({
-		queryKey: measurementQueryKeys.measurementListByAnimalId(animalId),
+		queryKey: measurementQueryKeys.measurementListByAnimalId(
+			animalId,
+			measurementType,
+		),
 		queryFn: () =>
 			getMeasurementsByAnimalId({
 				farmId,
 				animalId,
 				page: 1,
 				limit: LEGACY_LIST_PAGE_SIZE,
+				measurementType,
 			}),
 		select: (data) => data.data,
+		enabled: Boolean(farmId) && Boolean(animalId),
+	});
+
+export const useGetLatestMeasurementsByAnimalId = (animalId: string) =>
+	useQuery({
+		queryKey: measurementQueryKeys.latestByAnimalId(animalId),
+		queryFn: () => getLatestMeasurementsByAnimalId({ animalId }),
+		select: (data) => data.data,
+		enabled: Boolean(animalId),
 	});
 
 export const useGetInfiniteMeasurementsByAnimalId = ({
 	farmId,
 	animalId,
 	limit = DEFAULT_LIST_PAGE_SIZE,
+	measurementType,
 }: {
 	farmId: string;
 	animalId: string;
 	limit?: number;
+	measurementType?: MeasurementType;
 }) =>
 	useInfiniteQuery({
 		queryKey: measurementQueryKeys.measurementListByAnimalIdPage(
 			animalId,
 			limit,
+			measurementType,
 		),
 		queryFn: ({ pageParam }) =>
 			getMeasurementsByAnimalId({
@@ -68,6 +105,7 @@ export const useGetInfiniteMeasurementsByAnimalId = ({
 				animalId,
 				page: pageParam,
 				limit,
+				measurementType,
 			}),
 		initialPageParam: 1,
 		getNextPageParam: (lastPage) => {
@@ -98,15 +136,20 @@ export const useGetMeasurementsByAnimalIdPage = ({
 	animalId,
 	page,
 	limit,
+	measurementType,
 }: {
 	farmId: string;
 	animalId: string;
 	page: number;
 	limit: number;
+	measurementType?: MeasurementType;
 }) =>
 	useQuery({
 		queryKey: [
-			...measurementQueryKeys.measurementListByAnimalId(animalId),
+			...measurementQueryKeys.measurementListByAnimalId(
+				animalId,
+				measurementType,
+			),
 			"paged",
 			page,
 			limit,
@@ -117,6 +160,7 @@ export const useGetMeasurementsByAnimalIdPage = ({
 				animalId,
 				page,
 				limit,
+				measurementType,
 			}),
 		select: (data) => {
 			const pagination = data.meta?.pagination;
@@ -162,7 +206,7 @@ export const useCreateMeasurement = () => {
 			);
 
 			void queryClient.invalidateQueries({
-				queryKey: [...measurementQueryKeys.all, "list", animalId],
+				queryKey: measurementQueryKeys.animal(animalId),
 			});
 		},
 	});
@@ -200,7 +244,7 @@ export const useDeleteMeasurementById = () => {
 			);
 
 			void queryClient.invalidateQueries({
-				queryKey: [...measurementQueryKeys.all, "list", animalId],
+				queryKey: measurementQueryKeys.animal(animalId),
 			});
 		},
 	});

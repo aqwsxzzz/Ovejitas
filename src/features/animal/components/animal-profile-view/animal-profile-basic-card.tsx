@@ -3,8 +3,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { HealthStatusIndicator } from "@/components/common/health-status-indicator";
 import { useGetAnimalById } from "@/features/animal/api/animal-queries";
-import { useGetMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
-import type { IMeasurement } from "@/features/measurement/types/measurement-types";
+import { useGetLatestMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
 import type { IAnimal } from "@/features/animal/types/animal-types";
 import { getBreedDisplayName } from "@/features/breed/types/breed";
 import { useParams } from "@tanstack/react-router";
@@ -13,32 +12,21 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 
 export const AnimalProfileCard = () => {
-	const { farmId, animalId } = useParams({ strict: false });
+	const { animalId } = useParams({ strict: false });
 	const include = "breed,species";
 	const { data: animalData } = useGetAnimalById({
 		animalId: animalId!,
 		include,
 		withLanguage: true,
 	});
-	const { data: measurementData } = useGetMeasurementsByAnimalId(
-		farmId!,
+	const { data: latestMeasurements } = useGetLatestMeasurementsByAnimalId(
 		animalId!,
 	);
 	const { t, i18n } = useTranslation("animalProfileBasicCard");
 
-	const latestWeightMeasurement = measurementData
-		?.filter((measurement) => measurement.measurementType === "weight")
-		.reduce<IMeasurement | null>((latestMeasurement, measurement) => {
-			if (!latestMeasurement) {
-				return measurement;
-			}
-
-			return dayjs(measurement.measuredAt).isAfter(
-				dayjs(latestMeasurement.measuredAt),
-			)
-				? measurement
-				: latestMeasurement;
-		}, null);
+	const latestWeightMeasurement = latestMeasurements?.find(
+		(measurement) => measurement.measurementType === "weight",
+	);
 
 	const getLocalizedStatus = (status: IAnimal["status"]) => {
 		if (!status) {
