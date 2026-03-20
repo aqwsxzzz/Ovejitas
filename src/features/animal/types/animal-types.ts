@@ -109,6 +109,11 @@ export interface IAnimalsCountBySpeciesResponse {
 	};
 }
 
+export interface IAnimalStatsResponse {
+	total: number;
+	lastSevenDays: number;
+}
+
 export interface IAnimalListFilters {
 	sex?: IAnimal["sex"] | "";
 	speciesId?: string | "";
