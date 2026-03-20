@@ -41,6 +41,14 @@ Only use `useEffect` when item 7 is true.
 - Do not add testing frameworks, test dependencies, or test-related scripts by default.
 - Prefer lightweight validation via typecheck/build/lint and manual verification notes when needed.
 
+## 5.5 Enhance Over Patch
+- When facing a bug or limitation, prefer enhancing the system and architecture over implementing a temporary workaround.
+- Patching works but leaves technical debt; enhancement solves the root cause and improves the foundation.
+- Classic example: debounce + local state fixes focus-loss on search inputs, but URL search params enhance the system (adds bookmarkability, back/forward navigation, persistence).
+- Caveat: sometimes the right architecture doesn't exist yet or requires significant refactoring — in those cases, a short-term patch with a comment/ticket for future enhancement is acceptable.
+- When choosing to patch, explicitly mark it as temporary and document the ideal enhancement path.
+- This prevents the codebase from accumulating workarounds that should have been architectural improvements.
+
 ## 6. React Single Responsibility Rule
 - Apply this rule whenever creating or editing any React component, hook, service, or utility file.
 - Every file, function, component, and hook must do one thing. If it can only be described with "and", split it.

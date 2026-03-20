@@ -1,4 +1,3 @@
-import { AnimalCardSkeletonList } from "@/components/common/skeleton-loaders";
 import { FAB } from "@/components/common/fab";
 import { SearchBar } from "@/components/common/search-bar";
 import {
@@ -19,6 +18,8 @@ import { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
+import { useDebouncedValue } from "@/utils/use-debounced-value";
+import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/species/$speciesId/animals",
@@ -41,12 +42,12 @@ function RouteComponent() {
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedStatus, setSelectedStatus] = useState("all");
 	const [selectedSex, setSelectedSex] = useState("all");
 	const [isNewAnimalModalOpen, setIsNewAnimalModalOpen] = useState(false);
-	const effectiveQ =
-		searchQuery.trim() || (selectedStatus !== "all" ? selectedStatus : "");
-	const isSearchActive = effectiveQ.length > 0;
+	const isSearchActive = searchQuery.trim().length > 0;
+	const debouncedSearchQuery = useDebouncedValue(searchQuery.trim(), 350);
+	const isDebouncing =
+		isSearchActive && debouncedSearchQuery !== searchQuery.trim();
 	const sexFilter =
 		selectedSex !== "all"
 			? (selectedSex as "female" | "male" | "unknown")
@@ -63,21 +64,19 @@ function RouteComponent() {
 		limit: pageSize,
 		enabled: !isSearchActive,
 	});
-	const {
-		data: searchedAnimals,
-		isPending: isPendingSearch,
-		isFetching: isFetchingSearch,
-	} = useSearchAnimalsPaged({
-		filters: { q: effectiveQ, speciesId, sex: sexFilter },
-		page,
-		limit: pageSize,
-	});
-	const activeData = isSearchActive ? searchedAnimals : pagedAnimals;
+	const { data: searchedAnimals, isFetching: isFetchingSearch } =
+		useSearchAnimalsPaged({
+			filters: { q: debouncedSearchQuery, speciesId, sex: sexFilter },
+			page,
+			limit: pageSize,
+		});
+	const activeData =
+		debouncedSearchQuery.length > 0 ? searchedAnimals : pagedAnimals;
 	const animalsData = activeData?.items ?? [];
 	const totalAnimals = activeData?.total ?? 0;
 	const totalPages = activeData?.totalPages ?? 1;
-	const isPendingAnimals = isSearchActive ? isPendingSearch : isPendingList;
-	const isFetching = isFetchingList || isFetchingSearch;
+	const isPendingAnimals = !isSearchActive && isPendingList;
+	const isFetching = isFetchingList || isFetchingSearch || isDebouncing;
 	const { data: speciesData, isPending: isPendingSpecies } =
 		useGetSpeciesBySpecieId({
 			include: "translations",
@@ -86,12 +85,6 @@ function RouteComponent() {
 		});
 
 	const { t } = useTranslation("animals");
-	const statusOptions: FilterOption[] = [
-		{ label: t("filterButtonsAll"), value: "all" },
-		{ label: t("filterButtonsAlive"), value: "alive" },
-		{ label: t("filterButtonsSold"), value: "sold" },
-		{ label: t("filterButtonsDeceased"), value: "deceased" },
-	];
 	const sexOptions: FilterOption[] = [
 		{ label: t("filterButtonsAll"), value: "all" },
 		{ label: t("filterButtonsFemale"), value: "female" },
@@ -99,32 +92,13 @@ function RouteComponent() {
 		{ label: t("filterButtonsUnknown"), value: "unknown" },
 	];
 
-	if (isPendingAnimals || isPendingSpecies) {
-		return (
-			<ScrollablePageLayout
-				header={
-					<PageHeader
-						title="Loading..."
-						description={t("searchInputPlaceholder")}
-						backLink={{
-							to: "/farm/$farmId/species",
-							params: { farmId: farmId! },
-						}}
-					/>
-				}
-			>
-				<AnimalCardSkeletonList count={5} />
-			</ScrollablePageLayout>
-		);
-	}
-
 	return (
 		<>
 			<ScrollablePageLayout
 				header={
 					<div className="flex flex-col gap-6">
 						<PageHeader
-							title={speciesData?.translations?.[0].name || ""}
+							title={speciesData?.translations?.[0].name ?? ""}
 							description={t("searchSubtitle")}
 							backLink={{
 								to: "/farm/$farmId/species",
@@ -147,15 +121,6 @@ function RouteComponent() {
 								placeholder={t("searchInputPlaceholder")}
 							/>
 							<FilterChips
-								options={statusOptions}
-								selected={selectedStatus}
-								onSelect={(value) => {
-									setSelectedStatus(value);
-									setPage(1);
-									scrollToTop();
-								}}
-							/>
-							<FilterChips
 								options={sexOptions}
 								selected={selectedSex}
 								onSelect={(value) => {
@@ -168,7 +133,15 @@ function RouteComponent() {
 					</div>
 				}
 			>
-				{animalsData.length > 0 ? (
+				{isPendingAnimals || isPendingSpecies ? (
+					<div className="flex min-h-[260px] flex-col items-center justify-center gap-4">
+						<FarmAnimalSpinner
+							size="md"
+							speed="slow"
+						/>
+						<p className="text-caption text-muted-foreground">Loading...</p>
+					</div>
+				) : animalsData.length > 0 ? (
 					<div className="space-y-3">
 						<AnimalCardContainer
 							animalsList={animalsData}

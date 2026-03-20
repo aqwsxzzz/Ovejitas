@@ -3,6 +3,7 @@ import {
 	useMutation,
 	useQuery,
 	useQueryClient,
+	keepPreviousData,
 } from "@tanstack/react-query";
 import {
 	createAnimal,
@@ -690,6 +691,7 @@ export const useSearchAnimalsPaged = ({
 			};
 		},
 		enabled: filters.q.length > 0,
+		placeholderData: keepPreviousData,
 		staleTime: 10000,
 	});
 };
