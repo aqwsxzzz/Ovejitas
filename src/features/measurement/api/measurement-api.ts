@@ -4,17 +4,20 @@ import type {
 	ICreateMeasurementPayload,
 	IDeleteMeasurementResponse,
 	IMeasurement,
+	MeasurementType,
 } from "@/features/measurement/types/measurement-types";
 
 export const getMeasurementsByAnimalId = ({
 	animalId,
 	page,
 	limit,
+	measurementType,
 }: {
 	farmId: string;
 	animalId: string;
 	page?: number;
 	limit?: number;
+	measurementType?: MeasurementType;
 }) =>
 	axiosHelper<IResponse<IMeasurement[]>>({
 		method: "get",
@@ -22,7 +25,18 @@ export const getMeasurementsByAnimalId = ({
 		urlParams: {
 			page,
 			limit,
+			measurementType,
 		},
+	});
+
+export const getLatestMeasurementsByAnimalId = ({
+	animalId,
+}: {
+	animalId: string;
+}) =>
+	axiosHelper<IResponse<IMeasurement[]>>({
+		method: "get",
+		url: `/animals/${animalId}/measurements/latest`,
 	});
 
 export const createMeasurement = ({

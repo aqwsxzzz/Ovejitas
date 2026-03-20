@@ -1,0 +1,148 @@
+Ovejitas Measurement Implementation Playbook
+
+Purpose
+- This file is a long-term implementation guide for measurement-related improvements.
+- It is designed so we can continue in multiple sessions without losing context.
+- Priority is useful farm outcomes over visual polish.
+
+Project Context (for future sessions)
+- App: Ovejitas (farm/sheep management frontend).
+- Goal: improve measurement usefulness for health and operational decisions.
+- Existing work already done:
+  - Latest-per-type measurement endpoint integration.
+  - Delta fields in UI (change and changePercent).
+  - Trend direction visuals (up/down/neutral).
+  - Basic anomaly highlighting on significant changes.
+  - Measurement history modal responsive and scrollable.
+
+Why we are doing this
+- Farmers need fast, actionable health signals.
+- Measurements are most valuable when they support decisions:
+  - Who needs attention now?
+  - Who is improving or declining?
+  - What action should be taken next?
+- We should avoid cosmetic-only features and focus on practical value.
+
+Guiding Principles
+- Use backend-filtered and paginated data, not large client-side filtering.
+- Keep logic explainable (clear thresholds and reasons for alerts).
+- Prefer features that reduce missed health issues and save time.
+- Keep implementation incremental and safe (one feature at a time).
+
+Recommended Implementation Roadmap
+
+Phase 1 (highest value, low-medium effort)
+1) Measurement Trend Charts (30/60/90 days)
+- What:
+  - Add charts for weight, height, and temperature over time.
+  - Optional overlay with herd average for comparison.
+  - Healthy/warning/critical zones when range data is available.
+- Why:
+  - Trend shape is easier to understand than table rows.
+  - Helps detect gradual decline early.
+- Notes:
+  - Keep chart interaction simple for mobile.
+
+2) Smart Measurement Alerts (rule-based)
+- What:
+  - Add practical alert rules, for example:
+    - Rapid weight drop in short window.
+    - Fever spike or persistent elevated temperature.
+    - Large change percentages beyond threshold.
+  - Show alert reason text, not only a badge.
+- Why:
+  - Faster triage and clearer action for farm owners.
+- Notes:
+  - Start with conservative thresholds and tune with real data.
+
+Phase 2 (high usefulness for herd decisions)
+3) Herd Measurement Summary View
+- What:
+  - Aggregate view with average/min/max by measurement type.
+  - Count and percentage of animals in warning state.
+  - Quick filters: all, needs attention, stable, improving.
+- Why:
+  - Enables farm-level decisions instead of one-animal-at-a-time review.
+
+4) Body Condition Style Indicator (derived metric)
+- What:
+  - Add a derived status indicator from available measurements.
+  - Keep it transparent: explain formula/criteria in UI.
+- Why:
+  - More practical than raw values alone for many husbandry decisions.
+
+Phase 3 (advanced insights)
+5) Growth Benchmark View by Age/Breed
+- What:
+  - Compare an animal trend against expected growth curve.
+- Why:
+  - Detect underperformance and optimize feeding/treatment.
+
+6) Measurement + Event Correlation Timeline
+- What:
+  - Align measurements with events (treatments, diet changes, etc.).
+- Why:
+  - Helps identify what interventions worked.
+
+Reusable Session Prompt Template
+
+Copy this text at the start of any new session:
+
+"Context:
+We are continuing the Ovejitas measurement improvement roadmap.
+Priority is useful outcomes over visual appearance.
+Please read docs/measurement-implementation-playbook.txt first and continue from the next unfinished item.
+
+Current implementation baseline already includes:
+- latest-per-type measurement fetching
+- trend deltas (change/changePercent)
+- anomaly highlighting
+- responsive measurement records modal
+
+Task for this session:
+[PASTE THE SPECIFIC PHASE/ITEM HERE]
+
+Constraints:
+- Keep changes incremental and production-safe.
+- Prefer backend-driven filtering/aggregation where possible.
+- Do not add tests unless explicitly requested.
+- Run lightweight validation after code changes."
+
+Ready-to-use Prompts Per Feature
+
+Prompt A: Trend charts
+"Implement Phase 1, Item 1 from docs/measurement-implementation-playbook.txt.
+Add measurement trend charts (30/60/90 days) for weight, height, and temperature in the animal profile.
+Use existing data/query patterns and keep mobile usability strong.
+After implementation, run lint/build and summarize risks and follow-ups."
+
+Prompt B: Smart alerts
+"Implement Phase 1, Item 2 from docs/measurement-implementation-playbook.txt.
+Add rule-based smart alerts for measurements with clear reason text (not just color badges).
+Use conservative thresholds and make thresholds easy to adjust in one place.
+After implementation, run lint/build and list the final rules in a short table."
+
+Prompt C: Herd summary
+"Implement Phase 2, Item 3 from docs/measurement-implementation-playbook.txt.
+Create a herd measurement summary view with aggregates and attention filters.
+Prefer server-side aggregation if endpoint exists; if missing, propose the minimal API needed before fallback logic.
+After implementation, run lint/build and report performance considerations."
+
+Prompt D: Derived indicator
+"Implement Phase 2, Item 4 from docs/measurement-implementation-playbook.txt.
+Add a practical derived body-condition style indicator using existing measurements.
+Keep the rule transparent and explainable in UI.
+After implementation, run lint/build and document assumptions."
+
+Prompt E: Growth benchmark
+"Implement Phase 3, Item 5 from docs/measurement-implementation-playbook.txt.
+Add growth benchmark comparison by age/breed and highlight deviation severity.
+If required backend fields are missing, stop and specify exact endpoint/data contract needed."
+
+Prompt F: Event correlation timeline
+"Implement Phase 3, Item 6 from docs/measurement-implementation-playbook.txt.
+Create a timeline that correlates measurements with relevant animal events.
+Focus on practical decision support and readability on mobile."
+
+Change Log
+- 2026-03-20: Initial playbook created from measurement feature research and current implementation state.
