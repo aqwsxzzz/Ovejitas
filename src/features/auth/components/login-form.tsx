@@ -48,6 +48,11 @@ export const LoginForm = () => {
 							<FormLabel>{t("emailInputLabel")}</FormLabel>
 							<FormControl>
 								<Input
+									type="email"
+									autoComplete="email"
+									autoCapitalize="none"
+									autoCorrect="off"
+									spellCheck={false}
 									placeholder={t("emailPlaceholder")}
 									{...field}
 								/>
