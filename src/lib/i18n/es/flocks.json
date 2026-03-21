@@ -1,0 +1,93 @@
+{
+  "page": {
+    "title": "Lotes",
+    "description": "Gestiona tus animales agrupados por lote",
+    "newButton": "Nuevo lote",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "createSuccess": "Lote creado correctamente",
+    "loading": "Cargando lotes...",
+    "endpointUnavailable": "El endpoint de lotes no está disponible todavía en este entorno de API.",
+    "endpointUnavailableHint": "Despliega o cambia al branch del backend que incluye el módulo de lotes y vuelve a intentar.",
+    "retry": "Reintentar",
+    "empty": "No se encontraron lotes",
+    "perPage": "Por página",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "pageLabel": "Página {{page}} de {{totalPages}}",
+    "showingCount": "Mostrando {{visible}} de {{total}} lotes"
+  },
+  "filters": {
+    "allStatuses": "Todos los estados",
+    "allTypes": "Todos los tipos de lote"
+  },
+  "status": {
+    "active": "Activo",
+    "sold": "Vendido",
+    "culled": "Descartado",
+    "completed": "Completado"
+  },
+  "flockType": {
+    "layers": "Ponedoras",
+    "broilers": "Engorde",
+    "dual_purpose": "Doble propósito",
+    "general": "General"
+  },
+  "fields": {
+    "name": "Nombre",
+    "currentCount": "Cantidad actual",
+    "initialCount": "Cantidad inicial",
+    "species": "Especie",
+    "breed": "Raza",
+    "startDate": "Fecha de inicio",
+    "houseName": "Galpón",
+    "flockType": "Tipo de lote",
+    "acquisitionType": "Tipo de adquisición",
+    "ageAtAcquisitionWeeks": "Edad al adquirir (semanas)",
+    "notes": "Notas"
+  },
+  "acquisitionType": {
+    "hatched": "Nacido",
+    "purchased": "Comprado",
+    "other": "Otro"
+  },
+  "eventType": {
+    "mortality": "Mortalidad",
+    "sale": "Venta",
+    "cull": "Descarte",
+    "addition": "Adición",
+    "transfer": "Transferencia"
+  },
+  "createModal": {
+    "title": "Crear lote",
+    "description": "Registra un nuevo lote de animales"
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "speciesRequired": "La especie es obligatoria",
+    "breedRequired": "La raza es obligatoria",
+    "initialCountRequired": "La cantidad inicial debe ser al menos 1",
+    "startDateRequired": "La fecha de inicio es obligatoria"
+  },
+  "detail": {
+    "title": "Detalle del lote",
+    "description": "Sigue la actividad y producción del lote",
+    "loading": "Cargando detalle del lote...",
+    "events": {
+      "title": "Eventos del lote",
+      "loading": "Cargando eventos...",
+      "empty": "No se encontraron eventos",
+      "count": "Cantidad: {{count}}"
+    },
+    "eggCollections": {
+      "title": "Recolecciones de huevos",
+      "loading": "Cargando recolecciones...",
+      "empty": "No se encontraron recolecciones",
+      "layRate": "Tasa de postura: {{layRate}}%",
+      "totals": "Total: {{totalEggs}} • Aprovechables: {{usableEggs}} • Rotos: {{brokenEggs}}"
+    }
+  },
+  "common": {
+    "notProvided": "No informado"
+  }
+}

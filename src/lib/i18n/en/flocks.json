@@ -1,0 +1,93 @@
+{
+  "page": {
+    "title": "Flocks",
+    "description": "Manage your grouped livestock flocks",
+    "newButton": "New flock",
+    "save": "Save",
+    "saving": "Saving...",
+    "createSuccess": "Flock created successfully",
+    "loading": "Loading flocks...",
+    "endpointUnavailable": "Flock endpoint is not available in this API environment yet.",
+    "endpointUnavailableHint": "Deploy or switch to the backend branch that includes the flock module, then retry.",
+    "retry": "Retry",
+    "empty": "No flocks found",
+    "perPage": "Per page",
+    "previous": "Previous",
+    "next": "Next",
+    "pageLabel": "Page {{page}} of {{totalPages}}",
+    "showingCount": "Showing {{visible}} of {{total}} flocks"
+  },
+  "filters": {
+    "allStatuses": "All statuses",
+    "allTypes": "All flock types"
+  },
+  "status": {
+    "active": "Active",
+    "sold": "Sold",
+    "culled": "Culled",
+    "completed": "Completed"
+  },
+  "flockType": {
+    "layers": "Layers",
+    "broilers": "Broilers",
+    "dual_purpose": "Dual purpose",
+    "general": "General"
+  },
+  "fields": {
+    "name": "Name",
+    "currentCount": "Current count",
+    "initialCount": "Initial count",
+    "species": "Species",
+    "breed": "Breed",
+    "startDate": "Start date",
+    "houseName": "House",
+    "flockType": "Flock type",
+    "acquisitionType": "Acquisition type",
+    "ageAtAcquisitionWeeks": "Age at acquisition (weeks)",
+    "notes": "Notes"
+  },
+  "acquisitionType": {
+    "hatched": "Hatched",
+    "purchased": "Purchased",
+    "other": "Other"
+  },
+  "eventType": {
+    "mortality": "Mortality",
+    "sale": "Sale",
+    "cull": "Cull",
+    "addition": "Addition",
+    "transfer": "Transfer"
+  },
+  "createModal": {
+    "title": "Create flock",
+    "description": "Register a new grouped livestock flock"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "speciesRequired": "Species is required",
+    "breedRequired": "Breed is required",
+    "initialCountRequired": "Initial count must be at least 1",
+    "startDateRequired": "Start date is required"
+  },
+  "detail": {
+    "title": "Flock detail",
+    "description": "Track flock activity and production",
+    "loading": "Loading flock detail...",
+    "events": {
+      "title": "Flock events",
+      "loading": "Loading events...",
+      "empty": "No events found",
+      "count": "Count: {{count}}"
+    },
+    "eggCollections": {
+      "title": "Egg collections",
+      "loading": "Loading egg collections...",
+      "empty": "No egg collections found",
+      "layRate": "Lay rate: {{layRate}}%",
+      "totals": "Total: {{totalEggs}} • Usable: {{usableEggs}} • Broken: {{brokenEggs}}"
+    }
+  },
+  "common": {
+    "notProvided": "Not provided"
+  }
+}

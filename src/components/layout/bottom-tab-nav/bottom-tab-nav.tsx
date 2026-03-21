@@ -1,5 +1,5 @@
 import { Link, useParams, useRouterState } from "@tanstack/react-router";
-import { Home, Beef, CheckSquare, User, ReceiptText } from "lucide-react";
+import { Home, Beef, CheckSquare, User, ReceiptText, Bird } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
@@ -28,6 +28,12 @@ export function BottomTabNav() {
 			label: t("tabs.animals"),
 			icon: Beef,
 			path: `/farm/${farmId}/species`,
+		},
+		{
+			id: "flocks",
+			label: t("tabs.flocks"),
+			icon: Bird,
+			path: `/farm/${farmId}/flocks`,
 		},
 		{
 			id: "expenses",

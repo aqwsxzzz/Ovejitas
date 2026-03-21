@@ -31,6 +31,7 @@ import tasks from "./en/tasks-tab.json";
 import privateLayout from "./en/private-layout.json";
 import bottomTabNav from "./en/bottom-tab-nav.json";
 import expenses from "./en/expenses.json";
+import flocks from "./en/flocks.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -67,6 +68,7 @@ const resources = {
 	privateLayout,
 	bottomTabNav,
 	expenses,
+	flocks,
 } as const;
 
 export default resources;
