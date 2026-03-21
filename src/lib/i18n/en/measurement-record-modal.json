@@ -8,5 +8,11 @@
     "perPage": "Per page",
     "previous": "Previous",
     "next": "Next",
-    "pageLabel": "Page {{page}} of {{totalPages}}"
+    "pageLabel": "Page {{page}} of {{totalPages}}",
+    "changeUnavailable": "Change unavailable",
+    "insufficientData": "Not enough data yet",
+    "changeNeutral": "No change from previous measurement",
+    "changeValueOnly": "Change: {{change}} {{unit}}",
+    "changeWithPercent": "Change: {{change}} {{unit}} ({{percent}}%)",
+    "anomalyDetected": "Significant variation"
 }

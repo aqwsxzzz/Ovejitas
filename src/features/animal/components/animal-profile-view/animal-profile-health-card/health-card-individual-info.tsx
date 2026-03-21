@@ -1,14 +1,13 @@
-import { useGetMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
+import { useGetLatestMeasurementsByAnimalId } from "@/features/measurement/api/measurement-queries";
 import { MeasurementRecordModal } from "@/features/measurement/components/measurement-record-modal";
-import type { IMeasurement } from "@/features/measurement/types/measurement-types";
+import type { MeasurementType } from "@/features/measurement/types/measurement-types";
 import { formatDateByMonth } from "@/lib/dayjs/date-formats";
 import { useParams } from "@tanstack/react-router";
-import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { Scale, Ruler, Thermometer, type LucideIcon } from "lucide-react";
 
 const measurementConfig: Record<
-	IMeasurement["measurementType"],
+	MeasurementType,
 	{ icon: LucideIcon; color: string }
 > = {
 	weight: { icon: Scale, color: "text-primary" },
@@ -19,31 +18,16 @@ const measurementConfig: Record<
 export const HealthCardIndividualInfo = ({
 	measurementType,
 }: {
-	measurementType: IMeasurement["measurementType"];
+	measurementType: MeasurementType;
 }) => {
 	const { t } = useTranslation("healthCardIndividualInfo");
 	const { farmId, animalId } = useParams({ strict: false });
 
-	const { data: measurementData, isLoading } = useGetMeasurementsByAnimalId(
-		farmId!,
-		animalId!,
-	);
+	const { data: latestMeasurements, isLoading } =
+		useGetLatestMeasurementsByAnimalId(animalId!);
 
-	const filteredData = measurementData?.filter(
-		(m) => m.measurementType === measurementType,
-	);
-
-	const latestMeasurement = filteredData?.reduce<IMeasurement | null>(
-		(latest, current) => {
-			if (!latest) {
-				return current;
-			}
-
-			return dayjs(current.measuredAt).isAfter(dayjs(latest.measuredAt))
-				? current
-				: latest;
-		},
-		null,
+	const latestMeasurement = latestMeasurements?.find(
+		(measurement) => measurement.measurementType === measurementType,
 	);
 
 	const Icon = measurementConfig[measurementType].icon;
