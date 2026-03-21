@@ -11,14 +11,20 @@ export const signup = ({ payload }: { payload: ISignUpPayload }) =>
 	axiosHelper<IResponse<ISignUpResponse>>({
 		method: "post",
 		url: "/auth/signup",
-		data: payload,
+		data: {
+			...payload,
+			email: payload.email.trim().toLowerCase(),
+		},
 	});
 
 export const login = ({ payload }: { payload: ILoginPayload }) =>
 	axiosHelper<IResponse<IUser>>({
 		method: "post",
 		url: "/auth/login",
-		data: payload,
+		data: {
+			...payload,
+			email: payload.email.trim().toLowerCase(),
+		},
 	});
 
 export const getUserProfile = () =>

@@ -70,6 +70,11 @@ export const SignUpForm = ({
 									</div>
 								) : (
 									<Input
+										type="email"
+										autoComplete="email"
+										autoCapitalize="none"
+										autoCorrect="off"
+										spellCheck={false}
 										placeholder={t("emailPlaceholder")}
 										{...field}
 									/>
