@@ -1,4 +1,4 @@
-import type { IFarmMember } from "@/features/farm-invitations/types/farm-invitations-types";
+import type { IFarmMember } from "@/features/farm-members/types/farm-members-types";
 import type { IResponse } from "@/lib/axios";
 import { axiosHelper } from "@/lib/axios/axios-helper";
 

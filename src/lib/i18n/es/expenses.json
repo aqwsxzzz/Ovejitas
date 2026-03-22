@@ -58,84 +58,26 @@
       "create": "Crear movimiento",
       "save": "Guardar cambios"
     },
-    "sections": {
-      "quantityDetails": "Detalle de cantidad",
-      "additionalDetails": "Detalles adicionales",
-      "farmContext": "Contexto de granja"
-    },
     "fields": {
       "date": "Fecha",
       "amount": "Monto",
       "type": "Tipo",
-      "category": "Categoria",
       "description": "Descripcion",
-      "vendor": "Proveedor",
-      "invoiceNumber": "Numero de factura",
-      "paymentMethod": "Metodo de pago",
-      "status": "Estado",
-      "quantity": "Cantidad",
-      "quantityUnit": "Unidad de cantidad",
-      "unitCost": "Costo unitario",
-      "species": "Especie",
-      "breed": "Raza",
-      "animal": "Animal",
-      "lotId": "ID de lote"
+      "species": "Especie"
     },
     "placeholders": {
-      "optional": "Opcional",
-      "none": "Ninguno",
-      "selectSpeciesFirst": "Selecciona especie primero",
-      "selectSpecies": "Selecciona especie",
-      "noLots": "No hay lotes disponibles"
+      "selectSpecies": "Selecciona especie"
     },
     "validation": {
       "amountRequired": "El monto es obligatorio",
       "amountPositive": "El monto debe ser mayor a 0",
-      "amountNonNegative": "El monto debe ser un numero valido mayor o igual a 0",
-      "speciesRequired": "La especie es obligatoria",
-      "quantityNonNegative": "La cantidad debe ser mayor o igual a 0",
-      "unitCostNonNegative": "El costo unitario debe ser mayor o igual a 0",
-      "quantityUnitRequired": "La unidad de cantidad es obligatoria cuando se ingresa cantidad",
-      "amountMustMatch": "El monto debe coincidir con cantidad x costo unitario ({{expectedAmount}})"
+      "speciesRequired": "La especie es obligatoria"
     }
   },
   "enums": {
     "transactionType": {
       "expense": "Gasto",
       "income": "Ingreso"
-    },
-    "category": {
-      "feed": "Alimento",
-      "veterinary": "Veterinario",
-      "transport": "Transporte",
-      "equipment": "Equipamiento",
-      "labor": "Mano de obra",
-      "utilities": "Servicios",
-      "maintenance": "Mantenimiento",
-      "other": "Otro"
-    },
-    "paymentMethod": {
-      "cash": "Efectivo",
-      "bank_transfer": "Transferencia bancaria",
-      "credit_card": "Tarjeta de credito",
-      "debit_card": "Tarjeta de debito",
-      "check": "Cheque",
-      "other": "Otro"
-    },
-    "status": {
-      "pending": "Pendiente",
-      "paid": "Pagado",
-      "reimbursed": "Reembolsado"
-    },
-    "quantityUnit": {
-      "kg": "Kg",
-      "liters": "Litros",
-      "units": "Unidades",
-      "boxes": "Cajas",
-      "bags": "Bolsas",
-      "doses": "Dosis",
-      "hours": "Horas",
-      "other": "Otro"
     }
   },
   "toast": {

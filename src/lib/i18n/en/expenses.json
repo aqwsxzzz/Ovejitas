@@ -58,84 +58,26 @@
       "create": "Create transaction",
       "save": "Save changes"
     },
-    "sections": {
-      "quantityDetails": "Quantity details",
-      "additionalDetails": "Additional details",
-      "farmContext": "Farm context"
-    },
     "fields": {
       "date": "Date",
       "amount": "Amount",
       "type": "Type",
-      "category": "Category",
       "description": "Description",
-      "vendor": "Vendor",
-      "invoiceNumber": "Invoice number",
-      "paymentMethod": "Payment method",
-      "status": "Status",
-      "quantity": "Quantity",
-      "quantityUnit": "Quantity unit",
-      "unitCost": "Unit cost",
-      "species": "Species",
-      "breed": "Breed",
-      "animal": "Animal",
-      "lotId": "Lot ID"
+      "species": "Species"
     },
     "placeholders": {
-      "optional": "Optional",
-      "none": "None",
-      "selectSpeciesFirst": "Select species first",
-      "selectSpecies": "Select species",
-      "noLots": "No lots available"
+      "selectSpecies": "Select species"
     },
     "validation": {
       "amountRequired": "Amount is required",
       "amountPositive": "Amount must be greater than 0",
-      "amountNonNegative": "Amount must be a valid number greater than or equal to 0",
-      "speciesRequired": "Species is required",
-      "quantityNonNegative": "Quantity must be greater than or equal to 0",
-      "unitCostNonNegative": "Unit cost must be greater than or equal to 0",
-      "quantityUnitRequired": "Quantity unit is required when quantity is provided",
-      "amountMustMatch": "Amount must match quantity x unit cost ({{expectedAmount}})"
+      "speciesRequired": "Species is required"
     }
   },
   "enums": {
     "transactionType": {
       "expense": "Expense",
       "income": "Income"
-    },
-    "category": {
-      "feed": "Feed",
-      "veterinary": "Veterinary",
-      "transport": "Transport",
-      "equipment": "Equipment",
-      "labor": "Labor",
-      "utilities": "Utilities",
-      "maintenance": "Maintenance",
-      "other": "Other"
-    },
-    "paymentMethod": {
-      "cash": "Cash",
-      "bank_transfer": "Bank transfer",
-      "credit_card": "Credit card",
-      "debit_card": "Debit card",
-      "check": "Check",
-      "other": "Other"
-    },
-    "status": {
-      "pending": "Pending",
-      "paid": "Paid",
-      "reimbursed": "Reimbursed"
-    },
-    "quantityUnit": {
-      "kg": "Kg",
-      "liters": "Liters",
-      "units": "Units",
-      "boxes": "Boxes",
-      "bags": "Bags",
-      "doses": "Doses",
-      "hours": "Hours",
-      "other": "Other"
     }
   },
   "toast": {
