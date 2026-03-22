@@ -167,11 +167,11 @@ function RouteComponent() {
 							title={t("page.title")}
 							description={t("page.description")}
 							action={
-							<Button onClick={() => setIsCreateOpen(true)}>
-								<Plus className="h-4 w-4" />
-								{t("page.newButton")}
-							</Button>
-						}
+								<Button onClick={() => setIsCreateOpen(true)}>
+									<Plus className="h-4 w-4" />
+									{t("page.newButton")}
+								</Button>
+							}
 						/>
 					</div>
 					<div className="hidden items-center justify-between rounded-[24px] border border-border/70 bg-card px-5 py-4 shadow-sm md:flex">
@@ -186,12 +186,6 @@ function RouteComponent() {
 								</p>
 							</div>
 						</div>
-						<nav className="flex items-center gap-8 text-sm font-semibold text-muted-foreground">
-							<span className="text-foreground">{t("desktopNav.flocks")}</span>
-							<span>{t("desktopNav.reports")}</span>
-							<span>{t("desktopNav.health")}</span>
-							<span>{t("desktopNav.profile")}</span>
-						</nav>
 						<Button onClick={() => setIsCreateOpen(true)}>
 							<Plus className="h-4 w-4" />
 							{t("page.newButton")}
@@ -285,11 +279,11 @@ function RouteComponent() {
 					</>
 				)}
 			</div>
-		<CreateFlockModal
-			farmId={farmId!}
-			open={isCreateOpen}
-			onOpenChange={setIsCreateOpen}
-		/>
+			<CreateFlockModal
+				farmId={farmId!}
+				open={isCreateOpen}
+				onOpenChange={setIsCreateOpen}
+			/>
 		</ScrollablePageLayout>
 	);
 }
