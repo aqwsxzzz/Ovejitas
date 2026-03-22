@@ -2,6 +2,13 @@ export type IFlockType = "layers" | "broilers" | "dual_purpose" | "general";
 
 export type IFlockStatus = "active" | "sold" | "culled" | "completed";
 
+export type IFlockEventType =
+	| "mortality"
+	| "sale"
+	| "cull"
+	| "addition"
+	| "transfer";
+
 export interface ITranslatedSpecies {
 	id: string;
 	translations: Array<{
@@ -66,10 +73,21 @@ export interface ICreateFlockPayload {
 	notes?: string;
 }
 
+export interface IUpdateFlockPayload {
+	currentCount: number;
+}
+
+export interface ICreateFlockEventPayload {
+	eventType: IFlockEventType;
+	count: number;
+	date: string;
+	reason?: string;
+}
+
 export interface IFlockEvent {
 	id: string;
 	flockId: string;
-	eventType: "mortality" | "sale" | "cull" | "addition" | "transfer";
+	eventType: IFlockEventType;
 	count: number;
 	date: string;
 	reason: string | null;

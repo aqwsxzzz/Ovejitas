@@ -3,9 +3,11 @@
     "title": "Flocks",
     "description": "Manage your grouped livestock flocks",
     "newButton": "New flock",
+    "filtersToggle": "Filters",
     "save": "Save",
     "saving": "Saving...",
     "createSuccess": "Flock created successfully",
+    "updateSuccess": "Flock count updated successfully",
     "loading": "Loading flocks...",
     "endpointUnavailable": "Flock endpoint is not available in this API environment yet.",
     "endpointUnavailableHint": "Deploy or switch to the backend branch that includes the flock module, then retry.",
@@ -17,9 +19,41 @@
     "pageLabel": "Page {{page}} of {{totalPages}}",
     "showingCount": "Showing {{visible}} of {{total}} flocks"
   },
+  "desktopNav": {
+    "flocks": "Flocks",
+    "reports": "Reports",
+    "health": "Health",
+    "profile": "Profile"
+  },
+  "countEditor": {
+    "editAction": "Adjust",
+    "title": "Adjust current count",
+    "description": "Update the flock count when birds are added or removed.",
+    "currentValue": "Current saved value: {{value}}",
+    "cancel": "Cancel",
+    "keepValue": "Keep value",
+    "save": "Save count",
+    "saving": "Saving...",
+    "adjustmentReason": "Manual count adjustment"
+  },
   "filters": {
+    "statusTitle": "Filter by status",
+    "typeTitle": "Flock type",
     "allStatuses": "All statuses",
     "allTypes": "All flock types"
+  },
+  "summary": {
+    "totalFlocks": "Total flocks",
+    "activeFlocks": "Active",
+    "totalAnimals": "Total summary",
+    "totalAnimalsDescription": "Animals currently registered across your visible flocks."
+  },
+  "card": {
+    "animals": "birds",
+    "speciesBreed": "Species / breed",
+    "baseRatio": "{{percent}}% of starting count",
+    "stateSummary": "State: {{status}}",
+    "view": "View"
   },
   "status": {
     "active": "Active",

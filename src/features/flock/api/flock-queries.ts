@@ -1,15 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
+	createFlockEvent,
 	createFlock,
 	getEggCollections,
 	getFlockById,
 	getFlockEvents,
 	getFlocks,
+	updateFlockById,
 } from "@/features/flock/api/flock-api";
 import type {
 	ICreateFlockPayload,
+	ICreateFlockEventPayload,
 	IFlockListFilters,
+	IUpdateFlockPayload,
 } from "@/features/flock/types/flock-types";
 import i18next from "i18next";
 import { toast } from "sonner";
@@ -124,6 +128,63 @@ export const useCreateFlock = () => {
 			toast.success(i18next.t("flocks:page.createSuccess"));
 			void queryClient.invalidateQueries({
 				queryKey: [...flockQueryKeys.all, "list", farmId],
+			});
+		},
+	});
+};
+
+export const useUpdateFlockById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			flockId,
+			payload,
+		}: {
+			flockId: string;
+			farmId: string;
+			payload: IUpdateFlockPayload;
+		}) => updateFlockById({ flockId, payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { farmId, flockId }) => {
+			toast.success(i18next.t("flocks:page.updateSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "list", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "byId", flockId],
+			});
+		},
+	});
+};
+
+export const useCreateFlockEvent = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			flockId,
+			payload,
+		}: {
+			flockId: string;
+			farmId: string;
+			payload: ICreateFlockEventPayload;
+		}) => createFlockEvent({ flockId, payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { farmId, flockId }) => {
+			toast.success(i18next.t("flocks:page.updateSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "list", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "byId", flockId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "events", flockId],
 			});
 		},
 	});

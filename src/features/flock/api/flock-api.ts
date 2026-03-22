@@ -2,10 +2,12 @@ import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse } from "@/lib/axios";
 import type {
 	ICreateFlockPayload,
+	ICreateFlockEventPayload,
 	IEggCollection,
 	IFlock,
 	IFlockEvent,
 	IFlockListFilters,
+	IUpdateFlockPayload,
 } from "@/features/flock/types/flock-types";
 import i18next from "i18next";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
@@ -107,6 +109,19 @@ export const createFlock = ({ payload }: { payload: ICreateFlockPayload }) =>
 		data: payload,
 	});
 
+export const updateFlockById = ({
+	flockId,
+	payload,
+}: {
+	flockId: string;
+	payload: IUpdateFlockPayload;
+}) =>
+	axiosHelper<IResponse<IFlock>>({
+		method: "put",
+		url: `/flocks/${flockId}`,
+		data: payload,
+	});
+
 export const getFlockEvents = ({
 	flockId,
 	page,
@@ -123,6 +138,19 @@ export const getFlockEvents = ({
 			page: String(page),
 			limit: String(limit),
 		},
+	});
+
+export const createFlockEvent = ({
+	flockId,
+	payload,
+}: {
+	flockId: string;
+	payload: ICreateFlockEventPayload;
+}) =>
+	axiosHelper<IResponse<IFlockEvent>>({
+		method: "post",
+		url: `/flocks/${flockId}/events`,
+		data: payload,
 	});
 
 export const getEggCollections = ({
