@@ -35,7 +35,7 @@ export const DeleteAnimalModal = ({
 			filters: {
 				sex,
 				speciesId,
-			}
+			},
 		});
 		if (response.status === "success") setOpen(false);
 	};
@@ -50,7 +50,7 @@ export const DeleteAnimalModal = ({
 					<Trash2 />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-w-70">
+			<DialogContent className="w-[calc(100vw-2rem)] max-w-[30rem] min-w-[20rem] p-4 sm:p-6">
 				<DialogTitle>
 					{t("deleteTitle1")}
 					{animal.name} {animal.tagNumber}

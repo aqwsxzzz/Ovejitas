@@ -37,7 +37,7 @@ export const EditAnimalModal = ({ animal, trigger }: EditAnimalModalProps) => {
 					</Button>
 				)}
 			</DialogTrigger>
-			<DialogContent className="max-h-[90vh] overflow-y-auto p-4">
+			<DialogContent className="w-[calc(100vw-2rem)] max-w-[36rem] min-w-[20rem] max-h-[90vh] overflow-y-auto p-4 sm:max-w-[36rem] sm:p-6">
 				<DialogTitle>{t("editTitle")}</DialogTitle>
 				<DialogDescription>{t("editDescription")}</DialogDescription>
 				<EditAnimalForm
