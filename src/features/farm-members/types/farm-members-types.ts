@@ -8,4 +8,6 @@ export interface IFarmMember {
 		displayName: string;
 		email: string;
 	};
+	createdAt: string;
+	updatedAt: string;
 }

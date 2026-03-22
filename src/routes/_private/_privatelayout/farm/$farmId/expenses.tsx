@@ -1,16 +1,20 @@
 import { PageHeader } from "@/components/common/page-header";
 import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout";
 import { Button } from "@/components/ui/button";
-import { useGetExpensesPage } from "@/features/expense/api/expense-queries";
-import { ExpenseFilterSheet } from "@/features/expense/components/expense-filter-sheet";
+import {
+	useGetExpenseSummary,
+	useGetExpensesPage,
+} from "@/features/expense/api/expense-queries";
 import { ExpenseFilterFAB } from "@/features/expense/components/expense-filter-fab";
 import { ExpenseFilterPanel } from "@/features/expense/components/expense-filter-panel";
+import { ExpenseFilterSheet } from "@/features/expense/components/expense-filter-sheet";
 import { ExpenseFormModal } from "@/features/expense/components/expense-form-modal";
 import { ExpenseList } from "@/features/expense/components/expense-list";
 import { ExpenseListSkeleton } from "@/features/expense/components/expense-list-skeleton";
 import { ExpenseSummaryStrip } from "@/features/expense/components/expense-summary-strip";
 import type { IExpenseListFilters } from "@/features/expense/types/expense-types";
 import { useGetFarmById } from "@/features/farm/api/farm-queries";
+import { useGetSpecies } from "@/features/specie/api/specie.queries";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,9 +36,14 @@ function RouteComponent() {
 
 		window.scrollTo({ top: 0, behavior: "smooth" });
 	};
+
 	const { t } = useTranslation("expenses");
 	const { farmId } = useParams({ strict: false });
 	const { data: farmData } = useGetFarmById(farmId!);
+	const { data: speciesData = [] } = useGetSpecies({
+		include: "",
+		withLanguage: true,
+	});
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [filters, setFilters] = useState<Partial<IExpenseListFilters>>({});
@@ -42,6 +51,7 @@ function RouteComponent() {
 		Partial<IExpenseListFilters>
 	>({});
 	const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+
 	const {
 		data: pagedExpenses,
 		isPending,
@@ -55,6 +65,12 @@ function RouteComponent() {
 		page,
 		limit: pageSize,
 	});
+
+	const { data: summaryData } = useGetExpenseSummary({
+		farmId: farmId!,
+		filters,
+	});
+
 	const expenses = pagedExpenses?.items ?? [];
 	const totalExpenses = pagedExpenses?.total ?? expenses.length;
 	const totalPages = pagedExpenses?.totalPages ?? 1;
@@ -107,6 +123,7 @@ function RouteComponent() {
 							onChange={setDraftFilters}
 							onApply={applyDesktopFilters}
 							onClear={clearDesktopFilters}
+							speciesData={speciesData}
 						/>
 					</div>
 				}
@@ -119,13 +136,14 @@ function RouteComponent() {
 							onChange={setDraftFilters}
 							onApply={applyDesktopFilters}
 							onClear={clearDesktopFilters}
+							speciesData={speciesData}
 						/>
 					</div>
 
 					<div className="flex flex-col gap-4">
 						{!isPending && !isError && (
 							<ExpenseSummaryStrip
-								expenses={expenses}
+								summary={summaryData}
 								currencyCode={currencyCode}
 							/>
 						)}
@@ -159,6 +177,7 @@ function RouteComponent() {
 									farmId={farmId!}
 									filters={filters}
 									currencyCode={currencyCode}
+									speciesData={speciesData}
 								/>
 								<div className="flex flex-wrap items-center gap-2">
 									<label className="text-caption text-muted-foreground">
@@ -224,6 +243,7 @@ function RouteComponent() {
 				filters={draftFilters}
 				onChange={setDraftFilters}
 				onApply={applyDraftFilters}
+				speciesData={speciesData}
 			/>
 
 			<ExpenseFilterFAB

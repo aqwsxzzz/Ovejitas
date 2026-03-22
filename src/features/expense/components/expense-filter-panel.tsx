@@ -1,6 +1,6 @@
+import { DateSelector } from "@/components/common/DateSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import {
 	Select,
 	SelectContent,
@@ -8,18 +8,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { financialTransactionTypeLabelKeys } from "@/features/expense/components/expense-labels";
+import { toYyyyMmDd } from "@/features/expense/components/expense-form-schema";
 import {
-	expenseCategories,
-	expenseStatuses,
-	paymentMethods,
+	financialTransactionTypes,
 	type IExpenseListFilters,
 } from "@/features/expense/types/expense-types";
-import {
-	expenseCategoryLabelKeys,
-	expenseStatusLabelKeys,
-	paymentMethodLabelKeys,
-} from "./expense-labels";
-import { Check } from "lucide-react";
+import type { ISpecie } from "@/features/specie/types/specie-types";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,7 +24,11 @@ interface ExpenseFilterPanelProps {
 	onApply: () => void;
 	onClear: () => void;
 	variant: "toolbar" | "sidebar";
+	speciesData: ISpecie[];
 }
+
+const toDateValue = (value?: string) =>
+	value ? new Date(`${value}T00:00:00`) : undefined;
 
 export const ExpenseFilterPanel = ({
 	filters,
@@ -37,197 +36,182 @@ export const ExpenseFilterPanel = ({
 	onApply,
 	onClear,
 	variant,
+	speciesData,
 }: ExpenseFilterPanelProps) => {
 	const { t } = useTranslation("expenses");
 
-	const categoryOptions = useMemo(
+	const typeOptions = useMemo(
 		() => [
-			{ label: t("filters.allCategories"), value: "all" },
-			...expenseCategories.map((category) => ({
-				label: t(expenseCategoryLabelKeys[category] as never),
-				value: category,
+			{ label: t("filters.allTypes"), value: "all" },
+			...financialTransactionTypes.map((type) => ({
+				label: t(financialTransactionTypeLabelKeys[type] as never),
+				value: type,
 			})),
 		],
 		[t],
 	);
 
-	const statusOptions = useMemo(
+	const speciesOptions = useMemo(
 		() => [
-			{ label: t("filters.allStatuses"), value: "all" },
-			...expenseStatuses.map((status) => ({
-				label: t(expenseStatusLabelKeys[status] as never),
-				value: status,
-			})),
+			{ label: t("filters.allSpecies"), value: "all" },
+			...speciesData
+				.filter((specie) => specie.translations?.[0]?.name)
+				.map((specie) => ({
+					label: specie.translations?.[0]?.name ?? specie.id,
+					value: specie.id,
+				})),
 		],
-		[t],
-	);
-
-	const paymentMethodOptions = useMemo(
-		() => [
-			{ label: t("filters.allPaymentMethods"), value: "all" },
-			...paymentMethods.map((method) => ({
-				label: t(paymentMethodLabelKeys[method] as never),
-				value: method,
-			})),
-		],
-		[t],
+		[speciesData, t],
 	);
 
 	const activeFilterCount = Object.values(filters).filter(
-		(value) => value !== undefined,
+		(value) => value !== undefined && value !== "",
 	).length;
 
-	const setCategory = (value: string) => {
+	const setType = (value: string) => {
 		onChange({
 			...filters,
-			category:
+			type:
 				value === "all"
 					? undefined
-					: (value as NonNullable<IExpenseListFilters["category"]>),
+					: (value as NonNullable<IExpenseListFilters["type"]>),
 		});
 	};
 
-	const setStatus = (value: string) => {
+	const setSpeciesId = (value: string) => {
 		onChange({
 			...filters,
-			status:
-				value === "all"
-					? undefined
-					: (value as NonNullable<IExpenseListFilters["status"]>),
+			speciesId: value === "all" ? undefined : value,
 		});
 	};
 
-	const toggleStatus = (value: string) => {
+	const setDate = (key: "from" | "to", date?: Date) => {
 		onChange({
 			...filters,
-			status:
-				filters.status === value
-					? undefined
-					: (value as NonNullable<IExpenseListFilters["status"]>),
+			[key]: date ? toYyyyMmDd(date) : undefined,
 		});
 	};
 
-	const togglePaymentMethod = (value: string) => {
-		onChange({
-			...filters,
-			paymentMethod:
-				filters.paymentMethod === value
-					? undefined
-					: (value as NonNullable<IExpenseListFilters["paymentMethod"]>),
-		});
-	};
+	const controls = (
+		<>
+			<div className="space-y-1">
+				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
+					{t("filters.typeLabel")}
+				</p>
+				<Select
+					value={filters.type ?? "all"}
+					onValueChange={setType}
+				>
+					<SelectTrigger className="h-10">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						{typeOptions.map((option) => (
+							<SelectItem
+								key={option.value}
+								value={option.value}
+							>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
 
-	const setPaymentMethod = (value: string) => {
-		onChange({
-			...filters,
-			paymentMethod:
-				value === "all"
-					? undefined
-					: (value as NonNullable<IExpenseListFilters["paymentMethod"]>),
-		});
-	};
+			<div className="space-y-1">
+				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
+					{t("filters.speciesLabel")}
+				</p>
+				<Select
+					value={filters.speciesId ?? "all"}
+					onValueChange={setSpeciesId}
+				>
+					<SelectTrigger className="h-10">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						{speciesOptions.map((option) => (
+							<SelectItem
+								key={option.value}
+								value={option.value}
+							>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+
+			<div className="space-y-1">
+				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
+					{t("filters.fromLabel")}
+				</p>
+				<div className="flex items-center gap-2">
+					<DateSelector
+						date={toDateValue(filters.from)}
+						setDate={(date) => setDate("from", date)}
+					/>
+					{filters.from && (
+						<Button
+							type="button"
+							variant="ghost"
+							onClick={() => setDate("from", undefined)}
+						>
+							{t("filters.clearDate")}
+						</Button>
+					)}
+				</div>
+			</div>
+
+			<div className="space-y-1">
+				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
+					{t("filters.toLabel")}
+				</p>
+				<div className="flex items-center gap-2">
+					<DateSelector
+						date={toDateValue(filters.to)}
+						setDate={(date) => setDate("to", date)}
+					/>
+					{filters.to && (
+						<Button
+							type="button"
+							variant="ghost"
+							onClick={() => setDate("to", undefined)}
+						>
+							{t("filters.clearDate")}
+						</Button>
+					)}
+				</div>
+			</div>
+		</>
+	);
 
 	if (variant === "toolbar") {
 		return (
 			<Card className="hidden md:flex lg:hidden border border-border/70 shadow-none py-4">
 				<CardContent className="px-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-3 xl:grid-cols-4">
-						<div className="space-y-1">
-							<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
-								{t("filters.categoryLabel")}
-							</p>
-							<Select
-								value={filters.category ?? "all"}
-								onValueChange={setCategory}
-							>
-								<SelectTrigger className="h-10">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{categoryOptions.map((option) => (
-										<SelectItem
-											key={option.value}
-											value={option.value}
-										>
-											{option.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-1">
-							<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
-								{t("filters.statusLabel")}
-							</p>
-							<Select
-								value={filters.status ?? "all"}
-								onValueChange={setStatus}
-							>
-								<SelectTrigger className="h-10">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{statusOptions.map((option) => (
-										<SelectItem
-											key={option.value}
-											value={option.value}
-										>
-											{option.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-1">
-							<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
-								{t("filters.paymentMethodLabel")}
-							</p>
-							<Select
-								value={filters.paymentMethod ?? "all"}
-								onValueChange={setPaymentMethod}
-							>
-								<SelectTrigger className="h-10">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{paymentMethodOptions.map((option) => (
-										<SelectItem
-											key={option.value}
-											value={option.value}
-										>
-											{option.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
+					<div className="grid grid-cols-1 gap-3 xl:grid-cols-5">
+						{controls}
 						<div className="flex items-end justify-end gap-2">
 							<Button
 								type="button"
 								variant="ghost"
 								onClick={onClear}
 							>
-								{t("filters.clear", "Clear")}
+								{t("filters.clear")}
 							</Button>
 							<Button
 								type="button"
 								onClick={onApply}
 							>
-								{t("filters.apply", "Apply")}
+								{t("filters.apply")}
 							</Button>
 						</div>
 					</div>
-
 					<p className="mt-2 text-sm text-muted-foreground">
 						{activeFilterCount > 0
-							? t("filters.count", {
-									count: activeFilterCount,
-									defaultValue: "{{count}} selected",
-								})
-							: t("filters.noSelection", "No filters selected")}
+							? t("filters.count", { count: activeFilterCount })
+							: t("filters.noSelection")}
 					</p>
 				</CardContent>
 			</Card>
@@ -239,119 +223,29 @@ export const ExpenseFilterPanel = ({
 			<CardContent className="px-4 space-y-5">
 				<div>
 					<h3 className="text-2xl font-semibold tracking-tight">
-						{t("filters.title", "Filters")}
+						{t("filters.title")}
 					</h3>
 					<p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-						{t("filters.refine", "Refine expenses")}
+						{t("filters.refine")}
 					</p>
 				</div>
 
-				<div className="space-y-2">
-					<p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-						{t("filters.categoryLabel")}
-					</p>
-					<Select
-						value={filters.category ?? "all"}
-						onValueChange={setCategory}
-					>
-						<SelectTrigger className="h-10 rounded-xl bg-muted/50 border-transparent px-3">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							{categoryOptions.map((option) => (
-								<SelectItem
-									key={option.value}
-									value={option.value}
-								>
-									{option.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
+				<div className="space-y-4">{controls}</div>
 
-				<div className="space-y-2">
-					<p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-						{t("filters.statusLabel")}
-					</p>
-					<div className="grid grid-cols-2 gap-2">
-						{statusOptions.slice(1).map((option) => {
-							const isSelected = filters.status === option.value;
-
-							return (
-								<Button
-									key={option.value}
-									type="button"
-									variant="outline"
-									onClick={() => toggleStatus(option.value)}
-									className={cn(
-										"h-9 rounded-full justify-start px-3 text-xs",
-										isSelected
-											? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
-											: "bg-muted/50 border-transparent text-foreground hover:bg-muted",
-									)}
-								>
-									{isSelected && <Check className="h-3.5 w-3.5 mr-1.5" />}
-									<span className="truncate">{option.label}</span>
-								</Button>
-							);
-						})}
-					</div>
-				</div>
-
-				<div className="space-y-2">
-					<p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-						{t("filters.paymentMethodLabel")}
-					</p>
-					<div className="grid grid-cols-2 gap-2">
-						{paymentMethodOptions.slice(1).map((option) => {
-							const isSelected = filters.paymentMethod === option.value;
-
-							return (
-								<Button
-									key={option.value}
-									type="button"
-									variant="outline"
-									onClick={() => togglePaymentMethod(option.value)}
-									className={cn(
-										"h-9 rounded-full justify-start px-3 text-xs",
-										isSelected
-											? "bg-primary text-primary-foreground border-primary hover:bg-primary/90"
-											: "bg-muted/50 border-transparent text-foreground hover:bg-muted",
-									)}
-								>
-									{isSelected && <Check className="h-3.5 w-3.5 mr-1.5" />}
-									<span className="truncate">{option.label}</span>
-								</Button>
-							);
-						})}
-					</div>
-				</div>
-
-				<div className="pt-3 border-t">
-					<Button
-						type="button"
-						onClick={onApply}
-						className="w-full rounded-full"
-					>
-						{t("filters.apply", "Apply Filters")}
-					</Button>
+				<div className="flex items-center gap-2 pt-2">
 					<Button
 						type="button"
 						variant="ghost"
 						onClick={onClear}
-						className="w-full mt-1 uppercase tracking-[0.12em] text-[11px] text-muted-foreground"
 					>
-						{t("filters.clear", "Clear filters")}
+						{t("filters.clear")}
 					</Button>
-					<p className="mt-2 text-xs text-muted-foreground text-center">
-						{activeFilterCount > 0
-							? t("filters.count", {
-									count: activeFilterCount,
-									defaultValue: "{{count}} selected",
-								})
-							: t("filters.noSelection", "No filters selected")}
-					</p>
+					<Button
+						type="button"
+						onClick={onApply}
+					>
+						{t("filters.apply")}
+					</Button>
 				</div>
 			</CardContent>
 		</Card>

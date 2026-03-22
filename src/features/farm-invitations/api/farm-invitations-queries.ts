@@ -2,7 +2,10 @@ import {
 	getFarmInvitationList,
 	sendFarmInvitation,
 } from "@/features/farm-invitations/api/farm-invitations-api";
-import type { IFarmInvitationPayload } from "@/features/farm-invitations/types/farm-invitations-types";
+import type {
+	IFarmInvitationPayload,
+	IFarmInvitationResponse,
+} from "@/features/farm-invitations/types/farm-invitations-types";
 import {
 	useInfiniteQuery,
 	useMutation,
@@ -16,8 +19,16 @@ const LEGACY_LIST_PAGE_SIZE = 100;
 
 export const farmInvitationsQueryKeys = {
 	all: ["farm-invitations"] as const,
-	invitationsList: (farmId: string) =>
-		[...farmInvitationsQueryKeys.all, "list", farmId] as const,
+	invitationsList: (
+		farmId: string,
+		status?: IFarmInvitationResponse["status"],
+	) =>
+		[
+			...farmInvitationsQueryKeys.all,
+			"list",
+			farmId,
+			...(status ? [status] : []),
+		] as const,
 	invitationsListPage: (farmId: string, limit: number) =>
 		[
 			...farmInvitationsQueryKeys.invitationsList(farmId),
@@ -44,11 +55,22 @@ export const useSendFarmInvitation = () => {
 	});
 };
 
-export const useGetFarmInvitationsList = ({ farmId }: { farmId: string }) =>
+export const useGetFarmInvitationsList = ({
+	farmId,
+	status,
+}: {
+	farmId: string;
+	status?: IFarmInvitationResponse["status"];
+}) =>
 	useQuery({
-		queryKey: farmInvitationsQueryKeys.invitationsList(farmId),
+		queryKey: farmInvitationsQueryKeys.invitationsList(farmId, status),
 		queryFn: () =>
-			getFarmInvitationList({ farmId, page: 1, limit: LEGACY_LIST_PAGE_SIZE }),
+			getFarmInvitationList({
+				farmId,
+				page: 1,
+				limit: LEGACY_LIST_PAGE_SIZE,
+				status,
+			}),
 		select: (data) => data.data,
 		enabled: !!farmId,
 		staleTime: 10000, // 10 seconds

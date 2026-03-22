@@ -10,16 +10,7 @@ export interface IFarmInvitationResponse {
 	role: "owner" | "member";
 	status: "pending" | "accepted" | "expired" | "cancelled";
 	token: string;
-}
-
-export interface IFarmMember {
-	id: string;
-	farmId: string;
-	userId: string;
-	role: "owner" | "member";
-	user: {
-		id: string;
-		displayName: string;
-		email: string;
-	};
+	createdAt: string;
+	expiresAt: string;
+	updatedAt: string;
 }

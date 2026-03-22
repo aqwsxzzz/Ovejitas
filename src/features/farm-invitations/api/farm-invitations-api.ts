@@ -20,13 +20,15 @@ export const getFarmInvitationList = ({
 	farmId,
 	page,
 	limit,
+	status,
 }: {
 	farmId: string;
 	page?: number;
 	limit?: number;
+	status?: IFarmInvitationResponse["status"];
 }) =>
 	axiosHelper<IResponse<IFarmInvitationResponse[]>>({
 		method: "get",
 		url: "/invitations",
-		urlParams: { farmId, page, limit },
+		urlParams: { farmId, page, limit, status },
 	});
