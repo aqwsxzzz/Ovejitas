@@ -56,19 +56,23 @@ export const UpdateFlockCountModal = ({
 			return;
 		}
 
-		const response = await createFlockEvent({
-			flockId: flock.id,
-			farmId,
-			payload: {
-				eventType: deltaCount > 0 ? "addition" : "mortality",
-				count: Math.abs(deltaCount),
-				date: new Date().toISOString().slice(0, 10),
-				reason: t("countEditor.adjustmentReason"),
-			},
-		});
+		try {
+			const response = await createFlockEvent({
+				flockId: flock.id,
+				farmId,
+				payload: {
+					eventType: deltaCount > 0 ? "addition" : "mortality",
+					count: Math.abs(deltaCount),
+					date: new Date().toISOString().slice(0, 10),
+					reason: t("countEditor.adjustmentReason"),
+				},
+			});
 
-		if (response.status === "success") {
-			setIsEditing(false);
+			if (response.status === "success") {
+				setIsEditing(false);
+			}
+		} catch {
+			// Mutation onError already handles user feedback via toast.
 		}
 	};
 

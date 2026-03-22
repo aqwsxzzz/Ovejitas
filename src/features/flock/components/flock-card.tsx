@@ -13,24 +13,36 @@ interface FlockCardProps {
 
 const getTranslationName = (
 	translations: Array<{ language: string; name: string }> | undefined,
+	preferredLanguage: string,
 ): string => {
 	if (!translations || translations.length === 0) {
 		return "-";
 	}
 
-	const preferredTranslation = translations.find(
-		(item) => item.language === "en" || item.language === "es",
-	);
+	const normalizedPreferredLanguage = preferredLanguage.toLowerCase();
+	const preferredTranslation =
+		translations.find(
+			(item) => item.language.toLowerCase() === normalizedPreferredLanguage,
+		) ??
+		translations.find((item) => item.language.toLowerCase() === "en") ??
+		translations.find((item) => item.language.toLowerCase() === "es");
 
 	return preferredTranslation?.name ?? translations[0].name;
 };
 
 export const FlockCard = ({ flock }: FlockCardProps) => {
-	const { t } = useTranslation("flocks");
+	const { t, i18n } = useTranslation("flocks");
 	const { farmId } = useParams({ strict: false });
+	const preferredLanguage = i18n.language.slice(0, 2) || "en";
 
-	const speciesName = getTranslationName(flock.species?.translations);
-	const breedName = getTranslationName(flock.breed?.translations);
+	const speciesName = getTranslationName(
+		flock.species?.translations,
+		preferredLanguage,
+	);
+	const breedName = getTranslationName(
+		flock.breed?.translations,
+		preferredLanguage,
+	);
 	const occupancyRatio = Math.max(
 		0,
 		Math.min(100, Math.round((flock.currentCount / flock.initialCount) * 100)),

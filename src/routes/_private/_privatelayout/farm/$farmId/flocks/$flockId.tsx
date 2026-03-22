@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/common/page-header";
 import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout";
+import { Button } from "@/components/ui/button";
 import {
 	useGetEggCollectionsPage,
 	useGetFlockById,
@@ -19,24 +20,46 @@ export const Route = createFileRoute(
 function RouteComponent() {
 	const { t } = useTranslation("flocks");
 	const { flockId } = useParams({ strict: false });
+	const getErrorMessage = (error: unknown, fallback: string): string => {
+		if (error instanceof Error && error.message) {
+			return error.message;
+		}
 
-	const { data: flock, isPending: isFlockLoading } = useGetFlockById({
+		return fallback;
+	};
+
+	const {
+		data: flock,
+		isPending: isFlockLoading,
+		isError: isFlockError,
+		error: flockError,
+		refetch: refetchFlock,
+	} = useGetFlockById({
 		flockId: flockId!,
 		include: "species.translations,breed.translations",
 	});
-	const { data: eventData, isPending: isEventsLoading } = useGetFlockEventsPage(
-		{
-			flockId: flockId!,
-			page: 1,
-			limit: 10,
-		},
-	);
-	const { data: eggCollectionData, isPending: isEggCollectionsLoading } =
-		useGetEggCollectionsPage({
-			flockId: flockId!,
-			page: 1,
-			limit: 10,
-		});
+	const {
+		data: eventData,
+		isPending: isEventsLoading,
+		isError: isEventsError,
+		error: eventsError,
+		refetch: refetchEvents,
+	} = useGetFlockEventsPage({
+		flockId: flockId!,
+		page: 1,
+		limit: 10,
+	});
+	const {
+		data: eggCollectionData,
+		isPending: isEggCollectionsLoading,
+		isError: isEggCollectionsError,
+		error: eggCollectionsError,
+		refetch: refetchEggCollections,
+	} = useGetEggCollectionsPage({
+		flockId: flockId!,
+		page: 1,
+		limit: 10,
+	});
 
 	return (
 		<ScrollablePageLayout
@@ -51,6 +74,20 @@ function RouteComponent() {
 			{isFlockLoading ? (
 				<div className="rounded-card border p-6 text-center text-muted-foreground">
 					{t("detail.loading")}
+				</div>
+			) : isFlockError ? (
+				<div className="rounded-card border p-4 flex flex-col gap-2">
+					<p className="text-destructive text-sm">
+						{getErrorMessage(flockError, t("detail.loading"))}
+					</p>
+					<div>
+						<Button
+							variant="outline"
+							onClick={() => void refetchFlock()}
+						>
+							{t("page.retry")}
+						</Button>
+					</div>
 				</div>
 			) : (
 				<div className="space-y-4">
@@ -79,6 +116,20 @@ function RouteComponent() {
 							<div className="rounded-card border p-6 text-center text-muted-foreground">
 								{t("detail.events.loading")}
 							</div>
+						) : isEventsError ? (
+							<div className="rounded-card border p-4 flex flex-col gap-2">
+								<p className="text-destructive text-sm">
+									{getErrorMessage(eventsError, t("detail.events.loading"))}
+								</p>
+								<div>
+									<Button
+										variant="outline"
+										onClick={() => void refetchEvents()}
+									>
+										{t("page.retry")}
+									</Button>
+								</div>
+							</div>
 						) : (
 							<FlockEventsList events={eventData?.items ?? []} />
 						)}
@@ -89,6 +140,23 @@ function RouteComponent() {
 						{isEggCollectionsLoading ? (
 							<div className="rounded-card border p-6 text-center text-muted-foreground">
 								{t("detail.eggCollections.loading")}
+							</div>
+						) : isEggCollectionsError ? (
+							<div className="rounded-card border p-4 flex flex-col gap-2">
+								<p className="text-destructive text-sm">
+									{getErrorMessage(
+										eggCollectionsError,
+										t("detail.eggCollections.loading"),
+									)}
+								</p>
+								<div>
+									<Button
+										variant="outline"
+										onClick={() => void refetchEggCollections()}
+									>
+										{t("page.retry")}
+									</Button>
+								</div>
 							</div>
 						) : (
 							<EggCollectionsList

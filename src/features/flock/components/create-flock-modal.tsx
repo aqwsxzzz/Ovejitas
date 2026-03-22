@@ -34,7 +34,10 @@ export const CreateFlockModal = ({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={handleOpenChange}>
+		<Dialog
+			open={open}
+			onOpenChange={handleOpenChange}
+		>
 			{!isControlled && (
 				<DialogTrigger asChild>
 					<Button>
@@ -43,7 +46,7 @@ export const CreateFlockModal = ({
 					</Button>
 				</DialogTrigger>
 			)}
-			<DialogContent className="w-full max-h-[90vh] overflow-y-auto p-4 sm:max-w-lg">
+			<DialogContent className="w-[calc(100vw-2rem)] max-w-[42rem] min-w-[20rem] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
 				<DialogTitle>{t("createModal.title")}</DialogTitle>
 				<DialogDescription>{t("createModal.description")}</DialogDescription>
 				<CreateFlockForm
