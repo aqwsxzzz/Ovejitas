@@ -67,6 +67,8 @@ import bottomTabNavEN from "./en/bottom-tab-nav.json";
 import bottomTabNavES from "./es/bottom-tab-nav.json";
 import expensesEN from "./en/expenses.json";
 import expensesES from "./es/expenses.json";
+import flocksEN from "./en/flocks.json";
+import flocksES from "./es/flocks.json";
 
 export const defaultNS = "login";
 
@@ -110,6 +112,7 @@ i18next
 				privateLayout: privateLayoutEN,
 				bottomTabNav: bottomTabNavEN,
 				expenses: expensesEN,
+				flocks: flocksEN,
 			},
 			es: {
 				login: loginES,
@@ -145,6 +148,7 @@ i18next
 				privateLayout: privateLayoutES,
 				bottomTabNav: bottomTabNavES,
 				expenses: expensesES,
+				flocks: flocksES,
 			},
 		},
 		defaultNS,
