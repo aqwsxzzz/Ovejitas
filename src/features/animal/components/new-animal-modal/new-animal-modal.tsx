@@ -47,7 +47,7 @@ export const NewAnimalModal = ({
 					</Button>
 				</DialogTrigger>
 			)}
-			<DialogContent className="max-h-[90vh] overflow-y-auto p-4">
+			<DialogContent className="w-[calc(100vw-2rem)] max-w-[42rem] min-w-[20rem] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
 				<DialogTitle>{t("addAnimalTitle")}</DialogTitle>
 				<DialogDescription>{t("addAnimalDescription")}</DialogDescription>
 				<RadioGroup
