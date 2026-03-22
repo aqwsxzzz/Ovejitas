@@ -1,18 +1,13 @@
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { DeleteExpenseDialog } from "@/features/expense/components/delete-expense-dialog";
+import { ExpenseFormModal } from "@/features/expense/components/expense-form-modal";
+import { financialTransactionTypeLabelKeys } from "@/features/expense/components/expense-labels";
 import type {
 	IExpense,
 	IExpenseListFilters,
 } from "@/features/expense/types/expense-types";
-import {
-	expenseCategoryLabelKeys,
-	paymentMethodLabelKeys,
-} from "./expense-labels";
-import {
-	ExpenseCategoryBadge,
-	ExpenseStatusBadge,
-} from "@/features/expense/components/expense-badges";
-import { ExpenseFormModal } from "@/features/expense/components/expense-form-modal";
-import { DeleteExpenseDialog } from "@/features/expense/components/delete-expense-dialog";
+import type { ISpecie } from "@/features/specie/types/specie-types";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -21,38 +16,19 @@ interface ExpenseListProps {
 	farmId: string;
 	filters: Partial<IExpenseListFilters>;
 	currencyCode: string;
+	speciesData: ISpecie[];
 }
 
-const parseDecimal = (value: unknown): number | undefined => {
+const parseDecimal = (value: unknown): number => {
 	if (typeof value === "number" && Number.isFinite(value)) {
 		return value;
 	}
 
 	if (typeof value === "string") {
-		const normalizedValue = value.replace(/,/g, "").trim();
-		if (!normalizedValue) {
-			return undefined;
-		}
-
-		const parsedValue = Number(normalizedValue);
+		const parsedValue = Number(value.replace(/,/g, "").trim());
 		if (Number.isFinite(parsedValue)) {
 			return parsedValue;
 		}
-	}
-
-	return undefined;
-};
-
-const resolveExpenseAmount = (expense: IExpense): number => {
-	const amount = parseDecimal(expense.amount as unknown);
-	if (amount !== undefined) {
-		return amount;
-	}
-
-	const quantity = parseDecimal(expense.quantity as unknown);
-	const unitCost = parseDecimal(expense.unitCost as unknown);
-	if (quantity !== undefined && unitCost !== undefined) {
-		return quantity * unitCost;
 	}
 
 	return 0;
@@ -63,6 +39,7 @@ export const ExpenseList = ({
 	farmId,
 	filters,
 	currencyCode,
+	speciesData,
 }: ExpenseListProps) => {
 	const { t, i18n } = useTranslation("expenses");
 
@@ -84,10 +61,26 @@ export const ExpenseList = ({
 		[i18n.language],
 	);
 
+	const speciesNameById = useMemo(
+		() =>
+			new Map(
+				speciesData.map((specie) => [
+					specie.id,
+					specie.translations?.[0]?.name ?? specie.id,
+				]),
+			),
+		[speciesData],
+	);
+
 	return (
 		<div className="flex flex-col gap-3">
 			{expenses.map((expense) => {
-				const displayAmount = resolveExpenseAmount(expense);
+				const displayAmount = parseDecimal(expense.amount);
+				const speciesName = expense.speciesId
+					? speciesNameById.get(expense.speciesId)
+					: undefined;
+				const amountClassName =
+					expense.type === "income" ? "text-emerald-600" : "text-rose-600";
 
 				return (
 					<Card
@@ -98,13 +91,24 @@ export const ExpenseList = ({
 							<div className="flex items-start justify-between gap-3">
 								<div className="flex flex-col gap-2">
 									<div className="flex items-center gap-2 flex-wrap">
-										<ExpenseCategoryBadge category={expense.category} />
-										<ExpenseStatusBadge status={expense.status} />
+										<Badge variant="outline">
+											{t(
+												financialTransactionTypeLabelKeys[
+													expense.type
+												] as never,
+											)}
+										</Badge>
+										{speciesName && (
+											<Badge variant="secondary">{speciesName}</Badge>
+										)}
 									</div>
 									<p className="text-sm text-muted-foreground">
 										{dateFormatter.format(new Date(`${expense.date}T00:00:00`))}
 									</p>
-									<p className="text-lg font-semibold">
+									<p className="text-base text-muted-foreground">
+										{expense.description || t("list.noDescription")}
+									</p>
+									<p className={`text-lg font-semibold ${amountClassName}`}>
 										{currencyFormatter.format(displayAmount)}
 									</p>
 								</div>
@@ -123,28 +127,20 @@ export const ExpenseList = ({
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
 								<div>
-									<p className="text-muted-foreground">{t("list.vendor")}</p>
-									<p>{expense.vendor || t("list.notProvided")}</p>
-								</div>
-								<div>
-									<p className="text-muted-foreground">
-										{t("list.paymentMethod")}
-									</p>
+									<p className="text-muted-foreground">{t("list.type")}</p>
 									<p>
-										{expense.paymentMethod
-											? t(
-													paymentMethodLabelKeys[
-														expense.paymentMethod
-													] as never,
-												)
-											: t("list.notProvided")}
+										{t(
+											financialTransactionTypeLabelKeys[expense.type] as never,
+										)}
 									</p>
 								</div>
 								<div>
-									<p className="text-muted-foreground">{t("list.category")}</p>
-									<p>
-										{t(expenseCategoryLabelKeys[expense.category] as never)}
-									</p>
+									<p className="text-muted-foreground">{t("list.species")}</p>
+									<p>{speciesName || t("list.notProvided")}</p>
+								</div>
+								<div>
+									<p className="text-muted-foreground">{t("list.createdAt")}</p>
+									<p>{dateFormatter.format(new Date(expense.createdAt))}</p>
 								</div>
 							</div>
 						</CardContent>

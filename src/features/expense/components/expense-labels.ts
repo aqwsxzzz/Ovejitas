@@ -1,9 +1,18 @@
 import type {
 	ExpenseCategory,
 	ExpenseStatus,
+	FinancialTransactionType,
 	PaymentMethod,
 	QuantityUnit,
 } from "@/features/expense/types/expense-types";
+
+export const financialTransactionTypeLabelKeys: Record<
+	FinancialTransactionType,
+	string
+> = {
+	expense: "enums.transactionType.expense",
+	income: "enums.transactionType.income",
+};
 
 export const expenseCategoryLabelKeys: Record<ExpenseCategory, string> = {
 	feed: "enums.category.feed",

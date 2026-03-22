@@ -1,67 +1,72 @@
 {
   "page": {
-    "title": "Gastos",
-    "description": "Gestiona y controla los gastos de la granja",
-    "loading": "Cargando gastos...",
+    "title": "Finanzas",
+    "description": "Controla ingresos y gastos de tu granja",
+    "loading": "Cargando movimientos financieros...",
     "retry": "Reintentar",
-    "empty": "No se encontraron gastos con los filtros seleccionados.",
-    "loadMore": "Cargar mas gastos",
-    "showingCount": "Mostrando {{visible}} de {{total}} gastos",
+    "empty": "No se encontraron movimientos financieros con los filtros seleccionados.",
+    "showingCount": "Mostrando {{visible}} de {{total}} movimientos",
     "perPage": "Por pagina",
     "previous": "Anterior",
     "next": "Siguiente",
     "pageLabel": "Pagina {{page}} de {{totalPages}}"
   },
   "modal": {
-    "newButton": "Nuevo gasto",
-    "newTitle": "Nuevo gasto",
-    "newDescription": "Crea un nuevo registro de gasto",
-    "editTitle": "Editar gasto",
-    "editDescription": "Actualiza los detalles del gasto"
+    "newButton": "Nuevo movimiento",
+    "newTitle": "Nuevo movimiento",
+    "newDescription": "Crea un nuevo movimiento financiero",
+    "editTitle": "Editar movimiento",
+    "editDescription": "Actualiza los detalles del movimiento financiero"
   },
   "deleteDialog": {
-    "title": "¿Eliminar gasto?",
-    "description": "Esta accion no se puede deshacer y eliminara este registro de gasto.",
+    "title": "¿Eliminar movimiento?",
+    "description": "Esta accion no se puede deshacer y eliminara este movimiento financiero.",
     "cancel": "Cancelar",
     "confirm": "Eliminar"
   },
   "filters": {
-    "categoryPlaceholder": "Categoria",
-    "statusPlaceholder": "Estado",
-    "paymentMethodPlaceholder": "Metodo de pago",
-    "categoryLabel": "Categoria",
-    "statusLabel": "Estado",
-    "paymentMethodLabel": "Metodo de pago",
-    "allCategories": "Todas las categorias",
-    "allStatuses": "Todos los estados",
-    "allPaymentMethods": "Todos los metodos de pago",
-    "clear": "Limpiar filtros"
+    "title": "Filtros",
+    "refine": "Refinar movimientos",
+    "button": "Filtros",
+    "typeLabel": "Tipo",
+    "speciesLabel": "Especie",
+    "fromLabel": "Desde",
+    "toLabel": "Hasta",
+    "allTypes": "Todos los tipos",
+    "allSpecies": "Todas las especies",
+    "clear": "Limpiar filtros",
+    "apply": "Aplicar",
+    "clearDate": "Limpiar",
+    "count": "{{count}} filtros seleccionados",
+    "noSelection": "No hay filtros seleccionados"
   },
   "list": {
-    "vendor": "Proveedor",
-    "paymentMethod": "Metodo de pago",
-    "category": "Categoria",
-    "notProvided": "-"
+    "type": "Tipo",
+    "species": "Especie",
+    "createdAt": "Creado",
+    "notProvided": "-",
+    "noDescription": "Sin descripcion"
   },
   "summary": {
-    "total": "Total de gastos",
-    "pending": "Monto pendiente",
-    "records": "Registros"
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "net": "Balance"
   },
   "form": {
     "actions": {
       "cancel": "Cancelar",
-      "create": "Crear gasto",
+      "create": "Crear movimiento",
       "save": "Guardar cambios"
     },
     "sections": {
       "quantityDetails": "Detalle de cantidad",
       "additionalDetails": "Detalles adicionales",
-      "farmContext": "Contexto de granja (opcional)"
+      "farmContext": "Contexto de granja"
     },
     "fields": {
       "date": "Fecha",
       "amount": "Monto",
+      "type": "Tipo",
       "category": "Categoria",
       "description": "Descripcion",
       "vendor": "Proveedor",
@@ -80,11 +85,14 @@
       "optional": "Opcional",
       "none": "Ninguno",
       "selectSpeciesFirst": "Selecciona especie primero",
+      "selectSpecies": "Selecciona especie",
       "noLots": "No hay lotes disponibles"
     },
     "validation": {
       "amountRequired": "El monto es obligatorio",
+      "amountPositive": "El monto debe ser mayor a 0",
       "amountNonNegative": "El monto debe ser un numero valido mayor o igual a 0",
+      "speciesRequired": "La especie es obligatoria",
       "quantityNonNegative": "La cantidad debe ser mayor o igual a 0",
       "unitCostNonNegative": "El costo unitario debe ser mayor o igual a 0",
       "quantityUnitRequired": "La unidad de cantidad es obligatoria cuando se ingresa cantidad",
@@ -92,6 +100,10 @@
     }
   },
   "enums": {
+    "transactionType": {
+      "expense": "Gasto",
+      "income": "Ingreso"
+    },
     "category": {
       "feed": "Alimento",
       "veterinary": "Veterinario",
@@ -127,8 +139,8 @@
     }
   },
   "toast": {
-    "createSuccess": "Gasto creado correctamente",
-    "updateSuccess": "Gasto actualizado correctamente",
-    "deleteSuccess": "Gasto eliminado correctamente"
+    "createSuccess": "Movimiento creado correctamente",
+    "updateSuccess": "Movimiento actualizado correctamente",
+    "deleteSuccess": "Movimiento eliminado correctamente"
   }
 }
