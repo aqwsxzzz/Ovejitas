@@ -3,7 +3,8 @@
     "tabs": {
         "dashboard": "Inicio",
         "animals": "Animales",
-        "expenses": "Gastos",
+        "flocks": "Lotes",
+        "expenses": "Finanzas",
         "tasks": "Tareas",
         "profile": "Perfil"
     }

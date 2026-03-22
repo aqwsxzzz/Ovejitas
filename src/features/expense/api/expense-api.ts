@@ -4,6 +4,7 @@ import type {
 	ICreateExpensePayload,
 	IExpense,
 	IExpenseListFilters,
+	IExpenseSummary,
 	IUpdateExpensePayload,
 } from "@/features/expense/types/expense-types";
 
@@ -18,20 +19,39 @@ export const getExpenses = ({
 }) =>
 	axiosHelper<IResponse<IExpense[]>>({
 		method: "get",
-		url: "/expenses",
+		url: "/financial",
 		urlParams: {
-			category: filters?.category,
-			paymentMethod: filters?.paymentMethod,
-			status: filters?.status,
+			type: filters?.type,
+			speciesId: filters?.speciesId,
+			from: filters?.from,
+			to: filters?.to,
 			page,
 			limit,
+		},
+	});
+
+export const getExpenseSummary = ({
+	filters,
+}: {
+	filters?: Partial<IExpenseListFilters>;
+}) =>
+	axiosHelper<IResponse<IExpenseSummary>>({
+		method: "get",
+		url: "/financial/summary",
+		urlParams: {
+			groupBy: filters?.groupBy,
+			from: filters?.from,
+			to: filters?.to,
+			period: filters?.period,
+			type: filters?.type,
+			speciesId: filters?.speciesId,
 		},
 	});
 
 export const getExpenseById = ({ expenseId }: { expenseId: string }) =>
 	axiosHelper<IResponse<IExpense>>({
 		method: "get",
-		url: `/expenses/${expenseId}`,
+		url: `/financial/${expenseId}`,
 	});
 
 export const createExpense = ({
@@ -41,7 +61,7 @@ export const createExpense = ({
 }) =>
 	axiosHelper<IResponse<IExpense>>({
 		method: "post",
-		url: "/expenses",
+		url: "/financial",
 		data: payload,
 	});
 
@@ -54,12 +74,12 @@ export const updateExpenseById = ({
 }) =>
 	axiosHelper<IResponse<IExpense>>({
 		method: "put",
-		url: `/expenses/${expenseId}`,
+		url: `/financial/${expenseId}`,
 		data: payload,
 	});
 
 export const deleteExpenseById = ({ expenseId }: { expenseId: string }) =>
 	axiosHelper<IResponse<null>>({
 		method: "delete",
-		url: `/expenses/${expenseId}`,
+		url: `/financial/${expenseId}`,
 	});

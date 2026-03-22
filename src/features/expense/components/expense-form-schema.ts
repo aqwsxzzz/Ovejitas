@@ -1,11 +1,6 @@
 import { z } from "zod";
 import i18next from "i18next";
-import {
-	expenseCategories,
-	expenseStatuses,
-	paymentMethods,
-	quantityUnits,
-} from "@/features/expense/types/expense-types";
+import { financialTransactionTypes } from "@/features/expense/types/expense-types";
 
 const toNumber = (value: string | undefined): number | undefined => {
 	if (!value?.trim()) {
@@ -18,80 +13,27 @@ const toNumber = (value: string | undefined): number | undefined => {
 	return parsed;
 };
 
-const roundMoney = (value: number): number => Number(value.toFixed(2));
-
 export const expenseFormSchema = z
 	.object({
 		date: z.date(),
 		amount: z
 			.string()
 			.min(1, i18next.t("expenses:form.validation.amountRequired")),
-		category: z.enum(expenseCategories),
+		type: z.enum(financialTransactionTypes),
 		description: z.string().max(400).optional(),
-		vendor: z.string().max(120).optional(),
-		invoiceNumber: z.string().max(120).optional(),
-		paymentMethod: z.enum(paymentMethods).optional(),
-		status: z.enum(expenseStatuses),
-		quantity: z.string().optional(),
-		quantityUnit: z.enum(quantityUnits).optional(),
-		unitCost: z.string().optional(),
-		speciesId: z.string().optional(),
-		breedId: z.string().optional(),
-		animalId: z.string().optional(),
-		lotId: z.string().optional(),
+		speciesId: z
+			.string()
+			.min(1, i18next.t("expenses:form.validation.speciesRequired")),
 	})
 	.superRefine((value, ctx) => {
 		const amount = toNumber(value.amount);
-		const quantity = toNumber(value.quantity);
-		const unitCost = toNumber(value.unitCost);
 
-		if (amount === undefined || amount < 0) {
+		if (amount === undefined || amount <= 0) {
 			ctx.addIssue({
 				code: "custom",
 				path: ["amount"],
-				message: i18next.t("expenses:form.validation.amountNonNegative"),
+				message: i18next.t("expenses:form.validation.amountPositive"),
 			});
-		}
-
-		if (quantity !== undefined && quantity < 0) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["quantity"],
-				message: i18next.t("expenses:form.validation.quantityNonNegative"),
-			});
-		}
-
-		if (unitCost !== undefined && unitCost < 0) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["unitCost"],
-				message: i18next.t("expenses:form.validation.unitCostNonNegative"),
-			});
-		}
-
-		if (quantity !== undefined && !value.quantityUnit) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["quantityUnit"],
-				message: i18next.t("expenses:form.validation.quantityUnitRequired"),
-			});
-		}
-
-		if (
-			quantity !== undefined &&
-			unitCost !== undefined &&
-			amount !== undefined
-		) {
-			const expectedAmount = roundMoney(quantity * unitCost);
-			if (roundMoney(amount) !== expectedAmount) {
-				ctx.addIssue({
-					code: "custom",
-					path: ["amount"],
-					message: i18next.t("expenses:form.validation.amountMustMatch", {
-						expectedAmount: expectedAmount.toFixed(2),
-					}),
-				});
-			}
 		}
 	});
 

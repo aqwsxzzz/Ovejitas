@@ -57,6 +57,9 @@ export const DeleteExpenseDialog = ({
 			<DialogContent className="max-w-80">
 				<DialogTitle>{t("deleteDialog.title")}</DialogTitle>
 				<DialogDescription>{t("deleteDialog.description")}</DialogDescription>
+				<p className="text-sm text-muted-foreground">
+					{expense.description || t("list.noDescription")}
+				</p>
 				<div className="flex justify-end gap-2 mt-2">
 					<Button
 						variant="outline"

@@ -3,7 +3,8 @@
     "tabs": {
         "dashboard": "Dashboard",
         "animals": "Animals",
-        "expenses": "Expenses",
+        "flocks": "Flocks",
+        "expenses": "Financial",
         "tasks": "Tasks",
         "profile": "Profile"
     }

@@ -5,27 +5,30 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { IResponse } from "@/lib/axios";
 import {
 	createExpense,
 	deleteExpenseById,
 	getExpenseById,
 	getExpenses,
+	getExpenseSummary,
 	updateExpenseById,
 } from "@/features/expense/api/expense-api";
 import type {
 	ICreateExpensePayload,
-	IExpense,
 	IExpenseListFilters,
+	IExpenseSummary,
 	IUpdateExpensePayload,
 } from "@/features/expense/types/expense-types";
 import i18next from "i18next";
 
 const normalizeFilters = (filters?: Partial<IExpenseListFilters>): string[] => {
 	return [
-		filters?.category ?? "",
-		filters?.status ?? "",
-		filters?.paymentMethod ?? "",
+		filters?.type ?? "",
+		filters?.speciesId ?? "",
+		filters?.from ?? "",
+		filters?.to ?? "",
+		filters?.period ?? "",
+		filters?.groupBy ?? "",
 	];
 };
 
@@ -33,12 +36,12 @@ const DEFAULT_LIST_PAGE_SIZE = 20;
 const LEGACY_LIST_PAGE_SIZE = 100;
 
 export const expenseQueryKeys = {
-	all: ["expense"] as const,
+	all: ["financial"] as const,
+	farm: (farmId: string) => [...expenseQueryKeys.all, "farm", farmId] as const,
 	expenseList: (farmId: string, filters?: Partial<IExpenseListFilters>) =>
 		[
-			...expenseQueryKeys.all,
+			...expenseQueryKeys.farm(farmId),
 			"list",
-			farmId,
 			normalizeFilters(filters),
 		] as const,
 	expenseListPage: (
@@ -47,6 +50,12 @@ export const expenseQueryKeys = {
 		limit: number,
 	) =>
 		[...expenseQueryKeys.expenseList(farmId, filters), "page", limit] as const,
+	expenseSummary: (farmId: string, filters?: Partial<IExpenseListFilters>) =>
+		[
+			...expenseQueryKeys.farm(farmId),
+			"summary",
+			normalizeFilters(filters),
+		] as const,
 	expenseById: (expenseId: string) =>
 		[...expenseQueryKeys.all, "byId", expenseId] as const,
 };
@@ -63,6 +72,26 @@ export const useGetExpenses = ({
 		queryFn: () =>
 			getExpenses({ filters, page: 1, limit: LEGACY_LIST_PAGE_SIZE }),
 		select: (data) => data.data,
+		enabled: !!farmId,
+	});
+
+export const useGetExpenseSummary = ({
+	farmId,
+	filters,
+}: {
+	farmId: string;
+	filters?: Partial<IExpenseListFilters>;
+}) =>
+	useQuery({
+		queryKey: expenseQueryKeys.expenseSummary(farmId, filters),
+		queryFn: () =>
+			getExpenseSummary({
+				filters: {
+					groupBy: filters?.groupBy ?? "month",
+					...filters,
+				},
+			}),
+		select: (data): IExpenseSummary => data.data,
 		enabled: !!farmId,
 	});
 
@@ -167,24 +196,10 @@ export const useCreateExpense = () => {
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (response, { filters, farmId }) => {
+		onSuccess: async (_, { farmId }) => {
 			toast.success(i18next.t("expenses:toast.createSuccess"));
-			queryClient.setQueryData<IResponse<IExpense[]>>(
-				expenseQueryKeys.expenseList(farmId, filters),
-				(oldData) => {
-					if (!oldData) {
-						return;
-					}
-
-					return {
-						...oldData,
-						data: [response.data, ...oldData.data],
-					};
-				},
-			);
-
-			void queryClient.invalidateQueries({
-				queryKey: [...expenseQueryKeys.all, "list", farmId],
+			await queryClient.invalidateQueries({
+				queryKey: expenseQueryKeys.farm(farmId),
 			});
 		},
 	});
@@ -206,26 +221,10 @@ export const useUpdateExpenseById = () => {
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (response, { filters, farmId }) => {
+		onSuccess: async (_, { farmId }) => {
 			toast.success(i18next.t("expenses:toast.updateSuccess"));
-			queryClient.setQueryData<IResponse<IExpense[]>>(
-				expenseQueryKeys.expenseList(farmId, filters),
-				(oldData) => {
-					if (!oldData) {
-						return;
-					}
-
-					return {
-						...oldData,
-						data: oldData.data.map((expense) =>
-							expense.id === response.data.id ? response.data : expense,
-						),
-					};
-				},
-			);
-
-			void queryClient.invalidateQueries({
-				queryKey: [...expenseQueryKeys.all, "list", farmId],
+			await queryClient.invalidateQueries({
+				queryKey: expenseQueryKeys.farm(farmId),
 			});
 		},
 	});
@@ -245,24 +244,10 @@ export const useDeleteExpenseById = () => {
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (_, { expenseId, filters, farmId }) => {
+		onSuccess: async (_, { farmId }) => {
 			toast.success(i18next.t("expenses:toast.deleteSuccess"));
-			queryClient.setQueryData<IResponse<IExpense[]>>(
-				expenseQueryKeys.expenseList(farmId, filters),
-				(oldData) => {
-					if (!oldData) {
-						return;
-					}
-
-					return {
-						...oldData,
-						data: oldData.data.filter((expense) => expense.id !== expenseId),
-					};
-				},
-			);
-
-			void queryClient.invalidateQueries({
-				queryKey: [...expenseQueryKeys.all, "list", farmId],
+			await queryClient.invalidateQueries({
+				queryKey: expenseQueryKeys.farm(farmId),
 			});
 		},
 	});
