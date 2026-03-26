@@ -409,14 +409,13 @@ export const useEditAnimalById = () => {
 	return useMutation({
 		mutationFn: ({
 			payload,
-			farmId,
 			animalId,
 		}: {
 			payload: IEditAnimalPayload;
 			farmId: string;
 			animalId: string;
 			filters?: Partial<IAnimalListFilters>;
-		}) => editAnimalById({ payload, farmId, animalId }),
+		}) => editAnimalById({ payload, animalId }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
