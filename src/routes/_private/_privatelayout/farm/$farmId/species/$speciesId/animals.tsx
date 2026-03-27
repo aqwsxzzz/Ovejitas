@@ -1,4 +1,3 @@
-import { FAB } from "@/components/common/fab";
 import { SearchBar } from "@/components/common/search-bar";
 import {
 	FilterChips,
@@ -17,7 +16,6 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { useTranslation } from "react-i18next";
-import { Plus } from "lucide-react";
 import { useDebouncedValue } from "@/utils/use-debounced-value";
 import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
 
@@ -213,12 +211,7 @@ function RouteComponent() {
 				onOpenChange={setIsNewAnimalModalOpen}
 				preselectedSpecieId={speciesId}
 			/>
-			<FAB
-				icon={Plus}
-				onClick={() => setIsNewAnimalModalOpen(true)}
-				className="md:hidden"
-				ariaLabel={t("addAnimalButton")}
-			/>
+			{/* Floating FAB for animal creation removed as per requirements */}
 		</>
 	);
 }
