@@ -28,6 +28,9 @@ User intent: ${input:Optional commit intent — prefix with 'new-branch' to crea
 - Always base new branches off `development` unless the user specifies otherwise.
 
 ## Commit Execution Rules
+### Commit Message Length Rule
+- The commit head (first line of the commit message) must not exceed 100 characters.
+- If the head exceeds 100 characters, the commit will be blocked with an error by husky/commitlint.
 1. Run status and diff review first.
 2. Infer the best commit scope and propose up to 3 Conventional Commit messages.
 3. Apply Conventional Commit semantic rules only for message correctness; do not do version comparison, package version bumps, changelog updates, or tags.
