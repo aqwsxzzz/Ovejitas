@@ -39,6 +39,7 @@ User intent: ${input:Optional PR intent/title hint — prefix with 'draft' and/o
    - Validation performed
    - Validation format rule: list only the validation type and status (Passed/Failed); do not paste command output, logs, stack traces, or code snippets.
    - Risks/notes
+   - If there are changes included in the PR that are not reflected in the branch name or main PR intent, briefly explain these out-of-scope changes in the PR body or comments, as appropriate.
 9. Create the PR using resolved head/base branches:
    - Default: ready PR
    - If user intent includes `draft`, create as draft

@@ -39,3 +39,6 @@ User intent: ${input:Optional commit intent — prefix with 'new-branch' to crea
 6. If there is ambiguity (multiple unrelated changes), ask one concise clarification question before committing.
 7. After committing, push simply: use `git push -u origin "<branch-name>"` for a new branch or `git push` for an existing branch.
 8. Return: branch used (new or existing), final message, files committed, validation results, commit hash, and push command/result.
+
+### Out-of-Scope Change Explanation Rule
+- If there are changes in the commit that are not reflected in the branch name or intent, briefly explain these out-of-scope changes in the commit message body or comments, as appropriate.
