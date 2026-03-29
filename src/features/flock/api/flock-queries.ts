@@ -9,7 +9,7 @@ export const useDeleteFlockById = () => {
 		},
 		onSuccess: (_, variables) => {
 			toast.success(i18next.t("flocks:deleteDialog.success"));
-			if (variables && 'farmId' in variables) {
+			if (variables && "farmId" in variables) {
 				void queryClient.invalidateQueries({
 					queryKey: [...flockQueryKeys.all, "list", variables.farmId],
 				});

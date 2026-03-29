@@ -1,9 +1,9 @@
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
 } from "@/components/ui/dialog";
 import { useDeleteFlockById } from "@/features/flock/api/flock-queries";
 import { useState } from "react";
@@ -101,15 +101,15 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 							<CardTitle className="text-[1.75rem] font-bold tracking-tight">
 								{flock.name}
 							</CardTitle>
-								<Button
-									variant="destructive"
-									size="icon"
-									className="ml-2"
-									onClick={() => setDeleteDialogOpen(true)}
-									aria-label={t("deleteDialog.ariaLabel")}
-								>
-									<Trash2 className="w-5 h-5" />
-								</Button>
+							<Button
+								variant="destructive"
+								size="icon"
+								className="ml-2"
+								onClick={() => setDeleteDialogOpen(true)}
+								aria-label={t("deleteDialog.ariaLabel")}
+							>
+								<Trash2 className="w-5 h-5" />
+							</Button>
 							<p className="pt-1 text-sm text-muted-foreground">
 								{t(`flockType.${flock.flockType}`)}
 							</p>
