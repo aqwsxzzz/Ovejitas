@@ -23,6 +23,9 @@ import {
 } from "@/features/animal/api/animal-queries";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { useCurrentLocation } from "@/features/weather/use-current-location";
+import { useGetWeather } from "@/features/weather/api/weather-queries";
+import { weatherDescriptionKeyByCode } from "@/features/weather/weather-description-map";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 
 export const Route = createFileRoute(
@@ -48,6 +51,19 @@ function RouteComponent() {
 	const healthAlerts =
 		animalData?.filter((animal) => animal.status !== "alive").length || 0;
 	const { t } = useTranslation("dashboard");
+
+	// Weather: get user location and fetch weather
+	const {
+		lat,
+		lon,
+		loading: geoLoading,
+		error: geoError,
+	} = useCurrentLocation();
+	const {
+		data: weatherData,
+		isLoading: isWeatherLoading,
+		isError: isWeatherError,
+	} = useGetWeather(lat, lon, !geoLoading && !geoError);
 
 	const recentActivity = (animalData ?? []).slice(0, 3).map((animal) => ({
 		id: animal.id,
@@ -121,9 +137,34 @@ function RouteComponent() {
 							iconColor="text-info"
 							borderColor="border-l-info"
 							label={t("resumes.resumeWeatherCard.label")}
-							value="24°C"
+							value={
+								geoLoading
+									? "..."
+									: geoError
+										? t("resumes.resumeWeatherCard.locationError")
+										: isWeatherLoading
+											? "..."
+											: isWeatherError || !weatherData?.current
+												? t("resumes.resumeWeatherCard.apiError")
+												: `${Math.round(weatherData.current.temperature)}${weatherData.units.temperature}`
+							}
 							trend={{
-								value: t("resumes.resumeWeatherCard.trendValue"),
+								value:
+									isWeatherLoading || geoLoading
+										? ""
+										: (() => {
+												const code = weatherData?.current?.weatherCode;
+												if (code == null)
+													return weatherData?.current?.weatherDescription || "";
+												const key = weatherDescriptionKeyByCode[code];
+												return key
+													? t("weatherDescriptions." + key, {
+															ns: "dashboard",
+															defaultValue:
+																weatherData?.current?.weatherDescription || "",
+														})
+													: weatherData?.current?.weatherDescription || "";
+											})(),
 								direction: "neutral",
 							}}
 						/>

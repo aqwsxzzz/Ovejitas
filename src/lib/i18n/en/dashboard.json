@@ -10,7 +10,9 @@
         "resumeWeatherCard": {
             "label": "Weather",
             "value": "24°C",
-            "trendValue": "Sunny"
+            "trendValue": "Sunny",
+            "locationError": "Location unavailable",
+            "apiError": "Weather unavailable"
         },
         "resumeHealthCard": {
             "label": "Health Alerts",
@@ -63,6 +65,36 @@
             "description": "Morning feeding completed",
             "timestamp": "8 hours ago"
         }
+    },
+    "weatherDescriptions": {
+        "clearSky": "Clear sky",
+        "mainlyClear": "Mainly clear",
+        "partlyCloudy": "Partly cloudy",
+        "overcast": "Overcast",
+        "fog": "Fog",
+        "depositingRimeFog": "Depositing rime fog",
+        "drizzleLight": "Light drizzle",
+        "drizzleModerate": "Moderate drizzle",
+        "drizzleDense": "Dense drizzle",
+        "freezingDrizzleLight": "Light freezing drizzle",
+        "freezingDrizzleDense": "Dense freezing drizzle",
+        "rainSlight": "Slight rain",
+        "rainModerate": "Moderate rain",
+        "rainHeavy": "Heavy rain",
+        "freezingRainLight": "Light freezing rain",
+        "freezingRainHeavy": "Heavy freezing rain",
+        "snowFallSlight": "Slight snow fall",
+        "snowFallModerate": "Moderate snow fall",
+        "snowFallHeavy": "Heavy snow fall",
+        "snowGrains": "Snow grains",
+        "rainShowersSlight": "Slight rain showers",
+        "rainShowersModerate": "Moderate rain showers",
+        "rainShowersViolent": "Violent rain showers",
+        "snowShowersSlight": "Slight snow showers",
+        "snowShowersHeavy": "Heavy snow showers",
+        "thunderstorm": "Thunderstorm",
+        "thunderstormHailSlight": "Thunderstorm with slight hail",
+        "thunderstormHailHeavy": "Thunderstorm with heavy hail"
+    }
     }
 
-}

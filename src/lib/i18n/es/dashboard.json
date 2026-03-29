@@ -1,22 +1,9 @@
 {
-    "title": "Inicio",
-    "dashboardSubtitle": "Bienvenido de nuevo a tu granja digital",
-    "resumes": {
-
-        "resumeAnimalsCard": {
-            "label": "Total de animales",
-            "trendValue": "{{count}} agregados en los ultimos 7 dias"
+        "tasks": {
+            "title": "Tarea completada",
+            "description": "Alimentación matutina completada",
+            "timestamp": "Hace 8 horas"
         },
-        "resumeWeatherCard": {
-            "label": "Clima",
-            "value": "24°C",
-            "trendValue": "Soleado"
-        },
-        "resumeHealthCard": {
-            "label": "Alertas de salud",
-            "trendValue": "Todos sanos"
-        }
-    },
     "quickActions": {
         "title": "Acciones rápidas",
         "addAnimal": {
@@ -65,4 +52,53 @@
         }
     }
 
-}
+    ,
+    "resumes": {
+        "resumeAnimalsCard": {
+            "label": "Total de animales",
+            "trendValue": "{{count}} agregados en los últimos 7 días"
+        },
+        "resumeWeatherCard": {
+            "label": "Clima",
+            "value": "24°C",
+            "trendValue": "Soleado",
+            "locationError": "Ubicación no disponible",
+            "apiError": "Clima no disponible"
+        },
+        "resumeHealthCard": {
+            "label": "Alertas de salud",
+            "trendValue": "Todos sanos"
+        }
+    },
+    "weatherDescriptions": {
+        "clearSky": "Despejado",
+        "mainlyClear": "Mayormente despejado",
+        "partlyCloudy": "Parcialmente nublado",
+        "overcast": "Nublado",
+        "fog": "Niebla",
+        "depositingRimeFog": "Niebla con escarcha",
+        "drizzleLight": "Llovizna ligera",
+        "drizzleModerate": "Llovizna moderada",
+        "drizzleDense": "Llovizna densa",
+        "freezingDrizzleLight": "Llovizna helada ligera",
+        "freezingDrizzleDense": "Llovizna helada densa",
+        "rainSlight": "Lluvia ligera",
+        "rainModerate": "Lluvia moderada",
+        "rainHeavy": "Lluvia intensa",
+        "freezingRainLight": "Lluvia helada ligera",
+        "freezingRainHeavy": "Lluvia helada intensa",
+        "snowFallSlight": "Nevada ligera",
+        "snowFallModerate": "Nevada moderada",
+        "snowFallHeavy": "Nevada intensa",
+        "snowGrains": "Granos de nieve",
+        "rainShowersSlight": "Chubascos ligeros",
+        "rainShowersModerate": "Chubascos moderados",
+        "rainShowersViolent": "Chubascos violentos",
+        "snowShowersSlight": "Chubascos de nieve ligeros",
+        "snowShowersHeavy": "Chubascos de nieve intensos",
+        "thunderstorm": "Tormenta eléctrica",
+        "thunderstormHailSlight": "Tormenta con granizo leve",
+        "thunderstormHailHeavy": "Tormenta con granizo fuerte"
+    }
+    }
+
