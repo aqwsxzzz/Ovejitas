@@ -1,3 +1,22 @@
+import { deleteFlockById } from "@/features/flock/api/flock-api";
+export const useDeleteFlockById = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({ flockId }: { flockId: string }) =>
+			deleteFlockById({ flockId }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, variables) => {
+			toast.success(i18next.t("flocks:deleteDialog.success"));
+			if (variables && 'farmId' in variables) {
+				void queryClient.invalidateQueries({
+					queryKey: [...flockQueryKeys.all, "list", variables.farmId],
+				});
+			}
+		},
+	});
+};
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
