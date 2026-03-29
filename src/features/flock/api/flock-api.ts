@@ -1,3 +1,8 @@
+export const deleteFlockById = ({ flockId }: { flockId: string }) =>
+	axiosHelper<IResponse<{ message: string }>>({
+		method: "delete",
+		url: `/flocks/${flockId}`,
+	});
 import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse } from "@/lib/axios";
 import type {

@@ -1,3 +1,12 @@
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogFooter,
+} from "@/components/ui/dialog";
+import { useDeleteFlockById } from "@/features/flock/api/flock-queries";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { IFlock } from "@/features/flock/types/flock-types";
@@ -5,7 +14,7 @@ import { FlockStatusBadge } from "@/features/flock/components/flock-status-badge
 import { UpdateFlockCountModal } from "@/features/flock/components/update-flock-count-modal";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "@tanstack/react-router";
-import { EllipsisVertical } from "lucide-react";
+import { EllipsisVertical, Trash2 } from "lucide-react";
 
 interface FlockCardProps {
 	flock: IFlock;
@@ -31,6 +40,14 @@ const getTranslationName = (
 };
 
 export const FlockCard = ({ flock }: FlockCardProps) => {
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+	const { mutate: deleteFlock, isPending: isDeleting } = useDeleteFlockById();
+	const handleDelete = () => {
+		deleteFlock(
+			{ flockId: flock.id },
+			{ onSuccess: () => setDeleteDialogOpen(false) },
+		);
+	};
 	const { t, i18n } = useTranslation("flocks");
 	const { farmId } = useParams({ strict: false });
 	const preferredLanguage = i18n.language.slice(0, 2) || "en";
@@ -50,6 +67,33 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 
 	return (
 		<>
+			<Dialog
+				open={deleteDialogOpen}
+				onOpenChange={setDeleteDialogOpen}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>{t("deleteDialog.title")}</DialogTitle>
+					</DialogHeader>
+					<p>{t("deleteDialog.confirm", { name: flock.name })}</p>
+					<DialogFooter>
+						<Button
+							variant="outline"
+							onClick={() => setDeleteDialogOpen(false)}
+							disabled={isDeleting}
+						>
+							{t("common.cancel")}
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={handleDelete}
+							disabled={isDeleting}
+						>
+							{isDeleting ? t("common.deleting") : t("common.delete")}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 			<Card className="gap-0 rounded-[24px] border border-border/70 py-4 shadow-md md:hidden">
 				<CardHeader className="px-4 py-0">
 					<div className="flex items-start justify-between gap-3">
@@ -57,6 +101,15 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 							<CardTitle className="text-[1.75rem] font-bold tracking-tight">
 								{flock.name}
 							</CardTitle>
+							<Button
+								variant="destructive"
+								size="icon"
+								className="ml-2"
+								onClick={() => setDeleteDialogOpen(true)}
+								aria-label={t("deleteDialog.ariaLabel")}
+							>
+								<Trash2 className="w-5 h-5" />
+							</Button>
 							<p className="pt-1 text-sm text-muted-foreground">
 								{t(`flockType.${flock.flockType}`)}
 							</p>
@@ -125,6 +178,15 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 								<CardTitle className="text-xl font-bold tracking-tight">
 									{flock.name}
 								</CardTitle>
+								<Button
+									variant="destructive"
+									size="icon"
+									className="ml-2"
+									onClick={() => setDeleteDialogOpen(true)}
+									aria-label={t("deleteDialog.ariaLabel")}
+								>
+									<Trash2 className="w-5 h-5" />
+								</Button>
 								<p className="pt-1 text-sm text-muted-foreground">
 									{t(`flockType.${flock.flockType}`)}
 								</p>

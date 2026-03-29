@@ -121,7 +121,16 @@
       "totals": "Total: {{totalEggs}} • Aprovechables: {{usableEggs}} • Rotos: {{brokenEggs}}"
     }
   },
+  "deleteDialog": {
+    "title": "Eliminar lote",
+    "confirm": "¿Estás seguro de que deseas eliminar '{{name}}'? Esta acción no se puede deshacer.",
+    "ariaLabel": "Eliminar lote",
+    "success": "Lote eliminado correctamente."
+  },
   "common": {
-    "notProvided": "No informado"
+    "notProvided": "No informado",
+    "delete": "Eliminar",
+    "deleting": "Eliminando...",
+    "cancel": "Cancelar"
   }
 }

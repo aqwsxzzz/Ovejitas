@@ -121,7 +121,16 @@
       "totals": "Total: {{totalEggs}} • Usable: {{usableEggs}} • Broken: {{brokenEggs}}"
     }
   },
+  "deleteDialog": {
+    "title": "Delete flock",
+    "confirm": "Are you sure you want to delete '{{name}}'? This action cannot be undone.",
+    "ariaLabel": "Delete flock",
+    "success": "Flock deleted successfully."
+  },
   "common": {
-    "notProvided": "Not provided"
+    "notProvided": "Not provided",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "cancel": "Cancel"
   }
 }
