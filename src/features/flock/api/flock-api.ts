@@ -6,12 +6,14 @@ export const deleteFlockById = ({ flockId }: { flockId: string }) =>
 import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse } from "@/lib/axios";
 import type {
+	ICreateEggCollectionPayload,
 	ICreateFlockPayload,
 	ICreateFlockEventPayload,
 	IEggCollection,
 	IFlock,
 	IFlockEvent,
 	IFlockListFilters,
+	IUpdateEggCollectionPayload,
 	IUpdateFlockPayload,
 } from "@/features/flock/types/flock-types";
 import i18next from "i18next";
@@ -174,4 +176,44 @@ export const getEggCollections = ({
 			page: String(page),
 			limit: String(limit),
 		},
+	});
+
+export const createEggCollection = ({
+	flockId,
+	payload,
+}: {
+	flockId: string;
+	payload: ICreateEggCollectionPayload;
+}) =>
+	axiosHelper<IResponse<IEggCollection>>({
+		method: "post",
+		url: `/flocks/${flockId}/egg-collections`,
+		data: payload,
+	});
+
+export const updateEggCollection = ({
+	flockId,
+	collectionId,
+	payload,
+}: {
+	flockId: string;
+	collectionId: string;
+	payload: IUpdateEggCollectionPayload;
+}) =>
+	axiosHelper<IResponse<IEggCollection>>({
+		method: "put",
+		url: `/flocks/${flockId}/egg-collections/${collectionId}`,
+		data: payload,
+	});
+
+export const deleteEggCollection = ({
+	flockId,
+	collectionId,
+}: {
+	flockId: string;
+	collectionId: string;
+}) =>
+	axiosHelper<IResponse<{ message: string }>>({
+		method: "delete",
+		url: `/flocks/${flockId}/egg-collections/${collectionId}`,
 	});

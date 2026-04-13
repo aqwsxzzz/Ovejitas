@@ -118,7 +118,36 @@
       "loading": "Cargando recolecciones...",
       "empty": "No se encontraron recolecciones",
       "layRate": "Tasa de postura: {{layRate}}%",
-      "totals": "Total: {{totalEggs}} • Aprovechables: {{usableEggs}} • Rotos: {{brokenEggs}}"
+      "totals": "Total: {{totalEggs}} • Aprovechables: {{usableEggs}} • Rotos: {{brokenEggs}}",
+      "record": "Registrar huevos",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "recordSuccess": "Recolección registrada",
+      "updateSuccess": "Recolección actualizada",
+      "deleteSuccess": "Recolección eliminada",
+      "form": {
+        "date": "Fecha de recolección",
+        "totalEggs": "Total de huevos",
+        "brokenEggs": "Huevos rotos",
+        "notes": "Notas",
+        "notesPlaceholder": "Notas opcionales...",
+        "usableHelp": "Aprovechables: {{count}} huevos",
+        "submit": "Registrar",
+        "submitting": "Guardando...",
+        "update": "Actualizar",
+        "updating": "Actualizando...",
+        "brokenExceedsTotal": "No puede superar el total de huevos"
+      },
+      "recordModal": {
+        "title": "Registrar recolección",
+        "editTitle": "Editar recolección"
+      },
+      "deleteDialog": {
+        "title": "Eliminar recolección",
+        "description": "¿Estás seguro de que quieres eliminar esta recolección? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
     }
   },
   "deleteDialog": {

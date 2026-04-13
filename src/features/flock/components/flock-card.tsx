@@ -13,7 +13,7 @@ import type { IFlock } from "@/features/flock/types/flock-types";
 import { FlockStatusBadge } from "@/features/flock/components/flock-status-badge";
 import { UpdateFlockCountModal } from "@/features/flock/components/update-flock-count-modal";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { EllipsisVertical, Trash2 } from "lucide-react";
 
 interface FlockCardProps {
@@ -42,6 +42,7 @@ const getTranslationName = (
 export const FlockCard = ({ flock }: FlockCardProps) => {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const { mutate: deleteFlock, isPending: isDeleting } = useDeleteFlockById();
+	const navigate = useNavigate();
 	const handleDelete = () => {
 		deleteFlock(
 			{ flockId: flock.id },
@@ -64,6 +65,15 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 		0,
 		Math.min(100, Math.round((flock.currentCount / flock.initialCount) * 100)),
 	);
+
+	const goToDetail = () => {
+		if (!farmId) return;
+
+		void navigate({
+			to: "/farm/$farmId/flocks/$flockId",
+			params: { farmId, flockId: flock.id },
+		});
+	};
 
 	return (
 		<>
@@ -94,7 +104,18 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-			<Card className="gap-0 rounded-[24px] border border-border/70 py-4 shadow-md md:hidden">
+			<Card
+				className="gap-0 rounded-[24px] border border-border/70 py-4 shadow-md md:hidden cursor-pointer"
+				role="link"
+				tabIndex={0}
+				onClick={goToDetail}
+				onKeyDown={(event) => {
+					if (event.key === "Enter" || event.key === " ") {
+						event.preventDefault();
+						goToDetail();
+					}
+				}}
+			>
 				<CardHeader className="px-4 py-0">
 					<div className="flex items-start justify-between gap-3">
 						<div>
@@ -105,7 +126,10 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 								variant="destructive"
 								size="icon"
 								className="ml-2"
-								onClick={() => setDeleteDialogOpen(true)}
+								onClick={(event) => {
+									event.stopPropagation();
+									setDeleteDialogOpen(true);
+								}}
 								aria-label={t("deleteDialog.ariaLabel")}
 							>
 								<Trash2 className="w-5 h-5" />
@@ -169,7 +193,18 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 				</CardContent>
 			</Card>
 
-			<Card className="hidden gap-0 rounded-[24px] border border-border/20 py-5 shadow-[0px_12px_32px_rgba(28,28,24,0.06)] transition-transform duration-300 hover:-translate-y-1 md:flex">
+			<Card
+				className="hidden gap-0 rounded-[24px] border border-border/20 py-5 shadow-[0px_12px_32px_rgba(28,28,24,0.06)] transition-transform duration-300 hover:-translate-y-1 md:flex cursor-pointer"
+				role="link"
+				tabIndex={0}
+				onClick={goToDetail}
+				onKeyDown={(event) => {
+					if (event.key === "Enter" || event.key === " ") {
+						event.preventDefault();
+						goToDetail();
+					}
+				}}
+			>
 				<CardHeader className="px-5 py-0">
 					<div className="flex items-start justify-between gap-3">
 						<div className="space-y-2">
@@ -182,7 +217,10 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 									variant="destructive"
 									size="icon"
 									className="ml-2"
-									onClick={() => setDeleteDialogOpen(true)}
+									onClick={(event) => {
+										event.stopPropagation();
+										setDeleteDialogOpen(true);
+									}}
 									aria-label={t("deleteDialog.ariaLabel")}
 								>
 									<Trash2 className="w-5 h-5" />
@@ -196,6 +234,7 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 							variant="ghost"
 							size="icon"
 							className="h-9 w-9 rounded-xl text-muted-foreground"
+							onClick={(event) => event.stopPropagation()}
 							asChild
 						>
 							<Link

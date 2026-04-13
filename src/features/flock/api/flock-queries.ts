@@ -20,18 +20,23 @@ export const useDeleteFlockById = () => {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { keepPreviousData } from "@tanstack/react-query";
 import {
+	createEggCollection,
 	createFlockEvent,
 	createFlock,
+	deleteEggCollection,
 	getEggCollections,
 	getFlockById,
 	getFlockEvents,
 	getFlocks,
+	updateEggCollection,
 	updateFlockById,
 } from "@/features/flock/api/flock-api";
 import type {
+	ICreateEggCollectionPayload,
 	ICreateFlockPayload,
 	ICreateFlockEventPayload,
 	IFlockListFilters,
+	IUpdateEggCollectionPayload,
 	IUpdateFlockPayload,
 } from "@/features/flock/types/flock-types";
 import i18next from "i18next";
@@ -262,3 +267,77 @@ export const useGetEggCollectionsPage = ({
 		enabled: !!flockId,
 		placeholderData: keepPreviousData,
 	});
+
+export const useCreateEggCollection = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			flockId,
+			payload,
+		}: {
+			flockId: string;
+			farmId: string;
+			payload: ICreateEggCollectionPayload;
+		}) => createEggCollection({ flockId, payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { flockId }) => {
+			toast.success(i18next.t("flocks:detail.eggCollections.recordSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "eggCollections", flockId],
+			});
+		},
+	});
+};
+
+export const useUpdateEggCollection = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			flockId,
+			collectionId,
+			payload,
+		}: {
+			flockId: string;
+			farmId: string;
+			collectionId: string;
+			payload: IUpdateEggCollectionPayload;
+		}) => updateEggCollection({ flockId, collectionId, payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { flockId }) => {
+			toast.success(i18next.t("flocks:detail.eggCollections.updateSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "eggCollections", flockId],
+			});
+		},
+	});
+};
+
+export const useDeleteEggCollection = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			flockId,
+			collectionId,
+		}: {
+			flockId: string;
+			farmId: string;
+			collectionId: string;
+		}) => deleteEggCollection({ flockId, collectionId }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { flockId }) => {
+			toast.success(i18next.t("flocks:detail.eggCollections.deleteSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "eggCollections", flockId],
+			});
+		},
+	});
+};
