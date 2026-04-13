@@ -12,7 +12,11 @@
             "value": "24°C",
             "trendValue": "Sunny",
             "locationError": "Location unavailable",
-            "apiError": "Weather unavailable"
+            "apiError": "Weather unavailable",
+            "feelsLike": "Feels like",
+            "wind": "Wind",
+            "humidity": "Humidity",
+            "rainChance": "Rain chance"
         },
         "resumeHealthCard": {
             "label": "Health Alerts",
