@@ -9,14 +9,7 @@ import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout
 import { StatsWidget } from "@/components/common/stats-widget";
 import { ActivityFeed } from "@/components/common/activity-feed";
 import { QuickActionCard } from "@/components/common/quick-action-card";
-import {
-	Beef,
-	Cloud,
-	AlertTriangle,
-	Plus,
-	Stethoscope,
-	Heart,
-} from "lucide-react";
+import { Beef, AlertTriangle, Plus, Stethoscope, Heart } from "lucide-react";
 import {
 	useGetAnimalStats,
 	useGetAnimalsByFarmId,
@@ -25,8 +18,8 @@ import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import { useCurrentLocation } from "@/features/weather/use-current-location";
 import { useGetWeather } from "@/features/weather/api/weather-queries";
-import { weatherDescriptionKeyByCode } from "@/features/weather/weather-description-map";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
+import { DashboardWeatherCard } from "@/features/weather/components/dashboard-weather-card";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/dashboard",
@@ -132,41 +125,12 @@ function RouteComponent() {
 							/>
 						</Link>
 
-						<StatsWidget
-							icon={Cloud}
-							iconColor="text-info"
-							borderColor="border-l-info"
-							label={t("resumes.resumeWeatherCard.label")}
-							value={
-								geoLoading
-									? "..."
-									: geoError
-										? t("resumes.resumeWeatherCard.locationError")
-										: isWeatherLoading
-											? "..."
-											: isWeatherError || !weatherData?.current
-												? t("resumes.resumeWeatherCard.apiError")
-												: `${Math.round(weatherData.current.temperature)}${weatherData.units.temperature}`
-							}
-							trend={{
-								value:
-									isWeatherLoading || geoLoading
-										? ""
-										: (() => {
-												const code = weatherData?.current?.weatherCode;
-												if (code == null)
-													return weatherData?.current?.weatherDescription || "";
-												const key = weatherDescriptionKeyByCode[code];
-												return key
-													? t("weatherDescriptions." + key, {
-															ns: "dashboard",
-															defaultValue:
-																weatherData?.current?.weatherDescription || "",
-														})
-													: weatherData?.current?.weatherDescription || "";
-											})(),
-								direction: "neutral",
-							}}
+						<DashboardWeatherCard
+							weatherData={weatherData}
+							isGeoLoading={geoLoading}
+							geoError={geoError}
+							isWeatherLoading={isWeatherLoading}
+							isWeatherError={isWeatherError}
 						/>
 
 						<StatsWidget

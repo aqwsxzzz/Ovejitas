@@ -14,7 +14,7 @@ import type {
 	IFlockStatus,
 	IFlockType,
 } from "@/features/flock/types/flock-types";
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useParams } from "@tanstack/react-router";
 import { ListFilter, Plus, Tractor } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -29,8 +29,18 @@ export const Route = createFileRoute(
 const pageSizeOptions = [10, 20, 50];
 
 function RouteComponent() {
+	const { farmId, flockId } = useParams({ strict: false });
+
+	if (flockId) {
+		return <Outlet />;
+	}
+
+	return <FlocksListPage farmId={farmId!} />;
+}
+
+function FlocksListPage({ farmId }: { farmId: string }) {
 	const { t } = useTranslation("flocks");
-	const { farmId } = useParams({ strict: false });
+
 	const [page, setPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [filters, setFilters] = useState<Partial<IFlockListFilters>>({});

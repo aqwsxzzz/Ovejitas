@@ -1,5 +1,7 @@
 {
-        "tasks": {
+    "title": "Panel de control",
+    "dashboardSubtitle": "Bienvenido de nuevo a tu granja digital",
+    "tasks": {
             "title": "Tarea completada",
             "description": "Alimentación matutina completada",
             "timestamp": "Hace 8 horas"
@@ -63,7 +65,11 @@
             "value": "24°C",
             "trendValue": "Soleado",
             "locationError": "Ubicación no disponible",
-            "apiError": "Clima no disponible"
+            "apiError": "Clima no disponible",
+            "feelsLike": "Sensación térmica",
+            "wind": "Viento",
+            "humidity": "Humedad",
+            "rainChance": "Probabilidad de lluvia"
         },
         "resumeHealthCard": {
             "label": "Alertas de salud",

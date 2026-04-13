@@ -109,3 +109,16 @@ export interface IEggCollection {
 	createdAt: string;
 	updatedAt: string;
 }
+
+export interface ICreateEggCollectionPayload {
+	date: string;
+	totalEggs: number;
+	brokenEggs?: number;
+	notes?: string;
+}
+
+export interface IUpdateEggCollectionPayload {
+	totalEggs?: number;
+	brokenEggs?: number;
+	notes?: string;
+}

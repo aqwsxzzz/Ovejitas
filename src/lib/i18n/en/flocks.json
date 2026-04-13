@@ -118,7 +118,36 @@
       "loading": "Loading egg collections...",
       "empty": "No egg collections found",
       "layRate": "Lay rate: {{layRate}}%",
-      "totals": "Total: {{totalEggs}} • Usable: {{usableEggs}} • Broken: {{brokenEggs}}"
+      "totals": "Total: {{totalEggs}} • Usable: {{usableEggs}} • Broken: {{brokenEggs}}",
+      "record": "Record eggs",
+      "edit": "Edit",
+      "delete": "Delete",
+      "recordSuccess": "Egg collection recorded",
+      "updateSuccess": "Egg collection updated",
+      "deleteSuccess": "Egg collection deleted",
+      "form": {
+        "date": "Collection date",
+        "totalEggs": "Total eggs",
+        "brokenEggs": "Broken eggs",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes...",
+        "usableHelp": "Usable: {{count}} eggs",
+        "submit": "Record",
+        "submitting": "Saving...",
+        "update": "Update",
+        "updating": "Updating...",
+        "brokenExceedsTotal": "Cannot exceed total eggs"
+      },
+      "recordModal": {
+        "title": "Record egg collection",
+        "editTitle": "Edit collection"
+      },
+      "deleteDialog": {
+        "title": "Delete collection",
+        "description": "Are you sure you want to delete this egg collection? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
     }
   },
   "deleteDialog": {

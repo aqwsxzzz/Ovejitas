@@ -8,6 +8,8 @@ import {
 } from "@/features/flock/api/flock-queries";
 import { EggCollectionsList } from "@/features/flock/components/egg-collections-list";
 import { FlockEventsList } from "@/features/flock/components/flock-events-list";
+import { RecordEggCollectionModal } from "@/features/flock/components/record-egg-collection-modal";
+import { UpdateFlockCountModal } from "@/features/flock/components/update-flock-count-modal";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
@@ -19,7 +21,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
 	const { t } = useTranslation("flocks");
-	const { flockId } = useParams({ strict: false });
+	const { flockId, farmId } = useParams({ strict: false });
 	const getErrorMessage = (error: unknown, fallback: string): string => {
 		if (error instanceof Error && error.message) {
 			return error.message;
@@ -49,6 +51,15 @@ function RouteComponent() {
 		page: 1,
 		limit: 10,
 	});
+	const { data: historyEventData } = useGetFlockEventsPage({
+		flockId: flockId!,
+		page: 1,
+		limit: 1000,
+	});
+
+	const isLayingFlock =
+		flock?.flockType === "layers" || flock?.flockType === "dual_purpose";
+
 	const {
 		data: eggCollectionData,
 		isPending: isEggCollectionsLoading,
@@ -68,6 +79,10 @@ function RouteComponent() {
 				<PageHeader
 					title={flock?.name ?? t("detail.title")}
 					description={t("detail.description")}
+					backLink={{
+						to: "/farm/$farmId/flocks",
+						params: { farmId: farmId! },
+					}}
 				/>
 			}
 		>
@@ -110,6 +125,13 @@ function RouteComponent() {
 						</div>
 					</div>
 
+					<UpdateFlockCountModal
+						flock={flock!}
+						farmId={farmId!}
+						buttonClassName="h-11 w-full justify-center rounded-xl border border-border/50 bg-transparent font-bold text-foreground hover:bg-muted/50"
+						editorClassName="w-full min-w-0"
+					/>
+
 					<section className="space-y-2">
 						<h2 className="text-h2">{t("detail.events.title")}</h2>
 						{isEventsLoading ? (
@@ -135,35 +157,48 @@ function RouteComponent() {
 						)}
 					</section>
 
-					<section className="space-y-2">
-						<h2 className="text-h2">{t("detail.eggCollections.title")}</h2>
-						{isEggCollectionsLoading ? (
-							<div className="rounded-card border p-6 text-center text-muted-foreground">
-								{t("detail.eggCollections.loading")}
+					{isLayingFlock && (
+						<section className="space-y-2">
+							<div className="flex items-center justify-between gap-2">
+								<h2 className="text-h2">{t("detail.eggCollections.title")}</h2>
+								<RecordEggCollectionModal
+									mode="create"
+									flockId={flockId!}
+									farmId={farmId!}
+								/>
 							</div>
-						) : isEggCollectionsError ? (
-							<div className="rounded-card border p-4 flex flex-col gap-2">
-								<p className="text-destructive text-sm">
-									{getErrorMessage(
-										eggCollectionsError,
-										t("detail.eggCollections.loading"),
-									)}
-								</p>
-								<div>
-									<Button
-										variant="outline"
-										onClick={() => void refetchEggCollections()}
-									>
-										{t("page.retry")}
-									</Button>
+							{isEggCollectionsLoading ? (
+								<div className="rounded-card border p-6 text-center text-muted-foreground">
+									{t("detail.eggCollections.loading")}
 								</div>
-							</div>
-						) : (
-							<EggCollectionsList
-								eggCollections={eggCollectionData?.items ?? []}
-							/>
-						)}
-					</section>
+							) : isEggCollectionsError ? (
+								<div className="rounded-card border p-4 flex flex-col gap-2">
+									<p className="text-destructive text-sm">
+										{getErrorMessage(
+											eggCollectionsError,
+											t("detail.eggCollections.loading"),
+										)}
+									</p>
+									<div>
+										<Button
+											variant="outline"
+											onClick={() => void refetchEggCollections()}
+										>
+											{t("page.retry")}
+										</Button>
+									</div>
+								</div>
+							) : (
+								<EggCollectionsList
+									eggCollections={eggCollectionData?.items ?? []}
+									flockId={flockId!}
+									farmId={farmId!}
+									flockInitialCount={flock?.initialCount ?? 0}
+									flockEventsForHistory={historyEventData?.items ?? []}
+								/>
+							)}
+						</section>
+					)}
 				</div>
 			)}
 		</ScrollablePageLayout>
