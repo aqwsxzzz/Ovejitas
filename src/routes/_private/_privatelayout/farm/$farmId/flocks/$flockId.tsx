@@ -51,11 +51,6 @@ function RouteComponent() {
 		page: 1,
 		limit: 10,
 	});
-	const { data: historyEventData } = useGetFlockEventsPage({
-		flockId: flockId!,
-		page: 1,
-		limit: 1000,
-	});
 
 	const isLayingFlock =
 		flock?.flockType === "layers" || flock?.flockType === "dual_purpose";
@@ -193,8 +188,6 @@ function RouteComponent() {
 									eggCollections={eggCollectionData?.items ?? []}
 									flockId={flockId!}
 									farmId={farmId!}
-									flockInitialCount={flock?.initialCount ?? 0}
-									flockEventsForHistory={historyEventData?.items ?? []}
 								/>
 							)}
 						</section>

@@ -19,6 +19,8 @@ import type {
 import i18next from "i18next";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
+const MAX_FLOCK_EVENTS_LIMIT = 100;
+
 const getRequestLanguage = (): string => {
 	const normalizedLanguage = i18next.language.slice(0, 2);
 
@@ -137,15 +139,18 @@ export const getFlockEvents = ({
 	flockId: string;
 	page: number;
 	limit: number;
-}) =>
-	axiosHelper<IResponse<IFlockEvent[]>>({
+}) => {
+	const safeLimit = Math.min(limit, MAX_FLOCK_EVENTS_LIMIT);
+
+	return axiosHelper<IResponse<IFlockEvent[]>>({
 		method: "get",
 		url: `/flocks/${flockId}/events`,
 		urlParams: {
 			page: String(page),
-			limit: String(limit),
+			limit: String(safeLimit),
 		},
 	});
+};
 
 export const createFlockEvent = ({
 	flockId,
