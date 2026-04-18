@@ -32,6 +32,10 @@ import privateLayout from "./en/private-layout.json";
 import bottomTabNav from "./en/bottom-tab-nav.json";
 import expenses from "./en/expenses.json";
 import flocks from "./en/flocks.json";
+import feedTypes from "./en/feed-types.json";
+import feedLots from "./en/feed-lots.json";
+import feedConsumptions from "./en/feed-consumptions.json";
+import inventory from "./en/inventory.json";
 
 //Only bring one of the json files as structure reference.
 const resources = {
@@ -69,6 +73,10 @@ const resources = {
 	bottomTabNav,
 	expenses,
 	flocks,
+	feedTypes,
+	feedLots,
+	feedConsumptions,
+	inventory,
 } as const;
 
 export default resources;
