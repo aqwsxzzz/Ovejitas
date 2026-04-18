@@ -76,6 +76,7 @@ export const ExpenseList = ({
 		<div className="flex flex-col gap-3">
 			{expenses.map((expense) => {
 				const displayAmount = parseDecimal(expense.amount);
+				const isSystemGenerated = Boolean(expense.feedLotId);
 				const speciesName = expense.speciesId
 					? speciesNameById.get(expense.speciesId)
 					: undefined;
@@ -101,6 +102,11 @@ export const ExpenseList = ({
 										{speciesName && (
 											<Badge variant="secondary">{speciesName}</Badge>
 										)}
+										{isSystemGenerated && (
+											<Badge variant="secondary">
+												{t("list.systemGenerated")}
+											</Badge>
+										)}
 									</div>
 									<p className="text-sm text-muted-foreground">
 										{dateFormatter.format(new Date(`${expense.date}T00:00:00`))}
@@ -112,17 +118,25 @@ export const ExpenseList = ({
 										{currencyFormatter.format(displayAmount)}
 									</p>
 								</div>
-								<div className="flex gap-2">
-									<ExpenseFormModal
-										farmId={farmId}
-										filters={filters}
-										expense={expense}
-									/>
-									<DeleteExpenseDialog
-										expense={expense}
-										farmId={farmId}
-										filters={filters}
-									/>
+								<div className="flex gap-2 items-center">
+									{isSystemGenerated ? (
+										<p className="text-xs text-muted-foreground">
+											{t("list.systemGeneratedLocked")}
+										</p>
+									) : (
+										<>
+											<ExpenseFormModal
+												farmId={farmId}
+												filters={filters}
+												expense={expense}
+											/>
+											<DeleteExpenseDialog
+												expense={expense}
+												farmId={farmId}
+												filters={filters}
+											/>
+										</>
+									)}
 								</div>
 							</div>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
