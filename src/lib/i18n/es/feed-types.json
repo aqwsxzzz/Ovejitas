@@ -1,0 +1,7 @@
+{
+  "toast": {
+    "createSuccess": "Tipo de alimento creado exitosamente",
+    "updateSuccess": "Tipo de alimento actualizado exitosamente",
+    "deleteSuccess": "Tipo de alimento eliminado exitosamente"
+  }
+}

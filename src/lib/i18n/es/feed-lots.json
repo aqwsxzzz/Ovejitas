@@ -1,0 +1,7 @@
+{
+  "toast": {
+    "createSuccess": "Lote de alimento creado exitosamente",
+    "updateSuccess": "Lote de alimento actualizado exitosamente",
+    "deleteSuccess": "Lote de alimento eliminado exitosamente"
+  }
+}
