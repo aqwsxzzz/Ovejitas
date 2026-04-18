@@ -1,8 +1,3 @@
-export const deleteFlockById = ({ flockId }: { flockId: string }) =>
-	axiosHelper<IResponse<{ message: string }>>({
-		method: "delete",
-		url: `/flocks/${flockId}`,
-	});
 import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse } from "@/lib/axios";
 import type {
@@ -128,6 +123,25 @@ export const updateFlockById = ({
 	axiosHelper<IResponse<IFlock>>({
 		method: "put",
 		url: `/flocks/${flockId}`,
+		data: payload,
+	});
+
+export const deleteFlockById = ({ flockId }: { flockId: string }) =>
+	axiosHelper<IResponse<{ message: string }>>({
+		method: "delete",
+		url: `/flocks/${flockId}`,
+	});
+
+export const logTodaysFeeding = ({
+	flockId,
+	payload,
+}: {
+	flockId: string;
+	payload?: { date?: string };
+}) =>
+	axiosHelper<IResponse<{ message: string }>>({
+		method: "post",
+		url: `/flocks/${flockId}/log-todays-feeding`,
 		data: payload,
 	});
 

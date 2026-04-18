@@ -10,6 +10,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { toast } from "sonner";
 import i18next from "i18next";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/_private/_privatelayout")({
 	loader: async ({ context }) => {
@@ -33,6 +34,19 @@ function PrivateLayout() {
 	const { data: userData, isLoading } = useGetUserProfile();
 	const { t } = useTranslation("privateLayout");
 
+	useEffect(() => {
+		const previousHtmlOverflow = document.documentElement.style.overflow;
+		const previousBodyOverflow = document.body.style.overflow;
+
+		document.documentElement.style.overflow = "hidden";
+		document.body.style.overflow = "hidden";
+
+		return () => {
+			document.documentElement.style.overflow = previousHtmlOverflow;
+			document.body.style.overflow = previousBodyOverflow;
+		};
+	}, []);
+
 	if (isLoading) {
 		return <div>{t("isLoadingMsg")}</div>;
 	}
@@ -41,10 +55,10 @@ function PrivateLayout() {
 	}
 
 	return (
-		<div className="bg-background h-screen w-screen flex flex-col">
+		<div className="bg-background h-dvh w-full flex flex-col overflow-hidden">
 			<div
 				id="app-scroll-container"
-				className="flex-1 overflow-auto pb-20"
+				className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain pb-20"
 			>
 				<Outlet />
 			</div>

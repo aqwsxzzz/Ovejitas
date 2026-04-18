@@ -107,15 +107,22 @@
     "title": "Detalle del lote",
     "description": "Sigue la actividad y producción del lote",
     "loading": "Cargando detalle del lote...",
+    "logToday": {
+      "action": "Registrar alimentacion de hoy",
+      "logging": "Registrando...",
+      "success": "La alimentacion de hoy fue registrada"
+    },
     "events": {
       "title": "Eventos del lote",
       "loading": "Cargando eventos...",
+      "loadingMore": "Cargando mas eventos...",
       "empty": "No se encontraron eventos",
       "count": "Cantidad: {{count}}"
     },
     "eggCollections": {
       "title": "Recolecciones de huevos",
       "loading": "Cargando recolecciones...",
+      "loadingMore": "Cargando mas recolecciones...",
       "empty": "No se encontraron recolecciones",
       "layRate": "Tasa de postura: {{layRate}}%",
       "totals": "Total: {{totalEggs}} • Aprovechables: {{usableEggs}} • Rotos: {{brokenEggs}}",

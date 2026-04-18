@@ -2,9 +2,12 @@
     "ariaLabel": "Navegación principal",
     "tabs": {
         "dashboard": "Inicio",
+        "livestock": "Ganadería",
         "animals": "Animales",
         "flocks": "Lotes",
-        "expenses": "Finanzas",
+        "finance": "Finanzas",
+        "expenses": "Gastos",
+        "inventory": "Inventario",
         "tasks": "Tareas",
         "profile": "Perfil"
     }

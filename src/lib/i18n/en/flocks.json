@@ -107,15 +107,22 @@
     "title": "Flock detail",
     "description": "Track flock activity and production",
     "loading": "Loading flock detail...",
+    "logToday": {
+      "action": "Log today's feeding",
+      "logging": "Logging...",
+      "success": "Today's feeding was logged"
+    },
     "events": {
       "title": "Flock events",
       "loading": "Loading events...",
+      "loadingMore": "Loading more events...",
       "empty": "No events found",
       "count": "Count: {{count}}"
     },
     "eggCollections": {
       "title": "Egg collections",
       "loading": "Loading egg collections...",
+      "loadingMore": "Loading more egg collections...",
       "empty": "No egg collections found",
       "layRate": "Lay rate: {{layRate}}%",
       "totals": "Total: {{totalEggs}} • Usable: {{usableEggs}} • Broken: {{brokenEggs}}",
