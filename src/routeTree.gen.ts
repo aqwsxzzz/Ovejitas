@@ -15,6 +15,7 @@ import { Route as PrivatePrivatelayoutRouteImport } from './routes/_private/_pri
 import { Route as PublicLayoutSignupRouteImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginRouteImport } from './routes/_public/_layout/login'
 import { Route as PrivatePrivatelayoutFarmFarmIdTasksRouteImport } from './routes/_private/_privatelayout/farm/$farmId/tasks'
+import { Route as PrivatePrivatelayoutFarmFarmIdInventoryRouteImport } from './routes/_private/_privatelayout/farm/$farmId/inventory'
 import { Route as PrivatePrivatelayoutFarmFarmIdFlocksRouteImport } from './routes/_private/_privatelayout/farm/$farmId/flocks'
 import { Route as PrivatePrivatelayoutFarmFarmIdFarmsRouteImport } from './routes/_private/_privatelayout/farm/$farmId/farms'
 import { Route as PrivatePrivatelayoutFarmFarmIdFarmMembersRouteImport } from './routes/_private/_privatelayout/farm/$farmId/farm-members'
@@ -52,6 +53,12 @@ const PrivatePrivatelayoutFarmFarmIdTasksRoute =
   PrivatePrivatelayoutFarmFarmIdTasksRouteImport.update({
     id: '/farm/$farmId/tasks',
     path: '/farm/$farmId/tasks',
+    getParentRoute: () => PrivatePrivatelayoutRoute,
+  } as any)
+const PrivatePrivatelayoutFarmFarmIdInventoryRoute =
+  PrivatePrivatelayoutFarmFarmIdInventoryRouteImport.update({
+    id: '/farm/$farmId/inventory',
+    path: '/farm/$farmId/inventory',
     getParentRoute: () => PrivatePrivatelayoutRoute,
   } as any)
 const PrivatePrivatelayoutFarmFarmIdFlocksRoute =
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   '/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   '/farm/$farmId/flocks': typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
+  '/farm/$farmId/inventory': typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
   '/farm/$farmId/tasks': typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
   '/farm/$farmId/flocks/$flockId': typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
   '/farm/$farmId/species/': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
@@ -135,6 +143,7 @@ export interface FileRoutesByTo {
   '/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   '/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   '/farm/$farmId/flocks': typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
+  '/farm/$farmId/inventory': typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
   '/farm/$farmId/tasks': typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
   '/farm/$farmId/flocks/$flockId': typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
   '/farm/$farmId/species': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
@@ -153,6 +162,7 @@ export interface FileRoutesById {
   '/_private/_privatelayout/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   '/_private/_privatelayout/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   '/_private/_privatelayout/farm/$farmId/flocks': typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
+  '/_private/_privatelayout/farm/$farmId/inventory': typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
   '/_private/_privatelayout/farm/$farmId/tasks': typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
   '/_private/_privatelayout/farm/$farmId/flocks/$flockId': typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
   '/_private/_privatelayout/farm/$farmId/species/': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/farm/$farmId/farm-members'
     | '/farm/$farmId/farms'
     | '/farm/$farmId/flocks'
+    | '/farm/$farmId/inventory'
     | '/farm/$farmId/tasks'
     | '/farm/$farmId/flocks/$flockId'
     | '/farm/$farmId/species/'
@@ -185,6 +196,7 @@ export interface FileRouteTypes {
     | '/farm/$farmId/farm-members'
     | '/farm/$farmId/farms'
     | '/farm/$farmId/flocks'
+    | '/farm/$farmId/inventory'
     | '/farm/$farmId/tasks'
     | '/farm/$farmId/flocks/$flockId'
     | '/farm/$farmId/species'
@@ -202,6 +214,7 @@ export interface FileRouteTypes {
     | '/_private/_privatelayout/farm/$farmId/farm-members'
     | '/_private/_privatelayout/farm/$farmId/farms'
     | '/_private/_privatelayout/farm/$farmId/flocks'
+    | '/_private/_privatelayout/farm/$farmId/inventory'
     | '/_private/_privatelayout/farm/$farmId/tasks'
     | '/_private/_privatelayout/farm/$farmId/flocks/$flockId'
     | '/_private/_privatelayout/farm/$farmId/species/'
@@ -257,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/farm/$farmId/tasks'
       fullPath: '/farm/$farmId/tasks'
       preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdTasksRouteImport
+      parentRoute: typeof PrivatePrivatelayoutRoute
+    }
+    '/_private/_privatelayout/farm/$farmId/inventory': {
+      id: '/_private/_privatelayout/farm/$farmId/inventory'
+      path: '/farm/$farmId/inventory'
+      fullPath: '/farm/$farmId/inventory'
+      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdInventoryRouteImport
       parentRoute: typeof PrivatePrivatelayoutRoute
     }
     '/_private/_privatelayout/farm/$farmId/flocks': {
@@ -346,6 +366,7 @@ interface PrivatePrivatelayoutRouteChildren {
   PrivatePrivatelayoutFarmFarmIdFarmMembersRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
   PrivatePrivatelayoutFarmFarmIdFarmsRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
   PrivatePrivatelayoutFarmFarmIdFlocksRoute: typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
+  PrivatePrivatelayoutFarmFarmIdInventoryRoute: typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
   PrivatePrivatelayoutFarmFarmIdTasksRoute: typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
   PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
   PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
@@ -363,6 +384,8 @@ const PrivatePrivatelayoutRouteChildren: PrivatePrivatelayoutRouteChildren = {
     PrivatePrivatelayoutFarmFarmIdFarmsRoute,
   PrivatePrivatelayoutFarmFarmIdFlocksRoute:
     PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren,
+  PrivatePrivatelayoutFarmFarmIdInventoryRoute:
+    PrivatePrivatelayoutFarmFarmIdInventoryRoute,
   PrivatePrivatelayoutFarmFarmIdTasksRoute:
     PrivatePrivatelayoutFarmFarmIdTasksRoute,
   PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute:

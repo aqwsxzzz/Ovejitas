@@ -43,14 +43,18 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const { mutate: deleteFlock, isPending: isDeleting } = useDeleteFlockById();
 	const navigate = useNavigate();
+	const { farmId } = useParams({ strict: false });
 	const handleDelete = () => {
+		if (!farmId) {
+			return;
+		}
+
 		deleteFlock(
-			{ flockId: flock.id },
+			{ flockId: flock.id, farmId },
 			{ onSuccess: () => setDeleteDialogOpen(false) },
 		);
 	};
 	const { t, i18n } = useTranslation("flocks");
-	const { farmId } = useParams({ strict: false });
 	const preferredLanguage = i18n.language.slice(0, 2) || "en";
 
 	const speciesName = getTranslationName(

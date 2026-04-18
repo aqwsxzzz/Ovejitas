@@ -1,0 +1,157 @@
+{
+  "page": {
+    "title": "Inventory",
+    "description": "Manage feed lots and feeding records"
+  },
+  "tabs": {
+    "feedLots": "Feed Lots",
+    "feedLog": "Feed Log",
+    "feedingSchedules": "Schedules",
+    "feedReports": "Reports"
+  },
+  "feedLots": {
+    "title": "Feed Lots",
+    "stockFilter": {
+      "withStock": "With stock",
+      "all": "All"
+    },
+    "newButton": "New lot",
+    "modal": {
+      "title": "Create feed lot",
+      "description": "Record a feed purchase batch.",
+      "feedType": "Feed type",
+      "feedTypePlaceholder": "Select feed type",
+      "quantity": "Quantity (kg)",
+      "unitPrice": "Unit price",
+      "purchaseDate": "Purchase date",
+      "supplier": "Supplier",
+      "notes": "Notes",
+      "create": "Create"
+    },
+    "adminManagedNotice": "Feed types are managed by app administrators. Ask an admin to add at least one feed type before creating lots.",
+    "filterPlaceholder": "Filter by feed type",
+    "allFeedTypes": "All feed types",
+    "loading": "Loading feed lots...",
+    "loadingMore": "Loading more lots...",
+    "empty": "No lots found.",
+    "remaining": "{{remaining}} / {{purchased}} kg remaining",
+    "purchasedLine": "Purchased {{date}} - ${{price}} /kg",
+    "delete": "Delete",
+    "unknownFeedType": "Unknown feed type",
+    "deleteDialog": {
+      "title": "Delete feed lot?",
+      "description": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    }
+  },
+  "feedLog": {
+    "title": "Feed Log",
+    "newButton": "Log feeding",
+    "modal": {
+      "title": "Log feed event",
+      "description": "Record feeding, waste, transfer, or adjustment.",
+      "feedType": "Feed type",
+      "feedTypePlaceholder": "Select feed type",
+      "reason": "Reason",
+      "flock": "Flock",
+      "noFlock": "No flock",
+      "quantity": "Quantity (kg)",
+      "date": "Date",
+      "notes": "Notes",
+      "create": "Create"
+    },
+    "reasonOptions": {
+      "feeding": "Feeding",
+      "waste": "Waste",
+      "transfer": "Transfer",
+      "adjustment": "Adjustment"
+    },
+    "adminManagedNotice": "Feed types are managed by app administrators. Ask an admin to add at least one feed type before logging feed events.",
+    "loading": "Loading feed log...",
+    "loadingMore": "Loading more feed events...",
+    "empty": "No feed events recorded.",
+    "itemTitle": "{{qty}} kg - {{reason}}",
+    "itemSubtitle": "{{date}} - Cost ${{cost}}",
+    "delete": "Delete",
+    "deleteDialog": {
+      "title": "Delete feed record?",
+      "description": "This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    }
+  },
+  "feedingSchedules": {
+    "title": "Feeding Schedules",
+    "newButton": "New schedule",
+    "loading": "Loading feeding schedules...",
+    "empty": "No schedules found.",
+    "missingBaseData": "You need feed types and flocks before creating schedules.",
+    "unknownFlock": "Unknown flock",
+    "unknownFeedType": "Unknown feed type",
+    "filters": {
+      "active": "Active",
+      "all": "All"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "close": "Close",
+      "delete": "Delete"
+    },
+    "item": {
+      "qtyPerDay": "{{qty}} kg / day",
+      "period": "{{from}} to {{to}}"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "ongoing": "Ongoing"
+    },
+    "modal": {
+      "title": "Create feeding schedule",
+      "description": "Set the daily feed target and active period for a flock.",
+      "flock": "Flock",
+      "flockPlaceholder": "Select flock",
+      "feedType": "Feed type",
+      "feedTypePlaceholder": "Select feed type",
+      "qtyPerDay": "Daily quantity (kg)",
+      "activeFrom": "Active from",
+      "activeTo": "Active to (optional)",
+      "selectDate": "Select date",
+      "optional": "Optional",
+      "create": "Create"
+    },
+    "toast": {
+      "createSuccess": "Feeding schedule created",
+      "updateSuccess": "Feeding schedule updated",
+      "deleteSuccess": "Feeding schedule deleted"
+    }
+  },
+  "feedReports": {
+    "filters": {
+      "title": "Report filters",
+      "from": "From",
+      "to": "To",
+      "flock": "Flock",
+      "lot": "Lot",
+      "all": "All"
+    },
+    "costByFlock": {
+      "title": "Cost by flock",
+      "loading": "Loading flock cost report...",
+      "empty": "No flock cost data for the selected filters.",
+      "waste": "Waste / Transfers",
+      "totalCost": "{{value}}",
+      "totalQty": "{{value}}"
+    },
+    "costByLot": {
+      "title": "Cost by lot",
+      "selectLot": "Select a lot to see detailed costs.",
+      "loading": "Loading lot cost report...",
+      "empty": "No lot data found."
+    }
+  }
+}

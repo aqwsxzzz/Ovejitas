@@ -1,0 +1,6 @@
+{
+  "toast": {
+    "createSuccess": "Consumo de alimento registrado exitosamente",
+    "deleteSuccess": "Consumo de alimento eliminado exitosamente"
+  }
+}

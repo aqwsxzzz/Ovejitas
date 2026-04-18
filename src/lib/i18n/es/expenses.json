@@ -30,10 +30,26 @@
     "button": "Filtros",
     "typeLabel": "Tipo",
     "speciesLabel": "Especie",
+    "groupByLabel": "Agrupar por",
+    "periodLabel": "Periodo",
     "fromLabel": "Desde",
     "toLabel": "Hasta",
     "allTypes": "Todos los tipos",
     "allSpecies": "Todas las especies",
+    "allGroupBy": "Predeterminado",
+    "allPeriods": "Todos los periodos",
+    "groupByOptions": {
+      "day": "Dia",
+      "week": "Semana",
+      "month": "Mes",
+      "year": "Ano"
+    },
+    "periodOptions": {
+      "7d": "Ultimos 7 dias",
+      "30d": "Ultimos 30 dias",
+      "3m": "Ultimos 3 meses",
+      "1y": "Ultimo ano"
+    },
     "clear": "Limpiar filtros",
     "apply": "Aplicar",
     "clearDate": "Limpiar",
@@ -45,7 +61,9 @@
     "species": "Especie",
     "createdAt": "Creado",
     "notProvided": "-",
-    "noDescription": "Sin descripcion"
+    "noDescription": "Sin descripcion",
+    "systemGenerated": "Auto desde inventario",
+    "systemGeneratedLocked": "Gestionado por inventario"
   },
   "summary": {
     "income": "Ingresos",

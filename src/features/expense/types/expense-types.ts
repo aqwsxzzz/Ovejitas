@@ -21,7 +21,8 @@ export interface IExpense {
 	amount: number;
 	type: FinancialTransactionType;
 	description: string | null;
-	speciesId: string;
+	speciesId: string | null;
+	feedLotId: string | null;
 	createdBy: string;
 	createdAt: string;
 	updatedAt: string;
