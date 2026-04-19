@@ -1,16 +1,19 @@
 import { Cloud } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { WeatherData } from "@/features/weather/api/weather-api";
 import { weatherDescriptionKeyByCode } from "@/features/weather/weather-description-map";
 
 interface DashboardWeatherCardProps {
 	weatherData: WeatherData | undefined;
-	isGeoLoading: boolean;
-	geoError: string | null;
 	isWeatherLoading: boolean;
 	isWeatherError: boolean;
+	weatherErrorMessage?: string | null;
+	farmId: string;
+	borderColor?: string;
 	className?: string;
 }
 
@@ -34,20 +37,26 @@ function WeatherMetric({ label, value }: MetricProps) {
 
 export function DashboardWeatherCard({
 	weatherData,
-	isGeoLoading,
-	geoError,
 	isWeatherLoading,
 	isWeatherError,
+	weatherErrorMessage,
+	farmId,
+	borderColor,
 	className,
 }: DashboardWeatherCardProps) {
 	const { t } = useTranslation("dashboard");
 
-	const isLoading = isGeoLoading || isWeatherLoading;
-	const hasError = Boolean(geoError) || isWeatherError || !weatherData?.current;
+	const isLoading = isWeatherLoading;
+	const hasError = isWeatherError || !weatherData?.current;
+	const isLocationMissing =
+		(weatherErrorMessage ?? "").toLowerCase().includes("location is not set") ||
+		(weatherErrorMessage ?? "")
+			.toLowerCase()
+			.includes("configure latitude and longitude");
 
 	const headlineValue = isLoading
 		? "..."
-		: geoError
+		: isLocationMissing
 			? t("resumes.resumeWeatherCard.locationError")
 			: hasError
 				? t("resumes.resumeWeatherCard.apiError")
@@ -89,7 +98,8 @@ export function DashboardWeatherCard({
 	return (
 		<Card
 			className={cn(
-				"h-full border-l-4 border-l-info py-4 gap-0",
+				"h-full border-l-4 py-4 gap-0",
+				borderColor ?? "border-l-info",
 				"min-h-34",
 				className,
 			)}
@@ -107,7 +117,22 @@ export function DashboardWeatherCard({
 							<p className="text-small text-muted-foreground mt-1 wrap-break-word">
 								{weatherDescription}
 							</p>
-						) : null}
+						) : null}{" "}
+						{isLocationMissing && !isLoading ? (
+							<Button
+								asChild
+								size="sm"
+								variant="link"
+								className="px-0 mt-1 h-auto text-xs"
+							>
+								<Link
+									to="/farm/$farmId/farms"
+									params={{ farmId }}
+								>
+									{t("resumes.resumeWeatherCard.configureLocation")}
+								</Link>
+							</Button>
+						) : null}{" "}
 					</div>
 					<Cloud
 						className="w-7 h-7 text-info shrink-0 mt-1"

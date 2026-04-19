@@ -65,6 +65,7 @@
             "value": "24°C",
             "trendValue": "Soleado",
             "locationError": "Ubicación no disponible",
+            "configureLocation": "Configurar ubicación de la granja",
             "apiError": "Clima no disponible",
             "feelsLike": "Sensación térmica",
             "wind": "Viento",

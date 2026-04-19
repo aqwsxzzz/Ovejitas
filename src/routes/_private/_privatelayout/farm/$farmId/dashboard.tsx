@@ -9,17 +9,18 @@ import { ScrollablePageLayout } from "@/components/layout/scrollable-page-layout
 import { StatsWidget } from "@/components/common/stats-widget";
 import { ActivityFeed } from "@/components/common/activity-feed";
 import { QuickActionCard } from "@/components/common/quick-action-card";
-import { Beef, AlertTriangle, Plus, Stethoscope, Heart } from "lucide-react";
+import { Beef, Plus, Stethoscope, Heart } from "lucide-react";
 import {
 	useGetAnimalStats,
 	useGetAnimalsByFarmId,
 } from "@/features/animal/api/animal-queries";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import { useCurrentLocation } from "@/features/weather/use-current-location";
 import { useGetWeather } from "@/features/weather/api/weather-queries";
 import { NewAnimalModal } from "@/features/animal/components/new-animal-modal/new-animal-modal";
 import { DashboardWeatherCard } from "@/features/weather/components/dashboard-weather-card";
+import { ApiRequestError } from "@/lib/axios/axios-helper";
+import { useCurrentLocation } from "@/features/weather/use-current-location";
 
 export const Route = createFileRoute(
 	"/_private/_privatelayout/farm/$farmId/dashboard",
@@ -44,19 +45,19 @@ function RouteComponent() {
 	const healthAlerts =
 		animalData?.filter((animal) => animal.status !== "alive").length || 0;
 	const { t } = useTranslation("dashboard");
+	const { lat, lon } = useCurrentLocation();
 
-	// Weather: get user location and fetch weather
-	const {
-		lat,
-		lon,
-		loading: geoLoading,
-		error: geoError,
-	} = useCurrentLocation();
 	const {
 		data: weatherData,
 		isLoading: isWeatherLoading,
 		isError: isWeatherError,
-	} = useGetWeather(lat, lon, !geoLoading && !geoError);
+		error: weatherError,
+	} = useGetWeather({
+		latitude: lat,
+		longitude: lon,
+	});
+	const weatherErrorMessage =
+		weatherError instanceof ApiRequestError ? weatherError.message : null;
 
 	const recentActivity = (animalData ?? []).slice(0, 3).map((animal) => ({
 		id: animal.id,
@@ -127,27 +128,12 @@ function RouteComponent() {
 
 						<DashboardWeatherCard
 							weatherData={weatherData}
-							isGeoLoading={geoLoading}
-							geoError={geoError}
 							isWeatherLoading={isWeatherLoading}
 							isWeatherError={isWeatherError}
-						/>
-
-						<StatsWidget
-							icon={AlertTriangle}
-							iconColor={healthAlerts > 0 ? "text-error" : "text-success"}
+							weatherErrorMessage={weatherErrorMessage}
+							farmId={farmId!}
 							borderColor={
 								healthAlerts > 0 ? "border-l-error" : "border-l-success"
-							}
-							label={t("resumes.resumeHealthCard.label")}
-							value={healthAlerts}
-							trend={
-								healthAlerts === 0
-									? {
-											value: t("resumes.resumeHealthCard.trendValue"),
-											direction: "neutral",
-										}
-									: undefined
 							}
 						/>
 					</div>

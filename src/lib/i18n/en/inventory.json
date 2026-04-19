@@ -153,5 +153,45 @@
       "loading": "Loading lot cost report...",
       "empty": "No lot data found."
     }
+  },
+  "eggPricing": {
+    "title": "Egg Pricing",
+    "pricePerEgg": "Price Per Egg",
+    "effectiveFrom": "Effective From",
+    "setPrice": "Set Price",
+    "saving": "Saving...",
+    "activePriceTitle": "Active Price",
+    "loadingActive": "Loading active price...",
+    "noActivePrice": "No active pricing configured.",
+    "perEgg": "per egg",
+    "from": "From",
+    "historyTitle": "Pricing History",
+    "loadingHistory": "Loading pricing history...",
+    "noHistory": "No pricing history yet.",
+    "ongoing": "ongoing"
+  },
+  "profitability": {
+    "title": "Flock Profitability",
+    "summaryTitle": "Summary",
+    "loading": "Loading profitability report...",
+    "empty": "No profitability rows found for the selected filters.",
+    "period": "Period",
+    "from": "From",
+    "to": "To",
+    "flock": "Flock",
+    "allFlocks": "All flocks",
+    "revenue": "Revenue",
+    "feedCost": "Feed Cost",
+    "profit": "Profit",
+    "margin": "Margin",
+    "costPerDozen": "Cost / dozen",
+    "fcrLabel": "FCR kg / dozen",
+    "eggRevenue": "Egg revenue",
+    "breakdownPeriod": "Period",
+    "pricingRequired": {
+      "title": "Egg pricing required",
+      "description": "Set an egg price to calculate profitability. Use the Egg Pricing panel above, then retry.",
+      "cta": "Go to Egg Pricing"
+    }
   }
 }

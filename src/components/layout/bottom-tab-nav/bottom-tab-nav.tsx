@@ -96,7 +96,7 @@ export function BottomTabNav() {
 			id: "profile",
 			label: t("tabs.profile"),
 			icon: User,
-			path: `/farm/${farmId}/farm-members`,
+			path: `/farm/${farmId}/farms`,
 		},
 	];
 

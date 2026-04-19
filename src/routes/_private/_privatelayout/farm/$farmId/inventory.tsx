@@ -5,6 +5,8 @@ import { FeedConsumptionPanel } from "@/features/inventory/components/feed-consu
 import { FeedLotPanel } from "@/features/inventory/components/feed-lot-panel";
 import { FeedReportsPanel } from "@/features/inventory/components/feed-reports-panel";
 import { FeedingSchedulePanel } from "@/features/inventory/components/feeding-schedule-panel";
+import { EggPricingPanel } from "@/features/inventory/components/egg-pricing-panel";
+import { FlockProfitabilityPanel } from "@/features/inventory/components/flock-profitability-panel";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
@@ -58,7 +60,11 @@ function RouteComponent() {
 				</TabsContent>
 
 				<TabsContent value="reports">
-					<FeedReportsPanel farmId={farmId} />
+					<div className="space-y-4">
+						<EggPricingPanel farmId={farmId} />
+						<FlockProfitabilityPanel farmId={farmId} />
+						<FeedReportsPanel farmId={farmId} />
+					</div>
 				</TabsContent>
 			</Tabs>
 		</ScrollablePageLayout>

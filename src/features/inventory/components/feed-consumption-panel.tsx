@@ -48,6 +48,7 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 		null,
 	);
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
+	const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const filters = useMemo(() => ({ include: "lots" as const }), []);
 	const { data: feedTypes = [] } = useGetFeedTypes({ farmId });
 	const { data: flockData } = useGetFlocksPage({ farmId, page: 1, limit: 100 });
@@ -63,6 +64,7 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 
 	useEffect(() => {
 		const target = loadMoreRef.current;
+		const root = scrollContainerRef.current;
 		if (!target || !hasNextPage) {
 			return;
 		}
@@ -76,7 +78,7 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 
 				void fetchNextPage();
 			},
-			{ rootMargin: "200px" },
+			{ root, rootMargin: "200px" },
 		);
 
 		observer.observe(target);
@@ -256,13 +258,16 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 				) : consumptions.length === 0 ? (
 					<p className="text-sm text-muted-foreground">{t("feedLog.empty")}</p>
 				) : (
-					<div className="space-y-2">
+					<div
+						ref={scrollContainerRef}
+						className="h-72 overflow-y-auto overscroll-contain pr-1 space-y-2"
+					>
 						{consumptions.map((item) => (
 							<div
 								key={item.id}
 								className="rounded-md border p-3 flex items-center justify-between gap-3"
 							>
-								<div className="text-sm">
+								<div className="text-sm min-w-0">
 									<p className="font-medium">
 										{t("feedLog.itemTitle", {
 											qty: item.qty,
@@ -275,6 +280,18 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 											cost: item.totalCost.toFixed(2),
 										})}
 									</p>
+									<div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+										<span>
+											{item.flockId
+												? (flocks.find((f) => f.id === item.flockId)?.name ??
+													item.flockId)
+												: t("feedLog.modal.noFlock")}
+										</span>
+										<span>
+											{feedTypes.find((f) => f.id === item.feedTypeId)?.name ??
+												item.feedTypeId}
+										</span>
+									</div>
 								</div>
 								<Dialog
 									open={deleteConsumptionId === item.id}
