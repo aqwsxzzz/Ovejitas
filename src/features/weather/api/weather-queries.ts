@@ -3,22 +3,30 @@ import { getWeather } from "./weather-api";
 
 export const weatherQueryKeys = {
 	all: ["weather"] as const,
-	byCoords: (lat: number, lon: number) => ["weather", lat, lon] as const,
+	currentFarm: () => ["weather", "current-farm"] as const,
+	legacyFallbackCoords: (lat: number | null, lon: number | null) =>
+		["weather", "legacy-fallback", lat ?? "na", lon ?? "na"] as const,
 };
 
-export const useGetWeather = (
-	lat: number | null,
-	lon: number | null,
+export const useGetWeather = ({
 	enabled = true,
-) =>
+	latitude,
+	longitude,
+}: {
+	enabled?: boolean;
+	latitude?: number | null;
+	longitude?: number | null;
+} = {}) =>
 	useQuery({
 		queryKey:
-			lat && lon ? weatherQueryKeys.byCoords(lat, lon) : weatherQueryKeys.all,
-		queryFn: () => {
-			if (lat == null || lon == null) throw new Error("Missing coordinates");
-			return getWeather(lat, lon);
-		},
+			latitude != null || longitude != null
+				? weatherQueryKeys.legacyFallbackCoords(
+						latitude ?? null,
+						longitude ?? null,
+					)
+				: weatherQueryKeys.currentFarm(),
+		queryFn: () => getWeather({ latitude, longitude }),
 		select: (data) => data.data,
-		enabled: enabled && lat != null && lon != null,
+		enabled,
 		staleTime: 10 * 60 * 1000, // 10 minutes
 	});

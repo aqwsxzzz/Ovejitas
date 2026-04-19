@@ -12,6 +12,7 @@
             "value": "24°C",
             "trendValue": "Sunny",
             "locationError": "Location unavailable",
+            "configureLocation": "Configure farm location",
             "apiError": "Weather unavailable",
             "feelsLike": "Feels like",
             "wind": "Wind",

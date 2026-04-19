@@ -153,5 +153,45 @@
       "loading": "Cargando reporte por compra...",
       "empty": "No se encontro informacion de la compra."
     }
+  },
+  "eggPricing": {
+    "title": "Precio del huevo",
+    "pricePerEgg": "Precio por huevo",
+    "effectiveFrom": "Válido desde",
+    "setPrice": "Guardar precio",
+    "saving": "Guardando...",
+    "activePriceTitle": "Precio activo",
+    "loadingActive": "Cargando precio activo...",
+    "noActivePrice": "Sin precio configurado.",
+    "perEgg": "por huevo",
+    "from": "Desde",
+    "historyTitle": "Historial de precios",
+    "loadingHistory": "Cargando historial...",
+    "noHistory": "Sin historial de precios.",
+    "ongoing": "en curso"
+  },
+  "profitability": {
+    "title": "Rentabilidad del lote",
+    "summaryTitle": "Resumen",
+    "loading": "Cargando reporte de rentabilidad...",
+    "empty": "No se encontraron filas para los filtros seleccionados.",
+    "period": "Período",
+    "from": "Desde",
+    "to": "Hasta",
+    "flock": "Lote",
+    "allFlocks": "Todos los lotes",
+    "revenue": "Ingresos",
+    "feedCost": "Costo de alimento",
+    "profit": "Ganancia",
+    "margin": "Margen",
+    "costPerDozen": "Costo / docena",
+    "fcrLabel": "FCA kg / docena",
+    "eggRevenue": "Ingresos por huevos",
+    "breakdownPeriod": "Período",
+    "pricingRequired": {
+      "title": "Precio del huevo requerido",
+      "description": "Configura un precio por huevo para calcular la rentabilidad. Usa el panel de precio del huevo más arriba y vuelve a intentarlo.",
+      "cta": "Ir a precio del huevo"
+    }
   }
 }

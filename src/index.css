@@ -310,3 +310,15 @@
     box-shadow: var(--shadow-md); /* Widget elevation */
   }
 }
+
+/* Keep Leaflet panes contained below app overlays (headers, menus, tabs). */
+.farm-location-map .leaflet-pane,
+.farm-location-map .leaflet-control,
+.farm-location-map .leaflet-top,
+.farm-location-map .leaflet-bottom {
+  z-index: 1 !important;
+}
+
+.farm-location-map .leaflet-control-container {
+  z-index: 2;
+}

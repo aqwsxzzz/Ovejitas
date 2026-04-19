@@ -440,7 +440,7 @@ export const useLogTodaysFeeding = () => {
 			flockId: string;
 			farmId: string;
 			date?: string;
-		}) => logTodaysFeeding({ flockId, payload: date ? { date } : undefined }),
+		}) => logTodaysFeeding({ flockId, payload: { ...(date ? { date } : {}) } }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
