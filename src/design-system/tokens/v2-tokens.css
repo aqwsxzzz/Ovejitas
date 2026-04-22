@@ -1,0 +1,35 @@
+.v2-theme {
+  --v2-ink: oklch(0.24 0.07 220);
+  --v2-ink-soft: oklch(0.43 0.05 220);
+  --v2-bg: oklch(0.98 0.01 95);
+  --v2-surface: oklch(1 0 0);
+  --v2-primary: oklch(0.63 0.16 155);
+  --v2-accent: oklch(0.72 0.16 62);
+  --v2-border: oklch(0.88 0.02 90);
+  --v2-shadow: 0 8px 28px -16px hsl(203 40% 18% / 0.35);
+  --v2-gradient: radial-gradient(circle at 15% 15%, hsl(150 45% 92%) 0, hsl(66 55% 96%) 35%, hsl(0 0% 100%) 100%);
+  --v2-font-display: Sora, Poppins, "Segoe UI", sans-serif;
+  --v2-font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+.v2-page {
+  min-height: 100dvh;
+  background: var(--v2-gradient);
+  color: var(--v2-ink);
+  font-family: var(--v2-font-body);
+}
+
+.v2-card {
+  border: 1px solid var(--v2-border);
+  border-radius: 16px;
+  background: var(--v2-surface);
+  box-shadow: var(--v2-shadow);
+}
+
+.v2-kicker {
+  font-family: var(--v2-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-size: 0.75rem;
+  color: var(--v2-ink-soft);
+}

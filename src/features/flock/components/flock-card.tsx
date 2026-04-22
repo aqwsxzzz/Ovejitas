@@ -71,11 +71,8 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 	);
 
 	const goToDetail = () => {
-		if (!farmId) return;
-
 		void navigate({
-			to: "/farm/$farmId/flocks/$flockId",
-			params: { farmId, flockId: flock.id },
+			to: "/v2/production-units",
 		});
 	};
 
@@ -241,10 +238,7 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 							onClick={(event) => event.stopPropagation()}
 							asChild
 						>
-							<Link
-								to="/farm/$farmId/flocks/$flockId"
-								params={{ farmId: farmId!, flockId: flock.id }}
-							>
+							<Link to="/v2/production-units">
 								<EllipsisVertical className="h-4 w-4" />
 							</Link>
 						</Button>

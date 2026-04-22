@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./index.css";
+import "@/design-system/tokens/v2-tokens.css";
 import { Toaster } from "sonner";
 import { CheckCircle, Info, X } from "lucide-react";
 

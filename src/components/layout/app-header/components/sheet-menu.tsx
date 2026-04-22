@@ -13,13 +13,12 @@ import { useState } from "react";
 import type { IUser } from "@/features/auth/types/auth-types";
 import { useLogout } from "@/features/auth/api/auth-queries";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 export function SheetMainMenu({ userData }: { userData: IUser }) {
 	const { mutateAsync: logout } = useLogout();
 	const [open, setOpen] = useState<boolean>(false);
 	const { t } = useTranslation("sheetMenu");
-	const { farmId } = useParams({ strict: false });
 	return (
 		<Sheet
 			open={open}
@@ -66,10 +65,7 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 				<SheetDescription className="sr-only"></SheetDescription>
 
 				<div className="flex flex-col space-y-4 mt-8">
-					<Link
-						to="/farm/$farmId/dashboard"
-						params={{ farmId: farmId! }}
-					>
+					<Link to="/v2/dashboard">
 						<Button
 							variant="ghost"
 							className="justify-start h-12 px-4"
@@ -80,10 +76,7 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 						</Button>
 					</Link>
 
-					<Link
-						to="/farm/$farmId/species"
-						params={{ farmId: farmId! }}
-					>
+					<Link to="/v2/production-units">
 						<Button
 							variant="ghost"
 							className="justify-start h-12 px-4"
@@ -93,10 +86,7 @@ export function SheetMainMenu({ userData }: { userData: IUser }) {
 							{t("animals")}
 						</Button>
 					</Link>
-					<Link
-						to="/farm/$farmId/farm-members"
-						params={{ farmId: farmId! }}
-					>
+					<Link to="/v2/settings">
 						<Button
 							variant="ghost"
 							className="justify-start h-12 px-4"

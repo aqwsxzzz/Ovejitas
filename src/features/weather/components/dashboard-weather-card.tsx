@@ -40,10 +40,11 @@ export function DashboardWeatherCard({
 	isWeatherLoading,
 	isWeatherError,
 	weatherErrorMessage,
-	farmId,
+	farmId: _farmId,
 	borderColor,
 	className,
 }: DashboardWeatherCardProps) {
+	void _farmId;
 	const { t } = useTranslation("dashboard");
 
 	const isLoading = isWeatherLoading;
@@ -125,10 +126,7 @@ export function DashboardWeatherCard({
 								variant="link"
 								className="px-0 mt-1 h-auto text-xs"
 							>
-								<Link
-									to="/farm/$farmId/farms"
-									params={{ farmId }}
-								>
+								<Link to="/v2/settings">
 									{t("resumes.resumeWeatherCard.configureLocation")}
 								</Link>
 							</Button>

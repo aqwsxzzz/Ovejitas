@@ -40,11 +40,9 @@ export const useLogin = () => {
 			toast.error(error.message);
 		},
 		onSuccess: (response) => {
+			void response;
 			navigate({
-				to: "/farm/$farmId/dashboard",
-				params: {
-					farmId: response.data.lastVisitedFarmId,
-				},
+				to: "/v2/dashboard",
 			});
 		},
 	});

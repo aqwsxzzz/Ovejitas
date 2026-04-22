@@ -9,34 +9,67 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as V2RouteImport } from './routes/v2'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as V2IndexRouteImport } from './routes/v2.index'
+import { Route as V2SettingsRouteImport } from './routes/v2.settings'
+import { Route as V2ProductionUnitsRouteImport } from './routes/v2.production-units'
+import { Route as V2InventoryRouteImport } from './routes/v2.inventory'
+import { Route as V2FinanceRouteImport } from './routes/v2.finance'
+import { Route as V2DashboardRouteImport } from './routes/v2.dashboard'
+import { Route as V2AlertsRouteImport } from './routes/v2.alerts'
 import { Route as PublicLayoutRouteImport } from './routes/_public/_layout'
-import { Route as PrivatePrivatelayoutRouteImport } from './routes/_private/_privatelayout'
 import { Route as PublicLayoutSignupRouteImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginRouteImport } from './routes/_public/_layout/login'
-import { Route as PrivatePrivatelayoutFarmFarmIdTasksRouteImport } from './routes/_private/_privatelayout/farm/$farmId/tasks'
-import { Route as PrivatePrivatelayoutFarmFarmIdInventoryRouteImport } from './routes/_private/_privatelayout/farm/$farmId/inventory'
-import { Route as PrivatePrivatelayoutFarmFarmIdFlocksRouteImport } from './routes/_private/_privatelayout/farm/$farmId/flocks'
-import { Route as PrivatePrivatelayoutFarmFarmIdFarmsRouteImport } from './routes/_private/_privatelayout/farm/$farmId/farms'
-import { Route as PrivatePrivatelayoutFarmFarmIdFarmMembersRouteImport } from './routes/_private/_privatelayout/farm/$farmId/farm-members'
-import { Route as PrivatePrivatelayoutFarmFarmIdExpensesRouteImport } from './routes/_private/_privatelayout/farm/$farmId/expenses'
-import { Route as PrivatePrivatelayoutFarmFarmIdDashboardRouteImport } from './routes/_private/_privatelayout/farm/$farmId/dashboard'
-import { Route as PrivatePrivatelayoutFarmFarmIdSpeciesIndexRouteImport } from './routes/_private/_privatelayout/farm/$farmId/species/index'
-import { Route as PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRouteImport } from './routes/_private/_privatelayout/farm/$farmId/flocks/$flockId'
-import { Route as PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRouteImport } from './routes/_private/_privatelayout/farm/$farmId/species/$speciesId/animals'
-import { Route as PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRouteImport } from './routes/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal'
+import { Route as CompatFarmIdSpeciesIdAnimalIdRouteImport } from './routes/compat.$farmId.$speciesId.$animalId'
 
+const V2Route = V2RouteImport.update({
+  id: '/v2',
+  path: '/v2',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const V2IndexRoute = V2IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => V2Route,
+} as any)
+const V2SettingsRoute = V2SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => V2Route,
+} as any)
+const V2ProductionUnitsRoute = V2ProductionUnitsRouteImport.update({
+  id: '/production-units',
+  path: '/production-units',
+  getParentRoute: () => V2Route,
+} as any)
+const V2InventoryRoute = V2InventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => V2Route,
+} as any)
+const V2FinanceRoute = V2FinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => V2Route,
+} as any)
+const V2DashboardRoute = V2DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => V2Route,
+} as any)
+const V2AlertsRoute = V2AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => V2Route,
+} as any)
 const PublicLayoutRoute = PublicLayoutRouteImport.update({
   id: '/_public/_layout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivatePrivatelayoutRoute = PrivatePrivatelayoutRouteImport.update({
-  id: '/_private/_privatelayout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicLayoutSignupRoute = PublicLayoutSignupRouteImport.update({
@@ -49,187 +82,117 @@ const PublicLayoutLoginRoute = PublicLayoutLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => PublicLayoutRoute,
 } as any)
-const PrivatePrivatelayoutFarmFarmIdTasksRoute =
-  PrivatePrivatelayoutFarmFarmIdTasksRouteImport.update({
-    id: '/farm/$farmId/tasks',
-    path: '/farm/$farmId/tasks',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
+const CompatFarmIdSpeciesIdAnimalIdRoute =
+  CompatFarmIdSpeciesIdAnimalIdRouteImport.update({
+    id: '/compat/$farmId/$speciesId/$animalId',
+    path: '/compat/$farmId/$speciesId/$animalId',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const PrivatePrivatelayoutFarmFarmIdInventoryRoute =
-  PrivatePrivatelayoutFarmFarmIdInventoryRouteImport.update({
-    id: '/farm/$farmId/inventory',
-    path: '/farm/$farmId/inventory',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdFlocksRoute =
-  PrivatePrivatelayoutFarmFarmIdFlocksRouteImport.update({
-    id: '/farm/$farmId/flocks',
-    path: '/farm/$farmId/flocks',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdFarmsRoute =
-  PrivatePrivatelayoutFarmFarmIdFarmsRouteImport.update({
-    id: '/farm/$farmId/farms',
-    path: '/farm/$farmId/farms',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdFarmMembersRoute =
-  PrivatePrivatelayoutFarmFarmIdFarmMembersRouteImport.update({
-    id: '/farm/$farmId/farm-members',
-    path: '/farm/$farmId/farm-members',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdExpensesRoute =
-  PrivatePrivatelayoutFarmFarmIdExpensesRouteImport.update({
-    id: '/farm/$farmId/expenses',
-    path: '/farm/$farmId/expenses',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdDashboardRoute =
-  PrivatePrivatelayoutFarmFarmIdDashboardRouteImport.update({
-    id: '/farm/$farmId/dashboard',
-    path: '/farm/$farmId/dashboard',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute =
-  PrivatePrivatelayoutFarmFarmIdSpeciesIndexRouteImport.update({
-    id: '/farm/$farmId/species/',
-    path: '/farm/$farmId/species/',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute =
-  PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRouteImport.update({
-    id: '/$flockId',
-    path: '/$flockId',
-    getParentRoute: () => PrivatePrivatelayoutFarmFarmIdFlocksRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute =
-  PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRouteImport.update({
-    id: '/farm/$farmId/species/$speciesId/animals',
-    path: '/farm/$farmId/species/$speciesId/animals',
-    getParentRoute: () => PrivatePrivatelayoutRoute,
-  } as any)
-const PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute =
-  PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRouteImport.update(
-    {
-      id: '/farm/$farmId/species/$speciesId/$animalId/animal',
-      path: '/farm/$farmId/species/$speciesId/$animalId/animal',
-      getParentRoute: () => PrivatePrivatelayoutRoute,
-    } as any,
-  )
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/v2': typeof V2RouteWithChildren
+  '/v2/alerts': typeof V2AlertsRoute
+  '/v2/dashboard': typeof V2DashboardRoute
+  '/v2/finance': typeof V2FinanceRoute
+  '/v2/inventory': typeof V2InventoryRoute
+  '/v2/production-units': typeof V2ProductionUnitsRoute
+  '/v2/settings': typeof V2SettingsRoute
+  '/v2/': typeof V2IndexRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
-  '/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
-  '/farm/$farmId/expenses': typeof PrivatePrivatelayoutFarmFarmIdExpensesRoute
-  '/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
-  '/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
-  '/farm/$farmId/flocks': typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
-  '/farm/$farmId/inventory': typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
-  '/farm/$farmId/tasks': typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
-  '/farm/$farmId/flocks/$flockId': typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
-  '/farm/$farmId/species/': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
-  '/farm/$farmId/species/$speciesId/animals': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
-  '/farm/$farmId/species/$speciesId/$animalId/animal': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute
+  '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/v2/alerts': typeof V2AlertsRoute
+  '/v2/dashboard': typeof V2DashboardRoute
+  '/v2/finance': typeof V2FinanceRoute
+  '/v2/inventory': typeof V2InventoryRoute
+  '/v2/production-units': typeof V2ProductionUnitsRoute
+  '/v2/settings': typeof V2SettingsRoute
+  '/v2': typeof V2IndexRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
-  '/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
-  '/farm/$farmId/expenses': typeof PrivatePrivatelayoutFarmFarmIdExpensesRoute
-  '/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
-  '/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
-  '/farm/$farmId/flocks': typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
-  '/farm/$farmId/inventory': typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
-  '/farm/$farmId/tasks': typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
-  '/farm/$farmId/flocks/$flockId': typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
-  '/farm/$farmId/species': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
-  '/farm/$farmId/species/$speciesId/animals': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
-  '/farm/$farmId/species/$speciesId/$animalId/animal': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute
+  '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_private/_privatelayout': typeof PrivatePrivatelayoutRouteWithChildren
+  '/v2': typeof V2RouteWithChildren
   '/_public/_layout': typeof PublicLayoutRouteWithChildren
+  '/v2/alerts': typeof V2AlertsRoute
+  '/v2/dashboard': typeof V2DashboardRoute
+  '/v2/finance': typeof V2FinanceRoute
+  '/v2/inventory': typeof V2InventoryRoute
+  '/v2/production-units': typeof V2ProductionUnitsRoute
+  '/v2/settings': typeof V2SettingsRoute
+  '/v2/': typeof V2IndexRoute
   '/_public/_layout/login': typeof PublicLayoutLoginRoute
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
-  '/_private/_privatelayout/farm/$farmId/dashboard': typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
-  '/_private/_privatelayout/farm/$farmId/expenses': typeof PrivatePrivatelayoutFarmFarmIdExpensesRoute
-  '/_private/_privatelayout/farm/$farmId/farm-members': typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
-  '/_private/_privatelayout/farm/$farmId/farms': typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
-  '/_private/_privatelayout/farm/$farmId/flocks': typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
-  '/_private/_privatelayout/farm/$farmId/inventory': typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
-  '/_private/_privatelayout/farm/$farmId/tasks': typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
-  '/_private/_privatelayout/farm/$farmId/flocks/$flockId': typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
-  '/_private/_privatelayout/farm/$farmId/species/': typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
-  '/_private/_privatelayout/farm/$farmId/species/$speciesId/animals': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
-  '/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal': typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute
+  '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/v2'
+    | '/v2/alerts'
+    | '/v2/dashboard'
+    | '/v2/finance'
+    | '/v2/inventory'
+    | '/v2/production-units'
+    | '/v2/settings'
+    | '/v2/'
     | '/login'
     | '/signup'
-    | '/farm/$farmId/dashboard'
-    | '/farm/$farmId/expenses'
-    | '/farm/$farmId/farm-members'
-    | '/farm/$farmId/farms'
-    | '/farm/$farmId/flocks'
-    | '/farm/$farmId/inventory'
-    | '/farm/$farmId/tasks'
-    | '/farm/$farmId/flocks/$flockId'
-    | '/farm/$farmId/species/'
-    | '/farm/$farmId/species/$speciesId/animals'
-    | '/farm/$farmId/species/$speciesId/$animalId/animal'
+    | '/compat/$farmId/$speciesId/$animalId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/v2/alerts'
+    | '/v2/dashboard'
+    | '/v2/finance'
+    | '/v2/inventory'
+    | '/v2/production-units'
+    | '/v2/settings'
+    | '/v2'
     | '/login'
     | '/signup'
-    | '/farm/$farmId/dashboard'
-    | '/farm/$farmId/expenses'
-    | '/farm/$farmId/farm-members'
-    | '/farm/$farmId/farms'
-    | '/farm/$farmId/flocks'
-    | '/farm/$farmId/inventory'
-    | '/farm/$farmId/tasks'
-    | '/farm/$farmId/flocks/$flockId'
-    | '/farm/$farmId/species'
-    | '/farm/$farmId/species/$speciesId/animals'
-    | '/farm/$farmId/species/$speciesId/$animalId/animal'
+    | '/compat/$farmId/$speciesId/$animalId'
   id:
     | '__root__'
     | '/'
-    | '/_private/_privatelayout'
+    | '/v2'
     | '/_public/_layout'
+    | '/v2/alerts'
+    | '/v2/dashboard'
+    | '/v2/finance'
+    | '/v2/inventory'
+    | '/v2/production-units'
+    | '/v2/settings'
+    | '/v2/'
     | '/_public/_layout/login'
     | '/_public/_layout/signup'
-    | '/_private/_privatelayout/farm/$farmId/dashboard'
-    | '/_private/_privatelayout/farm/$farmId/expenses'
-    | '/_private/_privatelayout/farm/$farmId/farm-members'
-    | '/_private/_privatelayout/farm/$farmId/farms'
-    | '/_private/_privatelayout/farm/$farmId/flocks'
-    | '/_private/_privatelayout/farm/$farmId/inventory'
-    | '/_private/_privatelayout/farm/$farmId/tasks'
-    | '/_private/_privatelayout/farm/$farmId/flocks/$flockId'
-    | '/_private/_privatelayout/farm/$farmId/species/'
-    | '/_private/_privatelayout/farm/$farmId/species/$speciesId/animals'
-    | '/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal'
+    | '/compat/$farmId/$speciesId/$animalId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PrivatePrivatelayoutRoute: typeof PrivatePrivatelayoutRouteWithChildren
+  V2Route: typeof V2RouteWithChildren
   PublicLayoutRoute: typeof PublicLayoutRouteWithChildren
+  CompatFarmIdSpeciesIdAnimalIdRoute: typeof CompatFarmIdSpeciesIdAnimalIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/v2': {
+      id: '/v2'
+      path: '/v2'
+      fullPath: '/v2'
+      preLoaderRoute: typeof V2RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -237,18 +200,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v2/': {
+      id: '/v2/'
+      path: '/'
+      fullPath: '/v2/'
+      preLoaderRoute: typeof V2IndexRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/settings': {
+      id: '/v2/settings'
+      path: '/settings'
+      fullPath: '/v2/settings'
+      preLoaderRoute: typeof V2SettingsRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/production-units': {
+      id: '/v2/production-units'
+      path: '/production-units'
+      fullPath: '/v2/production-units'
+      preLoaderRoute: typeof V2ProductionUnitsRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/inventory': {
+      id: '/v2/inventory'
+      path: '/inventory'
+      fullPath: '/v2/inventory'
+      preLoaderRoute: typeof V2InventoryRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/finance': {
+      id: '/v2/finance'
+      path: '/finance'
+      fullPath: '/v2/finance'
+      preLoaderRoute: typeof V2FinanceRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/dashboard': {
+      id: '/v2/dashboard'
+      path: '/dashboard'
+      fullPath: '/v2/dashboard'
+      preLoaderRoute: typeof V2DashboardRouteImport
+      parentRoute: typeof V2Route
+    }
+    '/v2/alerts': {
+      id: '/v2/alerts'
+      path: '/alerts'
+      fullPath: '/v2/alerts'
+      preLoaderRoute: typeof V2AlertsRouteImport
+      parentRoute: typeof V2Route
+    }
     '/_public/_layout': {
       id: '/_public/_layout'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof PublicLayoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_private/_privatelayout': {
-      id: '/_private/_privatelayout'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof PrivatePrivatelayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/_layout/signup': {
@@ -265,139 +270,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLayoutLoginRouteImport
       parentRoute: typeof PublicLayoutRoute
     }
-    '/_private/_privatelayout/farm/$farmId/tasks': {
-      id: '/_private/_privatelayout/farm/$farmId/tasks'
-      path: '/farm/$farmId/tasks'
-      fullPath: '/farm/$farmId/tasks'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdTasksRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/inventory': {
-      id: '/_private/_privatelayout/farm/$farmId/inventory'
-      path: '/farm/$farmId/inventory'
-      fullPath: '/farm/$farmId/inventory'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdInventoryRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/flocks': {
-      id: '/_private/_privatelayout/farm/$farmId/flocks'
-      path: '/farm/$farmId/flocks'
-      fullPath: '/farm/$farmId/flocks'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/farms': {
-      id: '/_private/_privatelayout/farm/$farmId/farms'
-      path: '/farm/$farmId/farms'
-      fullPath: '/farm/$farmId/farms'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmsRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/farm-members': {
-      id: '/_private/_privatelayout/farm/$farmId/farm-members'
-      path: '/farm/$farmId/farm-members'
-      fullPath: '/farm/$farmId/farm-members'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/expenses': {
-      id: '/_private/_privatelayout/farm/$farmId/expenses'
-      path: '/farm/$farmId/expenses'
-      fullPath: '/farm/$farmId/expenses'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdExpensesRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/dashboard': {
-      id: '/_private/_privatelayout/farm/$farmId/dashboard'
-      path: '/farm/$farmId/dashboard'
-      fullPath: '/farm/$farmId/dashboard'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdDashboardRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/species/': {
-      id: '/_private/_privatelayout/farm/$farmId/species/'
-      path: '/farm/$farmId/species'
-      fullPath: '/farm/$farmId/species/'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/flocks/$flockId': {
-      id: '/_private/_privatelayout/farm/$farmId/flocks/$flockId'
-      path: '/$flockId'
-      fullPath: '/farm/$farmId/flocks/$flockId'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRouteImport
-      parentRoute: typeof PrivatePrivatelayoutFarmFarmIdFlocksRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/species/$speciesId/animals': {
-      id: '/_private/_privatelayout/farm/$farmId/species/$speciesId/animals'
-      path: '/farm/$farmId/species/$speciesId/animals'
-      fullPath: '/farm/$farmId/species/$speciesId/animals'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
-    }
-    '/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal': {
-      id: '/_private/_privatelayout/farm/$farmId/species/$speciesId/$animalId/animal'
-      path: '/farm/$farmId/species/$speciesId/$animalId/animal'
-      fullPath: '/farm/$farmId/species/$speciesId/$animalId/animal'
-      preLoaderRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRouteImport
-      parentRoute: typeof PrivatePrivatelayoutRoute
+    '/compat/$farmId/$speciesId/$animalId': {
+      id: '/compat/$farmId/$speciesId/$animalId'
+      path: '/compat/$farmId/$speciesId/$animalId'
+      fullPath: '/compat/$farmId/$speciesId/$animalId'
+      preLoaderRoute: typeof CompatFarmIdSpeciesIdAnimalIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface PrivatePrivatelayoutFarmFarmIdFlocksRouteChildren {
-  PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute: typeof PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute
+interface V2RouteChildren {
+  V2AlertsRoute: typeof V2AlertsRoute
+  V2DashboardRoute: typeof V2DashboardRoute
+  V2FinanceRoute: typeof V2FinanceRoute
+  V2InventoryRoute: typeof V2InventoryRoute
+  V2ProductionUnitsRoute: typeof V2ProductionUnitsRoute
+  V2SettingsRoute: typeof V2SettingsRoute
+  V2IndexRoute: typeof V2IndexRoute
 }
 
-const PrivatePrivatelayoutFarmFarmIdFlocksRouteChildren: PrivatePrivatelayoutFarmFarmIdFlocksRouteChildren =
-  {
-    PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute:
-      PrivatePrivatelayoutFarmFarmIdFlocksFlockIdRoute,
-  }
-
-const PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren =
-  PrivatePrivatelayoutFarmFarmIdFlocksRoute._addFileChildren(
-    PrivatePrivatelayoutFarmFarmIdFlocksRouteChildren,
-  )
-
-interface PrivatePrivatelayoutRouteChildren {
-  PrivatePrivatelayoutFarmFarmIdDashboardRoute: typeof PrivatePrivatelayoutFarmFarmIdDashboardRoute
-  PrivatePrivatelayoutFarmFarmIdExpensesRoute: typeof PrivatePrivatelayoutFarmFarmIdExpensesRoute
-  PrivatePrivatelayoutFarmFarmIdFarmMembersRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmMembersRoute
-  PrivatePrivatelayoutFarmFarmIdFarmsRoute: typeof PrivatePrivatelayoutFarmFarmIdFarmsRoute
-  PrivatePrivatelayoutFarmFarmIdFlocksRoute: typeof PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren
-  PrivatePrivatelayoutFarmFarmIdInventoryRoute: typeof PrivatePrivatelayoutFarmFarmIdInventoryRoute
-  PrivatePrivatelayoutFarmFarmIdTasksRoute: typeof PrivatePrivatelayoutFarmFarmIdTasksRoute
-  PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute
-  PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute
-  PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute: typeof PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute
+const V2RouteChildren: V2RouteChildren = {
+  V2AlertsRoute: V2AlertsRoute,
+  V2DashboardRoute: V2DashboardRoute,
+  V2FinanceRoute: V2FinanceRoute,
+  V2InventoryRoute: V2InventoryRoute,
+  V2ProductionUnitsRoute: V2ProductionUnitsRoute,
+  V2SettingsRoute: V2SettingsRoute,
+  V2IndexRoute: V2IndexRoute,
 }
 
-const PrivatePrivatelayoutRouteChildren: PrivatePrivatelayoutRouteChildren = {
-  PrivatePrivatelayoutFarmFarmIdDashboardRoute:
-    PrivatePrivatelayoutFarmFarmIdDashboardRoute,
-  PrivatePrivatelayoutFarmFarmIdExpensesRoute:
-    PrivatePrivatelayoutFarmFarmIdExpensesRoute,
-  PrivatePrivatelayoutFarmFarmIdFarmMembersRoute:
-    PrivatePrivatelayoutFarmFarmIdFarmMembersRoute,
-  PrivatePrivatelayoutFarmFarmIdFarmsRoute:
-    PrivatePrivatelayoutFarmFarmIdFarmsRoute,
-  PrivatePrivatelayoutFarmFarmIdFlocksRoute:
-    PrivatePrivatelayoutFarmFarmIdFlocksRouteWithChildren,
-  PrivatePrivatelayoutFarmFarmIdInventoryRoute:
-    PrivatePrivatelayoutFarmFarmIdInventoryRoute,
-  PrivatePrivatelayoutFarmFarmIdTasksRoute:
-    PrivatePrivatelayoutFarmFarmIdTasksRoute,
-  PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute:
-    PrivatePrivatelayoutFarmFarmIdSpeciesIndexRoute,
-  PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute:
-    PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalsRoute,
-  PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute:
-    PrivatePrivatelayoutFarmFarmIdSpeciesSpeciesIdAnimalIdAnimalRoute,
-}
-
-const PrivatePrivatelayoutRouteWithChildren =
-  PrivatePrivatelayoutRoute._addFileChildren(PrivatePrivatelayoutRouteChildren)
+const V2RouteWithChildren = V2Route._addFileChildren(V2RouteChildren)
 
 interface PublicLayoutRouteChildren {
   PublicLayoutLoginRoute: typeof PublicLayoutLoginRoute
@@ -415,8 +318,9 @@ const PublicLayoutRouteWithChildren = PublicLayoutRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PrivatePrivatelayoutRoute: PrivatePrivatelayoutRouteWithChildren,
+  V2Route: V2RouteWithChildren,
   PublicLayoutRoute: PublicLayoutRouteWithChildren,
+  CompatFarmIdSpeciesIdAnimalIdRoute: CompatFarmIdSpeciesIdAnimalIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

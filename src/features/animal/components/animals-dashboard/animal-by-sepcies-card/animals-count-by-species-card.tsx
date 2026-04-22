@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import type { IAnimalsCountBySpeciesResponse } from "@/features/animal/types/animal-types";
-import { Link, useParams } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 interface AnimalCardProps {
@@ -42,7 +42,6 @@ export const AnimalCountBySpeciesCard = ({
 	animal,
 	attentionCount,
 }: AnimalCardProps) => {
-	const { farmId } = useParams({ strict: false });
 	const { t } = useTranslation("animalsCountBySpeciesCard");
 
 	return (
@@ -79,8 +78,7 @@ export const AnimalCountBySpeciesCard = ({
 				{/* View Details Button */}
 				<Link
 					className="flex-none flex items-center"
-					to="/farm/$farmId/species/$speciesId/animals"
-					params={{ farmId: farmId!, speciesId: animal.species.id }}
+					to="/v2/production-units"
 				>
 					<Button
 						variant="outline"

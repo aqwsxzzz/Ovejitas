@@ -21,7 +21,7 @@ interface AnimalCardProps {
 
 export const AnimalCard = ({ animal, sex }: AnimalCardProps) => {
 	const { t } = useTranslation("animalCard");
-	const { farmId, speciesId } = useParams({ strict: false });
+	const { speciesId } = useParams({ strict: false });
 
 	const getStatusVariant = (
 		status: IAnimal["status"],
@@ -40,12 +40,7 @@ export const AnimalCard = ({ animal, sex }: AnimalCardProps) => {
 
 	return (
 		<Link
-			to="/farm/$farmId/species/$speciesId/$animalId/animal"
-			params={{
-				farmId: farmId!,
-				animalId: animal.id,
-				speciesId: speciesId!,
-			}}
+			to="/v2/production-units"
 			className="no-underline"
 		>
 			<Card className="border-2 p-2 flex flex-col gap-1 min-h-0 max-w-full">
