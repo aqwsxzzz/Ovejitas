@@ -1,0 +1,21 @@
+PATH: /api/v1/auth/login | METHOD: POST | OPID: auth_login | TAGS: auth | PARAMS:  | BODY: LoginInput | RESP: 200:TokenPair,422:HTTPValidationError
+PATH: /api/v1/auth/me | METHOD: GET | OPID: auth_me | TAGS: auth | PARAMS:  | BODY: N/A | RESP: 200:MeResponse
+PATH: /api/v1/auth/refresh | METHOD: POST | OPID: auth_refresh | TAGS: auth | PARAMS:  | BODY: RefreshInput | RESP: 200:TokenPair,422:HTTPValidationError
+PATH: /api/v1/auth/register | METHOD: POST | OPID: auth_register | TAGS: auth | PARAMS:  | BODY: RegisterInput | RESP: 201:TokenPair,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets | METHOD: GET | OPID: assets_list_assets | TAGS: assets | PARAMS: farm_id(path) | BODY: N/A | RESP: 200:Page_AssetRead_,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets | METHOD: POST | OPID: assets_create_asset | TAGS: assets | PARAMS: farm_id(path) | BODY: AssetCreate | RESP: 201:AssetRead,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id} | METHOD: DELETE | OPID: assets_delete_asset | TAGS: assets | PARAMS: farm_id(path),asset_id(path) | BODY: N/A | RESP: 204:N/A,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id} | METHOD: GET | OPID: assets_get_asset | TAGS: assets | PARAMS: farm_id(path),asset_id(path) | BODY: N/A | RESP: 200:AssetRead,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id} | METHOD: PATCH | OPID: assets_update_asset | TAGS: assets | PARAMS: farm_id(path),asset_id(path) | BODY: AssetUpdate | RESP: 200:AssetRead,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id}/individuals | METHOD: GET | OPID: individuals_list_individuals | TAGS: individuals | PARAMS: farm_id(path),asset_id(path) | BODY: N/A | RESP: 200:Page_IndividualRead_,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id}/individuals | METHOD: POST | OPID: individuals_create_individual | TAGS: individuals | PARAMS: farm_id(path),asset_id(path) | BODY: IndividualCreate | RESP: 201:IndividualRead,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id}/individuals/{individual_id} | METHOD: DELETE | OPID: individuals_delete_individual | TAGS: individuals | PARAMS: individual_id(path),farm_id(path),asset_id(path) | BODY: N/A | RESP: 204:N/A,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id}/individuals/{individual_id} | METHOD: GET | OPID: individuals_get_individual | TAGS: individuals | PARAMS: individual_id(path),farm_id(path),asset_id(path) | BODY: N/A | RESP: 200:IndividualRead,422:HTTPValidationError
+PATH: /api/v1/farms/{farm_id}/assets/{asset_id}/individuals/{individual_id} | METHOD: PATCH | OPID: individuals_update_individual | TAGS: individuals | PARAMS: individual_id(path),farm_id(path),asset_id(path) | BODY: IndividualUpdate | RESP: 200:IndividualRead,422:HTTPValidationError
+PATH: /health | METHOD: GET | OPID: health_health | TAGS: health | PARAMS:  | BODY: N/A | RESP: 200:N/A
+
+--- Enums ---
+AssetKind: animal, crop, equipment, material, location
+AssetMode: aggregated, individual
+IndividualStatus: active, sold, deceased, archived
+IndividualSex: Not found
