@@ -7,10 +7,11 @@ export const Route = createFileRoute("/v2/alerts")({
 function AlertsPage() {
 	return (
 		<section className="v2-card p-5 md:p-6">
-			<p className="v2-kicker">Phase D</p>
-			<h2 className="mt-2 text-xl font-semibold">Alerts</h2>
+			<p className="v2-kicker">Fase D</p>
+			<h2 className="mt-2 text-xl font-semibold">Alertas</h2>
 			<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-				Actionable alert queue and event outcomes will be centered here.
+				Aqui se centralizara la cola de alertas accionables y resultados de
+				eventos.
 			</p>
 		</section>
 	);
