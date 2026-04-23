@@ -1,5 +1,11 @@
 import axios from "axios";
 
+declare module "axios" {
+	export interface AxiosRequestConfig<D = any> {
+		_skipAuthRefresh?: boolean;
+	}
+}
+
 export const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_API_URL,
 	withCredentials: true,

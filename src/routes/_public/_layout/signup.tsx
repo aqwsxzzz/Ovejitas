@@ -34,7 +34,7 @@ function RouteComponent() {
 					<p>{t("footerTitle")}</p>
 					<Link
 						className=""
-						to="/login"
+						to="/v2/login"
 					>
 						<Button
 							variant="link"
