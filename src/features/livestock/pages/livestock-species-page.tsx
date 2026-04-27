@@ -1,18 +1,12 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
-import { listLivestockGroups } from "@/shared/api/v2-mock-repository";
-import type { LivestockIndividual } from "@/shared/types/v2-domain-types";
-
-const ATTENTION_STYLES: Record<string, string> = {
-	overdue: "border-red-200 bg-red-50",
-	watch: "border-amber-200 bg-amber-50",
-};
-
-const ATTENTION_LABELS: Record<string, string> = {
-	overdue: "VENCIDO",
-	watch: "VIGILAR",
-};
+import { useGetUserProfile } from "@/features/auth/api/auth-queries";
+import {
+	useGetLivestockAssetById,
+	useListIndividualsByAssetId,
+} from "@/features/livestock/api/livestock-queries";
+import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 const SEX_SYMBOL: Record<string, string> = {
 	male: "♂",
@@ -40,38 +34,28 @@ function SpeciesSearchBar({ value, onChange }: SpeciesSearchBarProps) {
 				onChange={(event) => onChange(event.target.value)}
 				placeholder="Buscar por nombre o tag..."
 				className="flex-1 bg-transparent text-sm outline-none placeholder:text-[color:var(--v2-ink-soft)]"
-				aria-label="Buscar animales de esta especie por nombre o tag"
+				aria-label="Buscar individuos por nombre o tag"
 			/>
 		</div>
 	);
 }
 
-function SpeciesAnimalRow({ animal }: { animal: LivestockIndividual }) {
-	const toneClass = animal.attention
-		? (ATTENTION_STYLES[animal.attention] ??
-			"border-[color:var(--v2-border)] bg-white")
-		: "border-[color:var(--v2-border)] bg-white";
-
+function SpeciesAnimalRow({ animal }: { animal: ILivestockIndividual }) {
 	return (
-		<div className={`rounded-xl border p-3 ${toneClass}`}>
+		<div className="rounded-xl border border-[color:var(--v2-border)] bg-white p-3">
 			<div className="flex items-start justify-between gap-3">
 				<div className="min-w-0">
-					<p className="font-medium leading-tight">{animal.name}</p>
+					<p className="font-medium leading-tight">
+						{animal.name ?? "Sin nombre"}
+					</p>
 					<p className="mt-0.5 text-xs text-[color:var(--v2-ink-soft)]">
 						{animal.tag}
-						{animal.sex ? ` · ${SEX_SYMBOL[animal.sex] ?? "–"}` : ""}
+						{animal.extra?.sex
+							? ` · ${SEX_SYMBOL[animal.extra.sex as string] ?? "–"}`
+							: ""}
+						{animal.status ? ` · ${animal.status}` : ""}
 					</p>
-					{animal.attentionNote && (
-						<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-							{animal.attentionNote}
-						</p>
-					)}
 				</div>
-				{animal.attention && (
-					<span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-bold tracking-wide text-[color:var(--v2-ink)]">
-						{ATTENTION_LABELS[animal.attention]}
-					</span>
-				)}
 			</div>
 		</div>
 	);
@@ -85,40 +69,68 @@ export function LivestockSpeciesPage({
 	speciesKey,
 }: LivestockSpeciesPageProps) {
 	const [query, setQuery] = useState("");
-	const group = listLivestockGroups().find(
-		(item) => item.categoryKey === speciesKey,
-	);
+	const { data: currentUser } = useGetUserProfile();
+	const farmId = currentUser?.lastVisitedFarmId ?? "";
+	const assetId = Number(speciesKey);
+	const isValidAssetId = Number.isInteger(assetId);
 
-	if (!group) {
-		return (
-			<section className="space-y-4">
-				<div className="v2-card p-5">
-					<p className="v2-kicker">Ganado</p>
-					<h1 className="mt-2 text-xl font-semibold">Especie no encontrada</h1>
-					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-						No encontramos la especie solicitada.
-					</p>
-					<Link
-						to="/v2/production-units"
-						className="mt-4 inline-flex rounded-full border border-[color:var(--v2-ink)] px-3 py-1.5 text-xs font-semibold"
-					>
-						Volver a especies
-					</Link>
-				</div>
-			</section>
-		);
-	}
+	const { data: asset } = useGetLivestockAssetById({
+		farmId,
+		assetId,
+		enabled: !!farmId && isValidAssetId,
+	});
 
-	const animals = [...group.attentionItems, ...group.healthyItems];
+	const { data: individualsResponse, isLoading } = useListIndividualsByAssetId({
+		farmId,
+		assetId: speciesKey,
+		filters: { pageSize: 100 },
+		enabled: !!farmId && isValidAssetId && asset?.mode === "individual",
+	});
+
+	const animals = individualsResponse?.data ?? [];
 	const filteredAnimals = useMemo(() => {
 		if (!query.trim()) return animals;
 		const normalizedQuery = query.toLowerCase();
 		return animals.filter(
 			(animal) =>
-				animal.name.toLowerCase().includes(normalizedQuery) ||
+				(animal.name ?? "").toLowerCase().includes(normalizedQuery) ||
 				animal.tag.toLowerCase().includes(normalizedQuery),
 		);
 	}, [animals, query]);
+
+	if (!farmId) {
+		return (
+			<section className="space-y-4">
+				<div className="v2-card p-5">
+					<p className="v2-kicker">Ganado</p>
+					<h1 className="mt-2 text-xl font-semibold">Selecciona una granja</h1>
+					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
+						No hay granja activa para cargar datos reales.
+					</p>
+				</div>
+			</section>
+		);
+	}
+
+	if (!asset) {
+		return (
+			<section className="space-y-4">
+				<div className="v2-card p-5">
+					<p className="v2-kicker">Ganado</p>
+					<h1 className="mt-2 text-xl font-semibold">Lote no encontrado</h1>
+					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
+						No encontramos un lote real para el id solicitado.
+					</p>
+					<Link
+						to="/v2/production-units"
+						className="mt-4 inline-flex rounded-full border border-[color:var(--v2-ink)] px-3 py-1.5 text-xs font-semibold"
+					>
+						Volver a lotes
+					</Link>
+				</div>
+			</section>
+		);
+	}
 
 	return (
 		<section className="space-y-4">
@@ -126,12 +138,22 @@ export function LivestockSpeciesPage({
 				<p className="v2-kicker">Ganado</p>
 				<div className="mt-2 flex flex-wrap items-center justify-between gap-3">
 					<div>
-						<h1 className="text-xl font-semibold">
-							<span aria-hidden="true">{group.icon}</span>
-							<span className="ml-2">{group.categoryLabel}</span>
-						</h1>
+						<div className="flex items-center gap-2">
+							<h1 className="text-xl font-semibold">🐔 {asset.name}</h1>
+							<span
+								className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+									asset.mode === "individual"
+										? "bg-blue-50 text-blue-700"
+										: "bg-(--v2-surface) text-(--v2-ink-soft)"
+								}`}
+							>
+								{asset.mode === "individual" ? "Individual" : "Agrupado"}
+							</span>
+						</div>
 						<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-							{animals.length} animales en esta especie
+							{asset.mode === "individual"
+								? `${animals.length} individuos en este lote`
+								: "Lote agrupado — el conteo se registra por eventos"}
 						</p>
 					</div>
 					<Link
@@ -143,25 +165,40 @@ export function LivestockSpeciesPage({
 				</div>
 			</div>
 
-			<SpeciesSearchBar
-				value={query}
-				onChange={setQuery}
-			/>
-
-			<div className="space-y-2">
-				{filteredAnimals.length === 0 ? (
+			{asset.mode === "aggregated" ? (
+				<div className="v2-card p-5">
 					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						No hay animales de esta especie que coincidan con "{query}".
+						Este lote es agrupado. Los individuos solo se pueden crear en lotes
+						de modo individual.
 					</p>
-				) : (
-					filteredAnimals.map((animal) => (
-						<SpeciesAnimalRow
-							key={animal.id}
-							animal={animal}
-						/>
-					))
-				)}
-			</div>
+				</div>
+			) : (
+				<>
+					<SpeciesSearchBar
+						value={query}
+						onChange={setQuery}
+					/>
+
+					<div className="space-y-2">
+						{isLoading ? (
+							<p className="text-sm text-[color:var(--v2-ink-soft)]">
+								Cargando individuos...
+							</p>
+						) : filteredAnimals.length === 0 ? (
+							<p className="text-sm text-[color:var(--v2-ink-soft)]">
+								No hay individuos que coincidan con "{query}".
+							</p>
+						) : (
+							filteredAnimals.map((animal) => (
+								<SpeciesAnimalRow
+									key={animal.id}
+									animal={animal}
+								/>
+							))
+						)}
+					</div>
+				</>
+			)}
 		</section>
 	);
 }
