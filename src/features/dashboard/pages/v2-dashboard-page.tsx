@@ -1,7 +1,8 @@
-import {
-	getDashboardSnapshot,
-	getUnitDashboardSlices,
-} from "@/shared/api/v2-mock-repository";
+import { useMemo } from "react";
+
+import { useGetUserProfile } from "@/features/auth/api/auth-queries";
+import { useListLivestockAssetsByFarmId } from "@/features/livestock/api/livestock-queries";
+import type { UnitDashboardSlice } from "@/shared/types/v2-domain-types";
 
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
 
@@ -10,85 +11,86 @@ const MONTH_LABEL = new Date().toLocaleDateString("es-EC", {
 	year: "numeric",
 });
 
+function mapAssetToSlice(asset: {
+	id: number;
+	name: string;
+	kind: string;
+	mode: "aggregated" | "individual";
+}): UnitDashboardSlice {
+	return {
+		unitId: String(asset.id),
+		unitName: asset.name,
+		categoryLabel: asset.kind,
+		mode: asset.mode === "aggregated" ? "aggregate" : "individual",
+		status: "active",
+		kpis: [
+			{ label: "Animales", value: "Sin dato" },
+			{ label: "Produccion", value: "Sin dato" },
+			{ label: "Neto", value: "Sin dato" },
+			{ label: "Alimento", value: "Sin dato" },
+		],
+	};
+}
+
 export function V2DashboardPage() {
-	const snapshot = getDashboardSnapshot();
-	const slices = getUnitDashboardSlices();
+	const { data: currentUser } = useGetUserProfile();
+	const farmId = currentUser?.lastVisitedFarmId ?? "";
+
+	const { data: farmAssetsResponse, isLoading } =
+		useListLivestockAssetsByFarmId({
+			farmId,
+			filters: { kind: "animal", page: 1, pageSize: 20 },
+			enabled: !!farmId,
+		});
+
+	const slices = useMemo(
+		() =>
+			(farmAssetsResponse?.data ?? []).map((asset) => mapAssetToSlice(asset)),
+		[farmAssetsResponse],
+	);
 
 	return (
 		<section className="space-y-4">
-			{/* Page header */}
 			<div>
 				<p className="v2-kicker">{MONTH_LABEL}</p>
-				<h1 className="mt-1 text-2xl font-semibold">{snapshot.farmName}</h1>
+				<h1 className="mt-1 text-2xl font-semibold">Dashboard</h1>
 			</div>
 
-			{/* Production unit slider — one card per unit */}
-			<UnitKpiSlider slices={slices} />
-
-			{/* Alerts */}
-			{snapshot.urgentAlerts.length > 0 && (
+			{!farmId ? (
 				<article className="v2-card p-4">
-					<p className="v2-kicker mb-3">Alertas urgentes</p>
-					<div className="space-y-2">
-						{snapshot.urgentAlerts.map((alert) => (
-							<div
-								key={alert.id}
-								className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-3"
-							>
-								<span
-									className="mt-0.5 text-base"
-									aria-hidden="true"
-								>
-									🔴
-								</span>
-								<div className="min-w-0">
-									<p className="font-medium leading-tight">{alert.title}</p>
-									<p className="mt-0.5 text-sm text-[color:var(--v2-ink-soft)]">
-										{alert.description}
-									</p>
-								</div>
-							</div>
-						))}
-					</div>
+					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+						Selecciona una granja para cargar datos reales del dashboard.
+					</p>
 				</article>
+			) : isLoading ? (
+				<article className="v2-card p-4">
+					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+						Cargando unidades reales...
+					</p>
+				</article>
+			) : slices.length === 0 ? (
+				<article className="v2-card p-4">
+					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+						No hay unidades de produccion reales para mostrar.
+					</p>
+				</article>
+			) : (
+				<UnitKpiSlider slices={slices} />
 			)}
 
-			{/* Tareas de hoy */}
+			<article className="v2-card p-4">
+				<p className="v2-kicker mb-3">Alertas urgentes</p>
+				<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					Las alertas se mostraran cuando el backend de reportes este disponible
+					para este modulo.
+				</p>
+			</article>
+
 			<article className="v2-card p-4">
 				<p className="v2-kicker mb-3">Tareas de hoy</p>
-				{snapshot.todayTasks.length === 0 ? (
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						No hay pendientes.
-					</p>
-				) : (
-					<div className="space-y-2">
-						{snapshot.todayTasks.map((task) => (
-							<div
-								key={task.id}
-								className="flex items-center gap-3 rounded-xl border border-[color:var(--v2-border)] p-3"
-							>
-								<span
-									className={`h-2 w-2 shrink-0 rounded-full ${
-										task.priority === "high"
-											? "bg-red-500"
-											: "bg-[color:var(--v2-primary)]"
-									}`}
-									aria-label={
-										task.priority === "high"
-											? "Prioridad alta"
-											: "Prioridad normal"
-									}
-								/>
-								<div className="min-w-0 flex-1">
-									<p className="font-medium leading-tight">{task.title}</p>
-									<p className="text-xs text-[color:var(--v2-ink-soft)]">
-										{task.unitName}
-									</p>
-								</div>
-							</div>
-						))}
-					</div>
-				)}
+				<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					No hay tareas con datos reales disponibles en esta vista.
+				</p>
 			</article>
 		</section>
 	);

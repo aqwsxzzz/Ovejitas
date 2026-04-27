@@ -1,8 +1,3 @@
-import {
-	getFlockDetailSnapshot,
-	listLivestockGroups,
-} from "@/shared/api/v2-mock-repository";
-
 export interface QuickActionItem {
 	id: string;
 	label: string;
@@ -98,6 +93,12 @@ function speciesActions(): QuickActionItem[] {
 function flockActions(): QuickActionItem[] {
 	return [
 		makeAction(
+			"nueva-categoria-evento",
+			"Nueva categoria",
+			"Crear categoria para eventos del lote",
+			"🏷️",
+		),
+		makeAction(
 			"registrar-huevos",
 			"Registrar huevos",
 			"Produccion del dia",
@@ -152,11 +153,9 @@ function decodeLastSegment(pathname: string): string | null {
 	return last ? decodeURIComponent(last) : null;
 }
 
-function findSpeciesLabel(speciesKey: string): string {
-	const match = listLivestockGroups().find(
-		(group) => group.categoryKey === speciesKey && group.mode === "individual",
-	);
-	return match?.categoryLabel ?? "especie";
+function toHumanSlug(value: string): string {
+	if (!value.trim()) return "especie";
+	return value.replace(/[-_]+/g, " ").trim();
 }
 
 export function getQuickActionSheetConfig(
@@ -164,11 +163,13 @@ export function getQuickActionSheetConfig(
 ): QuickActionSheetConfig {
 	if (pathname.startsWith("/v2/production-units/flock/")) {
 		const unitId = decodeLastSegment(pathname) ?? "";
-		const flock = getFlockDetailSnapshot(unitId);
+		const contextLabel = unitId ? `Lote ${unitId}` : undefined;
 		return {
-			title: flock ? `Acciones para ${flock.unitName}` : "Acciones de lote",
+			title: contextLabel
+				? `Acciones para ${contextLabel}`
+				: "Acciones de lote",
 			description: "Registrar rapido desde este lote.",
-			contextLabel: flock?.unitName,
+			contextLabel,
 			actions: flockActions(),
 		};
 	}
@@ -179,7 +180,7 @@ export function getQuickActionSheetConfig(
 		pathname !== "/v2/production-units/"
 	) {
 		const speciesKey = decodeLastSegment(pathname) ?? "";
-		const label = findSpeciesLabel(speciesKey);
+		const label = toHumanSlug(speciesKey);
 		return {
 			title: `Acciones para ${label.toLowerCase()}`,
 			description: "Registrar o crear dentro de esta especie.",
