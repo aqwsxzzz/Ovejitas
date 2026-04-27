@@ -191,21 +191,21 @@ export function IndividualDetail({
 
 			{/* Extra metadata (if any) */}
 			{Object.keys(individual.extra).length > 0 && (
-					<div className="rounded-lg border border-gray-200 bg-white p-6">
-						<h2 className="mb-4 text-xl font-bold">Metadata</h2>
-						<div className="space-y-2">
-							{Object.entries(individual.extra).map(([key, value]) => (
-								<div
-									key={key}
-									className="flex justify-between"
-								>
-									<span className="text-gray-600">{key}</span>
-									<span className="font-semibold">{String(value)}</span>
-								</div>
-							))}
-						</div>
+				<div className="rounded-lg border border-gray-200 bg-white p-6">
+					<h2 className="mb-4 text-xl font-bold">Metadata</h2>
+					<div className="space-y-2">
+						{Object.entries(individual.extra).map(([key, value]) => (
+							<div
+								key={key}
+								className="flex justify-between"
+							>
+								<span className="text-gray-600">{key}</span>
+								<span className="font-semibold">{String(value)}</span>
+							</div>
+						))}
 					</div>
-				)}
+				</div>
+			)}
 		</div>
 	);
 }

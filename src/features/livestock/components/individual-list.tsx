@@ -108,8 +108,9 @@ export function IndividualList({
 											{individual.tag ?? "Sin tag"}
 											{(() => {
 												const sex =
-													(individual.extra?.sex as keyof typeof SEX_SYMBOL | undefined) ??
-													"unknown";
+													(individual.extra?.sex as
+														| keyof typeof SEX_SYMBOL
+														| undefined) ?? "unknown";
 												return ` · ${SEX_SYMBOL[sex]}`;
 											})()}
 										</p>
