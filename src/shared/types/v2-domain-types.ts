@@ -1,5 +1,12 @@
 export type UnitMode = "aggregate" | "individual";
 
+export type AssetKind =
+	| "animal"
+	| "crop"
+	| "equipment"
+	| "material"
+	| "location";
+
 export type EventType =
 	| "production"
 	| "expense"
@@ -22,6 +29,7 @@ export interface ProductionUnit {
 	farmId: string;
 	name: string;
 	categoryLabel: string;
+	kind: AssetKind;
 	mode: UnitMode;
 	status: "active" | "inactive";
 	location?: string;
@@ -40,6 +48,7 @@ export interface Individual {
 	sex?: "male" | "female" | "unknown";
 	birthDate?: string;
 	status: "active" | "sold" | "deceased";
+	parentId?: string;
 	motherId?: string;
 	fatherId?: string;
 	attributes?: Record<string, string | number | boolean>;
