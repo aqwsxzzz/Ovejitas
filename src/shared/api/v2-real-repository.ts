@@ -238,6 +238,7 @@ export function getFeedSummary(): FeedSummary {
 export async function createEvent(
 	_payload: EventCreatePayload,
 ): Promise<FarmEvent> {
+	void _payload;
 	throw new Error(
 		"Event creation not yet implemented. Waiting for event endpoints.",
 	);
@@ -249,12 +250,13 @@ export async function listEvents(_params?: {
 	type?: FarmEvent["type"];
 	status?: FarmEvent["status"];
 }): Promise<FarmEvent[]> {
+	void _params;
 	throw new Error(
 		"Event listing not yet implemented. Waiting for event endpoints.",
 	);
 }
 
-export async function listCategories(): Promise<any[]> {
+export async function listCategories(): Promise<unknown[]> {
 	const farmId = getCurrentFarmId();
 	try {
 		return await backendApi.fetchEventCategories(farmId);

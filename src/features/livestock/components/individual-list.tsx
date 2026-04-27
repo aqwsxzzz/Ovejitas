@@ -31,13 +31,13 @@ export function IndividualList({
 	onCreateIndividual,
 }: IndividualListProps) {
 	const [searchQuery, setSearchQuery] = useState("");
-	const [deletingId, setDeletingId] = useState<string | null>(null);
+	const [deletingId, setDeletingId] = useState<number | null>(null);
 
 	const filtered = individuals.filter((ind) => {
 		const q = searchQuery.toLowerCase();
 		return (
 			(ind.name?.toLowerCase().includes(q) ?? false) ||
-			ind.tag.toLowerCase().includes(q)
+			(ind.tag ?? "").toLowerCase().includes(q)
 		);
 	});
 
@@ -105,9 +105,13 @@ export function IndividualList({
 											{individual.name || individual.tag}
 										</p>
 										<p className="text-sm text-gray-600">
-											{individual.tag}
-											{individual.sex &&
-												` · ${SEX_SYMBOL[individual.sex as keyof typeof SEX_SYMBOL]}`}
+											{individual.tag ?? "Sin tag"}
+											{(() => {
+												const sex =
+													(individual.extra?.sex as keyof typeof SEX_SYMBOL | undefined) ??
+													"unknown";
+												return ` · ${SEX_SYMBOL[sex]}`;
+											})()}
 										</p>
 									</div>
 								</div>

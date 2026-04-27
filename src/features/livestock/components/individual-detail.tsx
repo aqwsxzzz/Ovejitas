@@ -21,7 +21,7 @@ export function IndividualDetail({
 }: IndividualDetailProps) {
 	const [isEditingGenealogy, setIsEditingGenealogy] = useState(false);
 	const [selectedAncestorId, setSelectedAncestorId] = useState<
-		string | undefined
+		number | undefined
 	>();
 
 	// Build individual lookup map for genealogy
@@ -189,13 +189,12 @@ export function IndividualDetail({
 				)}
 			</div>
 
-			{/* Attributes (if any) */}
-			{individual.attributes &&
-				Object.keys(individual.attributes).length > 0 && (
+			{/* Extra metadata (if any) */}
+			{Object.keys(individual.extra).length > 0 && (
 					<div className="rounded-lg border border-gray-200 bg-white p-6">
-						<h2 className="mb-4 text-xl font-bold">Attributes</h2>
+						<h2 className="mb-4 text-xl font-bold">Metadata</h2>
 						<div className="space-y-2">
-							{Object.entries(individual.attributes).map(([key, value]) => (
+							{Object.entries(individual.extra).map(([key, value]) => (
 								<div
 									key={key}
 									className="flex justify-between"

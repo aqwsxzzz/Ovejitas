@@ -46,7 +46,7 @@ interface GenealogyTreeProps {
 	/** Callback when clicking an individual in the tree */
 	onSelectIndividual?: (individual: ILivestockIndividual) => void;
 	/** ID of currently selected individual */
-	selectedId?: string;
+	selectedId?: number;
 }
 
 /**
@@ -89,7 +89,7 @@ export function GenealogyTree({
 			maternalGrandfather?.id,
 			paternalGrandmother?.id,
 			paternalGrandfather?.id,
-		].filter((id): id is string => Boolean(id));
+		].filter((id): id is number => id != null);
 
 		const uniqueAncestors = new Set(ancestors);
 		if (uniqueAncestors.size < ancestors.length) {

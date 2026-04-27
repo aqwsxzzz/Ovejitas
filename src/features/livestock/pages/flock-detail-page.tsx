@@ -261,7 +261,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			await apiDeleteIndividual({
 				farmId,
 				assetId: unitId,
-				individualId: individual.id,
+				individualId: String(individual.id),
 			});
 
 			await refetchIndividuals();
@@ -273,7 +273,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		(individual: ILivestockIndividual) => {
 			navigate({
 				to: "/v2/production-units/flock/$unitId/individuals/$individualId",
-				params: { unitId, individualId: individual.id },
+				params: { unitId, individualId: String(individual.id) },
 			});
 		},
 		[navigate, unitId],
@@ -447,7 +447,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				await handleCreateEvent(data);
 				return;
 			}
-			if (!farmId || !unitId) return;
+			if (!farmId || !unitId || !asset) return;
 
 			setIsSavingEvent(true);
 			try {
@@ -730,7 +730,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						onEditIndividual={(individual) =>
 							navigate({
 								to: "/v2/production-units/flock/$unitId/individuals/$individualId",
-								params: { unitId, individualId: individual.id },
+								params: { unitId, individualId: String(individual.id) },
 							})
 						}
 						onDeleteIndividual={handleDeleteIndividual}

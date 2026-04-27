@@ -1,7 +1,7 @@
 import axios from "axios";
 
 declare module "axios" {
-	export interface AxiosRequestConfig<D = any> {
+	export interface AxiosRequestConfig {
 		_skipAuthRefresh?: boolean;
 	}
 }

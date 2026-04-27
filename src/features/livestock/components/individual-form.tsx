@@ -51,8 +51,14 @@ export function IndividualForm({
 
 	const [error, setError] = useState<string | null>(null);
 
+	type IndividualFormFieldValue =
+		| string
+		| IndividualSex
+		| IndividualFormData["status"]
+		| undefined;
+
 	const handleChange = useCallback(
-		(field: keyof IndividualFormData, value: any) => {
+		(field: keyof IndividualFormData, value: IndividualFormFieldValue) => {
 			setFormData((prev) => ({ ...prev, [field]: value || undefined }));
 			setError(null);
 		},
@@ -235,7 +241,12 @@ export function IndividualForm({
 					</label>
 					<select
 						value={formData.status ?? "active"}
-						onChange={(e) => handleChange("status", e.target.value as any)}
+						onChange={(e) =>
+							handleChange(
+								"status",
+								e.target.value as IndividualFormData["status"],
+							)
+						}
 						className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 					>
 						<option value="active">Active</option>

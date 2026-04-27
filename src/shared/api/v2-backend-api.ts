@@ -71,7 +71,7 @@ export interface BackendEventRead {
 	event_type: string;
 	occurred_at: string;
 	// Discriminated fields depend on event_type
-	data: Record<string, any>;
+	data: Record<string, unknown>;
 	created_at: string;
 	updated_at: string;
 }

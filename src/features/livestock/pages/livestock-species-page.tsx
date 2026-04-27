@@ -94,7 +94,7 @@ export function LivestockSpeciesPage({
 		return animals.filter(
 			(animal) =>
 				(animal.name ?? "").toLowerCase().includes(normalizedQuery) ||
-				animal.tag.toLowerCase().includes(normalizedQuery),
+				(animal.tag ?? "").toLowerCase().includes(normalizedQuery),
 		);
 	}, [animals, query]);
 
