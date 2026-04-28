@@ -12,6 +12,12 @@ interface IndividualDetailProps {
 	isLoading?: boolean;
 }
 
+function formatIndividualLabel(individual: ILivestockIndividual): string {
+	const tag = individual.tag?.trim() || `#${individual.id}`;
+	const name = individual.name?.trim();
+	return name ? `${tag} (${name})` : tag;
+}
+
 export function IndividualDetail({
 	individual,
 	allIndividuals,
@@ -23,6 +29,7 @@ export function IndividualDetail({
 	const [selectedAncestorId, setSelectedAncestorId] = useState<
 		number | undefined
 	>();
+	const individualLabel = formatIndividualLabel(individual);
 
 	// Build individual lookup map for genealogy
 	const individualsMap = useMemo(() => {
@@ -56,11 +63,7 @@ export function IndividualDetail({
 	};
 
 	const handleDelete = async () => {
-		if (
-			confirm(
-				`Delete ${individual.name || individual.tag}? This cannot be undone.`,
-			)
-		) {
+		if (confirm(`Delete ${individualLabel}? This cannot be undone.`)) {
 			await onDelete?.();
 		}
 	};
@@ -92,10 +95,7 @@ export function IndividualDetail({
 			<div className="rounded-lg border border-gray-200 bg-white p-6">
 				<div className="flex items-start justify-between gap-4">
 					<div>
-						<h1 className="text-3xl font-bold">
-							{individual.name || individual.tag}
-						</h1>
-						<p className="mt-1 text-gray-600">Tag: {individual.tag}</p>
+						<h1 className="text-3xl font-bold">{individualLabel}</h1>
 					</div>
 					<div className="text-right">
 						<div

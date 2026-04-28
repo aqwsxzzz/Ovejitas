@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
@@ -83,20 +83,15 @@ export function LivestockSpeciesPage({
 	const { data: individualsResponse, isLoading } = useListIndividualsByAssetId({
 		farmId,
 		assetId: speciesKey,
-		filters: { pageSize: 100 },
+		filters: {
+			q: query.trim() || undefined,
+			sort: "-updated_at",
+			pageSize: 20,
+		},
 		enabled: !!farmId && isValidAssetId && asset?.mode === "individual",
 	});
 
 	const animals = individualsResponse?.data ?? [];
-	const filteredAnimals = useMemo(() => {
-		if (!query.trim()) return animals;
-		const normalizedQuery = query.toLowerCase();
-		return animals.filter(
-			(animal) =>
-				(animal.name ?? "").toLowerCase().includes(normalizedQuery) ||
-				(animal.tag ?? "").toLowerCase().includes(normalizedQuery),
-		);
-	}, [animals, query]);
 
 	if (!farmId) {
 		return (
@@ -152,7 +147,7 @@ export function LivestockSpeciesPage({
 						</div>
 						<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
 							{asset.mode === "individual"
-								? `${animals.length} individuos en este lote`
+								? `${individualsResponse?.meta.total ?? animals.length} individuos en este lote`
 								: "Lote agrupado — el conteo se registra por eventos"}
 						</p>
 					</div>
@@ -184,12 +179,12 @@ export function LivestockSpeciesPage({
 							<p className="text-sm text-[color:var(--v2-ink-soft)]">
 								Cargando individuos...
 							</p>
-						) : filteredAnimals.length === 0 ? (
+						) : animals.length === 0 ? (
 							<p className="text-sm text-[color:var(--v2-ink-soft)]">
 								No hay individuos que coincidan con "{query}".
 							</p>
 						) : (
-							filteredAnimals.map((animal) => (
+							animals.map((animal) => (
 								<SpeciesAnimalRow
 									key={animal.id}
 									animal={animal}

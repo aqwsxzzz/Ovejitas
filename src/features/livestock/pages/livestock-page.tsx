@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -8,6 +8,8 @@ import {
 	updateLivestockAssetById,
 } from "@/features/livestock/api/livestock-api";
 import { useListLivestockAssetsByFarmId } from "@/features/livestock/api/livestock-queries";
+import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
+import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
 interface SearchBarProps {
 	value: string;
@@ -38,6 +40,7 @@ function SearchBar({ value, onChange }: SearchBarProps) {
 function LivestockUnitRow(props: {
 	id: number;
 	name: string;
+	kind: LivestockAssetKind;
 	location: string | null;
 	mode: "aggregated" | "individual";
 	isEditing: boolean;
@@ -51,6 +54,9 @@ function LivestockUnitRow(props: {
 	onDelete: () => Promise<void>;
 	isDeleting: boolean;
 }) {
+	const navigate = useNavigate();
+	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
 	if (props.isEditing) {
 		return (
 			<div className="v2-card space-y-3 p-4">
@@ -90,50 +96,111 @@ function LivestockUnitRow(props: {
 		);
 	}
 
+	const openDetail = () => {
+		if (isConfirmingDelete) return;
+
+		navigate({
+			to: "/v2/production-units/flock/$unitId",
+			params: { unitId: String(props.id) },
+		});
+	};
+
 	return (
-		<div className="v2-card block p-4 transition hover:-translate-y-px">
+		<div
+			role={isConfirmingDelete ? undefined : "link"}
+			tabIndex={isConfirmingDelete ? -1 : 0}
+			onClick={openDetail}
+			onKeyDown={(event) => {
+				if (isConfirmingDelete) return;
+
+				if (event.key === "Enter" || event.key === " ") {
+					event.preventDefault();
+					openDetail();
+				}
+			}}
+			className="v2-card block cursor-pointer p-4 transition hover:-translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--v2-ink) focus-visible:ring-offset-2"
+		>
 			<div className="flex items-center justify-between gap-3">
-				<div className="min-w-0">
-					<div className="flex items-center gap-2">
-						<Link
-							to="/v2/production-units/flock/$unitId"
-							params={{ unitId: String(props.id) }}
-							className="font-semibold leading-tight hover:underline"
-						>
-							🐔 {props.name}
-						</Link>
-						<span
-							className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-								props.mode === "individual"
-									? "bg-blue-50 text-blue-700"
-									: "bg-(--v2-surface) text-(--v2-ink-soft)"
-							}`}
-						>
-							{props.mode === "individual" ? "Individual" : "Agrupado"}
-						</span>
+				<div className="flex min-w-0 items-start gap-3">
+					<AssetKindMedal kind={props.kind} />
+					<div className="min-w-0">
+						<div className="flex flex-wrap items-center gap-2">
+							<p className="font-semibold leading-tight">{props.name}</p>
+							<span
+								className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+									props.mode === "individual"
+										? "bg-blue-50 text-blue-700"
+										: "bg-(--v2-surface) text-(--v2-ink-soft)"
+								}`}
+							>
+								{props.mode === "individual" ? "Individual" : "Agrupado"}
+							</span>
+						</div>
+						<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
+							{props.location ?? "Sin ubicacion"}
+						</p>
 					</div>
-					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-						{props.location ?? "Sin ubicacion"}
-					</p>
 				</div>
-				<div className="flex items-center gap-2">
-					<button
-						type="button"
-						onClick={props.onStartEdit}
-						className="rounded-full border border-[color:var(--v2-border)] px-3 py-1 text-xs font-semibold"
-					>
-						Editar
-					</button>
-					<button
-						type="button"
-						onClick={() => void props.onDelete()}
-						disabled={props.isDeleting}
-						className="rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
-					>
-						{props.isDeleting ? "Eliminando..." : "Eliminar"}
-					</button>
-				</div>
+				{isConfirmingDelete ? null : (
+					<div className="flex items-center gap-2">
+						<button
+							type="button"
+							onClick={(event) => {
+								event.stopPropagation();
+								setIsConfirmingDelete(false);
+								props.onStartEdit();
+							}}
+							aria-label="Editar"
+							title="Editar"
+							className="rounded-full border border-(--v2-border) px-2.5 py-1 text-sm font-semibold"
+						>
+							<span aria-hidden="true">✎</span>
+						</button>
+						<button
+							type="button"
+							onClick={(event) => {
+								event.stopPropagation();
+								setIsConfirmingDelete(true);
+							}}
+							disabled={props.isDeleting}
+							aria-label="Eliminar"
+							title="Eliminar"
+							className="rounded-full border border-red-200 px-2.5 py-1 text-sm font-semibold text-red-700 disabled:opacity-60"
+						>
+							<span aria-hidden="true">{props.isDeleting ? "⏳" : "🗑"}</span>
+						</button>
+					</div>
+				)}
 			</div>
+
+			{isConfirmingDelete ? (
+				<div
+					className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50/70 px-3 py-2"
+					onClick={(event) => event.stopPropagation()}
+				>
+					<p className="text-sm font-medium text-red-700">
+						Eliminar este lote?
+					</p>
+					<div className="flex items-center gap-2">
+						<button
+							type="button"
+							onClick={() => setIsConfirmingDelete(false)}
+							disabled={props.isDeleting}
+							className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold disabled:opacity-60"
+						>
+							Cancelar
+						</button>
+						<button
+							type="button"
+							onClick={() => void props.onDelete()}
+							disabled={props.isDeleting}
+							className="rounded-full border border-red-200 bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
+						>
+							{props.isDeleting ? "Eliminando..." : "Confirmar eliminar"}
+						</button>
+					</div>
+				</div>
+			) : null}
 		</div>
 	);
 }
@@ -154,23 +221,16 @@ export function LivestockPage() {
 	} = useListLivestockAssetsByFarmId({
 		farmId,
 		filters: {
+			q: query.trim() || undefined,
+			sort: "-updated_at",
 			kind: "animal",
 			page: 1,
-			pageSize: 100,
+			pageSize: 20,
 		},
 		enabled: !!farmId,
 	});
 
 	const units = farmAssetsResponse?.data ?? [];
-	const filteredUnits = useMemo(() => {
-		if (!query.trim()) return units;
-		const normalizedQuery = query.toLowerCase();
-		return units.filter(
-			(unit) =>
-				unit.name.toLowerCase().includes(normalizedQuery) ||
-				(unit.location ?? "").toLowerCase().includes(normalizedQuery),
-		);
-	}, [units, query]);
 
 	const handleStartEdit = (
 		id: number,
@@ -200,7 +260,6 @@ export function LivestockPage() {
 
 	const handleDeleteAsset = async (assetId: number) => {
 		if (!farmId) return;
-		if (!confirm("Eliminar este lote?")) return;
 
 		setDeletingAssetId(assetId);
 		try {
@@ -233,7 +292,7 @@ export function LivestockPage() {
 				<div>
 					<h1 className="text-2xl font-semibold">Ganado</h1>
 					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						{units.length} lotes activos
+						{farmAssetsResponse?.meta.total ?? units.length} lotes activos
 					</p>
 				</div>
 			</div>
@@ -247,17 +306,18 @@ export function LivestockPage() {
 				<p className="text-sm text-[color:var(--v2-ink-soft)]">
 					Cargando lotes...
 				</p>
-			) : filteredUnits.length === 0 ? (
+			) : units.length === 0 ? (
 				<p className="text-sm text-[color:var(--v2-ink-soft)]">
 					No hay lotes reales que coincidan con "{query}".
 				</p>
 			) : (
 				<div className="space-y-2">
-					{filteredUnits.map((unit) => (
+					{units.map((unit) => (
 						<LivestockUnitRow
 							key={unit.id}
 							id={unit.id}
 							name={unit.name}
+							kind={unit.kind}
 							location={unit.location}
 							mode={unit.mode}
 							isEditing={editingAssetId === unit.id}

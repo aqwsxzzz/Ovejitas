@@ -15,6 +15,8 @@ const SEX_SYMBOL = {
 
 interface IndividualListProps {
 	individuals: ILivestockIndividual[];
+	searchQuery: string;
+	onSearchQueryChange: (value: string) => void;
 	isLoading?: boolean;
 	onSelectIndividual?: (individual: ILivestockIndividual) => void;
 	onEditIndividual?: (individual: ILivestockIndividual) => void;
@@ -22,27 +24,35 @@ interface IndividualListProps {
 	onCreateIndividual?: () => void;
 }
 
+function getIndividualTag(individual: ILivestockIndividual): string {
+	return individual.tag?.trim() || `#${individual.id}`;
+}
+
+function getIndividualName(individual: ILivestockIndividual): string | null {
+	const name = individual.name?.trim();
+	return name || null;
+}
+
+function formatIndividualLabel(individual: ILivestockIndividual): string {
+	const tag = getIndividualTag(individual);
+	const name = getIndividualName(individual);
+	return name ? `${tag} (${name})` : tag;
+}
+
 export function IndividualList({
 	individuals,
+	searchQuery,
+	onSearchQueryChange,
 	isLoading = false,
 	onSelectIndividual,
 	onEditIndividual,
 	onDeleteIndividual,
 	onCreateIndividual,
 }: IndividualListProps) {
-	const [searchQuery, setSearchQuery] = useState("");
 	const [deletingId, setDeletingId] = useState<number | null>(null);
 
-	const filtered = individuals.filter((ind) => {
-		const q = searchQuery.toLowerCase();
-		return (
-			(ind.name?.toLowerCase().includes(q) ?? false) ||
-			(ind.tag ?? "").toLowerCase().includes(q)
-		);
-	});
-
 	const handleDelete = async (individual: ILivestockIndividual) => {
-		if (!confirm(`Delete ${individual.name || individual.tag}?`)) return;
+		if (!confirm(`Delete ${formatIndividualLabel(individual)}?`)) return;
 
 		try {
 			setDeletingId(individual.id);
@@ -74,7 +84,7 @@ export function IndividualList({
 					type="search"
 					placeholder="Search by name or tag..."
 					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
+					onChange={(event) => onSearchQueryChange(event.target.value)}
 					className="flex-1 bg-transparent outline-none"
 				/>
 			</div>
@@ -82,15 +92,15 @@ export function IndividualList({
 			{/* List */}
 			{isLoading ? (
 				<div className="py-8 text-center text-gray-500">Loading...</div>
-			) : filtered.length === 0 ? (
+			) : individuals.length === 0 ? (
 				<div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 py-8 text-center text-gray-500">
-					{individuals.length === 0
-						? "No individuals yet"
-						: "No individuals match your search"}
+					{searchQuery.trim()
+						? "No individuals match your search"
+						: "No individuals yet"}
 				</div>
 			) : (
 				<div className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
-					{filtered.map((individual) => (
+					{individuals.map((individual) => (
 						<div
 							key={individual.id}
 							className="flex items-center justify-between gap-4 p-4 hover:bg-gray-50"
@@ -101,19 +111,24 @@ export function IndividualList({
 							>
 								<div className="flex items-center gap-3">
 									<div>
-										<p className="font-semibold">
-											{individual.name || individual.tag}
-										</p>
-										<p className="text-sm text-gray-600">
-											{individual.tag ?? "Sin tag"}
-											{(() => {
-												const sex =
-													(individual.extra?.sex as
-														| keyof typeof SEX_SYMBOL
-														| undefined) ?? "unknown";
-												return ` · ${SEX_SYMBOL[sex]}`;
-											})()}
-										</p>
+										{(() => {
+											const tag = getIndividualTag(individual);
+											const name = getIndividualName(individual);
+											const sex =
+												(individual.extra?.sex as
+													| keyof typeof SEX_SYMBOL
+													| undefined) ?? "unknown";
+											return (
+												<>
+													<p className="font-semibold">{tag}</p>
+													<p className="text-sm text-gray-600">
+														{name
+															? `${name} · ${SEX_SYMBOL[sex]}`
+															: SEX_SYMBOL[sex]}
+													</p>
+												</>
+											);
+										})()}
 									</div>
 								</div>
 							</button>

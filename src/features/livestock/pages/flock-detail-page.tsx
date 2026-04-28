@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
+	createEventCategoryByFarmId,
 	createEventByAssetId,
 	createIndividual as apiCreateIndividual,
 	deleteEventByAssetId,
@@ -72,6 +73,15 @@ interface FlockDetailPageProps {
 	unitId: string;
 }
 
+interface ProductionProductSeries {
+	productKey: string;
+	productLabel: string;
+	firstDayLabel: string;
+	totalLast7Days: number;
+	todayCount: number;
+	series: number[];
+}
+
 function parseNumeric(value: string | null): number {
 	if (!value) return 0;
 	const parsed = Number(value);
@@ -97,6 +107,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 	const [isCreatingIndividual, setIsCreatingIndividual] = useState(false);
 	const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+	const [individualSearchQuery, setIndividualSearchQuery] = useState("");
 	const [isSavingEvent, setIsSavingEvent] = useState(false);
 	const [editingEvent, setEditingEvent] = useState<ILivestockEvent | null>(
 		null,
@@ -122,11 +133,27 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		enabled: !!farmId && !!unitId,
 	});
 
-	const { data: eventCategories = [] } = useListEventCategoriesByFarmId({
+	const {
+		data: listedIndividualsResponse,
+		isLoading: isLoadingListedIndividuals,
+		refetch: refetchListedIndividuals,
+	} = useListIndividualsByAssetId({
 		farmId,
-		filters: { archived: false, pageSize: 100 },
-		enabled: !!farmId,
+		assetId: unitId,
+		filters: {
+			q: individualSearchQuery.trim() || undefined,
+			sort: "-updated_at",
+			pageSize: 20,
+		},
+		enabled: !!farmId && !!unitId,
 	});
+
+	const { data: eventCategories = [], refetch: refetchEventCategories } =
+		useListEventCategoriesByFarmId({
+			farmId,
+			filters: { archived: false, pageSize: 100 },
+			enabled: !!farmId,
+		});
 
 	const {
 		data: eventsResponse,
@@ -140,12 +167,13 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 	});
 
 	const allIndividuals = individualsResponse?.data ?? [];
+	const listedIndividuals = listedIndividualsResponse?.data ?? [];
 	const unitEvents = useMemo(
 		() => eventsResponse?.data ?? [],
 		[eventsResponse],
 	);
 
-	const dailyEggSeries = useMemo(() => {
+	const productionSeries = useMemo<ProductionProductSeries[]>(() => {
 		const today = new Date();
 		const days = Array.from({ length: 7 }, (_, index) => {
 			const d = new Date(today);
@@ -154,30 +182,59 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			return d;
 		});
 		const dayKeys = days.map((d) => d.toISOString().slice(0, 10));
-		const totalsByDay = new Map(dayKeys.map((k) => [k, 0]));
+		const firstDayLabel = days[0]?.toLocaleDateString("es-EC", {
+			weekday: "short",
+		});
+		const categoryNameById = new Map(
+			eventCategories.map((category) => [category.id, category.name]),
+		);
+		const totalsByProduct = new Map<string, Map<string, number>>();
 
 		for (const event of unitEvents) {
 			if (event.type !== "production") continue;
 			const key = event.occurred_at.slice(0, 10);
-			if (!totalsByDay.has(key)) continue;
-			totalsByDay.set(
+			if (!dayKeys.includes(key)) continue;
+
+			const productKey =
+				event.category_id != null ? String(event.category_id) : "uncategorized";
+			if (!totalsByProduct.has(productKey)) {
+				totalsByProduct.set(
+					productKey,
+					new Map(dayKeys.map((dayKey) => [dayKey, 0])),
+				);
+			}
+
+			const productTotals = totalsByProduct.get(productKey);
+			if (!productTotals) continue;
+
+			productTotals.set(
 				key,
-				(totalsByDay.get(key) ?? 0) + parseNumeric(event.quantity),
+				(productTotals.get(key) ?? 0) + parseNumeric(event.quantity),
 			);
 		}
 
-		return dayKeys.map((key) => totalsByDay.get(key) ?? 0);
-	}, [unitEvents]);
+		return Array.from(totalsByProduct.entries())
+			.map(([productKey, totalsByDay]) => {
+				const series = dayKeys.map((dayKey) => totalsByDay.get(dayKey) ?? 0);
+				const totalLast7Days = series.reduce((sum, value) => sum + value, 0);
+				const todayCount = series[series.length - 1] ?? 0;
+				const productLabel =
+					productKey === "uncategorized"
+						? "Sin categoria"
+						: (categoryNameById.get(Number(productKey)) ??
+							`Categoria #${productKey}`);
 
-	const eggsLast7Days = useMemo(
-		() => dailyEggSeries.reduce((sum, value) => sum + value, 0),
-		[dailyEggSeries],
-	);
-
-	const todayEggCount = useMemo(
-		() => dailyEggSeries[dailyEggSeries.length - 1] ?? 0,
-		[dailyEggSeries],
-	);
+				return {
+					productKey,
+					productLabel,
+					firstDayLabel: firstDayLabel ?? "",
+					totalLast7Days,
+					todayCount,
+					series,
+				};
+			})
+			.sort((left, right) => right.totalLast7Days - left.totalLast7Days);
+	}, [unitEvents, eventCategories]);
 
 	const netMonth = useMemo(() => {
 		const now = new Date();
@@ -208,9 +265,24 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		}, 0);
 	}, [unitEvents]);
 
+	const aggregatedAcquiredTotal = useMemo(() => {
+		return unitEvents.reduce((acc, event) => {
+			if (event.type !== "acquisition" || event.quantity == null) return acc;
+			return acc + parseNumeric(event.quantity);
+		}, 0);
+	}, [unitEvents]);
+
+	const taggedMembersCount = useMemo(
+		() =>
+			allIndividuals.filter((individual) =>
+				Boolean(individual.tag && individual.tag.trim()),
+			).length,
+		[allIndividuals],
+	);
+
 	const countSummary = useMemo(() => {
 		if (asset?.mode === "individual") {
-			return `${allIndividuals.length} individuos`;
+			return `${taggedMembersCount} individuos etiquetados`;
 		}
 		if (asset?.mode === "aggregated") {
 			return unitEvents.some(
@@ -222,7 +294,26 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				: "sin conteo registrado";
 		}
 		return "";
-	}, [asset?.mode, allIndividuals.length, aggregatedBalance, unitEvents]);
+	}, [asset?.mode, taggedMembersCount, aggregatedBalance, unitEvents]);
+
+	const countCardValue = useMemo(() => {
+		if (asset?.mode === "aggregated") {
+			return `${aggregatedBalance} / ${aggregatedAcquiredTotal}`;
+		}
+		return `${allIndividuals.length} / ${allIndividuals.length}`;
+	}, [
+		asset?.mode,
+		aggregatedBalance,
+		aggregatedAcquiredTotal,
+		allIndividuals.length,
+	]);
+
+	const countCardNote = useMemo(() => {
+		if (asset?.mode === "aggregated") {
+			return "Conteo neto (adquisiciones - mortalidades) / total adquirido";
+		}
+		return "Conteo actual de individuos activos en este lote";
+	}, [asset?.mode]);
 
 	const hasDescription = Boolean(asset?.description?.trim());
 	const descriptionPreview = useMemo(() => {
@@ -250,8 +341,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			setIsCreatingIndividual(false);
 			await refetchIndividuals();
+			await refetchListedIndividuals();
 		},
-		[farmId, unitId, refetchIndividuals],
+		[farmId, unitId, refetchIndividuals, refetchListedIndividuals],
 	);
 
 	const handleDeleteIndividual = useCallback(
@@ -265,8 +357,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			});
 
 			await refetchIndividuals();
+			await refetchListedIndividuals();
 		},
-		[farmId, unitId, refetchIndividuals],
+		[farmId, unitId, refetchIndividuals, refetchListedIndividuals],
 	);
 
 	const handleSelectIndividual = useCallback(
@@ -500,6 +593,27 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		[editingEvent, handleCreateEvent, farmId, unitId, refetchEvents, asset],
 	);
 
+	const handleCreateProductionCategory = useCallback(
+		async ({ name, color }: { name: string; color?: string }) => {
+			if (!farmId) {
+				throw new Error("Farm id is required to create categories.");
+			}
+
+			const createdCategory = await createEventCategoryByFarmId({
+				farmId,
+				data: {
+					type: "production",
+					name,
+					color,
+				},
+			});
+
+			await refetchEventCategories();
+			return createdCategory.id;
+		},
+		[farmId, refetchEventCategories],
+	);
+
 	if (!farmId) {
 		return (
 			<section className="space-y-4">
@@ -590,35 +704,48 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				</div>
 			</div>
 
-			<div className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
-				<p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
-					Huevos · ultimos 7 dias
-				</p>
-				<div className="mt-2 flex items-start justify-between gap-3">
-					<p className="text-5xl font-semibold leading-none">{eggsLast7Days}</p>
-					<div className="text-right text-sm text-[color:var(--v2-ink-soft)]">
-						<p className="text-xl font-semibold leading-none text-[color:var(--v2-ink)]">
-							0%
-						</p>
-						<p>tasa de postura</p>
-					</div>
+			{productionSeries.length > 0 ? (
+				<div className="grid gap-3">
+					{productionSeries.map((productSeries) => (
+						<div
+							key={productSeries.productKey}
+							className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]"
+						>
+							<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+								{productSeries.productLabel} · ultimos 7 dias
+							</p>
+							<div className="mt-2 flex items-start justify-between gap-3">
+								<p className="text-5xl font-semibold leading-none">
+									{productSeries.totalLast7Days}
+								</p>
+								<div className="text-right text-sm text-(--v2-ink-soft)">
+									<p className="text-xs uppercase tracking-[0.08em]">Hoy</p>
+									<p className="text-xl font-semibold leading-none text-(--v2-ink)">
+										{productSeries.todayCount}
+									</p>
+								</div>
+							</div>
+							<Bars
+								data={
+									productSeries.series.length > 0
+										? productSeries.series
+										: [0, 0, 0, 0, 0, 0, 0]
+								}
+							/>
+							<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+								<span>{productSeries.firstDayLabel}</span>
+								<span>Hoy · {productSeries.todayCount}</span>
+							</div>
+						</div>
+					))}
 				</div>
-				<Bars
-					data={
-						dailyEggSeries.length > 0 ? dailyEggSeries : [0, 0, 0, 0, 0, 0, 0]
-					}
-				/>
-				<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
-					<span>Lun</span>
-					<span>Hoy · {todayEggCount}</span>
-				</div>
-			</div>
+			) : null}
 
 			<div className="grid gap-3 md:grid-cols-2">
 				<MetricCard
 					label="Conteo"
-					value={`${allIndividuals.length} / ${allIndividuals.length}`}
-					note="Conteo actual de individuos activos en este lote"
+					value={countCardValue}
+					note={countCardNote}
 				/>
 				<MetricCard
 					label="Neto · mes"
@@ -658,6 +785,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								setEditingEvent(null);
 							}}
 							isSubmitting={isSavingEvent}
+							onCreateProductionCategory={handleCreateProductionCategory}
 							initialValues={
 								editingEvent
 									? {
@@ -724,8 +852,10 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					</div>
 				) : (
 					<IndividualList
-						individuals={allIndividuals}
-						isLoading={isLoadingIndividuals}
+						individuals={listedIndividuals}
+						searchQuery={individualSearchQuery}
+						onSearchQueryChange={setIndividualSearchQuery}
+						isLoading={isLoadingListedIndividuals}
 						onSelectIndividual={handleSelectIndividual}
 						onEditIndividual={(individual) =>
 							navigate({

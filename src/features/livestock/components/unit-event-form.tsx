@@ -24,6 +24,13 @@ export interface UnitEventFormData {
 	notes?: string;
 }
 
+interface CreateProductionCategoryInput {
+	name: string;
+	color?: string;
+}
+
+const NEW_CATEGORY_OPTION_VALUE = "__new__";
+
 interface UnitEventFormProps {
 	categories: ILivestockEventCategory[];
 	individuals: ILivestockIndividual[];
@@ -34,6 +41,9 @@ interface UnitEventFormProps {
 	isSubmitting: boolean;
 	initialValues?: UnitEventFormData;
 	submitLabel?: string;
+	onCreateProductionCategory?: (
+		input: CreateProductionCategoryInput,
+	) => Promise<number>;
 }
 
 function toDateTimeLocalValue(value: Date): string {
@@ -55,6 +65,7 @@ export function UnitEventForm({
 	isSubmitting,
 	initialValues,
 	submitLabel,
+	onCreateProductionCategory,
 }: UnitEventFormProps) {
 	const defaultType: LivestockEventType =
 		initialValues?.type ?? categories[0]?.type ?? "production";
@@ -90,6 +101,9 @@ export function UnitEventForm({
 	const [inventoryUnit, setInventoryUnit] = useState<string>("unit");
 	const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
 	const [error, setError] = useState<string>("");
+	const [newCategoryName, setNewCategoryName] = useState<string>("");
+	const [newCategoryColor, setNewCategoryColor] = useState<string>("#f2df77");
+	const [isCreatingCategory, setIsCreatingCategory] = useState<boolean>(false);
 	const isEditMode = Boolean(initialValues);
 	const canSelectIndividual = assetMode === "individual";
 	const canUseReproductive = assetKind === "animal";
@@ -101,6 +115,9 @@ export function UnitEventForm({
 	);
 
 	const currentCategoryId = useMemo(() => {
+		if (categoryId === NEW_CATEGORY_OPTION_VALUE) {
+			return NEW_CATEGORY_OPTION_VALUE;
+		}
 		if (
 			availableCategories.some((category) => category.id === Number(categoryId))
 		) {
@@ -108,6 +125,39 @@ export function UnitEventForm({
 		}
 		return "";
 	}, [availableCategories, categoryId]);
+
+	const isCreatingNewProductionCategory =
+		type === "production" && currentCategoryId === NEW_CATEGORY_OPTION_VALUE;
+
+	const handleCreateCategory = async () => {
+		setError("");
+
+		if (type !== "production") {
+			return;
+		}
+
+		if (!onCreateProductionCategory) {
+			setError("No se pudo crear la categoria desde esta vista.");
+			return;
+		}
+
+		if (!newCategoryName.trim()) {
+			setError("Escribe un nombre para la nueva categoria.");
+			return;
+		}
+
+		setIsCreatingCategory(true);
+		try {
+			const createdCategoryId = await onCreateProductionCategory({
+				name: newCategoryName.trim(),
+				color: newCategoryColor,
+			});
+			setCategoryId(String(createdCategoryId));
+			setNewCategoryName("");
+		} finally {
+			setIsCreatingCategory(false);
+		}
+	};
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
@@ -125,6 +175,16 @@ export function UnitEventForm({
 
 		if (type === "production" && !unit.trim()) {
 			setError("Unidad es requerida para eventos de produccion.");
+			return;
+		}
+
+		if (
+			type === "production" &&
+			(!currentCategoryId || currentCategoryId === NEW_CATEGORY_OPTION_VALUE)
+		) {
+			setError(
+				"Categoria es requerida para eventos de produccion. Crea o selecciona una para nombrar el producto.",
+			);
 			return;
 		}
 
@@ -202,7 +262,9 @@ export function UnitEventForm({
 				</label>
 
 				<label className="space-y-1 text-sm">
-					<span className="font-medium">Categoria</span>
+					<span className="font-medium">
+						Categoria {type === "production" ? "(requerida)" : "(opcional)"}
+					</span>
 					<select
 						value={currentCategoryId}
 						onChange={(event) => setCategoryId(event.target.value)}
@@ -217,7 +279,51 @@ export function UnitEventForm({
 								{category.name}
 							</option>
 						))}
+						{type === "production" ? (
+							<option value={NEW_CATEGORY_OPTION_VALUE}>
+								+ Nueva categoria
+							</option>
+						) : null}
 					</select>
+					{type === "production" ? (
+						<p className="text-xs text-(--v2-ink-soft)">
+							Usa la categoria como nombre del producto (ej: huevos, leche,
+							lana).
+						</p>
+					) : null}
+					{isCreatingNewProductionCategory ? (
+						<div className="mt-2 grid gap-2 rounded-lg border border-(--v2-border) bg-white/60 p-2">
+							<label className="space-y-1 text-xs">
+								<span className="font-medium">Nombre de categoria</span>
+								<input
+									type="text"
+									value={newCategoryName}
+									onChange={(event) => setNewCategoryName(event.target.value)}
+									placeholder="Ej: Huevos"
+									className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
+								/>
+							</label>
+							<label className="space-y-1 text-xs">
+								<span className="font-medium">Color</span>
+								<input
+									type="color"
+									value={newCategoryColor}
+									onChange={(event) => setNewCategoryColor(event.target.value)}
+									className="h-10 w-full rounded-lg border border-(--v2-border) px-1 py-1"
+								/>
+							</label>
+							<div className="flex justify-end">
+								<button
+									type="button"
+									onClick={() => void handleCreateCategory()}
+									disabled={isCreatingCategory || isSubmitting}
+									className="rounded-full border border-(--v2-ink) px-3 py-1 text-xs font-semibold disabled:opacity-60"
+								>
+									{isCreatingCategory ? "Creando..." : "Crear categoria"}
+								</button>
+							</div>
+						</div>
+					) : null}
 				</label>
 			</div>
 

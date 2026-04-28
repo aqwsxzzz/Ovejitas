@@ -1,5 +1,20 @@
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
+function formatIndividualLabel(individual: ILivestockIndividual): string {
+	const tag = individual.tag?.trim() || `#${individual.id}`;
+	const name = individual.name?.trim();
+	return name ? `${tag} (${name})` : tag;
+}
+
+function getIndividualTag(individual: ILivestockIndividual): string {
+	return individual.tag?.trim() || `#${individual.id}`;
+}
+
+function getIndividualName(individual: ILivestockIndividual): string | null {
+	const name = individual.name?.trim();
+	return name || null;
+}
+
 interface GenealogyCellProps {
 	individual: ILivestockIndividual | null;
 	isHighlighted?: boolean;
@@ -22,6 +37,8 @@ function GenealogyCellComponent({
 
 	const sex = (individual.extra?.sex as string | undefined) ?? "unknown";
 	const sexSymbol = { male: "♂", female: "♀", unknown: "–" }[sex] ?? "–";
+	const tag = getIndividualTag(individual);
+	const name = getIndividualName(individual);
 
 	return (
 		<button
@@ -32,10 +49,10 @@ function GenealogyCellComponent({
 					: "border-gray-300 bg-white hover:border-blue-300"
 			}`}
 		>
-			<div className="truncate text-sm font-semibold">
-				{individual.name || individual.tag}
+			<div className="truncate text-sm font-semibold">{tag}</div>
+			<div className="truncate text-xs text-gray-600">
+				{name ? name : sexSymbol}
 			</div>
-			<div className="text-xs text-gray-600">{sexSymbol}</div>
 		</button>
 	);
 }
@@ -59,6 +76,8 @@ export function GenealogyTree({
 	onSelectIndividual,
 	selectedId,
 }: GenealogyTreeProps) {
+	const subjectLabel = formatIndividualLabel(individual);
+
 	// Build the tree structure
 	const mother = individual.mother_id
 		? individuals.get(individual.mother_id)
@@ -193,9 +212,7 @@ export function GenealogyTree({
 			{/* Subject */}
 			<div className="flex justify-center rounded-lg border-3 border-blue-600 bg-blue-50 p-4">
 				<div className="text-center">
-					<div className="text-lg font-bold text-blue-900">
-						{individual.name || individual.tag}
-					</div>
+					<div className="text-lg font-bold text-blue-900">{subjectLabel}</div>
 					<div className="text-sm text-blue-700">
 						{(individual.extra?.sex as string | undefined) === "male"
 							? "♂ Male"

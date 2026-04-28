@@ -14,6 +14,9 @@ import type {
 
 interface ListLivestockAssetsFilters {
 	q?: string;
+	sort?: string;
+	dateFrom?: string;
+	dateTo?: string;
 	kind?: LivestockAssetKind;
 	mode?: LivestockAssetMode;
 	page?: number;
@@ -23,6 +26,9 @@ interface ListLivestockAssetsFilters {
 interface ListIndividualsFilters {
 	q?: string;
 	sort?: string;
+	status?: ILivestockIndividual["status"];
+	dateFrom?: string;
+	dateTo?: string;
 	page?: number;
 	pageSize?: number;
 }
@@ -58,6 +64,9 @@ export const listLivestockAssetsByFarmId = ({
 		url: `/api/v1/farms/${farmId}/assets`,
 		urlParams: {
 			q: filters?.q,
+			sort: filters?.sort,
+			date_from: filters?.dateFrom,
+			date_to: filters?.dateTo,
 			kind: filters?.kind,
 			mode: filters?.mode,
 			page: filters?.page,
@@ -145,6 +154,9 @@ export const listIndividualsByAssetId = ({
 		urlParams: {
 			q: filters?.q,
 			sort: filters?.sort,
+			status: filters?.status,
+			date_from: filters?.dateFrom,
+			date_to: filters?.dateTo,
 			page: filters?.page,
 			page_size: filters?.pageSize,
 		},

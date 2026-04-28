@@ -18,6 +18,9 @@ import type {
 
 interface ListLivestockAssetsFilters {
 	q?: string;
+	sort?: string;
+	dateFrom?: string;
+	dateTo?: string;
 	kind?: LivestockAssetKind;
 	mode?: LivestockAssetMode;
 	page?: number;
@@ -27,6 +30,9 @@ interface ListLivestockAssetsFilters {
 interface ListIndividualsFilters {
 	q?: string;
 	sort?: string;
+	status?: ILivestockIndividual["status"];
+	dateFrom?: string;
+	dateTo?: string;
 	page?: number;
 	pageSize?: number;
 }
@@ -58,6 +64,9 @@ export const livestockQueryKeys = {
 			"assetsByFarm",
 			farmId,
 			filters?.q ?? "",
+			filters?.sort ?? "",
+			filters?.dateFrom ?? "",
+			filters?.dateTo ?? "",
 			filters?.kind ?? "",
 			filters?.mode ?? "",
 			filters?.page ?? 1,
@@ -76,6 +85,10 @@ export const livestockQueryKeys = {
 			farmId,
 			assetId,
 			filters?.q ?? "",
+			filters?.sort ?? "",
+			filters?.status ?? "",
+			filters?.dateFrom ?? "",
+			filters?.dateTo ?? "",
 			filters?.page ?? 1,
 			filters?.pageSize ?? 20,
 		] as const,
