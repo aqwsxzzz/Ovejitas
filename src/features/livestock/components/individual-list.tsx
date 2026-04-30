@@ -15,6 +15,7 @@ const SEX_SYMBOL = {
 
 interface IndividualListProps {
 	individuals: ILivestockIndividual[];
+	totalIndividuals?: number;
 	searchQuery: string;
 	onSearchQueryChange: (value: string) => void;
 	isLoading?: boolean;
@@ -41,6 +42,7 @@ function formatIndividualLabel(individual: ILivestockIndividual): string {
 
 export function IndividualList({
 	individuals,
+	totalIndividuals,
 	searchQuery,
 	onSearchQueryChange,
 	isLoading = false,
@@ -50,9 +52,10 @@ export function IndividualList({
 	onCreateIndividual,
 }: IndividualListProps) {
 	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const headerTotal = totalIndividuals ?? individuals.length;
 
 	const handleDelete = async (individual: ILivestockIndividual) => {
-		if (!confirm(`Delete ${formatIndividualLabel(individual)}?`)) return;
+		if (!confirm(`Eliminar ${formatIndividualLabel(individual)}?`)) return;
 
 		try {
 			setDeletingId(individual.id);
@@ -66,13 +69,13 @@ export function IndividualList({
 		<div className="space-y-4">
 			{/* Header */}
 			<div className="flex items-center justify-between gap-2">
-				<h2 className="text-lg font-bold">Individuals</h2>
+				<h2 className="text-lg font-bold">Individuos ({headerTotal})</h2>
 				{onCreateIndividual && (
 					<button
 						onClick={onCreateIndividual}
 						className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
 					>
-						+ Add Individual
+						+ Agregar individuo
 					</button>
 				)}
 			</div>
@@ -82,7 +85,7 @@ export function IndividualList({
 				<span className="text-gray-400">🔍</span>
 				<input
 					type="search"
-					placeholder="Search by name or tag..."
+					placeholder="Buscar por nombre o tag..."
 					value={searchQuery}
 					onChange={(event) => onSearchQueryChange(event.target.value)}
 					className="flex-1 bg-transparent outline-none"
@@ -91,12 +94,12 @@ export function IndividualList({
 
 			{/* List */}
 			{isLoading ? (
-				<div className="py-8 text-center text-gray-500">Loading...</div>
+				<div className="py-8 text-center text-gray-500">Cargando...</div>
 			) : individuals.length === 0 ? (
 				<div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 py-8 text-center text-gray-500">
 					{searchQuery.trim()
-						? "No individuals match your search"
-						: "No individuals yet"}
+						? "No hay individuos que coincidan con tu busqueda"
+						: "Aun no hay individuos"}
 				</div>
 			) : (
 				<div className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
@@ -150,7 +153,7 @@ export function IndividualList({
 										onClick={() => onEditIndividual(individual)}
 										className="rounded px-2 py-1 text-xs hover:bg-gray-200"
 									>
-										Edit
+										Editar
 									</button>
 								)}
 								{onDeleteIndividual && (
@@ -159,7 +162,7 @@ export function IndividualList({
 										disabled={deletingId === individual.id}
 										className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
 									>
-										{deletingId === individual.id ? "..." : "Delete"}
+										{deletingId === individual.id ? "..." : "Eliminar"}
 									</button>
 								)}
 							</div>
