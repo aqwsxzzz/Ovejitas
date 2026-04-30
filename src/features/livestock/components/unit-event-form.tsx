@@ -46,13 +46,15 @@ interface UnitEventFormProps {
 	) => Promise<number>;
 }
 
-function toDateTimeLocalValue(value: Date): string {
+function toDateOnlyValue(value: Date): string {
 	const year = value.getFullYear();
 	const month = String(value.getMonth() + 1).padStart(2, "0");
 	const day = String(value.getDate()).padStart(2, "0");
-	const hours = String(value.getHours()).padStart(2, "0");
-	const minutes = String(value.getMinutes()).padStart(2, "0");
-	return `${year}-${month}-${day}T${hours}:${minutes}`;
+	return `${year}-${month}-${day}`;
+}
+
+function toOccurredAtIso(value: string): string {
+	return new Date(`${value}T00:00:00`).toISOString();
 }
 
 export function UnitEventForm({
@@ -83,8 +85,8 @@ export function UnitEventForm({
 	);
 	const [occurredAt, setOccurredAt] = useState<string>(
 		initialValues?.occurredAt
-			? toDateTimeLocalValue(new Date(initialValues.occurredAt))
-			: toDateTimeLocalValue(new Date()),
+			? toDateOnlyValue(new Date(initialValues.occurredAt))
+			: toDateOnlyValue(new Date()),
 	);
 	const [quantity, setQuantity] = useState<string>(
 		initialValues?.quantity != null ? String(initialValues.quantity) : "",
@@ -220,7 +222,7 @@ export function UnitEventForm({
 			categoryId: currentCategoryId ? Number(currentCategoryId) : undefined,
 			individualId: individualId ? Number(individualId) : undefined,
 			status,
-			occurredAt: new Date(occurredAt).toISOString(),
+			occurredAt: toOccurredAtIso(occurredAt),
 			quantity: quantity ? Number(quantity) : undefined,
 			unit: unit.trim() || undefined,
 			amount: amount ? Number(amount) : undefined,
@@ -280,9 +282,7 @@ export function UnitEventForm({
 							</option>
 						))}
 						{type === "production" ? (
-							<option value={NEW_CATEGORY_OPTION_VALUE}>
-								+ Nueva categoria
-							</option>
+							<option value={NEW_CATEGORY_OPTION_VALUE}>Nueva categoria</option>
 						) : null}
 					</select>
 					{type === "production" ? (
@@ -353,9 +353,9 @@ export function UnitEventForm({
 
 			<div className="grid gap-3 md:grid-cols-2">
 				<label className="space-y-1 text-sm">
-					<span className="font-medium">Fecha y hora</span>
+					<span className="font-medium">Fecha</span>
 					<input
-						type="datetime-local"
+						type="date"
 						value={occurredAt}
 						onChange={(event) => setOccurredAt(event.target.value)}
 						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"

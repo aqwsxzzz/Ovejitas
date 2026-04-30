@@ -14,7 +14,7 @@ const items = [
 	},
 	{ to: "/v2/log", label: "Registro", icon: Plus, kind: "center" as const },
 	{
-		to: "/v2/finance",
+		to: "/v2/reports",
 		label: "Reportes",
 		icon: BarChart3,
 		kind: "normal" as const,
