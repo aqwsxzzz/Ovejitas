@@ -392,7 +392,6 @@ export type LivestockEventCreatePayload =
 			type: "acquisition";
 			occurred_at: string;
 			quantity: number;
-			unit: LivestockEventUnit;
 			amount?: number;
 			currency?: string;
 			category_id?: number;

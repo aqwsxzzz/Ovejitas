@@ -533,7 +533,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							category_id: data.categoryId,
 							individual_id: data.individualId,
 							quantity: data.quantity ?? 0,
-							unit: data.unit ?? "unit",
 							amount: data.amount,
 							currency: data.currency,
 							notes: data.notes,

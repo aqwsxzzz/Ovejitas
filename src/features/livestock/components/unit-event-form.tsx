@@ -175,8 +175,8 @@ export function UnitEventForm({
 			return;
 		}
 
-		if ((type === "production" || type === "acquisition") && !unit) {
-			setError("Unidad es requerida para eventos de produccion o adquisicion.");
+		if (type === "production" && !unit) {
+			setError("Unidad es requerida para eventos de produccion.");
 			return;
 		}
 
@@ -229,7 +229,7 @@ export function UnitEventForm({
 			status,
 			occurredAt: toOccurredAtIso(occurredAt),
 			quantity: quantity ? Number(quantity) : undefined,
-			unit,
+			unit: type === "acquisition" ? undefined : unit,
 			amount: amount ? Number(amount) : undefined,
 			currency: currency.trim().toUpperCase() || undefined,
 			inventoryQuantityDelta: inventoryQuantityDelta
@@ -393,15 +393,11 @@ export function UnitEventForm({
 				)}
 			</div>
 
-			{(type === "production" ||
-				type === "observation" ||
-				type === "acquisition") && (
+			{(type === "production" || type === "observation") && (
 				<label className="space-y-1 text-sm">
 					<span className="font-medium">
 						Unidad
-						{type === "production" || type === "acquisition"
-							? " (requerida)"
-							: " (opcional)"}
+						{type === "production" ? " (requerida)" : " (opcional)"}
 					</span>
 					<select
 						value={unit}
