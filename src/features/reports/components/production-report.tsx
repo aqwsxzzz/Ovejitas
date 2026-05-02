@@ -8,6 +8,7 @@ import {
 import type {
 	ProductionBucket,
 	EventType,
+	Unit,
 } from "@/features/reports/types/reports-types";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
@@ -15,6 +16,7 @@ interface ProductionReportProps {
 	farmId: string | number;
 	eventType: EventType;
 	bucket: ProductionBucket;
+	unit?: Unit;
 	dateFrom?: string;
 	dateTo?: string;
 	assetId?: number;
@@ -56,6 +58,7 @@ export const ProductionReport = ({
 	farmId,
 	eventType,
 	bucket,
+	unit,
 	dateFrom,
 	dateTo,
 	assetId,
@@ -72,6 +75,7 @@ export const ProductionReport = ({
 		date_from: dateFrom,
 		date_to: dateTo,
 		asset_id: assetId,
+		unit,
 	});
 
 	// Also fetch profitability to get asset names as reference
@@ -97,6 +101,30 @@ export const ProductionReport = ({
 	const hasDateRangeFilter = !!dateFrom || !!dateTo;
 	const periodsWithRecords = report?.data?.length ?? 0;
 
+	const totalsByUnit = useMemo(() => {
+		if (!report?.data) return [];
+
+		if (report.totals && report.totals.length > 0) {
+			return report.totals.map((item) => ({
+				unit: item.unit,
+				total: parseDecimal(item.total),
+			}));
+		}
+
+		const grouped = report.data.reduce(
+			(acc, row) => {
+				acc[row.unit] = (acc[row.unit] ?? 0) + parseDecimal(row.total);
+				return acc;
+			},
+			{} as Record<string, number>,
+		);
+
+		return Object.entries(grouped).map(([groupedUnit, total]) => ({
+			unit: groupedUnit,
+			total,
+		}));
+	}, [report]);
+
 	return (
 		<Card className="v2-card">
 			<CardHeader>
@@ -105,6 +133,24 @@ export const ProductionReport = ({
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
+				{totalsByUnit.length > 0 && (
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						{totalsByUnit.map((item) => (
+							<div
+								key={item.unit}
+								className="rounded-lg border p-4"
+							>
+								<p className="text-xs font-medium text-muted-foreground">
+									Total ({item.unit})
+								</p>
+								<p className="text-lg font-semibold mt-2">
+									{item.total.toFixed(2)}
+								</p>
+							</div>
+						))}
+					</div>
+				)}
+
 				{/* Report */}
 				{isPending ? (
 					<p className="text-sm text-muted-foreground">Cargando...</p>

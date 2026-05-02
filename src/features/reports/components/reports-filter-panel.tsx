@@ -19,8 +19,10 @@ import { useGetProductionReport } from "@/features/reports/api/reports-queries";
 import type {
 	EventType,
 	ProductionBucket,
+	Unit,
 } from "@/features/reports/types/reports-types";
 import type { LivestockEventType } from "@/features/livestock/types/livestock-types";
+import { EVENT_UNITS_BY_DIMENSION } from "@/shared/types/unit-types";
 
 export type ReportScope = "all-assets" | "specific-asset" | "individual";
 
@@ -28,6 +30,7 @@ export interface ReportFilters {
 	scope: ReportScope;
 	eventType: EventType;
 	bucket: ProductionBucket;
+	unit: Unit;
 	dateFrom?: string;
 	dateTo?: string;
 	assetId?: number;
@@ -90,6 +93,7 @@ export const ReportsFilterPanel = ({
 	const [scope, setScope] = useState<ReportScope>("all-assets");
 	const [eventType, setEventType] = useState<EventType>("production");
 	const [bucket, setBucket] = useState<ProductionBucket>("month");
+	const [unit, setUnit] = useState<Unit>("dozen");
 	const [dateFrom, setDateFrom] = useState("");
 	const [dateTo, setDateTo] = useState("");
 	const [selectedAssetId, setSelectedAssetId] = useState<string>("");
@@ -271,6 +275,7 @@ export const ReportsFilterPanel = ({
 			scope,
 			eventType,
 			bucket,
+			unit,
 			dateFrom: dateFromApi,
 			dateTo: dateToApi,
 			assetId: selectedAssetId ? Number(selectedAssetId) : undefined,
@@ -347,6 +352,46 @@ export const ReportsFilterPanel = ({
 						</SelectContent>
 					</Select>
 				</div>
+
+				{scope !== "individual" && (
+					<div className="space-y-2">
+						<Label>Unidad</Label>
+						<Select
+							value={unit}
+							onValueChange={(value) => setUnit(value as Unit)}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{EVENT_UNITS_BY_DIMENSION.mass.map((unitValue) => (
+									<SelectItem
+										key={unitValue}
+										value={unitValue}
+									>
+										Masa: {unitValue}
+									</SelectItem>
+								))}
+								{EVENT_UNITS_BY_DIMENSION.volume.map((unitValue) => (
+									<SelectItem
+										key={unitValue}
+										value={unitValue}
+									>
+										Volumen: {unitValue}
+									</SelectItem>
+								))}
+								{EVENT_UNITS_BY_DIMENSION.count.map((unitValue) => (
+									<SelectItem
+										key={unitValue}
+										value={unitValue}
+									>
+										Conteo: {unitValue}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+				)}
 
 				{(scope === "specific-asset" || scope === "individual") && (
 					<div className="space-y-2">

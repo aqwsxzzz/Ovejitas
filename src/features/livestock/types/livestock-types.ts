@@ -1,9 +1,13 @@
+import type { EventUnit } from "@/shared/types/unit-types";
+
 export type LivestockAssetKind =
 	| "animal"
 	| "crop"
 	| "equipment"
 	| "material"
 	| "location";
+
+export type LivestockEventUnit = EventUnit;
 
 export type LivestockAssetMode = "aggregated" | "individual";
 
@@ -67,7 +71,7 @@ export interface ILivestockEvent {
 	category_id: number | null;
 	occurred_at: string;
 	quantity: string | null;
-	unit: string | null;
+	unit: LivestockEventUnit | null;
 	amount: string | null;
 	currency: string | null;
 	notes: string | null;
@@ -102,4 +106,71 @@ export interface ILivestockEventListResponse {
 export interface ILivestockEventCategoryListResponse {
 	data: ILivestockEventCategory[];
 	meta: ILivestockPageMeta;
+}
+
+// --- Report types ---
+
+export type ReportBucket = "day" | "week" | "month";
+
+export interface IProfitabilityRow {
+	asset_id: number;
+	asset_name: string;
+	currency: string;
+	income_total: string;
+	expense_total: string;
+	net: string;
+}
+
+export interface IProfitabilityTotal {
+	currency: string;
+	income_total: string;
+	expense_total: string;
+	net: string;
+}
+
+export interface IProfitabilityReport {
+	data: IProfitabilityRow[];
+	totals: IProfitabilityTotal[];
+}
+
+export interface IProductionRow {
+	bucket_start: string;
+	asset_id: number;
+	unit: LivestockEventUnit;
+	category_id: number | null;
+	total: string;
+}
+
+export interface IProductionTotal {
+	unit: LivestockEventUnit;
+	total: string;
+}
+
+export interface IProductionReport {
+	data: IProductionRow[];
+	totals: IProductionTotal[];
+	bucket: ReportBucket;
+	type: LivestockEventType;
+}
+
+export interface ICostPerUnitRow {
+	asset_id: number;
+	asset_name: string;
+	currency: string;
+	quantity: string;
+	expense_total: string;
+	cost_per_unit: string;
+}
+
+export interface ICostPerUnitTotal {
+	currency: string;
+	quantity: string;
+	expense_total: string;
+	cost_per_unit: string;
+}
+
+export interface ICostPerUnitReport {
+	data: ICostPerUnitRow[];
+	totals: ICostPerUnitTotal[];
+	unit: LivestockEventUnit;
 }

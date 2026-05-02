@@ -14,13 +14,15 @@ import {
 	useGetLivestockAssetById,
 	useListInfiniteEventsByAssetId,
 	useListEventCategoriesByFarmId,
-	useListEventsByAssetId,
 	useListIndividualsByAssetId,
+	useGetProfitabilityReport,
+	useGetProductionReport,
 } from "@/features/livestock/api/livestock-queries";
 import type {
 	ILivestockAsset,
 	ILivestockEvent,
 	ILivestockIndividual,
+	LivestockEventType,
 } from "@/features/livestock/types/livestock-types";
 
 import { IndividualForm } from "../components/individual-form";
@@ -163,16 +165,39 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			enabled: !!farmId,
 		});
 
-	const {
-		data: eventsResponse,
-		isLoading: isLoadingEvents,
-		refetch: refetchEvents,
-	} = useListEventsByAssetId({
-		farmId,
-		assetId: unitId,
-		filters: { pageSize: 100, sort: "-occurred_at" },
-		enabled: !!farmId && !!unitId,
-	});
+	const now = new Date();
+	const currentMonthStart = new Date(
+		now.getFullYear(),
+		now.getMonth(),
+		1,
+	).toISOString();
+	const sevenDaysAgo = new Date(
+		now.getFullYear(),
+		now.getMonth(),
+		now.getDate() - 6,
+	).toISOString();
+
+	const { data: profitabilityReport, refetch: refetchProfitability } =
+		useGetProfitabilityReport({
+			farmId,
+			filters: {
+				assetId: parsedAssetId,
+				dateFrom: currentMonthStart,
+			},
+			enabled: hasValidAssetId && !!farmId,
+		});
+
+	const { data: productionReport, refetch: refetchProductionReport } =
+		useGetProductionReport({
+			farmId,
+			filters: {
+				assetId: parsedAssetId,
+				bucket: "day",
+				type: "production",
+				dateFrom: sevenDaysAgo,
+			},
+			enabled: hasValidAssetId && !!farmId,
+		});
 
 	const {
 		data: eventsLogData,
@@ -195,10 +220,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 	);
 	const listedIndividuals = listedIndividualsResponse?.data ?? [];
 	const timelineEvents = eventsLogData?.items ?? [];
-	const unitEvents = useMemo(
-		() => eventsResponse?.data ?? [],
-		[eventsResponse],
-	);
 
 	useEffect(() => {
 		hasAutoLoadedEventsPageRef.current = false;
@@ -280,13 +301,12 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		);
 		const totalsByProduct = new Map<string, Map<string, number>>();
 
-		for (const event of unitEvents) {
-			if (event.type !== "production") continue;
-			const key = event.occurred_at.slice(0, 10);
+		for (const row of productionReport?.data ?? []) {
+			const key = row.bucket_start.slice(0, 10);
 			if (!dayKeys.includes(key)) continue;
 
 			const productKey =
-				event.category_id != null ? String(event.category_id) : "uncategorized";
+				row.category_id != null ? String(row.category_id) : "uncategorized";
 			if (!totalsByProduct.has(productKey)) {
 				totalsByProduct.set(
 					productKey,
@@ -299,7 +319,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			productTotals.set(
 				key,
-				(productTotals.get(key) ?? 0) + parseNumeric(event.quantity),
+				(productTotals.get(key) ?? 0) + parseNumeric(row.total),
 			);
 		}
 
@@ -324,43 +344,15 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				};
 			})
 			.sort((left, right) => right.totalLast7Days - left.totalLast7Days);
-	}, [unitEvents, eventCategories]);
+	}, [productionReport, eventCategories]);
 
 	const netMonth = useMemo(() => {
-		const now = new Date();
-		const currentMonth = now.getMonth();
-		const currentYear = now.getFullYear();
-
-		return unitEvents.reduce((acc, event) => {
-			const occurredAt = new Date(event.occurred_at);
-			if (
-				occurredAt.getMonth() !== currentMonth ||
-				occurredAt.getFullYear() !== currentYear
-			) {
-				return acc;
-			}
-			if (event.type === "income") return acc + parseNumeric(event.amount);
-			if (event.type === "expense") return acc - parseNumeric(event.amount);
-			return acc;
-		}, 0);
-	}, [unitEvents]);
-
-	const aggregatedBalance = useMemo(() => {
-		return unitEvents.reduce((acc, event) => {
-			if (event.quantity == null) return acc;
-			if (event.type === "acquisition")
-				return acc + parseNumeric(event.quantity);
-			if (event.type === "mortality") return acc - parseNumeric(event.quantity);
-			return acc;
-		}, 0);
-	}, [unitEvents]);
-
-	const aggregatedAcquiredTotal = useMemo(() => {
-		return unitEvents.reduce((acc, event) => {
-			if (event.type !== "acquisition" || event.quantity == null) return acc;
-			return acc + parseNumeric(event.quantity);
-		}, 0);
-	}, [unitEvents]);
+		const assetRow = profitabilityReport?.data.find(
+			(row) => row.asset_id === parsedAssetId,
+		);
+		if (!assetRow) return 0;
+		return parseNumeric(assetRow.net);
+	}, [profitabilityReport, parsedAssetId]);
 
 	const taggedMembersCount = useMemo(
 		() =>
@@ -375,32 +367,29 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			return `${taggedMembersCount} individuos etiquetados`;
 		}
 		if (asset?.mode === "aggregated") {
-			return unitEvents.some(
-				(event) =>
-					(event.type === "acquisition" || event.type === "mortality") &&
-					event.quantity != null,
-			)
-				? `${aggregatedBalance} en conteo neto`
+			const acquisitionTotal = parseNumeric(
+				productionReport?.totals.find((t) => t.unit === "head")?.total ?? null,
+			);
+			return acquisitionTotal > 0
+				? `${acquisitionTotal} en conteo`
 				: "sin conteo registrado";
 		}
 		return "";
-	}, [asset?.mode, taggedMembersCount, aggregatedBalance, unitEvents]);
+	}, [asset?.mode, taggedMembersCount, productionReport]);
 
 	const countCardValue = useMemo(() => {
 		if (asset?.mode === "aggregated") {
-			return `${aggregatedBalance} / ${aggregatedAcquiredTotal}`;
+			const total = parseNumeric(
+				productionReport?.totals.find((t) => t.unit === "head")?.total ?? null,
+			);
+			return String(total);
 		}
-		return `${allIndividuals.length} / ${allIndividuals.length}`;
-	}, [
-		asset?.mode,
-		aggregatedBalance,
-		aggregatedAcquiredTotal,
-		allIndividuals.length,
-	]);
+		return `${allIndividuals.length}`;
+	}, [asset?.mode, productionReport, allIndividuals.length]);
 
 	const countCardNote = useMemo(() => {
 		if (asset?.mode === "aggregated") {
-			return "Conteo neto (adquisiciones - mortalidades) / total adquirido";
+			return "Total de producción del período";
 		}
 		return "Conteo actual de individuos activos en este lote";
 	}, [asset?.mode]);
@@ -544,6 +533,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							category_id: data.categoryId,
 							individual_id: data.individualId,
 							quantity: data.quantity ?? 0,
+							unit: data.unit ?? "unit",
 							amount: data.amount,
 							currency: data.currency,
 							notes: data.notes,
@@ -580,12 +570,23 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				}
 
 				setIsCreatingEvent(false);
-				await Promise.all([refetchEvents(), refetchEventsLog()]);
+				await Promise.all([
+					refetchEventsLog(),
+					refetchProfitability(),
+					refetchProductionReport(),
+				]);
 			} finally {
 				setIsSavingEvent(false);
 			}
 		},
-		[farmId, unitId, refetchEvents, refetchEventsLog, asset],
+		[
+			farmId,
+			unitId,
+			refetchEventsLog,
+			refetchProfitability,
+			refetchProductionReport,
+			asset,
+		],
 	);
 
 	const handleStartEditEvent = useCallback((event: ILivestockEvent) => {
@@ -611,12 +612,23 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					setIsCreatingEvent(false);
 				}
 
-				await Promise.all([refetchEvents(), refetchEventsLog()]);
+				await Promise.all([
+					refetchEventsLog(),
+					refetchProfitability(),
+					refetchProductionReport(),
+				]);
 			} finally {
 				setDeletingEventId(null);
 			}
 		},
-		[farmId, unitId, editingEvent, refetchEvents, refetchEventsLog],
+		[
+			farmId,
+			unitId,
+			editingEvent,
+			refetchEventsLog,
+			refetchProfitability,
+			refetchProductionReport,
+		],
 	);
 
 	const handleSubmitEvent = useCallback(
@@ -650,7 +662,8 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								: null,
 						unit:
 							editingEvent.type === "production" ||
-							editingEvent.type === "observation"
+							editingEvent.type === "observation" ||
+							editingEvent.type === "acquisition"
 								? (data.unit ?? null)
 								: null,
 						amount:
@@ -670,7 +683,11 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 				setEditingEvent(null);
 				setIsCreatingEvent(false);
-				await Promise.all([refetchEvents(), refetchEventsLog()]);
+				await Promise.all([
+					refetchEventsLog(),
+					refetchProfitability(),
+					refetchProductionReport(),
+				]);
 			} finally {
 				setIsSavingEvent(false);
 			}
@@ -680,14 +697,23 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			handleCreateEvent,
 			farmId,
 			unitId,
-			refetchEvents,
 			refetchEventsLog,
+			refetchProfitability,
+			refetchProductionReport,
 			asset,
 		],
 	);
 
-	const handleCreateProductionCategory = useCallback(
-		async ({ name, color }: { name: string; color?: string }) => {
+	const handleCreateEventCategory = useCallback(
+		async ({
+			type,
+			name,
+			color,
+		}: {
+			type: LivestockEventType;
+			name: string;
+			color?: string;
+		}) => {
 			if (!farmId) {
 				throw new Error("Farm id is required to create categories.");
 			}
@@ -695,7 +721,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			const createdCategory = await createEventCategoryByFarmId({
 				farmId,
 				data: {
-					type: "production",
+					type,
 					name,
 					color,
 				},
@@ -969,7 +995,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								setEditingEvent(null);
 							}}
 							isSubmitting={isSavingEvent}
-							onCreateProductionCategory={handleCreateProductionCategory}
+							onCreateEventCategory={handleCreateEventCategory}
 							initialValues={
 								editingEvent
 									? {
@@ -1022,7 +1048,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						/>
 					) : null}
 				</div>
-				{isPendingEventsLog || isLoadingEvents ? (
+				{isPendingEventsLog ? (
 					<p className="mt-2 text-xs text-(--v2-ink-soft)">
 						Actualizando eventos...
 					</p>

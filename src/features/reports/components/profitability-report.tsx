@@ -50,10 +50,18 @@ export const ProfitabilityReport = ({
 	const summary = useMemo(() => {
 		if (!report?.data) return null;
 
+		if (report.totals && report.totals.length > 0) {
+			return report.totals.map((item) => ({
+				currency: item.currency,
+				income_total: parseDecimal(item.income_total),
+				expense_total: parseDecimal(item.expense_total),
+				net: parseDecimal(item.net),
+			}));
+		}
+
 		const rows = report.data;
 		if (rows.length === 0) return null;
 
-		// Group by currency and sum
 		const byCurrency = rows.reduce(
 			(acc, row) => {
 				const curr = row.currency;
@@ -82,7 +90,7 @@ export const ProfitabilityReport = ({
 		);
 
 		return Object.values(byCurrency);
-	}, [report?.data]);
+	}, [report]);
 
 	const apiError = error instanceof ApiRequestError ? error : null;
 

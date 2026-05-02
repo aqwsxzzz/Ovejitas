@@ -5,41 +5,18 @@ import type { FormEvent } from "react";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	createEventByAssetId,
-	createEventCategoryByFarmId,
 	createIndividual,
 	createLivestockAsset,
 } from "@/features/livestock/api/livestock-api";
 import type {
 	IndividualSex,
 	LivestockAssetMode,
-	LivestockEventType,
 } from "@/features/livestock/types/livestock-types";
 
 function parseUnitIdFromPath(path?: string): string | null {
 	if (!path) return null;
 	const match = path.match(/\/v2\/production-units\/flock\/([^/]+)/);
 	return match?.[1] ? decodeURIComponent(match[1]) : null;
-}
-
-function eventTypeLabelEs(type: LivestockEventType): string {
-	switch (type) {
-		case "production":
-			return "Produccion";
-		case "expense":
-			return "Gasto";
-		case "income":
-			return "Ingreso";
-		case "observation":
-			return "Observacion";
-		case "reproductive":
-			return "Reproductivo";
-		case "acquisition":
-			return "Adquisicion";
-		case "mortality":
-			return "Mortalidad";
-		default:
-			return type;
-	}
 }
 
 function ActionCard(props: {
@@ -78,17 +55,6 @@ export function V2LogPage() {
 	const [individualName, setIndividualName] = useState("");
 	const [individualTag, setIndividualTag] = useState("");
 	const [individualSex, setIndividualSex] = useState<IndividualSex>("unknown");
-
-	const [categoryName, setCategoryName] = useState("");
-	const [categoryType, setCategoryType] =
-		useState<LivestockEventType>("production");
-	const [categoryColor, setCategoryColor] = useState("#8a8677");
-
-	const handleUseAcquisitionPreset = () => {
-		setCategoryName("adquisicion");
-		setCategoryType("acquisition");
-		setCategoryColor("#6b7280");
-	};
 
 	const goBack = () =>
 		navigate({
@@ -130,6 +96,7 @@ export function V2LogPage() {
 						type: "acquisition",
 						occurred_at: new Date().toISOString(),
 						quantity: parsedInitialAmount,
+						unit: "head",
 						notes: "Conteo inicial del lote",
 						payload: { source: "initial_asset_setup" },
 					},
@@ -159,27 +126,6 @@ export function V2LogPage() {
 				},
 			});
 			setMessage("Individual creado.");
-			goBack();
-		} finally {
-			setIsSaving(false);
-		}
-	}
-
-	async function handleCreateCategory(event: FormEvent) {
-		event.preventDefault();
-		if (!farmId || !categoryName.trim()) return;
-		setIsSaving(true);
-		setMessage("");
-		try {
-			await createEventCategoryByFarmId({
-				farmId,
-				data: {
-					type: categoryType,
-					name: categoryName.trim(),
-					color: categoryColor,
-				},
-			});
-			setMessage("Categoria creada.");
 			goBack();
 		} finally {
 			setIsSaving(false);
@@ -337,75 +283,6 @@ export function V2LogPage() {
 							</button>
 						</form>
 					)}
-				</ActionCard>
-			) : actionId === "nueva-categoria-evento" ? (
-				<ActionCard
-					title="Nueva categoria"
-					subtitle="Solo creacion. Editar y eliminar se hace en la vista del lote."
-				>
-					<div className="rounded-lg border border-(--v2-border) bg-white p-3">
-						<p className="text-xs font-medium uppercase tracking-[0.08em] text-(--v2-ink-soft)">
-							Preset recomendado
-						</p>
-						<div className="mt-2 flex flex-wrap items-center gap-2">
-							<button
-								type="button"
-								onClick={handleUseAcquisitionPreset}
-								className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
-							>
-								Usar adquisicion
-							</button>
-							<p className="text-xs text-(--v2-ink-soft)">
-								Para registrar altas de cantidad en activos agrupados.
-							</p>
-						</div>
-					</div>
-					<form
-						className="space-y-3"
-						onSubmit={handleCreateCategory}
-					>
-						<input
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Nombre"
-							value={categoryName}
-							onChange={(event) => setCategoryName(event.target.value)}
-						/>
-						<select
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							value={categoryType}
-							onChange={(event) =>
-								setCategoryType(event.target.value as LivestockEventType)
-							}
-						>
-							<option value="production">
-								{eventTypeLabelEs("production")}
-							</option>
-							<option value="expense">{eventTypeLabelEs("expense")}</option>
-							<option value="income">{eventTypeLabelEs("income")}</option>
-							<option value="observation">
-								{eventTypeLabelEs("observation")}
-							</option>
-							<option value="reproductive">
-								{eventTypeLabelEs("reproductive")}
-							</option>
-							<option value="acquisition">
-								{eventTypeLabelEs("acquisition")}
-							</option>
-							<option value="mortality">{eventTypeLabelEs("mortality")}</option>
-						</select>
-						<input
-							type="color"
-							className="h-10 w-24 rounded-lg border border-(--v2-border)"
-							value={categoryColor}
-							onChange={(event) => setCategoryColor(event.target.value)}
-						/>
-						<button
-							disabled={isSaving}
-							className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white"
-						>
-							{isSaving ? "Guardando..." : "Crear categoria"}
-						</button>
-					</form>
 				</ActionCard>
 			) : (
 				<ActionCard

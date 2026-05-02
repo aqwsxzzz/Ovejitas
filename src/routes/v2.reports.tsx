@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { ProfitabilityReport } from "@/features/reports/components/profitability-report";
 import { ProductionReport } from "@/features/reports/components/production-report";
+import { CostPerUnitReport } from "@/features/reports/components/cost-per-unit-report";
 import { IndividualTimelineReport } from "@/features/reports/components/individual-timeline-report";
 import {
 	ReportsFilterPanel,
@@ -72,10 +73,18 @@ function ReportsPage() {
 									dateTo={activeFilters.dateTo}
 									assetId={activeFilters.assetId}
 								/>
+								<CostPerUnitReport
+									farmId={farmId}
+									unit={activeFilters.unit}
+									dateFrom={activeFilters.dateFrom}
+									dateTo={activeFilters.dateTo}
+									assetId={activeFilters.assetId}
+								/>
 								<ProductionReport
 									farmId={farmId}
 									eventType={activeFilters.eventType}
 									bucket={activeFilters.bucket}
+									unit={activeFilters.unit}
 									dateFrom={activeFilters.dateFrom}
 									dateTo={activeFilters.dateTo}
 									assetId={activeFilters.assetId}

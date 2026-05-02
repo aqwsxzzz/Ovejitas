@@ -6,6 +6,9 @@ import {
 	listLivestockAssetsByFarmId,
 	listIndividualsByAssetId,
 	getIndividualById,
+	getProfitabilityReport,
+	getProductionReport,
+	getCostPerUnitReport,
 } from "@/features/livestock/api/livestock-api";
 import type {
 	ILivestockAsset,
@@ -14,6 +17,8 @@ import type {
 	LivestockEventType,
 	LivestockAssetKind,
 	LivestockAssetMode,
+	LivestockEventUnit,
+	ReportBucket,
 } from "@/features/livestock/types/livestock-types";
 
 interface ListLivestockAssetsFilters {
@@ -150,6 +155,56 @@ export const livestockQueryKeys = {
 			filters?.archived ?? false,
 			filters?.page ?? 1,
 			filters?.pageSize ?? 100,
+		] as const,
+	profitabilityReport: (
+		farmId: string,
+		assetId?: number,
+		dateFrom?: string,
+		dateTo?: string,
+	) =>
+		[
+			...livestockQueryKeys.all,
+			"profitabilityReport",
+			farmId,
+			assetId ?? "",
+			dateFrom ?? "",
+			dateTo ?? "",
+		] as const,
+	productionReport: (
+		farmId: string,
+		assetId?: number,
+		type?: LivestockEventType,
+		unit?: LivestockEventUnit,
+		bucket?: ReportBucket,
+		dateFrom?: string,
+		dateTo?: string,
+	) =>
+		[
+			...livestockQueryKeys.all,
+			"productionReport",
+			farmId,
+			assetId ?? "",
+			type ?? "production",
+			unit ?? "",
+			bucket ?? "day",
+			dateFrom ?? "",
+			dateTo ?? "",
+		] as const,
+	costPerUnitReport: (
+		farmId: string,
+		unit: LivestockEventUnit,
+		assetId?: number,
+		dateFrom?: string,
+		dateTo?: string,
+	) =>
+		[
+			...livestockQueryKeys.all,
+			"costPerUnitReport",
+			farmId,
+			unit,
+			assetId ?? "",
+			dateFrom ?? "",
+			dateTo ?? "",
 		] as const,
 };
 
@@ -289,5 +344,87 @@ export const useListEventCategoriesByFarmId = ({
 			const result = await listEventCategoriesByFarmId({ farmId, filters });
 			return result.data;
 		},
+		enabled: enabled && !!farmId,
+	});
+
+// --- Report hooks ---
+
+interface ReportBaseFilters {
+	assetId?: number;
+	dateFrom?: string;
+	dateTo?: string;
+}
+
+export const useGetProfitabilityReport = ({
+	farmId,
+	filters,
+	enabled = true,
+}: {
+	farmId: string;
+	filters?: ReportBaseFilters;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.profitabilityReport(
+			farmId,
+			filters?.assetId,
+			filters?.dateFrom,
+			filters?.dateTo,
+		),
+		queryFn: () => getProfitabilityReport({ farmId, filters }),
+		enabled: enabled && !!farmId,
+	});
+
+interface ProductionReportFilters extends ReportBaseFilters {
+	type?: LivestockEventType;
+	unit?: LivestockEventUnit;
+	bucket?: ReportBucket;
+}
+
+export const useGetProductionReport = ({
+	farmId,
+	filters,
+	enabled = true,
+}: {
+	farmId: string;
+	filters?: ProductionReportFilters;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.productionReport(
+			farmId,
+			filters?.assetId,
+			filters?.type,
+			filters?.unit,
+			filters?.bucket,
+			filters?.dateFrom,
+			filters?.dateTo,
+		),
+		queryFn: () => getProductionReport({ farmId, filters }),
+		enabled: enabled && !!farmId,
+	});
+
+interface CostPerUnitReportFilters extends ReportBaseFilters {
+	unit: LivestockEventUnit;
+}
+
+export const useGetCostPerUnitReport = ({
+	farmId,
+	filters,
+	enabled = true,
+}: {
+	farmId: string;
+	filters: CostPerUnitReportFilters;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.costPerUnitReport(
+			farmId,
+			filters.unit,
+			filters.assetId,
+			filters.dateFrom,
+			filters.dateTo,
+		),
+		queryFn: () => getCostPerUnitReport({ farmId, filters }),
 		enabled: enabled && !!farmId,
 	});

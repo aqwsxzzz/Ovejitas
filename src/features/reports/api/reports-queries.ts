@@ -50,11 +50,20 @@ export const reportsQueryKeys = {
 			dateTo ?? null,
 			assetId ?? null,
 		] as const,
-	costPerUnit: (farmId: string | number, unit?: string) =>
+	costPerUnit: (
+		farmId: string | number,
+		unit?: string,
+		dateFrom?: string,
+		dateTo?: string,
+		assetId?: number,
+	) =>
 		[
 			...reportsQueryKeys.farm(farmId),
 			"cost-per-unit",
 			unit ?? "dozen",
+			dateFrom ?? null,
+			dateTo ?? null,
+			assetId ?? null,
 		] as const,
 	timeline: (
 		farmId: string | number,
@@ -125,7 +134,13 @@ export const useGetCostPerUnitReport = (
 	enabled = true,
 ) =>
 	useQuery({
-		queryKey: reportsQueryKeys.costPerUnit(params.farmId, params.unit),
+		queryKey: reportsQueryKeys.costPerUnit(
+			params.farmId,
+			params.unit,
+			params.date_from,
+			params.date_to,
+			params.asset_id,
+		),
 		queryFn: () => getCostPerUnitReport(params),
 		enabled: enabled && !!params.farmId && !!params.unit,
 	});

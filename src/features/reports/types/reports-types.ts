@@ -3,6 +3,10 @@
  * Source: C:\projects\Ovejitas\Ovejitas-api\docs\api\reports.md
  */
 
+import type { EventUnit } from "@/shared/types/unit-types";
+
+export type Unit = EventUnit;
+
 // Profitability Report
 export interface IProfitabilityRow {
 	asset_id: number;
@@ -13,8 +17,16 @@ export interface IProfitabilityRow {
 	net: string;
 }
 
+export interface IProfitabilityTotal {
+	currency: string;
+	income_total: string;
+	expense_total: string;
+	net: string;
+}
+
 export interface IProfitabilityReport {
 	data: IProfitabilityRow[];
+	totals: IProfitabilityTotal[];
 }
 
 // Production Report
@@ -31,15 +43,21 @@ export type EventType =
 export interface IProductionRow {
 	bucket_start: string; // ISO datetime
 	asset_id: number;
-	unit: string;
+	unit: Unit;
 	category_id: number | null;
 	total: string; // decimal as string
+}
+
+export interface IProductionTotal {
+	unit: Unit;
+	total: string;
 }
 
 export interface IProductionReport {
 	data: IProductionRow[];
 	bucket: ProductionBucket;
 	type: EventType;
+	totals: IProductionTotal[];
 }
 
 // Cost Per Unit Report
@@ -52,9 +70,17 @@ export interface ICostPerUnitRow {
 	cost_per_unit: string;
 }
 
+export interface ICostPerUnitTotal {
+	currency: string;
+	quantity: string;
+	expense_total: string;
+	cost_per_unit: string;
+}
+
 export interface ICostPerUnitReport {
 	data: ICostPerUnitRow[];
-	unit: string;
+	unit: Unit;
+	totals: ICostPerUnitTotal[];
 }
 
 // Timeline Report
@@ -67,7 +93,7 @@ export interface IEventRead {
 	category_id: number | null;
 	occurred_at: string; // ISO datetime
 	quantity: string | null;
-	unit: string | null;
+	unit: Unit | null;
 	amount: string | null;
 	currency: string | null;
 	notes: string | null;
@@ -105,12 +131,12 @@ export interface IProductionReportParams {
 	date_from?: string;
 	date_to?: string;
 	asset_id?: number;
-	unit?: string;
+	unit?: Unit;
 }
 
 export interface ICostPerUnitReportParams {
 	farmId: string | number;
-	unit: string; // required
+	unit: Unit; // required
 	date_from?: string;
 	date_to?: string;
 	asset_id?: number;

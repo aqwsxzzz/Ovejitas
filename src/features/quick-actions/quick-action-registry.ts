@@ -93,12 +93,6 @@ function speciesActions(): QuickActionItem[] {
 function flockActions(): QuickActionItem[] {
 	return [
 		makeAction(
-			"nueva-categoria-evento",
-			"Nueva categoria",
-			"Crear categoria para eventos del lote",
-			"🏷️",
-		),
-		makeAction(
 			"registrar-huevos",
 			"Registrar huevos",
 			"Produccion del dia",

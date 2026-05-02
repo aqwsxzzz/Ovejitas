@@ -8,8 +8,13 @@ import type {
 	ILivestockIndividual,
 	ILivestockIndividualListResponse,
 	LivestockEventType,
+	LivestockEventUnit,
 	LivestockAssetKind,
 	LivestockAssetMode,
+	ReportBucket,
+	IProfitabilityReport,
+	IProductionReport,
+	ICostPerUnitReport,
 } from "@/features/livestock/types/livestock-types";
 
 interface ListLivestockAssetsFilters {
@@ -354,7 +359,7 @@ export type LivestockEventCreatePayload =
 			type: "production";
 			occurred_at: string;
 			quantity: number;
-			unit: string;
+			unit: LivestockEventUnit;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
@@ -376,7 +381,7 @@ export type LivestockEventCreatePayload =
 			type: "observation";
 			occurred_at: string;
 			quantity?: number;
-			unit?: string;
+			unit?: LivestockEventUnit;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
@@ -387,6 +392,7 @@ export type LivestockEventCreatePayload =
 			type: "acquisition";
 			occurred_at: string;
 			quantity: number;
+			unit: LivestockEventUnit;
 			amount?: number;
 			currency?: string;
 			category_id?: number;
@@ -420,7 +426,7 @@ export interface LivestockEventUpdatePayload {
 	individual_id?: number | null;
 	category_id?: number | null;
 	quantity?: number | null;
-	unit?: string | null;
+	unit?: LivestockEventUnit | null;
 	amount?: number | null;
 	currency?: string | null;
 	notes?: string | null;
@@ -471,4 +477,77 @@ export const deleteEventByAssetId = ({
 	axiosHelper<void>({
 		method: "delete",
 		url: `/api/v1/farms/${farmId}/assets/${assetId}/events/${eventId}`,
+	});
+
+// --- Reports ---
+
+interface ReportBaseFilters {
+	assetId?: number;
+	dateFrom?: string;
+	dateTo?: string;
+}
+
+export const getProfitabilityReport = ({
+	farmId,
+	filters,
+}: {
+	farmId: string;
+	filters?: ReportBaseFilters;
+}) =>
+	axiosHelper<IProfitabilityReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/profitability`,
+		urlParams: {
+			asset_id: filters?.assetId,
+			date_from: filters?.dateFrom,
+			date_to: filters?.dateTo,
+		},
+	});
+
+interface ProductionReportFilters extends ReportBaseFilters {
+	type?: LivestockEventType;
+	unit?: LivestockEventUnit;
+	bucket?: ReportBucket;
+}
+
+export const getProductionReport = ({
+	farmId,
+	filters,
+}: {
+	farmId: string;
+	filters?: ProductionReportFilters;
+}) =>
+	axiosHelper<IProductionReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/production`,
+		urlParams: {
+			asset_id: filters?.assetId,
+			date_from: filters?.dateFrom,
+			date_to: filters?.dateTo,
+			type: filters?.type,
+			unit: filters?.unit,
+			bucket: filters?.bucket ?? "day",
+		},
+	});
+
+interface CostPerUnitReportFilters extends ReportBaseFilters {
+	unit: LivestockEventUnit;
+}
+
+export const getCostPerUnitReport = ({
+	farmId,
+	filters,
+}: {
+	farmId: string;
+	filters: CostPerUnitReportFilters;
+}) =>
+	axiosHelper<ICostPerUnitReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/cost-per-unit`,
+		urlParams: {
+			asset_id: filters.assetId,
+			date_from: filters.dateFrom,
+			date_to: filters.dateTo,
+			unit: filters.unit,
+		},
 	});

@@ -7,7 +7,9 @@ import type {
 	LivestockAssetMode,
 	LivestockEventStatus,
 	LivestockEventType,
+	LivestockEventUnit,
 } from "@/features/livestock/types/livestock-types";
+import { EVENT_UNITS_BY_DIMENSION } from "@/shared/types/unit-types";
 
 export interface UnitEventFormData {
 	type: LivestockEventType;
@@ -16,15 +18,16 @@ export interface UnitEventFormData {
 	status: LivestockEventStatus;
 	occurredAt: string;
 	quantity?: number;
-	unit?: string;
+	unit?: LivestockEventUnit;
 	amount?: number;
 	currency?: string;
 	inventoryQuantityDelta?: number;
-	inventoryUnit?: string;
+	inventoryUnit?: LivestockEventUnit;
 	notes?: string;
 }
 
-interface CreateProductionCategoryInput {
+interface CreateEventCategoryInput {
+	type: LivestockEventType;
 	name: string;
 	color?: string;
 }
@@ -41,9 +44,7 @@ interface UnitEventFormProps {
 	isSubmitting: boolean;
 	initialValues?: UnitEventFormData;
 	submitLabel?: string;
-	onCreateProductionCategory?: (
-		input: CreateProductionCategoryInput,
-	) => Promise<number>;
+	onCreateEventCategory?: (input: CreateEventCategoryInput) => Promise<number>;
 }
 
 function toDateOnlyValue(value: Date): string {
@@ -67,7 +68,7 @@ export function UnitEventForm({
 	isSubmitting,
 	initialValues,
 	submitLabel,
-	onCreateProductionCategory,
+	onCreateEventCategory,
 }: UnitEventFormProps) {
 	const defaultType: LivestockEventType =
 		initialValues?.type ?? categories[0]?.type ?? "production";
@@ -91,7 +92,9 @@ export function UnitEventForm({
 	const [quantity, setQuantity] = useState<string>(
 		initialValues?.quantity != null ? String(initialValues.quantity) : "",
 	);
-	const [unit, setUnit] = useState<string>(initialValues?.unit ?? "unit");
+	const [unit, setUnit] = useState<LivestockEventUnit>(
+		initialValues?.unit ?? "unit",
+	);
 	const [amount, setAmount] = useState<string>(
 		initialValues?.amount != null ? String(initialValues.amount) : "",
 	);
@@ -100,7 +103,8 @@ export function UnitEventForm({
 	);
 	const [inventoryQuantityDelta, setInventoryQuantityDelta] =
 		useState<string>("");
-	const [inventoryUnit, setInventoryUnit] = useState<string>("unit");
+	const [inventoryUnit, setInventoryUnit] =
+		useState<LivestockEventUnit>("unit");
 	const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
 	const [error, setError] = useState<string>("");
 	const [newCategoryName, setNewCategoryName] = useState<string>("");
@@ -128,17 +132,12 @@ export function UnitEventForm({
 		return "";
 	}, [availableCategories, categoryId]);
 
-	const isCreatingNewProductionCategory =
-		type === "production" && currentCategoryId === NEW_CATEGORY_OPTION_VALUE;
+	const isCreatingNewCategory = currentCategoryId === NEW_CATEGORY_OPTION_VALUE;
 
 	const handleCreateCategory = async () => {
 		setError("");
 
-		if (type !== "production") {
-			return;
-		}
-
-		if (!onCreateProductionCategory) {
+		if (!onCreateEventCategory) {
 			setError("No se pudo crear la categoria desde esta vista.");
 			return;
 		}
@@ -150,7 +149,8 @@ export function UnitEventForm({
 
 		setIsCreatingCategory(true);
 		try {
-			const createdCategoryId = await onCreateProductionCategory({
+			const createdCategoryId = await onCreateEventCategory({
+				type,
 				name: newCategoryName.trim(),
 				color: newCategoryColor,
 			});
@@ -175,8 +175,8 @@ export function UnitEventForm({
 			return;
 		}
 
-		if (type === "production" && !unit.trim()) {
-			setError("Unidad es requerida para eventos de produccion.");
+		if ((type === "production" || type === "acquisition") && !unit) {
+			setError("Unidad es requerida para eventos de produccion o adquisicion.");
 			return;
 		}
 
@@ -187,6 +187,11 @@ export function UnitEventForm({
 			setError(
 				"Categoria es requerida para eventos de produccion. Crea o selecciona una para nombrar el producto.",
 			);
+			return;
+		}
+
+		if (currentCategoryId === NEW_CATEGORY_OPTION_VALUE) {
+			setError("Completa la creacion de la nueva categoria antes de guardar.");
 			return;
 		}
 
@@ -224,13 +229,13 @@ export function UnitEventForm({
 			status,
 			occurredAt: toOccurredAtIso(occurredAt),
 			quantity: quantity ? Number(quantity) : undefined,
-			unit: unit.trim() || undefined,
+			unit,
 			amount: amount ? Number(amount) : undefined,
 			currency: currency.trim().toUpperCase() || undefined,
 			inventoryQuantityDelta: inventoryQuantityDelta
 				? Number(inventoryQuantityDelta)
 				: undefined,
-			inventoryUnit: inventoryUnit.trim() || undefined,
+			inventoryUnit,
 			notes: notes.trim() || undefined,
 		});
 	};
@@ -245,9 +250,10 @@ export function UnitEventForm({
 					<span className="font-medium">Tipo</span>
 					<select
 						value={type}
-						onChange={(event) =>
-							setType(event.target.value as LivestockEventType)
-						}
+						onChange={(event) => {
+							setType(event.target.value as LivestockEventType);
+							setCategoryId("");
+						}}
 						disabled={isEditMode}
 						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 					>
@@ -272,7 +278,16 @@ export function UnitEventForm({
 						onChange={(event) => setCategoryId(event.target.value)}
 						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 					>
-						<option value="">Sin categoria</option>
+						{type === "production" ? (
+							<option
+								value=""
+								disabled
+							>
+								Selecciona categoria
+							</option>
+						) : (
+							<option value="">Sin categoria</option>
+						)}
 						{availableCategories.map((category) => (
 							<option
 								key={category.id}
@@ -281,9 +296,7 @@ export function UnitEventForm({
 								{category.name}
 							</option>
 						))}
-						{type === "production" ? (
-							<option value={NEW_CATEGORY_OPTION_VALUE}>Nueva categoria</option>
-						) : null}
+						<option value={NEW_CATEGORY_OPTION_VALUE}>Nueva categoria</option>
 					</select>
 					{type === "production" ? (
 						<p className="text-xs text-(--v2-ink-soft)">
@@ -291,7 +304,7 @@ export function UnitEventForm({
 							lana).
 						</p>
 					) : null}
-					{isCreatingNewProductionCategory ? (
+					{isCreatingNewCategory ? (
 						<div className="mt-2 grid gap-2 rounded-lg border border-(--v2-border) bg-white/60 p-2">
 							<label className="space-y-1 text-xs">
 								<span className="font-medium">Nombre de categoria</span>
@@ -380,18 +393,48 @@ export function UnitEventForm({
 				)}
 			</div>
 
-			{(type === "production" || type === "observation") && (
+			{(type === "production" ||
+				type === "observation" ||
+				type === "acquisition") && (
 				<label className="space-y-1 text-sm">
 					<span className="font-medium">
-						Unidad {type === "production" ? "(requerida)" : "(opcional)"}
+						Unidad
+						{type === "production" || type === "acquisition"
+							? " (requerida)"
+							: " (opcional)"}
 					</span>
-					<input
-						type="text"
+					<select
 						value={unit}
-						onChange={(event) => setUnit(event.target.value)}
-						placeholder="ej: unit, kg, L"
+						onChange={(event) =>
+							setUnit(event.target.value as LivestockEventUnit)
+						}
 						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-					/>
+					>
+						{EVENT_UNITS_BY_DIMENSION.mass.map((unitValue) => (
+							<option
+								key={unitValue}
+								value={unitValue}
+							>
+								Masa: {unitValue}
+							</option>
+						))}
+						{EVENT_UNITS_BY_DIMENSION.volume.map((unitValue) => (
+							<option
+								key={unitValue}
+								value={unitValue}
+							>
+								Volumen: {unitValue}
+							</option>
+						))}
+						{EVENT_UNITS_BY_DIMENSION.count.map((unitValue) => (
+							<option
+								key={unitValue}
+								value={unitValue}
+							>
+								Conteo: {unitValue}
+							</option>
+						))}
+					</select>
 				</label>
 			)}
 
@@ -446,13 +489,38 @@ export function UnitEventForm({
 						</label>
 						<label className="space-y-1 text-sm">
 							<span className="font-medium">Unidad del conteo</span>
-							<input
-								type="text"
+							<select
 								value={inventoryUnit}
-								onChange={(event) => setInventoryUnit(event.target.value)}
-								placeholder="unit"
+								onChange={(event) =>
+									setInventoryUnit(event.target.value as LivestockEventUnit)
+								}
 								className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-							/>
+							>
+								{EVENT_UNITS_BY_DIMENSION.mass.map((unitValue) => (
+									<option
+										key={unitValue}
+										value={unitValue}
+									>
+										Masa: {unitValue}
+									</option>
+								))}
+								{EVENT_UNITS_BY_DIMENSION.volume.map((unitValue) => (
+									<option
+										key={unitValue}
+										value={unitValue}
+									>
+										Volumen: {unitValue}
+									</option>
+								))}
+								{EVENT_UNITS_BY_DIMENSION.count.map((unitValue) => (
+									<option
+										key={unitValue}
+										value={unitValue}
+									>
+										Conteo: {unitValue}
+									</option>
+								))}
+							</select>
 						</label>
 					</div>
 				</div>
