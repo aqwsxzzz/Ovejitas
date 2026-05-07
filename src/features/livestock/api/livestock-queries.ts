@@ -428,3 +428,67 @@ export const useGetCostPerUnitReport = ({
 		queryFn: () => getCostPerUnitReport({ farmId, filters }),
 		enabled: enabled && !!farmId,
 	});
+
+export const useGetAggregatedHeadcountByAssetId = ({
+	farmId,
+	assetId,
+	enabled = true,
+}: {
+	farmId: string;
+	assetId: string;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: [
+			...livestockQueryKeys.all,
+			"aggregatedHeadcount",
+			farmId,
+			assetId,
+		],
+		queryFn: async () => {
+			const pageSize = 100;
+
+			const sumQuantityByType = async (
+				type: Extract<LivestockEventType, "acquisition" | "mortality">,
+			): Promise<number> => {
+				let page = 1;
+				let total = 0;
+
+				while (true) {
+					const response = await listEventsByAssetId({
+						farmId,
+						assetId,
+						filters: {
+							type,
+							page,
+							pageSize,
+						},
+					});
+
+					for (const event of response.data) {
+						total += Number(event.quantity ?? 0) || 0;
+					}
+
+					if (!response.meta.has_next) {
+						break;
+					}
+
+					page = response.meta.page + 1;
+				}
+
+				return total;
+			};
+
+			const [acquisitionTotal, mortalityTotal] = await Promise.all([
+				sumQuantityByType("acquisition"),
+				sumQuantityByType("mortality"),
+			]);
+
+			return {
+				acquisitionTotal,
+				mortalityTotal,
+				net: Math.max(acquisitionTotal - mortalityTotal, 0),
+			};
+		},
+		enabled: enabled && !!farmId && !!assetId,
+	});

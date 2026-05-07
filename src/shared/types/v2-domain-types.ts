@@ -146,6 +146,13 @@ export interface EventCreatePayload {
 	metadata?: Record<string, string | number | boolean>;
 }
 
+export interface UnitKpiSlide {
+	/** Unit label shown above the value (e.g. "kg", "unit") */
+	unit: string;
+	value: string;
+	sparkline?: number[];
+}
+
 /** One of the four cells in a production unit's dashboard card */
 export interface UnitKpiCard {
 	label: string;
@@ -155,6 +162,8 @@ export interface UnitKpiCard {
 	sub?: string;
 	/** If present, renders an inline sparkline (values oldest → newest) */
 	sparkline?: number[];
+	/** If present, renders a mini per-unit slider instead of value+sparkline */
+	slides?: UnitKpiSlide[];
 	/** If present, renders a fill bar (0 – 1) */
 	fillPct?: number;
 	status?: "ok" | "low" | "critical";

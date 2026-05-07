@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import type {
 	UnitDashboardSlice,
 	UnitKpiCard,
+	UnitKpiSlide,
 } from "@/shared/types/v2-domain-types";
 
 // ─── Sparkline ───────────────────────────────────────────────────────────────
@@ -64,6 +65,79 @@ function FillBar({ pct, status = "ok" }: { pct: number; status?: string }) {
 	);
 }
 
+// ─── ProductionSlides (mini per-unit slider inside a KPI cell) ───────────────
+
+function ProductionSlides({
+	slides,
+	sub,
+}: {
+	slides: UnitKpiSlide[];
+	sub?: string;
+}) {
+	const [activeIdx, setActiveIdx] = useState(0);
+	const trackRef = useRef<HTMLDivElement>(null);
+
+	function handleScroll() {
+		const track = trackRef.current;
+		if (!track) return;
+		setActiveIdx(Math.round(track.scrollLeft / track.clientWidth));
+	}
+
+	if (slides.length === 1) {
+		const slide = slides[0]!;
+		return (
+			<div className="mt-1">
+				<p className="text-[10px] text-(--v2-ink-soft)">{slide.unit}</p>
+				<p className="text-xl font-semibold leading-none">{slide.value}</p>
+				{slide.sparkline && <Sparkline data={slide.sparkline} />}
+				{sub && <p className="mt-1 text-[11px] text-(--v2-ink-soft)">{sub}</p>}
+			</div>
+		);
+	}
+
+	return (
+		<div className="mt-1">
+			<div
+				ref={trackRef}
+				onScroll={handleScroll}
+				className="flex snap-x snap-mandatory overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+			>
+				{slides.map((slide) => (
+					<div
+						key={slide.unit}
+						className="w-full shrink-0 snap-center"
+					>
+						<p className="text-[10px] text-(--v2-ink-soft)">{slide.unit}</p>
+						<p className="text-xl font-semibold leading-none">{slide.value}</p>
+						{slide.sparkline && <Sparkline data={slide.sparkline} />}
+					</div>
+				))}
+			</div>
+			<div className="mt-1.5 flex items-center gap-1">
+				{slides.map((slide, i) => (
+					<button
+						key={slide.unit}
+						type="button"
+						aria-label={slide.unit}
+						aria-pressed={i === activeIdx}
+						onClick={() => {
+							trackRef.current?.scrollTo({
+								left: i * trackRef.current.clientWidth,
+								behavior: "smooth",
+							});
+							setActiveIdx(i);
+						}}
+						className={`h-1 rounded-full transition-all duration-200 ${
+							i === activeIdx ? "w-4 bg-(--v2-ink)" : "w-1.5 bg-(--v2-border)"
+						}`}
+					/>
+				))}
+				{sub && <p className="ml-1 text-[10px] text-(--v2-ink-soft)">{sub}</p>}
+			</div>
+		</div>
+	);
+}
+
 // ─── KpiCell ─────────────────────────────────────────────────────────────────
 
 function KpiCell({ kpi }: { kpi: UnitKpiCard }) {
@@ -72,27 +146,34 @@ function KpiCell({ kpi }: { kpi: UnitKpiCard }) {
 			<p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
 				{kpi.label}
 			</p>
-			<div className="mt-1">
-				{kpi.sparkline ? (
-					<>
+			{kpi.slides ? (
+				<ProductionSlides
+					slides={kpi.slides}
+					sub={kpi.sub}
+				/>
+			) : (
+				<div className="mt-1">
+					{kpi.sparkline ? (
+						<>
+							<p className="text-xl font-semibold leading-none">{kpi.value}</p>
+							<Sparkline data={kpi.sparkline} />
+						</>
+					) : (
 						<p className="text-xl font-semibold leading-none">{kpi.value}</p>
-						<Sparkline data={kpi.sparkline} />
-					</>
-				) : (
-					<p className="text-xl font-semibold leading-none">{kpi.value}</p>
-				)}
-				{kpi.fillPct != null && (
-					<FillBar
-						pct={kpi.fillPct}
-						status={kpi.status}
-					/>
-				)}
-				{kpi.sub && (
-					<p className="mt-1 text-[11px] text-[color:var(--v2-ink-soft)]">
-						{kpi.sub}
-					</p>
-				)}
-			</div>
+					)}
+					{kpi.fillPct != null && (
+						<FillBar
+							pct={kpi.fillPct}
+							status={kpi.status}
+						/>
+					)}
+					{kpi.sub && (
+						<p className="mt-1 text-[11px] text-[color:var(--v2-ink-soft)]">
+							{kpi.sub}
+						</p>
+					)}
+				</div>
+			)}
 		</div>
 	);
 }
