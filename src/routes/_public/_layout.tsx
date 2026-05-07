@@ -3,25 +3,18 @@ import redBarn from "@/routes/_public/assets/redBarn.svg";
 import { useTranslation } from "react-i18next";
 import { authQueryKeys } from "@/features/auth/api/auth-queries";
 import { getUserProfile } from "@/features/auth/api/auth-api";
-import type { IUser } from "@/features/auth/types/auth-types";
-import type { IResponse } from "@/lib/axios";
-import { Route as FarmDashboardRoute } from "@/routes/_private/_privatelayout/farm/$farmId/dashboard";
+import type { IMeResponse } from "@/features/auth/types/auth-types";
 import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
 
 export const Route = createFileRoute("/_public/_layout")({
 	beforeLoad: async ({ context }) => {
 		try {
-			const response = await context.queryClient.ensureQueryData<
-				IResponse<IUser>
-			>({
+			await context.queryClient.ensureQueryData<IMeResponse>({
 				queryKey: authQueryKeys.all,
 				queryFn: getUserProfile,
 			});
 
-			return redirect({
-				to: FarmDashboardRoute.to,
-				params: { farmId: response.data.lastVisitedFarmId },
-			});
+			return redirect({ to: "/v2/dashboard" });
 		} catch (error) {
 			void error;
 		}

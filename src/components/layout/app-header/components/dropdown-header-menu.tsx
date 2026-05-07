@@ -11,13 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
-import { useParams } from "@tanstack/react-router";
 import { useLogout } from "@/features/auth/api/auth-queries";
 import { useTranslation } from "react-i18next";
 import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
 
 export const DropdownHeaderMenu = () => {
-	const { farmId } = useParams({ strict: false });
 	const { mutateAsync: logout } = useLogout();
 	const { t } = useTranslation("dropdownMenuHeader");
 
@@ -37,10 +35,7 @@ export const DropdownHeaderMenu = () => {
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator className="w-2/3 mx-auto" />
 				<DropdownMenuGroup>
-					<Link
-						to="/farm/$farmId/dashboard"
-						params={{ farmId: farmId! }}
-					>
+					<Link to="/v2/dashboard">
 						<DropdownMenuItem>
 							{t("dashboard")}
 							<DropdownMenuShortcut className="text-primary text-center w-4">
@@ -48,10 +43,7 @@ export const DropdownHeaderMenu = () => {
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
-					<Link
-						to="/farm/$farmId/species"
-						params={{ farmId: farmId! }}
-					>
+					<Link to="/v2/production-units">
 						<DropdownMenuItem>
 							{t("animals")}
 							<DropdownMenuShortcut className="text-primary text-center w-4">
@@ -59,10 +51,7 @@ export const DropdownHeaderMenu = () => {
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
-					<Link
-						to="/farm/$farmId/farms"
-						params={{ farmId: farmId! }}
-					>
+					<Link to="/v2/production-units">
 						<DropdownMenuItem className="flex justify-between items-center">
 							{t("farms")}
 							<DropdownMenuShortcut className="text-primary text-center w-4">

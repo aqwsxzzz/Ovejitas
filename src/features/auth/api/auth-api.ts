@@ -1,26 +1,28 @@
 import type {
+	IRefreshPayload,
 	ILoginPayload,
+	IMeResponse,
 	ISignUpPayload,
-	ISignUpResponse,
-	IUser,
+	ITokenPair,
 } from "@/features/auth/types/auth-types";
-import type { IResponse } from "@/lib/axios";
 import { axiosHelper } from "@/lib/axios/axios-helper";
+import { axiosInstance } from "@/lib/axios";
 
 export const signup = ({ payload }: { payload: ISignUpPayload }) =>
-	axiosHelper<IResponse<ISignUpResponse>>({
+	axiosHelper<ITokenPair>({
 		method: "post",
-		url: "/auth/signup",
+		url: "/api/v1/auth/register",
 		data: {
-			...payload,
+			name: payload.displayName,
 			email: payload.email.trim().toLowerCase(),
+			password: payload.password,
 		},
 	});
 
 export const login = ({ payload }: { payload: ILoginPayload }) =>
-	axiosHelper<IResponse<IUser>>({
+	axiosHelper<ITokenPair>({
 		method: "post",
-		url: "/auth/login",
+		url: "/api/v1/auth/login",
 		data: {
 			...payload,
 			email: payload.email.trim().toLowerCase(),
@@ -28,11 +30,27 @@ export const login = ({ payload }: { payload: ILoginPayload }) =>
 	});
 
 export const getUserProfile = () =>
-	axiosHelper<IResponse<IUser>>({ method: "get", url: "/auth/me" });
+	axiosHelper<IMeResponse>({ method: "get", url: "/api/v1/auth/me" });
 
-export const logout = () =>
-	axiosHelper<IResponse<string>>({
+export const refreshTokenPair = ({ payload }: { payload: IRefreshPayload }) =>
+	axiosHelper<ITokenPair>({
 		method: "post",
-		url: "/auth/logout",
-		withCredentials: true,
+		url: "/api/v1/auth/refresh",
+		data: payload,
 	});
+
+export const refreshTokenPairSilently = async ({
+	payload,
+}: {
+	payload: IRefreshPayload;
+}): Promise<ITokenPair> => {
+	const response = await axiosInstance.post<ITokenPair>(
+		"/api/v1/auth/refresh",
+		payload,
+		{
+			_skipAuthRefresh: true,
+		},
+	);
+
+	return response.data;
+};

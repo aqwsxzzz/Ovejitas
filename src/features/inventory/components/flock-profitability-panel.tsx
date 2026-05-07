@@ -214,10 +214,7 @@ export const FlockProfitabilityPanel = ({
 							asChild
 							variant="outline"
 						>
-							<Link
-								to="/farm/$farmId/inventory"
-								params={{ farmId }}
-							>
+							<Link to="/v2/inventory">
 								{t("profitability.pricingRequired.cta")}
 							</Link>
 						</Button>
