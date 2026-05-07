@@ -18,6 +18,8 @@ import {
 import { financialTransactionTypeLabelKeys } from "@/features/expense/components/expense-labels";
 import { toYyyyMmDd } from "@/features/expense/components/expense-form-schema";
 import {
+	financialSummaryGroupBy,
+	financialSummaryPeriods,
 	financialTransactionTypes,
 	type IExpenseListFilters,
 } from "@/features/expense/types/expense-types";
@@ -58,6 +60,24 @@ export const ExpenseFilterSheet = ({
 		[t],
 	);
 
+	const groupByOptions = useMemo(
+		() =>
+			financialSummaryGroupBy.map((groupBy) => ({
+				label: t(`filters.groupByOptions.${groupBy}`),
+				value: groupBy,
+			})),
+		[t],
+	);
+
+	const periodOptions = useMemo(
+		() =>
+			financialSummaryPeriods.map((period) => ({
+				label: t(`filters.periodOptions.${period}`),
+				value: period,
+			})),
+		[t],
+	);
+
 	const speciesOptions = useMemo(
 		() => [
 			{ label: t("filters.allSpecies"), value: "all" },
@@ -89,6 +109,26 @@ export const ExpenseFilterSheet = ({
 		onChange({
 			...filters,
 			speciesId: value === "all" ? undefined : value,
+		});
+	};
+
+	const setGroupBy = (value: string) => {
+		onChange({
+			...filters,
+			groupBy:
+				value === "all"
+					? undefined
+					: (value as NonNullable<IExpenseListFilters["groupBy"]>),
+		});
+	};
+
+	const setPeriod = (value: string) => {
+		onChange({
+			...filters,
+			period:
+				value === "all"
+					? undefined
+					: (value as NonNullable<IExpenseListFilters["period"]>),
 		});
 	};
 
@@ -157,6 +197,56 @@ export const ExpenseFilterSheet = ({
 							</SelectTrigger>
 							<SelectContent>
 								{speciesOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+							{t("filters.groupByLabel")}
+						</label>
+						<Select
+							value={filters.groupBy ?? "all"}
+							onValueChange={setGroupBy}
+						>
+							<SelectTrigger className="h-12 rounded-2xl bg-muted/60 border-transparent px-4 text-base">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">{t("filters.allGroupBy")}</SelectItem>
+								{groupByOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+
+					<div className="space-y-2">
+						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+							{t("filters.periodLabel")}
+						</label>
+						<Select
+							value={filters.period ?? "all"}
+							onValueChange={setPeriod}
+						>
+							<SelectTrigger className="h-12 rounded-2xl bg-muted/60 border-transparent px-4 text-base">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="all">{t("filters.allPeriods")}</SelectItem>
+								{periodOptions.map((option) => (
 									<SelectItem
 										key={option.value}
 										value={option.value}

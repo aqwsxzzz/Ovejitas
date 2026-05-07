@@ -3,8 +3,11 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./index.css";
+import "@/design-system/tokens/v2-tokens.css";
 import { Toaster } from "sonner";
 import { CheckCircle, Info, X } from "lucide-react";
+import { initializeAuthSession } from "@/features/auth/utils/auth-session";
+import { initializeAuthRefreshInterceptor } from "@/features/auth/utils/auth-refresh";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -14,6 +17,9 @@ const queryClient = new QueryClient({
 		queries: { retry: false, refetchOnWindowFocus: false },
 	},
 });
+
+initializeAuthSession();
+initializeAuthRefreshInterceptor();
 
 // Create a new router instance
 const router = createRouter({ routeTree, context: { queryClient } });

@@ -1,0 +1,197 @@
+{
+  "page": {
+    "title": "Inventario",
+    "description": "Gestiona lotes de alimento y registros de alimentacion"
+  },
+  "tabs": {
+    "feedLots": "Lotes de alimento",
+    "feedLog": "Registro de alimento",
+    "feedingSchedules": "Programacion",
+    "feedReports": "Reportes"
+  },
+  "feedLots": {
+    "title": "Lotes de alimento",
+    "stockFilter": {
+      "withStock": "Con stock",
+      "all": "Todos"
+    },
+    "newButton": "Nuevo lote",
+    "modal": {
+      "title": "Crear lote de alimento",
+      "description": "Registra un lote de compra de alimento.",
+      "feedType": "Tipo de alimento",
+      "feedTypePlaceholder": "Selecciona un tipo de alimento",
+      "quantity": "Cantidad (kg)",
+      "unitPrice": "Precio unitario",
+      "purchaseDate": "Fecha de compra",
+      "supplier": "Proveedor",
+      "notes": "Notas",
+      "create": "Crear"
+    },
+    "adminManagedNotice": "Los tipos de alimento los administra el equipo de la app. Pide a un administrador que agregue al menos un tipo de alimento antes de crear lotes.",
+    "filterPlaceholder": "Filtrar por tipo de alimento",
+    "allFeedTypes": "Todos los tipos de alimento",
+    "loading": "Cargando lotes de alimento...",
+    "loadingMore": "Cargando mas lotes...",
+    "empty": "No se encontraron lotes.",
+    "remaining": "{{remaining}} / {{purchased}} kg restantes",
+    "purchasedLine": "Comprado {{date}} - ${{price}} /kg",
+    "delete": "Eliminar",
+    "unknownFeedType": "Tipo de alimento desconocido",
+    "deleteDialog": {
+      "title": "Eliminar lote de alimento?",
+      "description": "Esta accion no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    }
+  },
+  "feedLog": {
+    "title": "Registro de alimento",
+    "newButton": "Registrar consumo",
+    "modal": {
+      "title": "Registrar evento de alimento",
+      "description": "Registra alimentacion, merma, traslado o ajuste.",
+      "feedType": "Tipo de alimento",
+      "feedTypePlaceholder": "Selecciona un tipo de alimento",
+      "reason": "Motivo",
+      "flock": "Lote",
+      "noFlock": "Sin lote",
+      "quantity": "Cantidad (kg)",
+      "date": "Fecha",
+      "notes": "Notas",
+      "create": "Crear"
+    },
+    "reasonOptions": {
+      "feeding": "Alimentacion",
+      "waste": "Merma",
+      "transfer": "Traslado",
+      "adjustment": "Ajuste"
+    },
+    "adminManagedNotice": "Los tipos de alimento los administra el equipo de la app. Pide a un administrador que agregue al menos un tipo de alimento antes de registrar eventos.",
+    "loading": "Cargando registro de alimento...",
+    "loadingMore": "Cargando mas eventos de alimento...",
+    "empty": "No hay eventos de alimento registrados.",
+    "itemTitle": "{{qty}} kg - {{reason}}",
+    "itemSubtitle": "{{date}} - Costo ${{cost}}",
+    "delete": "Eliminar",
+    "deleteDialog": {
+      "title": "Eliminar registro de alimento?",
+      "description": "Esta accion no se puede deshacer.",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar"
+    }
+  },
+  "feedingSchedules": {
+    "title": "Programacion de alimentacion",
+    "newButton": "Nueva programacion",
+    "loading": "Cargando programaciones...",
+    "empty": "No se encontraron programaciones.",
+    "missingBaseData": "Necesitas tipos de alimento y lotes para crear programaciones.",
+    "unknownFlock": "Lote desconocido",
+    "unknownFeedType": "Tipo de alimento desconocido",
+    "filters": {
+      "active": "Activas",
+      "all": "Todas"
+    },
+    "status": {
+      "active": "Activa",
+      "inactive": "Inactiva"
+    },
+    "actions": {
+      "close": "Cerrar",
+      "delete": "Eliminar"
+    },
+    "item": {
+      "qtyPerDay": "{{qty}} kg / dia",
+      "period": "{{from}} a {{to}}"
+    },
+    "status": {
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "ongoing": "En curso"
+    },
+    "modal": {
+      "title": "Crear programacion de alimentacion",
+      "description": "Define la meta diaria de alimento y el periodo activo para un lote.",
+      "flock": "Lote",
+      "flockPlaceholder": "Selecciona lote",
+      "feedType": "Tipo de alimento",
+      "feedTypePlaceholder": "Selecciona tipo de alimento",
+      "qtyPerDay": "Cantidad diaria (kg)",
+      "activeFrom": "Activa desde",
+      "activeTo": "Activa hasta (opcional)",
+      "selectDate": "Selecciona fecha",
+      "optional": "Opcional",
+      "create": "Crear"
+    },
+    "toast": {
+      "createSuccess": "Programacion creada",
+      "updateSuccess": "Programacion actualizada",
+      "deleteSuccess": "Programacion eliminada"
+    }
+  },
+  "feedReports": {
+    "filters": {
+      "title": "Filtros de reporte",
+      "from": "Desde",
+      "to": "Hasta",
+      "flock": "Lote",
+      "lot": "Compra",
+      "all": "Todos"
+    },
+    "costByFlock": {
+      "title": "Costo por lote",
+      "loading": "Cargando reporte por lote...",
+      "empty": "No hay datos para los filtros seleccionados.",
+      "waste": "Desperdicio / Transferencias",
+      "totalCost": "{{value}}",
+      "totalQty": "{{value}}"
+    },
+    "costByLot": {
+      "title": "Costo por compra",
+      "selectLot": "Selecciona una compra para ver costos detallados.",
+      "loading": "Cargando reporte por compra...",
+      "empty": "No se encontro informacion de la compra."
+    }
+  },
+  "eggPricing": {
+    "title": "Precio del huevo",
+    "pricePerEgg": "Precio por huevo",
+    "effectiveFrom": "Válido desde",
+    "setPrice": "Guardar precio",
+    "saving": "Guardando...",
+    "activePriceTitle": "Precio activo",
+    "loadingActive": "Cargando precio activo...",
+    "noActivePrice": "Sin precio configurado.",
+    "perEgg": "por huevo",
+    "from": "Desde",
+    "historyTitle": "Historial de precios",
+    "loadingHistory": "Cargando historial...",
+    "noHistory": "Sin historial de precios.",
+    "ongoing": "en curso"
+  },
+  "profitability": {
+    "title": "Rentabilidad del lote",
+    "summaryTitle": "Resumen",
+    "loading": "Cargando reporte de rentabilidad...",
+    "empty": "No se encontraron filas para los filtros seleccionados.",
+    "period": "Período",
+    "from": "Desde",
+    "to": "Hasta",
+    "flock": "Lote",
+    "allFlocks": "Todos los lotes",
+    "revenue": "Ingresos",
+    "feedCost": "Costo de alimento",
+    "profit": "Ganancia",
+    "margin": "Margen",
+    "costPerDozen": "Costo / docena",
+    "fcrLabel": "FCA kg / docena",
+    "eggRevenue": "Ingresos por huevos",
+    "breakdownPeriod": "Período",
+    "pricingRequired": {
+      "title": "Precio del huevo requerido",
+      "description": "Configura un precio por huevo para calcular la rentabilidad. Usa el panel de precio del huevo más arriba y vuelve a intentarlo.",
+      "cta": "Ir a precio del huevo"
+    }
+  }
+}

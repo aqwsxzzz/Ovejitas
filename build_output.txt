@@ -1,0 +1,17 @@
+
+> client@0.0.1 build
+> tsc -b && vite build
+
+src/components/layout/app-header/app-header.tsx(8,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/components/layout/bottom-tab-nav/bottom-tab-nav.tsx(38,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/animal/components/animal-card.tsx(24,10): error TS2339: Property 'speciesId' does not exist on type '{}'.
+src/features/animal/components/animal-profile-view/animal-profile-basic-card.tsx(15,10): error TS2339: Property 'animalId' does not exist on type '{}'.
+src/features/animal/components/animal-profile-view/animal-profile-health-card/health-card-individual-info.tsx(24,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/animal/components/animal-profile-view/animal-profile-health-card/health-card-individual-info.tsx(24,18): error TS2339: Property 'animalId' does not exist on type '{}'.
+src/features/animal/components/delete-animal-modal/delete-animal-modal.tsx(29,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/animal/components/edit-animal-modal/edit-animal-form.tsx(91,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/animal/components/new-animal-modal/new-animal-bulk-form.tsx(133,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/animal/components/new-animal-modal/new-animal-form.tsx(35,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/farm-invitations/components/farm-invite-modal.tsx(39,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/flock/components/flock-card.tsx(46,10): error TS2339: Property 'farmId' does not exist on type '{}'.
+src/features/measurement/components/add-new-measurement-modal/add-new-measurement-form.tsx(47,10): error TS2339: Property 'animalId' does not exist on type '{}'.

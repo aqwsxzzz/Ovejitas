@@ -1,12 +1,18 @@
+import { DeleteEggCollectionDialog } from "@/features/flock/components/delete-egg-collection-dialog";
+import { RecordEggCollectionModal } from "@/features/flock/components/record-egg-collection-modal";
 import type { IEggCollection } from "@/features/flock/types/flock-types";
 import { useTranslation } from "react-i18next";
 
 interface EggCollectionsListProps {
 	eggCollections: IEggCollection[];
+	flockId: string;
+	farmId: string;
 }
 
 export const EggCollectionsList = ({
 	eggCollections,
+	flockId,
+	farmId,
 }: EggCollectionsListProps) => {
 	const { t } = useTranslation("flocks");
 
@@ -27,11 +33,24 @@ export const EggCollectionsList = ({
 				>
 					<div className="flex items-center justify-between gap-2">
 						<p className="font-medium">{eggCollection.date}</p>
-						<p className="text-sm text-muted-foreground">
-							{t("detail.eggCollections.layRate", {
-								layRate: eggCollection.layRate.toFixed(2),
-							})}
-						</p>
+						<div className="flex items-center gap-1">
+							<p className="text-sm text-muted-foreground">
+								{t("detail.eggCollections.layRate", {
+									layRate: eggCollection.layRate?.toFixed(2) ?? "-",
+								})}
+							</p>
+							<RecordEggCollectionModal
+								mode="edit"
+								flockId={flockId}
+								farmId={farmId}
+								collection={eggCollection}
+							/>
+							<DeleteEggCollectionDialog
+								flockId={flockId}
+								farmId={farmId}
+								collectionId={eggCollection.id}
+							/>
+						</div>
 					</div>
 					<p className="text-sm">
 						{t("detail.eggCollections.totals", {

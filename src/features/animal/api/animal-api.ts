@@ -72,16 +72,14 @@ export const getAnimalById = ({
 
 export const editAnimalById = ({
 	payload,
-	farmId,
 	animalId,
 }: {
 	payload: IEditAnimalPayload;
-	farmId: string;
 	animalId: string;
 }) =>
 	axiosHelper<IResponse<IAnimal>>({
 		method: "put",
-		url: `/farms/${farmId}/animals/${animalId}`,
+		url: `/animals/${animalId}`,
 		data: payload,
 	});
 

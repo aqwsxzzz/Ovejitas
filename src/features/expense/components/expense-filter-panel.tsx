@@ -11,6 +11,8 @@ import {
 import { financialTransactionTypeLabelKeys } from "@/features/expense/components/expense-labels";
 import { toYyyyMmDd } from "@/features/expense/components/expense-form-schema";
 import {
+	financialSummaryGroupBy,
+	financialSummaryPeriods,
 	financialTransactionTypes,
 	type IExpenseListFilters,
 } from "@/features/expense/types/expense-types";
@@ -51,6 +53,24 @@ export const ExpenseFilterPanel = ({
 		[t],
 	);
 
+	const groupByOptions = useMemo(
+		() =>
+			financialSummaryGroupBy.map((groupBy) => ({
+				label: t(`filters.groupByOptions.${groupBy}`),
+				value: groupBy,
+			})),
+		[t],
+	);
+
+	const periodOptions = useMemo(
+		() =>
+			financialSummaryPeriods.map((period) => ({
+				label: t(`filters.periodOptions.${period}`),
+				value: period,
+			})),
+		[t],
+	);
+
 	const speciesOptions = useMemo(
 		() => [
 			{ label: t("filters.allSpecies"), value: "all" },
@@ -82,6 +102,26 @@ export const ExpenseFilterPanel = ({
 		onChange({
 			...filters,
 			speciesId: value === "all" ? undefined : value,
+		});
+	};
+
+	const setGroupBy = (value: string) => {
+		onChange({
+			...filters,
+			groupBy:
+				value === "all"
+					? undefined
+					: (value as NonNullable<IExpenseListFilters["groupBy"]>),
+		});
+	};
+
+	const setPeriod = (value: string) => {
+		onChange({
+			...filters,
+			period:
+				value === "all"
+					? undefined
+					: (value as NonNullable<IExpenseListFilters["period"]>),
 		});
 	};
 
@@ -144,6 +184,56 @@ export const ExpenseFilterPanel = ({
 
 			<div className="space-y-1">
 				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
+					{t("filters.groupByLabel")}
+				</p>
+				<Select
+					value={filters.groupBy ?? "all"}
+					onValueChange={setGroupBy}
+				>
+					<SelectTrigger className="h-10">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">{t("filters.allGroupBy")}</SelectItem>
+						{groupByOptions.map((option) => (
+							<SelectItem
+								key={option.value}
+								value={option.value}
+							>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+
+			<div className="space-y-1">
+				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
+					{t("filters.periodLabel")}
+				</p>
+				<Select
+					value={filters.period ?? "all"}
+					onValueChange={setPeriod}
+				>
+					<SelectTrigger className="h-10">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="all">{t("filters.allPeriods")}</SelectItem>
+						{periodOptions.map((option) => (
+							<SelectItem
+								key={option.value}
+								value={option.value}
+							>
+								{option.label}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
+
+			<div className="space-y-1">
+				<p className="text-caption text-muted-foreground font-semibold uppercase tracking-wide">
 					{t("filters.fromLabel")}
 				</p>
 				<div className="flex items-center gap-2">
@@ -190,7 +280,7 @@ export const ExpenseFilterPanel = ({
 		return (
 			<Card className="hidden md:flex lg:hidden border border-border/70 shadow-none py-4">
 				<CardContent className="px-4">
-					<div className="grid grid-cols-1 gap-3 xl:grid-cols-5">
+					<div className="grid grid-cols-1 gap-3 xl:grid-cols-7">
 						{controls}
 						<div className="flex items-end justify-end gap-2">
 							<Button

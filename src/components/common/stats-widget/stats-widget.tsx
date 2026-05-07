@@ -46,26 +46,24 @@ export function StatsWidget({
 			</div>
 
 			<div className="flex-1 min-w-0">
-				<div className="flex flex-wrap items-end gap-x-2 gap-y-1">
-					<span className="text-display font-bold text-foreground leading-none break-words">
-						{value}
-					</span>
-					{trend && (
-						<span
-							className={cn(
-								"text-small font-medium leading-tight break-words",
-								trend.direction === "up" && "text-success",
-								trend.direction === "down" && "text-error",
-								trend.direction === "neutral" && "text-muted-foreground",
-							)}
-						>
-							{trend.direction === "up" && "↑"}
-							{trend.direction === "down" && "↓"}
-							{trend.value}
-						</span>
-					)}
-				</div>
+				<span className="text-display font-bold text-foreground leading-none break-words">
+					{value}
+				</span>
 				<p className="text-body text-muted-foreground mt-1">{label}</p>
+				{trend && (
+					<span
+						className={cn(
+							"text-small font-medium leading-tight break-words",
+							trend.direction === "up" && "text-success",
+							trend.direction === "down" && "text-error",
+							trend.direction === "neutral" && "text-muted-foreground",
+						)}
+					>
+						{trend.direction === "up" && "↑"}
+						{trend.direction === "down" && "↓"}
+						{trend.value}
+					</span>
+				)}
 			</div>
 		</Component>
 	);

@@ -1,3 +1,11 @@
+# 11. PR Formatting Rule
+- Always use real line breaks (not escaped \n) in PR titles and bodies to ensure proper formatting on GitHub.
+# 10. Model Change Adaptation Rule
+- Always detect when the underlying AI model changes (e.g., from GPT-4 to a lower-tier or free model).
+- On model change, immediately re-read all current prompt, agent, and skill instructions.
+- Re-evaluate and adapt workflow automation to maintain full compliance with repository prompts and automation expectations, regardless of model tier.
+- If the model is unable to fully automate as required, warn the user and suggest restoring a higher-tier model for best results.
+
 # Copilot Global Instructions
 
 These instructions apply to all Copilot chats and agents in this workspace.

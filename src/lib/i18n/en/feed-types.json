@@ -1,0 +1,7 @@
+{
+  "toast": {
+    "createSuccess": "Feed type created successfully",
+    "updateSuccess": "Feed type updated successfully",
+    "deleteSuccess": "Feed type deleted successfully"
+  }
+}

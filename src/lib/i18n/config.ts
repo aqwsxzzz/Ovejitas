@@ -69,6 +69,14 @@ import expensesEN from "./en/expenses.json";
 import expensesES from "./es/expenses.json";
 import flocksEN from "./en/flocks.json";
 import flocksES from "./es/flocks.json";
+import feedTypesEN from "./en/feed-types.json";
+import feedTypesES from "./es/feed-types.json";
+import feedLotsEN from "./en/feed-lots.json";
+import feedLotsES from "./es/feed-lots.json";
+import feedConsumptionsEN from "./en/feed-consumptions.json";
+import feedConsumptionsES from "./es/feed-consumptions.json";
+import inventoryEN from "./en/inventory.json";
+import inventoryES from "./es/inventory.json";
 
 export const defaultNS = "login";
 
@@ -113,6 +121,10 @@ i18next
 				bottomTabNav: bottomTabNavEN,
 				expenses: expensesEN,
 				flocks: flocksEN,
+				feedTypes: feedTypesEN,
+				feedLots: feedLotsEN,
+				feedConsumptions: feedConsumptionsEN,
+				inventory: inventoryEN,
 			},
 			es: {
 				login: loginES,
@@ -149,6 +161,10 @@ i18next
 				bottomTabNav: bottomTabNavES,
 				expenses: expensesES,
 				flocks: flocksES,
+				feedTypes: feedTypesES,
+				feedLots: feedLotsES,
+				feedConsumptions: feedConsumptionsES,
+				inventory: inventoryES,
 			},
 		},
 		defaultNS,
