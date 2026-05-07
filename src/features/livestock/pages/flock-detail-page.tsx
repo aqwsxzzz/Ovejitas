@@ -193,12 +193,14 @@ function toBreedLabel(asset: ILivestockAsset): string {
 	return `${asset.kind} · ${modeLabel}`;
 }
 
-function buildEventPairIdempotencyPrefix(type: "income" | "expense"): string {
+function buildEventPairIdempotencyPrefix(
+	type: "income" | "expense" | "acquisition",
+): string {
 	return `${type}-${crypto.randomUUID()}`;
 }
 
-function isChainedInventoryLegEvent(event: ILivestockEvent): boolean {
-	return event.payload.chain_role === "inventory_leg";
+function isChainedLegEvent(event: ILivestockEvent): boolean {
+	return typeof event.payload.chain_role === "string";
 }
 
 export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
@@ -325,7 +327,38 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		[individualsResponse?.data],
 	);
 	const listedIndividuals = listedIndividualsResponse?.data ?? [];
-	const timelineEvents = eventsLogData?.items ?? [];
+	const timelineEvents = useMemo(
+		() => eventsLogData?.items ?? [],
+		[eventsLogData?.items],
+	);
+
+	const preferredSecondaryCategoryByType = useMemo(() => {
+		const resolveByType = (
+			type: Extract<LivestockEventType, "acquisition" | "mortality">,
+		): number | undefined => {
+			const fromAssetEvents = timelineEvents.find(
+				(event) => event.type === type && event.category_id != null,
+			)?.category_id;
+			if (fromAssetEvents != null) {
+				return fromAssetEvents;
+			}
+
+			const matchingCategories = eventCategories
+				.filter((category) => category.type === type)
+				.sort((left, right) => left.id - right.id);
+
+			if (matchingCategories.length === 0) {
+				return undefined;
+			}
+
+			return matchingCategories[0]?.id;
+		};
+
+		return {
+			acquisition: resolveByType("acquisition"),
+			mortality: resolveByType("mortality"),
+		};
+	}, [timelineEvents, eventCategories]);
 
 	useEffect(() => {
 		hasAutoLoadedEventsPageRef.current = false;
@@ -608,6 +641,8 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					) {
 						const inventoryEventType =
 							data.type === "expense" ? "acquisition" : "mortality";
+						const secondaryCategoryId =
+							preferredSecondaryCategoryByType[inventoryEventType];
 						const chainReason =
 							data.type === "expense"
 								? "purchase_inventory_adjustment"
@@ -618,6 +653,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							data: {
 								type: inventoryEventType,
 								occurred_at: data.occurredAt,
+								category_id: secondaryCategoryId,
 								quantity: Math.abs(data.inventoryQuantityDelta),
 								notes: data.notes,
 								payload: {
@@ -646,21 +682,65 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						},
 					});
 				} else if (data.type === "acquisition") {
-					await createEventByAssetId({
-						farmId,
-						assetId: unitId,
-						data: {
-							type: "acquisition",
-							occurred_at: data.occurredAt,
-							category_id: data.categoryId,
-							individual_id: data.individualId,
-							quantity: data.quantity ?? 0,
-							amount: data.amount,
-							currency: data.currency,
-							notes: data.notes,
-							payload: { status: data.status },
-						},
-					});
+					const shouldCreateExpensePair = (data.amount ?? 0) > 0;
+
+					if (shouldCreateExpensePair) {
+						const eventPairPrefix =
+							buildEventPairIdempotencyPrefix("acquisition");
+						await createEventByAssetId({
+							farmId,
+							assetId: unitId,
+							data: {
+								type: "acquisition",
+								occurred_at: data.occurredAt,
+								category_id: data.categoryId,
+								individual_id: data.individualId,
+								quantity: data.quantity ?? 0,
+								amount: data.amount,
+								currency: data.currency,
+								notes: data.notes,
+								payload: { status: data.status },
+								idempotency_key: `${eventPairPrefix}:acquisition`,
+							},
+						});
+
+						await createEventByAssetId({
+							farmId,
+							assetId: unitId,
+							data: {
+								type: "expense",
+								occurred_at: data.occurredAt,
+								amount: data.amount ?? 0,
+								currency: data.currency ?? "USD",
+								category_id: data.categoryId,
+								individual_id: data.individualId,
+								notes: data.notes,
+								payload: {
+									status: data.status,
+									paired_with: "acquisition",
+									chain_reason: "acquisition_cost",
+									chain_role: "financial_leg",
+								},
+								idempotency_key: `${eventPairPrefix}:expense`,
+							},
+						});
+					} else {
+						await createEventByAssetId({
+							farmId,
+							assetId: unitId,
+							data: {
+								type: "acquisition",
+								occurred_at: data.occurredAt,
+								category_id: data.categoryId,
+								individual_id: data.individualId,
+								quantity: data.quantity ?? 0,
+								amount: data.amount,
+								currency: data.currency,
+								notes: data.notes,
+								payload: { status: data.status },
+							},
+						});
+					}
 				} else if (data.type === "mortality") {
 					await createEventByAssetId({
 						farmId,
@@ -708,12 +788,13 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			refetchProfitability,
 			refetchProductionReport,
 			refetchAggregatedHeadcount,
+			preferredSecondaryCategoryByType,
 			asset,
 		],
 	);
 
 	const handleStartEditEvent = useCallback((event: ILivestockEvent) => {
-		if (isChainedInventoryLegEvent(event)) {
+		if (isChainedLegEvent(event)) {
 			alert(
 				"Este evento fue generado automaticamente por una operacion encadenada. Edita el evento financiero principal para mantener consistencia.",
 			);
@@ -727,7 +808,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 	const handleDeleteEvent = useCallback(
 		async (event: ILivestockEvent) => {
 			if (!farmId || !unitId) return;
-			if (isChainedInventoryLegEvent(event)) {
+			if (isChainedLegEvent(event)) {
 				alert(
 					"Este evento fue generado automaticamente por una operacion encadenada. Eliminalo desde el evento financiero principal para evitar desbalances.",
 				);
@@ -775,7 +856,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				await handleCreateEvent(data);
 				return;
 			}
-			if (isChainedInventoryLegEvent(editingEvent)) {
+			if (isChainedLegEvent(editingEvent)) {
 				alert(
 					"Este evento fue generado automaticamente por una operacion encadenada. Edita el evento financiero principal para mantener consistencia.",
 				);

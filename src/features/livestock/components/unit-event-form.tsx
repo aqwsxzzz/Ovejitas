@@ -457,7 +457,10 @@ export function UnitEventForm({
 						/>
 					</label>
 					<label className="space-y-1 text-sm">
-						<span className="font-medium">Moneda (requerida)</span>
+						<span className="font-medium">
+							Moneda
+							{type === "acquisition" ? " (opcional)" : " (requerida)"}
+						</span>
 						<input
 							type="text"
 							value={currency}
@@ -468,7 +471,6 @@ export function UnitEventForm({
 					</label>
 				</div>
 			)}
-
 			{canCreateInventoryPair && (type === "income" || type === "expense") ? (
 				<div className="rounded-lg border border-(--v2-border) bg-white/60 p-3">
 					<p className="text-sm font-medium">Impacto en conteo</p>
