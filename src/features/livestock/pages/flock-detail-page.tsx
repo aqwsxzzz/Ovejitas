@@ -17,6 +17,7 @@ import {
 	useListIndividualsByAssetId,
 	useGetProfitabilityReport,
 	useGetProductionReport,
+	useGetAggregatedHeadcountByAssetId,
 } from "@/features/livestock/api/livestock-queries";
 import type {
 	ILivestockAsset,
@@ -54,6 +55,100 @@ function Bars({ data }: { data: number[] }) {
 					style={{ height: `${Math.max((value / max) * 100, 20)}%` }}
 				/>
 			))}
+		</div>
+	);
+}
+
+function ProductionSeriesCard({
+	productSeries,
+}: {
+	productSeries: ProductionProductSeries;
+}) {
+	return (
+		<div className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
+			<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+				{productSeries.productLabel} · ultimos 7 dias
+			</p>
+			<div className="mt-2 flex items-start justify-between gap-3">
+				<p className="text-5xl font-semibold leading-none">
+					{productSeries.totalLast7Days}
+				</p>
+				<div className="text-right text-sm text-(--v2-ink-soft)">
+					<p className="text-xs uppercase tracking-[0.08em]">Hoy</p>
+					<p className="text-xl font-semibold leading-none text-(--v2-ink)">
+						{productSeries.todayCount}
+					</p>
+				</div>
+			</div>
+			<Bars
+				data={
+					productSeries.series.length > 0
+						? productSeries.series
+						: [0, 0, 0, 0, 0, 0, 0]
+				}
+			/>
+			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+				<span>{productSeries.firstDayLabel}</span>
+				<span>Hoy · {productSeries.todayCount}</span>
+			</div>
+		</div>
+	);
+}
+
+function ProductionSeriesSlider({
+	series,
+}: {
+	series: ProductionProductSeries[];
+}) {
+	const [activeIndex, setActiveIndex] = useState(0);
+
+	if (series.length === 1) {
+		return <ProductionSeriesCard productSeries={series[0]!} />;
+	}
+
+	return (
+		<div className="space-y-2">
+			<div
+				className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1"
+				onScroll={(event) => {
+					const el = event.currentTarget;
+					if (!el.clientWidth) return;
+					const nextIndex = Math.round(el.scrollLeft / el.clientWidth);
+					setActiveIndex(Math.max(0, Math.min(nextIndex, series.length - 1)));
+				}}
+			>
+				{series.map((productSeries) => (
+					<div
+						key={productSeries.productKey}
+						className="min-w-full snap-start"
+					>
+						<ProductionSeriesCard productSeries={productSeries} />
+					</div>
+				))}
+			</div>
+			<div className="flex items-center justify-center gap-1">
+				{series.map((productSeries, index) => (
+					<button
+						key={productSeries.productKey}
+						type="button"
+						aria-label={`Ver serie ${index + 1}`}
+						onClick={(event) => {
+							const container = event.currentTarget
+								.closest(".space-y-2")
+								?.querySelector<HTMLDivElement>(".snap-x.snap-mandatory");
+							if (!container) return;
+							container.scrollTo({
+								left: index * container.clientWidth,
+								behavior: "smooth",
+							});
+							setActiveIndex(index);
+						}}
+						className={`h-2 w-2 rounded-full transition ${
+							index === activeIndex ? "bg-[color:var(--v2-ink)]" : "bg-black/30"
+						}`}
+					/>
+				))}
+			</div>
 		</div>
 	);
 }
@@ -100,6 +195,10 @@ function toBreedLabel(asset: ILivestockAsset): string {
 
 function buildEventPairIdempotencyPrefix(type: "income" | "expense"): string {
 	return `${type}-${crypto.randomUUID()}`;
+}
+
+function isChainedInventoryLegEvent(event: ILivestockEvent): boolean {
+	return event.payload.chain_role === "inventory_leg";
 }
 
 export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
@@ -197,6 +296,13 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				dateFrom: sevenDaysAgo,
 			},
 			enabled: hasValidAssetId && !!farmId,
+		});
+
+	const { data: aggregatedHeadcount, refetch: refetchAggregatedHeadcount } =
+		useGetAggregatedHeadcountByAssetId({
+			farmId,
+			assetId: unitId,
+			enabled: !!farmId && !!unitId,
 		});
 
 	const {
@@ -299,40 +405,51 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		const categoryNameById = new Map(
 			eventCategories.map((category) => [category.id, category.name]),
 		);
-		const totalsByProduct = new Map<string, Map<string, number>>();
+		type ProductAggregation = {
+			productLabel: string;
+			totalsByDay: Map<string, number>;
+		};
+		const totalsByProduct = new Map<string, ProductAggregation>();
 
 		for (const row of productionReport?.data ?? []) {
 			const key = row.bucket_start.slice(0, 10);
 			if (!dayKeys.includes(key)) continue;
 
-			const productKey =
+			const categoryKey =
 				row.category_id != null ? String(row.category_id) : "uncategorized";
+			const unitKey = row.unit ?? "unit";
+			const productKey = `${unitKey}::${categoryKey}`;
+			const categoryLabel =
+				categoryKey === "uncategorized"
+					? "Sin categoria"
+					: (categoryNameById.get(Number(categoryKey)) ??
+						`Categoria #${categoryKey}`);
+			const productLabel =
+				categoryKey === "uncategorized"
+					? unitKey
+					: `${unitKey} · ${categoryLabel}`;
+
 			if (!totalsByProduct.has(productKey)) {
-				totalsByProduct.set(
-					productKey,
-					new Map(dayKeys.map((dayKey) => [dayKey, 0])),
-				);
+				totalsByProduct.set(productKey, {
+					productLabel,
+					totalsByDay: new Map(dayKeys.map((dayKey) => [dayKey, 0])),
+				});
 			}
 
-			const productTotals = totalsByProduct.get(productKey);
-			if (!productTotals) continue;
+			const product = totalsByProduct.get(productKey);
+			if (!product) continue;
 
-			productTotals.set(
+			product.totalsByDay.set(
 				key,
-				(productTotals.get(key) ?? 0) + parseNumeric(row.total),
+				(product.totalsByDay.get(key) ?? 0) + parseNumeric(row.total),
 			);
 		}
 
 		return Array.from(totalsByProduct.entries())
-			.map(([productKey, totalsByDay]) => {
+			.map(([productKey, { productLabel, totalsByDay }]) => {
 				const series = dayKeys.map((dayKey) => totalsByDay.get(dayKey) ?? 0);
 				const totalLast7Days = series.reduce((sum, value) => sum + value, 0);
 				const todayCount = series[series.length - 1] ?? 0;
-				const productLabel =
-					productKey === "uncategorized"
-						? "Sin categoria"
-						: (categoryNameById.get(Number(productKey)) ??
-							`Categoria #${productKey}`);
 
 				return {
 					productKey,
@@ -362,34 +479,32 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		[allIndividuals],
 	);
 
+	const aggregatedActiveCount = useMemo(() => {
+		return aggregatedHeadcount?.net ?? 0;
+	}, [aggregatedHeadcount]);
+
 	const countSummary = useMemo(() => {
 		if (asset?.mode === "individual") {
 			return `${taggedMembersCount} individuos etiquetados`;
 		}
 		if (asset?.mode === "aggregated") {
-			const acquisitionTotal = parseNumeric(
-				productionReport?.totals.find((t) => t.unit === "head")?.total ?? null,
-			);
-			return acquisitionTotal > 0
-				? `${acquisitionTotal} en conteo`
+			return aggregatedActiveCount > 0
+				? `${aggregatedActiveCount} en conteo`
 				: "sin conteo registrado";
 		}
 		return "";
-	}, [asset?.mode, taggedMembersCount, productionReport]);
+	}, [asset?.mode, taggedMembersCount, aggregatedActiveCount]);
 
 	const countCardValue = useMemo(() => {
 		if (asset?.mode === "aggregated") {
-			const total = parseNumeric(
-				productionReport?.totals.find((t) => t.unit === "head")?.total ?? null,
-			);
-			return String(total);
+			return String(aggregatedActiveCount);
 		}
 		return `${allIndividuals.length}`;
-	}, [asset?.mode, productionReport, allIndividuals.length]);
+	}, [asset?.mode, aggregatedActiveCount, allIndividuals.length]);
 
 	const countCardNote = useMemo(() => {
 		if (asset?.mode === "aggregated") {
-			return "Total de producción del período";
+			return "Entradas por adquisicion menos salidas por mortalidad";
 		}
 		return "Conteo actual de individuos activos en este lote";
 	}, [asset?.mode]);
@@ -491,20 +606,27 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						data.inventoryQuantityDelta != null &&
 						data.inventoryQuantityDelta !== 0
 					) {
+						const inventoryEventType =
+							data.type === "expense" ? "acquisition" : "mortality";
+						const chainReason =
+							data.type === "expense"
+								? "purchase_inventory_adjustment"
+								: "sale_inventory_adjustment";
 						await createEventByAssetId({
 							farmId,
 							assetId: unitId,
 							data: {
-								type: "observation",
+								type: inventoryEventType,
 								occurred_at: data.occurredAt,
-								quantity: data.inventoryQuantityDelta,
-								unit: data.inventoryUnit ?? "unit",
+								quantity: Math.abs(data.inventoryQuantityDelta),
 								notes: data.notes,
 								payload: {
 									status: data.status,
 									paired_with: data.type,
+									chain_reason: chainReason,
+									chain_role: "inventory_leg",
 								},
-								idempotency_key: `${eventPairPrefix}:observation`,
+								idempotency_key: `${eventPairPrefix}:${inventoryEventType}`,
 							},
 						});
 					}
@@ -573,6 +695,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					refetchEventsLog(),
 					refetchProfitability(),
 					refetchProductionReport(),
+					refetchAggregatedHeadcount(),
 				]);
 			} finally {
 				setIsSavingEvent(false);
@@ -584,11 +707,19 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			refetchEventsLog,
 			refetchProfitability,
 			refetchProductionReport,
+			refetchAggregatedHeadcount,
 			asset,
 		],
 	);
 
 	const handleStartEditEvent = useCallback((event: ILivestockEvent) => {
+		if (isChainedInventoryLegEvent(event)) {
+			alert(
+				"Este evento fue generado automaticamente por una operacion encadenada. Edita el evento financiero principal para mantener consistencia.",
+			);
+			return;
+		}
+
 		setEditingEvent(event);
 		setIsCreatingEvent(true);
 	}, []);
@@ -596,6 +727,12 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 	const handleDeleteEvent = useCallback(
 		async (event: ILivestockEvent) => {
 			if (!farmId || !unitId) return;
+			if (isChainedInventoryLegEvent(event)) {
+				alert(
+					"Este evento fue generado automaticamente por una operacion encadenada. Eliminalo desde el evento financiero principal para evitar desbalances.",
+				);
+				return;
+			}
 			if (!confirm("Eliminar este evento?")) return;
 
 			setDeletingEventId(event.id);
@@ -615,6 +752,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					refetchEventsLog(),
 					refetchProfitability(),
 					refetchProductionReport(),
+					refetchAggregatedHeadcount(),
 				]);
 			} finally {
 				setDeletingEventId(null);
@@ -627,6 +765,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			refetchEventsLog,
 			refetchProfitability,
 			refetchProductionReport,
+			refetchAggregatedHeadcount,
 		],
 	);
 
@@ -634,6 +773,14 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		async (data: UnitEventFormData) => {
 			if (!editingEvent) {
 				await handleCreateEvent(data);
+				return;
+			}
+			if (isChainedInventoryLegEvent(editingEvent)) {
+				alert(
+					"Este evento fue generado automaticamente por una operacion encadenada. Edita el evento financiero principal para mantener consistencia.",
+				);
+				setEditingEvent(null);
+				setIsCreatingEvent(false);
 				return;
 			}
 			if (!farmId || !unitId || !asset) return;
@@ -686,6 +833,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					refetchEventsLog(),
 					refetchProfitability(),
 					refetchProductionReport(),
+					refetchAggregatedHeadcount(),
 				]);
 			} finally {
 				setIsSavingEvent(false);
@@ -699,6 +847,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			refetchEventsLog,
 			refetchProfitability,
 			refetchProductionReport,
+			refetchAggregatedHeadcount,
 			asset,
 		],
 	);
@@ -913,38 +1062,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			{productionSeries.length > 0 ? (
 				<div className="grid gap-3">
-					{productionSeries.map((productSeries) => (
-						<div
-							key={productSeries.productKey}
-							className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]"
-						>
-							<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
-								{productSeries.productLabel} · ultimos 7 dias
-							</p>
-							<div className="mt-2 flex items-start justify-between gap-3">
-								<p className="text-5xl font-semibold leading-none">
-									{productSeries.totalLast7Days}
-								</p>
-								<div className="text-right text-sm text-(--v2-ink-soft)">
-									<p className="text-xs uppercase tracking-[0.08em]">Hoy</p>
-									<p className="text-xl font-semibold leading-none text-(--v2-ink)">
-										{productSeries.todayCount}
-									</p>
-								</div>
-							</div>
-							<Bars
-								data={
-									productSeries.series.length > 0
-										? productSeries.series
-										: [0, 0, 0, 0, 0, 0, 0]
-								}
-							/>
-							<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
-								<span>{productSeries.firstDayLabel}</span>
-								<span>Hoy · {productSeries.todayCount}</span>
-							</div>
-						</div>
-					))}
+					<ProductionSeriesSlider series={productionSeries} />
 				</div>
 			) : null}
 

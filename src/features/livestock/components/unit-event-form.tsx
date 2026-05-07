@@ -22,7 +22,6 @@ export interface UnitEventFormData {
 	amount?: number;
 	currency?: string;
 	inventoryQuantityDelta?: number;
-	inventoryUnit?: LivestockEventUnit;
 	notes?: string;
 }
 
@@ -103,8 +102,6 @@ export function UnitEventForm({
 	);
 	const [inventoryQuantityDelta, setInventoryQuantityDelta] =
 		useState<string>("");
-	const [inventoryUnit, setInventoryUnit] =
-		useState<LivestockEventUnit>("unit");
 	const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
 	const [error, setError] = useState<string>("");
 	const [newCategoryName, setNewCategoryName] = useState<string>("");
@@ -205,6 +202,17 @@ export function UnitEventForm({
 			return;
 		}
 
+		if (
+			(type === "expense" || type === "income") &&
+			inventoryQuantityDelta &&
+			Number(inventoryQuantityDelta) <= 0
+		) {
+			setError(
+				"Cantidad a ajustar debe ser mayor que cero para el impacto en conteo.",
+			);
+			return;
+		}
+
 		if (type === "reproductive" && !canUseReproductive) {
 			setError("Eventos reproductivos solo aplican a activos de tipo animal.");
 			return;
@@ -235,7 +243,6 @@ export function UnitEventForm({
 			inventoryQuantityDelta: inventoryQuantityDelta
 				? Number(inventoryQuantityDelta)
 				: undefined,
-			inventoryUnit,
 			notes: notes.trim() || undefined,
 		});
 	};
@@ -467,56 +474,23 @@ export function UnitEventForm({
 					<p className="text-sm font-medium">Impacto en conteo</p>
 					<p className="mt-1 text-xs text-(--v2-ink-soft)">
 						Opcional. Si esta accion tambien cambia el conteo del lote agrupado,
-						se registrara un segundo evento de observacion con el mismo prefijo
-						de idempotencia.
+						se registrara un segundo evento de{" "}
+						{type === "expense" ? "adquisicion" : "mortalidad"} con el mismo
+						prefijo de idempotencia.
 					</p>
 					<div className="mt-3 grid gap-3 md:grid-cols-2">
 						<label className="space-y-1 text-sm">
-							<span className="font-medium">Delta de conteo</span>
+							<span className="font-medium">Cantidad a ajustar</span>
 							<input
 								type="number"
+								min="1"
 								value={inventoryQuantityDelta}
 								onChange={(event) =>
 									setInventoryQuantityDelta(event.target.value)
 								}
-								placeholder={type === "expense" ? "ej: 200" : "ej: -20"}
+								placeholder={type === "expense" ? "ej: 50" : "ej: 30"}
 								className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 							/>
-						</label>
-						<label className="space-y-1 text-sm">
-							<span className="font-medium">Unidad del conteo</span>
-							<select
-								value={inventoryUnit}
-								onChange={(event) =>
-									setInventoryUnit(event.target.value as LivestockEventUnit)
-								}
-								className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-							>
-								{EVENT_UNITS_BY_DIMENSION.mass.map((unitValue) => (
-									<option
-										key={unitValue}
-										value={unitValue}
-									>
-										Masa: {unitValue}
-									</option>
-								))}
-								{EVENT_UNITS_BY_DIMENSION.volume.map((unitValue) => (
-									<option
-										key={unitValue}
-										value={unitValue}
-									>
-										Volumen: {unitValue}
-									</option>
-								))}
-								{EVENT_UNITS_BY_DIMENSION.count.map((unitValue) => (
-									<option
-										key={unitValue}
-										value={unitValue}
-									>
-										Conteo: {unitValue}
-									</option>
-								))}
-							</select>
 						</label>
 					</div>
 				</div>

@@ -13,7 +13,15 @@ interface UnitEventTimelineProps {
 }
 
 function canEditEvent(event: ILivestockEvent): boolean {
-	return event.type !== "reproductive";
+	return event.type !== "reproductive" && !isChainedInventoryLegEvent(event);
+}
+
+function canDeleteEvent(event: ILivestockEvent): boolean {
+	return !isChainedInventoryLegEvent(event);
+}
+
+function isChainedInventoryLegEvent(event: ILivestockEvent): boolean {
+	return event.payload.chain_role === "inventory_leg";
 }
 
 function eventTypeLabel(type: ILivestockEvent["type"]): string {
@@ -84,6 +92,7 @@ export function UnitEventTimeline({
 				const status = getEventStatus(event);
 				const isDeleting = deletingEventId === event.id;
 				const isEditing = editingEventId === event.id;
+				const isChainedInventoryLeg = isChainedInventoryLegEvent(event);
 				return (
 					<article
 						key={event.id}
@@ -118,6 +127,11 @@ export function UnitEventTimeline({
 									Monto: ${Number(event.amount)} {event.currency ?? ""}
 								</span>
 							) : null}
+							{isChainedInventoryLeg ? (
+								<span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
+									Encadenado
+								</span>
+							) : null}
 						</div>
 						{event.notes ? (
 							<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
@@ -135,7 +149,7 @@ export function UnitEventTimeline({
 										{isEditing ? "Editando" : "Editar"}
 									</button>
 								) : null}
-								{onDeleteEvent ? (
+								{onDeleteEvent && canDeleteEvent(event) ? (
 									<button
 										type="button"
 										onClick={() => void onDeleteEvent(event)}
