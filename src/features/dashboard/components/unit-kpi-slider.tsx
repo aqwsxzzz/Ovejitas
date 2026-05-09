@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 
+import { useNavigate } from "@tanstack/react-router";
+
 import type {
 	UnitDashboardSlice,
 	UnitKpiCard,
@@ -8,37 +10,81 @@ import type {
 
 // ─── Sparkline ───────────────────────────────────────────────────────────────
 
-function Sparkline({ data }: { data: number[] }) {
+function buildSmoothPath(pts: Array<{ x: number; y: number }>): string {
+	if (pts.length < 2) return "";
+	let d = `M ${pts[0]!.x.toFixed(1)} ${pts[0]!.y.toFixed(1)}`;
+	for (let i = 1; i < pts.length; i++) {
+		const prev = pts[i - 1]!;
+		const curr = pts[i]!;
+		const cpx = ((prev.x + curr.x) / 2).toFixed(1);
+		d += ` C ${cpx} ${prev.y.toFixed(1)}, ${cpx} ${curr.y.toFixed(1)}, ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+	}
+	return d;
+}
+
+let sparklineIdCounter = 0;
+
+function Sparkline({ data, full = false }: { data: number[]; full?: boolean }) {
 	if (data.length < 2) return null;
 
-	const max = Math.max(...data, 1);
-	const w = 72;
-	const h = 24;
-	const pad = 2;
-	const points = data
-		.map((v, i) => {
-			const x = pad + (i / (data.length - 1)) * (w - pad * 2);
-			const y = h - pad - (v / max) * (h - pad * 2);
-			return `${x.toFixed(1)},${y.toFixed(1)}`;
-		})
-		.join(" ");
+	const id = `sparkline-grad-${++sparklineIdCounter}`;
+	const min = Math.min(...data);
+	const max = Math.max(...data, min + 1);
+	const w = 100;
+	const h = full ? 48 : 24;
+	const padX = 0;
+	const padY = full ? 6 : 3;
+
+	const pts = data.map((v, i) => ({
+		x: padX + (i / (data.length - 1)) * (w - padX * 2),
+		y: h - padY - ((v - min) / (max - min)) * (h - padY * 2),
+	}));
+
+	const linePath = buildSmoothPath(pts);
+	const first = pts[0]!;
+	const last = pts[pts.length - 1]!;
+	const areaPath = `${linePath} L ${last.x.toFixed(1)} ${h} L ${first.x.toFixed(1)} ${h} Z`;
 
 	return (
 		<svg
-			width={w}
+			width="100%"
 			height={h}
 			viewBox={`0 0 ${w} ${h}`}
+			preserveAspectRatio="none"
 			aria-hidden="true"
-			className="mt-1 overflow-visible"
+			className="overflow-visible"
 		>
-			<polyline
-				points={points}
+			<defs>
+				<linearGradient
+					id={id}
+					x1="0"
+					y1="0"
+					x2="0"
+					y2="1"
+				>
+					<stop
+						offset="0%"
+						stopColor="var(--v2-primary)"
+						stopOpacity="0.35"
+					/>
+					<stop
+						offset="100%"
+						stopColor="var(--v2-primary)"
+						stopOpacity="0"
+					/>
+				</linearGradient>
+			</defs>
+			<path
+				d={areaPath}
+				fill={`url(#${id})`}
+			/>
+			<path
+				d={linePath}
 				fill="none"
-				stroke="currentColor"
-				strokeWidth="1.5"
+				stroke="var(--v2-primary)"
+				strokeWidth={full ? "1.5" : "1.2"}
 				strokeLinejoin="round"
 				strokeLinecap="round"
-				className="text-[color:var(--v2-ink)]"
 			/>
 		</svg>
 	);
@@ -89,7 +135,14 @@ function ProductionSlides({
 			<div className="mt-1">
 				<p className="text-[10px] text-(--v2-ink-soft)">{slide.unit}</p>
 				<p className="text-xl font-semibold leading-none">{slide.value}</p>
-				{slide.sparkline && <Sparkline data={slide.sparkline} />}
+				{slide.sparkline && (
+					<div className="mt-2 w-full overflow-hidden rounded-md">
+						<Sparkline
+							data={slide.sparkline}
+							full
+						/>
+					</div>
+				)}
 				{sub && <p className="mt-1 text-[11px] text-(--v2-ink-soft)">{sub}</p>}
 			</div>
 		);
@@ -109,7 +162,14 @@ function ProductionSlides({
 					>
 						<p className="text-[10px] text-(--v2-ink-soft)">{slide.unit}</p>
 						<p className="text-xl font-semibold leading-none">{slide.value}</p>
-						{slide.sparkline && <Sparkline data={slide.sparkline} />}
+						{slide.sparkline && (
+							<div className="mt-2 w-full overflow-hidden rounded-md">
+								<Sparkline
+									data={slide.sparkline}
+									full
+								/>
+							</div>
+						)}
 					</div>
 				))}
 			</div>
@@ -142,7 +202,7 @@ function ProductionSlides({
 
 function KpiCell({ kpi }: { kpi: UnitKpiCard }) {
 	return (
-		<div className="flex flex-col justify-between p-3">
+		<div className="flex flex-col p-3">
 			<p className="text-[10px] font-medium uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
 				{kpi.label}
 			</p>
@@ -151,16 +211,22 @@ function KpiCell({ kpi }: { kpi: UnitKpiCard }) {
 					slides={kpi.slides}
 					sub={kpi.sub}
 				/>
+			) : kpi.sparkline ? (
+				<div className="relative mt-1 flex flex-col">
+					<p className="text-xl font-semibold leading-none">{kpi.value}</p>
+					{kpi.sub && (
+						<p className="mt-0.5 text-[11px] text-(--v2-ink-soft)">{kpi.sub}</p>
+					)}
+					<div className="mt-2 w-full overflow-hidden rounded-md">
+						<Sparkline
+							data={kpi.sparkline}
+							full
+						/>
+					</div>
+				</div>
 			) : (
 				<div className="mt-1">
-					{kpi.sparkline ? (
-						<>
-							<p className="text-xl font-semibold leading-none">{kpi.value}</p>
-							<Sparkline data={kpi.sparkline} />
-						</>
-					) : (
-						<p className="text-xl font-semibold leading-none">{kpi.value}</p>
-					)}
+					<p className="text-xl font-semibold leading-none">{kpi.value}</p>
 					{kpi.fillPct != null && (
 						<FillBar
 							pct={kpi.fillPct}
@@ -168,9 +234,7 @@ function KpiCell({ kpi }: { kpi: UnitKpiCard }) {
 						/>
 					)}
 					{kpi.sub && (
-						<p className="mt-1 text-[11px] text-[color:var(--v2-ink-soft)]">
-							{kpi.sub}
-						</p>
+						<p className="mt-1 text-[11px] text-(--v2-ink-soft)">{kpi.sub}</p>
 					)}
 				</div>
 			)}
@@ -195,12 +259,31 @@ const MODE_LABEL: Record<string, string> = {
 };
 
 function UnitCard({ slice }: { slice: UnitDashboardSlice }) {
+	const navigate = useNavigate();
 	const icon = CATEGORY_ICON[slice.categoryLabel] ?? "🌿";
+
+	const openDetail = () => {
+		navigate({
+			to: "/v2/production-units/flock/$unitId",
+			params: { unitId: slice.unitId },
+		});
+	};
 
 	return (
 		<article className="v2-card flex w-full shrink-0 flex-col overflow-hidden">
 			{/* Card header */}
-			<div className="flex items-center gap-2 border-b border-[color:var(--v2-border)] px-4 py-3">
+			<div
+				role="link"
+				tabIndex={0}
+				onClick={openDetail}
+				onKeyDown={(event) => {
+					if (event.key === "Enter" || event.key === " ") {
+						event.preventDefault();
+						openDetail();
+					}
+				}}
+				className="flex cursor-pointer items-center gap-2 border-b border-(--v2-border) px-4 py-3 transition hover:bg-black/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--v2-ink) focus-visible:ring-inset"
+			>
 				<span
 					className="text-lg"
 					aria-hidden="true"
@@ -211,11 +294,11 @@ function UnitCard({ slice }: { slice: UnitDashboardSlice }) {
 					<p className="truncate font-semibold leading-tight">
 						{slice.unitName}
 					</p>
-					<p className="text-[11px] text-[color:var(--v2-ink-soft)]">
+					<p className="text-[11px] text-(--v2-ink-soft)">
 						{slice.categoryLabel}
 					</p>
 				</div>
-				<span className="rounded-full bg-[color:var(--v2-accent)]/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[color:var(--v2-ink)]">
+				<span className="rounded-full bg-(--v2-accent)/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-(--v2-ink)">
 					{MODE_LABEL[slice.mode] ?? slice.mode}
 				</span>
 			</div>

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -38,23 +39,65 @@ function formatMoney(value: number): string {
 	return `${sign}$${Math.abs(value).toFixed(2)}`;
 }
 
-function Bars({ data }: { data: number[] }) {
+function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
 	const max = Math.max(...data, 1);
+	const mid = Math.max(Math.round(max / 2), 1);
+	const highlightedIndex = data.reduce(
+		(bestIndex, value, index, list) =>
+			value > (list[bestIndex] ?? Number.NEGATIVE_INFINITY) ? index : bestIndex,
+		0,
+	);
+	const weekdayLabels =
+		labels && labels.length === data.length
+			? labels
+			: Array.from({ length: data.length }, (_, index) => {
+					const d = new Date();
+					d.setHours(0, 0, 0, 0);
+					d.setDate(d.getDate() - (data.length - 1 - index));
+					return d.toLocaleDateString("es-EC", { weekday: "short" });
+				});
+
 	return (
-		<div className="mt-3 flex h-10 items-end gap-1.5">
-			{data.map((value, index) => (
-				<div
-					key={`${value}-${index}`}
-					className={`flex-1 rounded-t-sm border border-black/20 ${
-						index === data.length - 1
-							? "bg-[#f2df77]"
-							: index % 2 === 0
-								? "bg-[#1f211d]"
-								: "bg-[#8a8677]"
-					}`}
-					style={{ height: `${Math.max((value / max) * 100, 20)}%` }}
-				/>
-			))}
+		<div className="mt-3 rounded-xl border border-white/45 bg-[#cfd2d6] p-3">
+			<div className="relative h-28">
+				<div className="pointer-events-none absolute inset-x-0 top-4 border-t border-white/40" />
+				<div className="pointer-events-none absolute inset-x-0 top-14 border-t border-white/40" />
+				<div className="pointer-events-none absolute inset-x-0 top-24 border-t border-white/40" />
+				<div className="pointer-events-none absolute right-0 top-0 flex h-24 w-8 flex-col justify-between text-right text-[9px] font-medium text-[#6c798f]">
+					<span>{max}</span>
+					<span>{mid}</span>
+					<span>0</span>
+				</div>
+				<div className="absolute bottom-0 left-3 right-9 grid h-24 grid-cols-7 gap-3">
+					{data.map((value, index) => {
+						// Keep zero values visually close to baseline to avoid implying production.
+						const barHeightPct =
+							value <= 0 ? 2 : Math.max((value / max) * 100, 14);
+						return (
+							<div
+								key={`${value}-${index}`}
+								className="flex items-end justify-center"
+							>
+								<div
+									className={`h-full w-full rounded-md ${
+										value <= 0
+											? "bg-[#efd97b]/35"
+											: index === highlightedIndex
+												? "bg-[#f5a000]"
+												: "bg-[#efd97b]"
+									}`}
+									style={{ height: `${barHeightPct}%` }}
+								/>
+							</div>
+						);
+					})}
+				</div>
+			</div>
+			<div className="mt-2 grid grid-cols-7 gap-3 pl-3 pr-9 text-center text-[10px] font-medium text-[#6c798f]">
+				{weekdayLabels.map((label, index) => (
+					<span key={`${label}-${index}`}>{label}</span>
+				))}
+			</div>
 		</div>
 	);
 }
@@ -65,17 +108,17 @@ function ProductionSeriesCard({
 	productSeries: ProductionProductSeries;
 }) {
 	return (
-		<div className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
-			<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+		<div className="rounded-2xl border border-(--v2-border) bg-[#d7d9dd] p-4 shadow-[0_10px_24px_-18px_rgba(24,33,49,0.35)]">
+			<p className="text-[10px] uppercase tracking-[0.08em] text-[#6c798f]">
 				{productSeries.productLabel} · ultimos 7 dias
 			</p>
 			<div className="mt-2 flex items-start justify-between gap-3">
-				<p className="text-5xl font-semibold leading-none">
+				<p className="text-5xl font-semibold leading-none text-[#243246]">
 					{productSeries.totalLast7Days}
 				</p>
-				<div className="text-right text-sm text-(--v2-ink-soft)">
+				<div className="text-right text-sm text-[#6c798f]">
 					<p className="text-xs uppercase tracking-[0.08em]">Hoy</p>
-					<p className="text-xl font-semibold leading-none text-(--v2-ink)">
+					<p className="text-xl font-semibold leading-none text-[#243246]">
 						{productSeries.todayCount}
 					</p>
 				</div>
@@ -86,8 +129,9 @@ function ProductionSeriesCard({
 						? productSeries.series
 						: [0, 0, 0, 0, 0, 0, 0]
 				}
+				labels={productSeries.dayLabels}
 			/>
-			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-[#6c798f]">
 				<span>{productSeries.firstDayLabel}</span>
 				<span>Hoy · {productSeries.todayCount}</span>
 			</div>
@@ -175,6 +219,7 @@ interface ProductionProductSeries {
 	productKey: string;
 	productLabel: string;
 	firstDayLabel: string;
+	dayLabels: string[];
 	totalLast7Days: number;
 	todayCount: number;
 	series: number[];
@@ -188,9 +233,13 @@ function parseNumeric(value: string | null): number {
 	return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function toBreedLabel(asset: ILivestockAsset): string {
-	const modeLabel = asset.mode === "aggregated" ? "aggregate" : "individual";
-	return `${asset.kind} · ${modeLabel}`;
+function toModeLabel(asset: ILivestockAsset): string {
+	return asset.mode === "aggregated" ? "Aggregate" : "Individual";
+}
+
+function toKindLabel(asset: ILivestockAsset): string {
+	if (!asset.kind) return "Animal";
+	return `${asset.kind.charAt(0).toUpperCase()}${asset.kind.slice(1)}`;
 }
 
 function buildEventPairIdempotencyPrefix(
@@ -431,6 +480,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			d.setDate(today.getDate() - (6 - index));
 			return d;
 		});
+		const dayLabels = days.map((day) =>
+			day.toLocaleDateString("es-EC", { weekday: "short" }),
+		);
 		const dayKeys = days.map((d) => d.toISOString().slice(0, 10));
 		const firstDayLabel = days[0]?.toLocaleDateString("es-EC", {
 			weekday: "short",
@@ -488,6 +540,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					productKey,
 					productLabel,
 					firstDayLabel: firstDayLabel ?? "",
+					dayLabels,
 					totalLast7Days,
 					todayCount,
 					series,
@@ -504,29 +557,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		return parseNumeric(assetRow.net);
 	}, [profitabilityReport, parsedAssetId]);
 
-	const taggedMembersCount = useMemo(
-		() =>
-			allIndividuals.filter((individual) =>
-				Boolean(individual.tag && individual.tag.trim()),
-			).length,
-		[allIndividuals],
-	);
-
 	const aggregatedActiveCount = useMemo(() => {
 		return aggregatedHeadcount?.net ?? 0;
 	}, [aggregatedHeadcount]);
-
-	const countSummary = useMemo(() => {
-		if (asset?.mode === "individual") {
-			return `${taggedMembersCount} individuos etiquetados`;
-		}
-		if (asset?.mode === "aggregated") {
-			return aggregatedActiveCount > 0
-				? `${aggregatedActiveCount} en conteo`
-				: "sin conteo registrado";
-		}
-		return "";
-	}, [asset?.mode, taggedMembersCount, aggregatedActiveCount]);
 
 	const countCardValue = useMemo(() => {
 		if (asset?.mode === "aggregated") {
@@ -1116,28 +1149,74 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			onTouchCancel={resetSwipeTracking}
 		>
 			<div className="v2-card p-5">
-				<div className="flex items-start justify-between gap-3">
-					<div>
+				<div className="min-w-0 flex-1">
+					<div className="mb-2 flex items-center justify-between gap-3">
 						<div className="flex items-center gap-2">
-							<Link
-								to="/v2/production-units"
-								className="text-sm text-[color:var(--v2-ink-soft)]"
-							>
-								‹
-							</Link>
-							<h1 className="text-2xl font-semibold">{asset.name}</h1>
+							<span className="rounded-md bg-[#e7d7ae] px-2.5 py-1 text-xs font-semibold text-[#6f5413]">
+								{toKindLabel(asset)}
+							</span>
+							<span className="rounded-md border border-[color:var(--v2-border)] bg-white px-2.5 py-1 text-xs font-semibold text-[color:var(--v2-ink)]">
+								{toModeLabel(asset)}
+							</span>
 						</div>
-						<p className="mt-2 text-sm italic text-[color:var(--v2-ink-soft)]">
-							{toBreedLabel(asset)} · {countSummary} ·{" "}
-							{asset.location ?? "Sin ubicacion"}
-						</p>
-						{hasDescription ? (
-							<p className="mt-2 text-sm text-(--v2-ink-soft) wrap-break-word text-center">
-								&quot;{asset.description?.trim()}&quot;
-							</p>
-						) : null}
+						<Link
+							to="/v2/production-units"
+							className="inline-flex items-center justify-center p-1 text-[color:var(--v2-ink-soft)] transition-colors hover:text-[color:var(--v2-ink)]"
+							aria-label="Volver a ganado"
+						>
+							<ArrowLeft
+								aria-hidden="true"
+								className="h-6 w-6"
+							/>
+						</Link>
 					</div>
-					<span className="text-[color:var(--v2-ink-soft)]">···</span>
+					<div className="flex items-center gap-2">
+						<h1
+							className="text-3xl font-bold leading-tight md:text-[2.35rem]"
+							style={{ color: "#006847", fontFamily: "var(--v2-font-display)" }}
+						>
+							{asset.name}
+						</h1>
+					</div>
+					<div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-[color:var(--v2-border)] bg-[#ecf0e8] px-3 py-1.5 text-sm text-[color:var(--v2-ink)]">
+						<span className="inline-flex h-5 w-5 items-center justify-center text-[#0e6b49]">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="h-4 w-4"
+							>
+								<path d="M12 21s-6-5.5-6-11a6 6 0 1 1 12 0c0 5.5-6 11-6 11Z" />
+								<circle
+									cx="12"
+									cy="10"
+									r="2"
+								/>
+							</svg>
+						</span>
+						<span className="truncate">
+							{asset.location ?? "Sin ubicacion"}
+						</span>
+					</div>
+					{hasDescription ? (
+						<>
+							<div className="mt-4 border-t border-[color:var(--v2-border)]" />
+							<div className="mt-4 flex justify-center">
+								<blockquote
+									className="max-w-2xl text-center text-lg italic leading-snug text-[color:var(--v2-primary)] md:text-xl"
+									style={{
+										fontFamily:
+											'"Segoe Script", "Bradley Hand", "Comic Sans MS", cursive',
+									}}
+								>
+									&quot;{asset.description?.trim()}&quot;
+								</blockquote>
+							</div>
+						</>
+					) : null}
 				</div>
 			</div>
 
