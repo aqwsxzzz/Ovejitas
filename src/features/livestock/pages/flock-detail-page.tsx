@@ -4,14 +4,6 @@ import { ArrowLeft } from "lucide-react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
-	createEventCategoryByFarmId,
-	createEventByAssetId,
-	createIndividual as apiCreateIndividual,
-	deleteEventByAssetId,
-	deleteIndividual as apiDeleteIndividual,
-	updateEventByAssetId,
-} from "@/features/livestock/api/livestock-api";
-import {
 	useGetLivestockAssetById,
 	useListInfiniteEventsByAssetId,
 	useListEventCategoriesByFarmId,
@@ -19,6 +11,12 @@ import {
 	useGetProfitabilityReport,
 	useGetProductionReport,
 	useGetAggregatedHeadcountByAssetId,
+	useCreateEventByAssetId,
+	useUpdateEventByAssetId,
+	useDeleteEventByAssetId,
+	useCreateIndividual,
+	useDeleteIndividual,
+	useCreateEventCategoryByFarmId,
 } from "@/features/livestock/api/livestock-queries";
 import type {
 	ILivestockAsset,
@@ -282,21 +280,17 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		},
 	);
 
-	const {
-		data: individualsResponse,
-		isLoading: isLoadingIndividuals,
-		refetch: refetchIndividuals,
-	} = useListIndividualsByAssetId({
-		farmId,
-		assetId: unitId,
-		filters: { pageSize: 100 },
-		enabled: !!farmId && !!unitId,
-	});
+	const { data: individualsResponse, isLoading: isLoadingIndividuals } =
+		useListIndividualsByAssetId({
+			farmId,
+			assetId: unitId,
+			filters: { pageSize: 100 },
+			enabled: !!farmId && !!unitId,
+		});
 
 	const {
 		data: listedIndividualsResponse,
 		isLoading: isLoadingListedIndividuals,
-		refetch: refetchListedIndividuals,
 	} = useListIndividualsByAssetId({
 		farmId,
 		assetId: unitId,
@@ -308,12 +302,11 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		enabled: !!farmId && !!unitId,
 	});
 
-	const { data: eventCategories = [], refetch: refetchEventCategories } =
-		useListEventCategoriesByFarmId({
-			farmId,
-			filters: { archived: false, pageSize: 100 },
-			enabled: !!farmId,
-		});
+	const { data: eventCategories = [] } = useListEventCategoriesByFarmId({
+		farmId,
+		filters: { archived: false, pageSize: 100 },
+		enabled: !!farmId,
+	});
 
 	const now = new Date();
 	const currentMonthStart = new Date(
@@ -327,34 +320,31 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		now.getDate() - 6,
 	).toISOString();
 
-	const { data: profitabilityReport, refetch: refetchProfitability } =
-		useGetProfitabilityReport({
-			farmId,
-			filters: {
-				assetId: parsedAssetId,
-				dateFrom: currentMonthStart,
-			},
-			enabled: hasValidAssetId && !!farmId,
-		});
+	const { data: profitabilityReport } = useGetProfitabilityReport({
+		farmId,
+		filters: {
+			assetId: parsedAssetId,
+			dateFrom: currentMonthStart,
+		},
+		enabled: hasValidAssetId && !!farmId,
+	});
 
-	const { data: productionReport, refetch: refetchProductionReport } =
-		useGetProductionReport({
-			farmId,
-			filters: {
-				assetId: parsedAssetId,
-				bucket: "day",
-				type: "production",
-				dateFrom: sevenDaysAgo,
-			},
-			enabled: hasValidAssetId && !!farmId,
-		});
+	const { data: productionReport } = useGetProductionReport({
+		farmId,
+		filters: {
+			assetId: parsedAssetId,
+			bucket: "day",
+			type: "production",
+			dateFrom: sevenDaysAgo,
+		},
+		enabled: hasValidAssetId && !!farmId,
+	});
 
-	const { data: aggregatedHeadcount, refetch: refetchAggregatedHeadcount } =
-		useGetAggregatedHeadcountByAssetId({
-			farmId,
-			assetId: unitId,
-			enabled: !!farmId && !!unitId,
-		});
+	const { data: aggregatedHeadcount } = useGetAggregatedHeadcountByAssetId({
+		farmId,
+		assetId: unitId,
+		enabled: !!farmId && !!unitId,
+	});
 
 	const {
 		data: eventsLogData,
@@ -362,7 +352,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		hasNextPage: hasNextEventsLogPage,
 		fetchNextPage: fetchNextEventsLogPage,
 		isFetchingNextPage: isFetchingNextEventsLogPage,
-		refetch: refetchEventsLog,
 	} = useListInfiniteEventsByAssetId({
 		farmId,
 		assetId: unitId,
@@ -370,6 +359,14 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		pageSize: EVENTS_LOG_PAGE_SIZE,
 		enabled: !!farmId && !!unitId,
 	});
+
+	// Mutation hooks
+	const createEventMutation = useCreateEventByAssetId();
+	const updateEventMutation = useUpdateEventByAssetId();
+	const deleteEventMutation = useDeleteEventByAssetId();
+	const createIndividualMutation = useCreateIndividual();
+	const deleteIndividualMutation = useDeleteIndividual();
+	const createEventCategoryMutation = useCreateEventCategoryByFarmId();
 
 	const allIndividuals = useMemo(
 		() => individualsResponse?.data ?? [],
@@ -581,7 +578,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		async (data: IndividualFormData) => {
 			if (!farmId || !unitId) return;
 
-			await apiCreateIndividual({
+			await createIndividualMutation.mutateAsync({
 				farmId,
 				assetId: unitId,
 				data: {
@@ -595,26 +592,21 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			});
 
 			setIsCreatingIndividual(false);
-			await refetchIndividuals();
-			await refetchListedIndividuals();
 		},
-		[farmId, unitId, refetchIndividuals, refetchListedIndividuals],
+		[farmId, unitId, createIndividualMutation],
 	);
 
 	const handleDeleteIndividual = useCallback(
 		async (individual: ILivestockIndividual) => {
 			if (!farmId || !unitId) return;
 
-			await apiDeleteIndividual({
+			await deleteIndividualMutation.mutateAsync({
 				farmId,
 				assetId: unitId,
 				individualId: String(individual.id),
 			});
-
-			await refetchIndividuals();
-			await refetchListedIndividuals();
 		},
-		[farmId, unitId, refetchIndividuals, refetchListedIndividuals],
+		[farmId, unitId, deleteIndividualMutation],
 	);
 
 	const handleSelectIndividual = useCallback(
@@ -635,7 +627,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			setIsSavingEvent(true);
 			try {
 				if (data.type === "production") {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -651,7 +643,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					});
 				} else if (data.type === "expense" || data.type === "income") {
 					const eventPairPrefix = buildEventPairIdempotencyPrefix(data.type);
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -680,7 +672,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							data.type === "expense"
 								? "purchase_inventory_adjustment"
 								: "sale_inventory_adjustment";
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -700,7 +692,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						});
 					}
 				} else if (data.type === "observation") {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -720,7 +712,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					if (shouldCreateExpensePair) {
 						const eventPairPrefix =
 							buildEventPairIdempotencyPrefix("acquisition");
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -737,7 +729,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							},
 						});
 
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -758,7 +750,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							},
 						});
 					} else {
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -775,7 +767,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						});
 					}
 				} else if (data.type === "mortality") {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -789,7 +781,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						},
 					});
 				} else {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -804,12 +796,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				}
 
 				setIsCreatingEvent(false);
-				await Promise.all([
-					refetchEventsLog(),
-					refetchProfitability(),
-					refetchProductionReport(),
-					refetchAggregatedHeadcount(),
-				]);
 			} finally {
 				setIsSavingEvent(false);
 			}
@@ -817,10 +803,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		[
 			farmId,
 			unitId,
-			refetchEventsLog,
-			refetchProfitability,
-			refetchProductionReport,
-			refetchAggregatedHeadcount,
+			createEventMutation,
 			preferredSecondaryCategoryByType,
 			asset,
 		],
@@ -851,7 +834,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			setDeletingEventId(event.id);
 			try {
-				await deleteEventByAssetId({
+				await deleteEventMutation.mutateAsync({
 					farmId,
 					assetId: unitId,
 					eventId: event.id,
@@ -861,26 +844,11 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					setEditingEvent(null);
 					setIsCreatingEvent(false);
 				}
-
-				await Promise.all([
-					refetchEventsLog(),
-					refetchProfitability(),
-					refetchProductionReport(),
-					refetchAggregatedHeadcount(),
-				]);
 			} finally {
 				setDeletingEventId(null);
 			}
 		},
-		[
-			farmId,
-			unitId,
-			editingEvent,
-			refetchEventsLog,
-			refetchProfitability,
-			refetchProductionReport,
-			refetchAggregatedHeadcount,
-		],
+		[farmId, unitId, editingEvent, deleteEventMutation],
 	);
 
 	const handleSubmitEvent = useCallback(
@@ -903,7 +871,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			try {
 				const nextIndividualId =
 					asset.mode === "individual" ? (data.individualId ?? null) : null;
-				await updateEventByAssetId({
+				await updateEventMutation.mutateAsync({
 					farmId,
 					assetId: unitId,
 					eventId: editingEvent.id,
@@ -943,12 +911,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 				setEditingEvent(null);
 				setIsCreatingEvent(false);
-				await Promise.all([
-					refetchEventsLog(),
-					refetchProfitability(),
-					refetchProductionReport(),
-					refetchAggregatedHeadcount(),
-				]);
 			} finally {
 				setIsSavingEvent(false);
 			}
@@ -958,10 +920,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			handleCreateEvent,
 			farmId,
 			unitId,
-			refetchEventsLog,
-			refetchProfitability,
-			refetchProductionReport,
-			refetchAggregatedHeadcount,
+			updateEventMutation,
 			asset,
 		],
 	);
@@ -980,7 +939,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				throw new Error("Farm id is required to create categories.");
 			}
 
-			const createdCategory = await createEventCategoryByFarmId({
+			const createdCategory = await createEventCategoryMutation.mutateAsync({
 				farmId,
 				data: {
 					type,
@@ -989,10 +948,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				},
 			});
 
-			await refetchEventCategories();
 			return createdCategory.id;
 		},
-		[farmId, refetchEventCategories],
+		[farmId, createEventCategoryMutation],
 	);
 
 	const resetSwipeTracking = useCallback(() => {
