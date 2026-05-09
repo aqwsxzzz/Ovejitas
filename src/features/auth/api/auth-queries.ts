@@ -107,11 +107,11 @@ export const useLogout = () => {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async () => {
+			await queryClient.cancelQueries();
+			queryClient.clear();
 			clearTokenPair();
-			return Promise.resolve();
 		},
 		onSuccess: () => {
-			queryClient.removeQueries({ queryKey: authQueryKeys.all });
 			navigation({
 				to: "/v2/login",
 			});

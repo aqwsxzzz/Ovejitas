@@ -35,6 +35,14 @@ export const loadTokenPair = (): ITokenPair | null => {
 	};
 };
 
+export const hasStoredAccessToken = (): boolean => {
+	return Boolean(loadTokenPair()?.access_token);
+};
+
+export const getAuthLandingPath = (): "/v2/login" | "/v2/dashboard" => {
+	return hasStoredAccessToken() ? "/v2/dashboard" : "/v2/login";
+};
+
 export const clearTokenPair = (): void => {
 	if (!isBrowser()) return;
 
