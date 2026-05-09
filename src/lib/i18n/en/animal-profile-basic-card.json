@@ -6,6 +6,8 @@
     "notAvailable": "N/A",
     "AgeTitle": "Age",
     "WeightTitle": "Weight",
+    "animalType": "Animal",
+    "unknownType": "Unknown Type",
     "ReproductiveStatusTitle": "Reproductive Status",
     "TagNumberTitle": "Tag Number",
     "LocationTitle": "Location",

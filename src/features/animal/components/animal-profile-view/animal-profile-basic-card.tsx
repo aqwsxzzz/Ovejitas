@@ -86,9 +86,17 @@ export const AnimalProfileCard = () => {
 			className="rounded-card shadow-card"
 		>
 			<CardContent className="p-4 space-y-4">
-				{/* Name and breed with health indicator and status badge */}
-				<div className="flex items-center gap-3">
-					<Avatar className="size-12 border border-border">
+				{/* Category badges at the top */}
+				<div className="flex items-center gap-2">
+					<Badge variant="secondary">{t("animalType")}</Badge>
+					<Badge variant="outline">
+						{animalData.acquisitionType ?? t("unknownType")}
+					</Badge>
+				</div>
+
+				{/* Main title section with avatar and status */}
+				<div className="flex items-start gap-3">
+					<Avatar className="size-12 border border-border flex-shrink-0">
 						<AvatarFallback className="text-xl bg-primary/10 text-primary">
 							{animalData.sex === "male"
 								? "🐏"
@@ -97,15 +105,11 @@ export const AnimalProfileCard = () => {
 									: "🐾"}
 						</AvatarFallback>
 					</Avatar>
-					<HealthStatusIndicator
-						status={animalData.status}
-						className="mt-1"
-					/>
 					<div className="flex-1">
-						<div className="flex items-center gap-2 flex-wrap">
-							<h2 className="text-h1 font-display font-bold text-foreground">
+						<div className="flex items-center gap-2 mb-2">
+							<h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
 								{animalData.name ?? t("unknownAnimalName")}
-							</h2>
+							</h1>
 							<Badge variant={getHealthStatusVariant(animalData.status ?? "")}>
 								{getLocalizedStatus(animalData.status)}
 							</Badge>
@@ -116,11 +120,24 @@ export const AnimalProfileCard = () => {
 								i18n.language.slice(0, 2),
 							) || t("missingData")}
 						</p>
-						<p className="text-caption text-muted-foreground">
-							{t("profileImageHint")}
-						</p>
 					</div>
+					<HealthStatusIndicator
+						status={animalData.status}
+						className="mt-1 flex-shrink-0"
+					/>
 				</div>
+
+				{/* Location badge */}
+				{animalData.tagNumber && (
+					<div className="flex items-center gap-2 bg-muted/50 rounded-md px-3 py-2 w-fit">
+						<span className="text-muted-foreground text-caption uppercase tracking-wide">
+							📍
+						</span>
+						<span className="text-small font-medium text-foreground">
+							{animalData.tagNumber}
+						</span>
+					</div>
+				)}
 
 				{/* Animal details grid */}
 				<div className="grid grid-cols-2 gap-4 text-sm">
