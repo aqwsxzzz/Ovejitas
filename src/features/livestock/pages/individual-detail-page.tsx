@@ -78,6 +78,7 @@ export function IndividualDetailPage({
 		navigate({
 			to: `/v2/production-units/flock/$unitId`,
 			params: { unitId: assetId },
+			search: { eventType: undefined },
 		});
 	}, [farmId, assetId, individualId, navigate]);
 
@@ -104,6 +105,7 @@ export function IndividualDetailPage({
 					navigate({
 						to: `/v2/production-units/flock/$unitId`,
 						params: { unitId: assetId },
+						search: { eventType: undefined },
 					})
 				}
 				className="text-sm text-blue-600 hover:underline"

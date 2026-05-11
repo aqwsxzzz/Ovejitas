@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -211,6 +211,8 @@ function MetricCard(props: { label: string; value: string; note: string }) {
 
 interface FlockDetailPageProps {
 	unitId: string;
+	eventTypeFilter?: string;
+	onEventTypeFilterChange?: (next: LivestockEventType | "all") => void;
 }
 
 interface ProductionProductSeries {
@@ -224,6 +226,32 @@ interface ProductionProductSeries {
 }
 
 const EVENTS_LOG_PAGE_SIZE = 3;
+
+const EVENT_TYPE_FILTER_OPTIONS: Array<{
+	value: "all" | LivestockEventType;
+	label: string;
+}> = [
+	{ value: "all", label: "Todos" },
+	{ value: "production", label: "Produccion" },
+	{ value: "income", label: "Ingreso" },
+	{ value: "expense", label: "Gasto" },
+	{ value: "observation", label: "Observacion" },
+	{ value: "reproductive", label: "Reproductivo" },
+	{ value: "acquisition", label: "Adquisicion" },
+	{ value: "mortality", label: "Mortalidad" },
+];
+
+function isLivestockEventType(value: string): value is LivestockEventType {
+	return (
+		value === "production" ||
+		value === "income" ||
+		value === "expense" ||
+		value === "observation" ||
+		value === "reproductive" ||
+		value === "acquisition" ||
+		value === "mortality"
+	);
+}
 
 function parseNumeric(value: string | null): number {
 	if (!value) return 0;
@@ -250,12 +278,20 @@ function isChainedLegEvent(event: ILivestockEvent): boolean {
 	return typeof event.payload.chain_role === "string";
 }
 
-export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
+export function FlockDetailPage({
+	unitId,
+	eventTypeFilter,
+	onEventTypeFilterChange,
+}: FlockDetailPageProps) {
 	const navigate = useNavigate();
 	const { data: currentUser } = useGetUserProfile();
 	const parsedAssetId = Number(unitId);
 	const hasValidAssetId = Number.isInteger(parsedAssetId);
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
+	const selectedEventType =
+		typeof eventTypeFilter === "string" && isLivestockEventType(eventTypeFilter)
+			? eventTypeFilter
+			: undefined;
 
 	const [isCreatingIndividual, setIsCreatingIndividual] = useState(false);
 	const [isCreatingEvent, setIsCreatingEvent] = useState(false);
@@ -355,7 +391,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 	} = useListInfiniteEventsByAssetId({
 		farmId,
 		assetId: unitId,
-		filters: { sort: "-occurred_at" },
+		filters: { sort: "-occurred_at", type: selectedEventType },
 		pageSize: EVENTS_LOG_PAGE_SIZE,
 		enabled: !!farmId && !!unitId,
 	});
@@ -408,7 +444,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 	useEffect(() => {
 		hasAutoLoadedEventsPageRef.current = false;
-	}, [unitId]);
+	}, [unitId, selectedEventType]);
 
 	useEffect(() => {
 		const root = eventsScrollContainerRef.current;
@@ -614,9 +650,10 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			navigate({
 				to: "/v2/production-units/flock/$unitId/individuals/$individualId",
 				params: { unitId, individualId: String(individual.id) },
+				search: { eventType: selectedEventType },
 			});
 		},
-		[navigate, unitId],
+		[navigate, unitId, selectedEventType],
 	);
 
 	const handleCreateEvent = useCallback(
@@ -1201,7 +1238,36 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			<div className="v2-card p-4">
 				<div className="mb-3 flex items-center justify-between gap-3">
-					<p className="v2-kicker">Eventos del lote</p>
+					<div className="flex items-center gap-2">
+						<p className="v2-kicker">Eventos del lote</p>
+						<select
+							value={selectedEventType ?? "all"}
+							onChange={(event) => {
+								const nextValue = event.target.value;
+								if (nextValue === "all") {
+									onEventTypeFilterChange?.("all");
+									return;
+								}
+
+								if (!isLivestockEventType(nextValue)) {
+									return;
+								}
+
+								onEventTypeFilterChange?.(nextValue);
+							}}
+							className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-medium text-(--v2-ink)"
+							aria-label="Filtrar eventos por tipo"
+						>
+							{EVENT_TYPE_FILTER_OPTIONS.map((option) => (
+								<option
+									key={option.value}
+									value={option.value}
+								>
+									{option.label}
+								</option>
+							))}
+						</select>
+					</div>
 					<button
 						type="button"
 						onClick={() => {
@@ -1211,9 +1277,28 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								return next;
 							});
 						}}
-						className="rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
+						className="inline-flex items-center gap-2 rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
+						aria-label={isCreatingEvent ? "Cerrar" : "Nuevo evento"}
 					>
-						{isCreatingEvent ? "Cerrar" : "Nuevo evento"}
+						{isCreatingEvent ? (
+							<>
+								<span className="hidden md:inline">Cerrar</span>
+								<span
+									className="md:hidden"
+									aria-hidden="true"
+								>
+									×
+								</span>
+							</>
+						) : (
+							<>
+								<Plus
+									aria-hidden="true"
+									className="h-3.5 w-3.5 md:hidden"
+								/>
+								<span className="hidden md:inline">Nuevo evento</span>
+							</>
+						)}
 					</button>
 				</div>
 
@@ -1319,6 +1404,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								navigate({
 									to: "/v2/production-units/flock/$unitId/individuals/$individualId",
 									params: { unitId, individualId: String(individual.id) },
+									search: { eventType: selectedEventType },
 								})
 							}
 							onDeleteIndividual={handleDeleteIndividual}

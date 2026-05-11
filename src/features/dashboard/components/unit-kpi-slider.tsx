@@ -266,6 +266,7 @@ function UnitCard({ slice }: { slice: UnitDashboardSlice }) {
 		navigate({
 			to: "/v2/production-units/flock/$unitId",
 			params: { unitId: slice.unitId },
+			search: { eventType: undefined },
 		});
 	};
 

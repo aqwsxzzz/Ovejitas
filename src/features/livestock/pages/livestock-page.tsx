@@ -102,6 +102,7 @@ function LivestockUnitRow(props: {
 		navigate({
 			to: "/v2/production-units/flock/$unitId",
 			params: { unitId: String(props.id) },
+			search: { eventType: undefined },
 		});
 	};
 
