@@ -1,15 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Plus } from "lucide-react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
-import {
-	createEventCategoryByFarmId,
-	createEventByAssetId,
-	createIndividual as apiCreateIndividual,
-	deleteEventByAssetId,
-	deleteIndividual as apiDeleteIndividual,
-	updateEventByAssetId,
-} from "@/features/livestock/api/livestock-api";
 import {
 	useGetLivestockAssetById,
 	useListInfiniteEventsByAssetId,
@@ -18,6 +11,12 @@ import {
 	useGetProfitabilityReport,
 	useGetProductionReport,
 	useGetAggregatedHeadcountByAssetId,
+	useCreateEventByAssetId,
+	useUpdateEventByAssetId,
+	useDeleteEventByAssetId,
+	useCreateIndividual,
+	useDeleteIndividual,
+	useCreateEventCategoryByFarmId,
 } from "@/features/livestock/api/livestock-queries";
 import type {
 	ILivestockAsset,
@@ -38,23 +37,65 @@ function formatMoney(value: number): string {
 	return `${sign}$${Math.abs(value).toFixed(2)}`;
 }
 
-function Bars({ data }: { data: number[] }) {
+function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
 	const max = Math.max(...data, 1);
+	const mid = Math.max(Math.round(max / 2), 1);
+	const highlightedIndex = data.reduce(
+		(bestIndex, value, index, list) =>
+			value > (list[bestIndex] ?? Number.NEGATIVE_INFINITY) ? index : bestIndex,
+		0,
+	);
+	const weekdayLabels =
+		labels && labels.length === data.length
+			? labels
+			: Array.from({ length: data.length }, (_, index) => {
+					const d = new Date();
+					d.setHours(0, 0, 0, 0);
+					d.setDate(d.getDate() - (data.length - 1 - index));
+					return d.toLocaleDateString("es-EC", { weekday: "short" });
+				});
+
 	return (
-		<div className="mt-3 flex h-10 items-end gap-1.5">
-			{data.map((value, index) => (
-				<div
-					key={`${value}-${index}`}
-					className={`flex-1 rounded-t-sm border border-black/20 ${
-						index === data.length - 1
-							? "bg-[#f2df77]"
-							: index % 2 === 0
-								? "bg-[#1f211d]"
-								: "bg-[#8a8677]"
-					}`}
-					style={{ height: `${Math.max((value / max) * 100, 20)}%` }}
-				/>
-			))}
+		<div className="mt-3 rounded-xl border border-white/45 bg-[#cfd2d6] p-3">
+			<div className="relative h-28">
+				<div className="pointer-events-none absolute inset-x-0 top-4 border-t border-white/40" />
+				<div className="pointer-events-none absolute inset-x-0 top-14 border-t border-white/40" />
+				<div className="pointer-events-none absolute inset-x-0 top-24 border-t border-white/40" />
+				<div className="pointer-events-none absolute right-0 top-0 flex h-24 w-8 flex-col justify-between text-right text-[9px] font-medium text-[#6c798f]">
+					<span>{max}</span>
+					<span>{mid}</span>
+					<span>0</span>
+				</div>
+				<div className="absolute bottom-0 left-3 right-9 grid h-24 grid-cols-7 gap-3">
+					{data.map((value, index) => {
+						// Keep zero values visually close to baseline to avoid implying production.
+						const barHeightPct =
+							value <= 0 ? 2 : Math.max((value / max) * 100, 14);
+						return (
+							<div
+								key={`${value}-${index}`}
+								className="flex items-end justify-center"
+							>
+								<div
+									className={`h-full w-full rounded-md ${
+										value <= 0
+											? "bg-[#efd97b]/35"
+											: index === highlightedIndex
+												? "bg-[#f5a000]"
+												: "bg-[#efd97b]"
+									}`}
+									style={{ height: `${barHeightPct}%` }}
+								/>
+							</div>
+						);
+					})}
+				</div>
+			</div>
+			<div className="mt-2 grid grid-cols-7 gap-3 pl-3 pr-9 text-center text-[10px] font-medium text-[#6c798f]">
+				{weekdayLabels.map((label, index) => (
+					<span key={`${label}-${index}`}>{label}</span>
+				))}
+			</div>
 		</div>
 	);
 }
@@ -65,17 +106,17 @@ function ProductionSeriesCard({
 	productSeries: ProductionProductSeries;
 }) {
 	return (
-		<div className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
-			<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+		<div className="rounded-2xl border border-(--v2-border) bg-[#d7d9dd] p-4 shadow-[0_10px_24px_-18px_rgba(24,33,49,0.35)]">
+			<p className="text-[10px] uppercase tracking-[0.08em] text-[#6c798f]">
 				{productSeries.productLabel} · ultimos 7 dias
 			</p>
 			<div className="mt-2 flex items-start justify-between gap-3">
-				<p className="text-5xl font-semibold leading-none">
+				<p className="text-5xl font-semibold leading-none text-[#243246]">
 					{productSeries.totalLast7Days}
 				</p>
-				<div className="text-right text-sm text-(--v2-ink-soft)">
+				<div className="text-right text-sm text-[#6c798f]">
 					<p className="text-xs uppercase tracking-[0.08em]">Hoy</p>
-					<p className="text-xl font-semibold leading-none text-(--v2-ink)">
+					<p className="text-xl font-semibold leading-none text-[#243246]">
 						{productSeries.todayCount}
 					</p>
 				</div>
@@ -86,8 +127,9 @@ function ProductionSeriesCard({
 						? productSeries.series
 						: [0, 0, 0, 0, 0, 0, 0]
 				}
+				labels={productSeries.dayLabels}
 			/>
-			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-[#6c798f]">
 				<span>{productSeries.firstDayLabel}</span>
 				<span>Hoy · {productSeries.todayCount}</span>
 			</div>
@@ -169,12 +211,15 @@ function MetricCard(props: { label: string; value: string; note: string }) {
 
 interface FlockDetailPageProps {
 	unitId: string;
+	eventTypeFilter?: string;
+	onEventTypeFilterChange?: (next: LivestockEventType | "all") => void;
 }
 
 interface ProductionProductSeries {
 	productKey: string;
 	productLabel: string;
 	firstDayLabel: string;
+	dayLabels: string[];
 	totalLast7Days: number;
 	todayCount: number;
 	series: number[];
@@ -182,15 +227,45 @@ interface ProductionProductSeries {
 
 const EVENTS_LOG_PAGE_SIZE = 3;
 
+const EVENT_TYPE_FILTER_OPTIONS: Array<{
+	value: "all" | LivestockEventType;
+	label: string;
+}> = [
+	{ value: "all", label: "Todos" },
+	{ value: "production", label: "Produccion" },
+	{ value: "income", label: "Ingreso" },
+	{ value: "expense", label: "Gasto" },
+	{ value: "observation", label: "Observacion" },
+	{ value: "reproductive", label: "Reproductivo" },
+	{ value: "acquisition", label: "Adquisicion" },
+	{ value: "mortality", label: "Mortalidad" },
+];
+
+function isLivestockEventType(value: string): value is LivestockEventType {
+	return (
+		value === "production" ||
+		value === "income" ||
+		value === "expense" ||
+		value === "observation" ||
+		value === "reproductive" ||
+		value === "acquisition" ||
+		value === "mortality"
+	);
+}
+
 function parseNumeric(value: string | null): number {
 	if (!value) return 0;
 	const parsed = Number(value);
 	return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function toBreedLabel(asset: ILivestockAsset): string {
-	const modeLabel = asset.mode === "aggregated" ? "aggregate" : "individual";
-	return `${asset.kind} · ${modeLabel}`;
+function toModeLabel(asset: ILivestockAsset): string {
+	return asset.mode === "aggregated" ? "Aggregate" : "Individual";
+}
+
+function toKindLabel(asset: ILivestockAsset): string {
+	if (!asset.kind) return "Animal";
+	return `${asset.kind.charAt(0).toUpperCase()}${asset.kind.slice(1)}`;
 }
 
 function buildEventPairIdempotencyPrefix(
@@ -203,12 +278,20 @@ function isChainedLegEvent(event: ILivestockEvent): boolean {
 	return typeof event.payload.chain_role === "string";
 }
 
-export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
+export function FlockDetailPage({
+	unitId,
+	eventTypeFilter,
+	onEventTypeFilterChange,
+}: FlockDetailPageProps) {
 	const navigate = useNavigate();
 	const { data: currentUser } = useGetUserProfile();
 	const parsedAssetId = Number(unitId);
 	const hasValidAssetId = Number.isInteger(parsedAssetId);
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
+	const selectedEventType =
+		typeof eventTypeFilter === "string" && isLivestockEventType(eventTypeFilter)
+			? eventTypeFilter
+			: undefined;
 
 	const [isCreatingIndividual, setIsCreatingIndividual] = useState(false);
 	const [isCreatingEvent, setIsCreatingEvent] = useState(false);
@@ -233,21 +316,17 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		},
 	);
 
-	const {
-		data: individualsResponse,
-		isLoading: isLoadingIndividuals,
-		refetch: refetchIndividuals,
-	} = useListIndividualsByAssetId({
-		farmId,
-		assetId: unitId,
-		filters: { pageSize: 100 },
-		enabled: !!farmId && !!unitId,
-	});
+	const { data: individualsResponse, isLoading: isLoadingIndividuals } =
+		useListIndividualsByAssetId({
+			farmId,
+			assetId: unitId,
+			filters: { pageSize: 100 },
+			enabled: !!farmId && !!unitId,
+		});
 
 	const {
 		data: listedIndividualsResponse,
 		isLoading: isLoadingListedIndividuals,
-		refetch: refetchListedIndividuals,
 	} = useListIndividualsByAssetId({
 		farmId,
 		assetId: unitId,
@@ -259,12 +338,11 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		enabled: !!farmId && !!unitId,
 	});
 
-	const { data: eventCategories = [], refetch: refetchEventCategories } =
-		useListEventCategoriesByFarmId({
-			farmId,
-			filters: { archived: false, pageSize: 100 },
-			enabled: !!farmId,
-		});
+	const { data: eventCategories = [] } = useListEventCategoriesByFarmId({
+		farmId,
+		filters: { archived: false, pageSize: 100 },
+		enabled: !!farmId,
+	});
 
 	const now = new Date();
 	const currentMonthStart = new Date(
@@ -278,34 +356,31 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		now.getDate() - 6,
 	).toISOString();
 
-	const { data: profitabilityReport, refetch: refetchProfitability } =
-		useGetProfitabilityReport({
-			farmId,
-			filters: {
-				assetId: parsedAssetId,
-				dateFrom: currentMonthStart,
-			},
-			enabled: hasValidAssetId && !!farmId,
-		});
+	const { data: profitabilityReport } = useGetProfitabilityReport({
+		farmId,
+		filters: {
+			assetId: parsedAssetId,
+			dateFrom: currentMonthStart,
+		},
+		enabled: hasValidAssetId && !!farmId,
+	});
 
-	const { data: productionReport, refetch: refetchProductionReport } =
-		useGetProductionReport({
-			farmId,
-			filters: {
-				assetId: parsedAssetId,
-				bucket: "day",
-				type: "production",
-				dateFrom: sevenDaysAgo,
-			},
-			enabled: hasValidAssetId && !!farmId,
-		});
+	const { data: productionReport } = useGetProductionReport({
+		farmId,
+		filters: {
+			assetId: parsedAssetId,
+			bucket: "day",
+			type: "production",
+			dateFrom: sevenDaysAgo,
+		},
+		enabled: hasValidAssetId && !!farmId,
+	});
 
-	const { data: aggregatedHeadcount, refetch: refetchAggregatedHeadcount } =
-		useGetAggregatedHeadcountByAssetId({
-			farmId,
-			assetId: unitId,
-			enabled: !!farmId && !!unitId,
-		});
+	const { data: aggregatedHeadcount } = useGetAggregatedHeadcountByAssetId({
+		farmId,
+		assetId: unitId,
+		enabled: !!farmId && !!unitId,
+	});
 
 	const {
 		data: eventsLogData,
@@ -313,14 +388,21 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		hasNextPage: hasNextEventsLogPage,
 		fetchNextPage: fetchNextEventsLogPage,
 		isFetchingNextPage: isFetchingNextEventsLogPage,
-		refetch: refetchEventsLog,
 	} = useListInfiniteEventsByAssetId({
 		farmId,
 		assetId: unitId,
-		filters: { sort: "-occurred_at" },
+		filters: { sort: "-occurred_at", type: selectedEventType },
 		pageSize: EVENTS_LOG_PAGE_SIZE,
 		enabled: !!farmId && !!unitId,
 	});
+
+	// Mutation hooks
+	const createEventMutation = useCreateEventByAssetId();
+	const updateEventMutation = useUpdateEventByAssetId();
+	const deleteEventMutation = useDeleteEventByAssetId();
+	const createIndividualMutation = useCreateIndividual();
+	const deleteIndividualMutation = useDeleteIndividual();
+	const createEventCategoryMutation = useCreateEventCategoryByFarmId();
 
 	const allIndividuals = useMemo(
 		() => individualsResponse?.data ?? [],
@@ -362,7 +444,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 	useEffect(() => {
 		hasAutoLoadedEventsPageRef.current = false;
-	}, [unitId]);
+	}, [unitId, selectedEventType]);
 
 	useEffect(() => {
 		const root = eventsScrollContainerRef.current;
@@ -431,6 +513,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			d.setDate(today.getDate() - (6 - index));
 			return d;
 		});
+		const dayLabels = days.map((day) =>
+			day.toLocaleDateString("es-EC", { weekday: "short" }),
+		);
 		const dayKeys = days.map((d) => d.toISOString().slice(0, 10));
 		const firstDayLabel = days[0]?.toLocaleDateString("es-EC", {
 			weekday: "short",
@@ -488,6 +573,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					productKey,
 					productLabel,
 					firstDayLabel: firstDayLabel ?? "",
+					dayLabels,
 					totalLast7Days,
 					todayCount,
 					series,
@@ -504,29 +590,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		return parseNumeric(assetRow.net);
 	}, [profitabilityReport, parsedAssetId]);
 
-	const taggedMembersCount = useMemo(
-		() =>
-			allIndividuals.filter((individual) =>
-				Boolean(individual.tag && individual.tag.trim()),
-			).length,
-		[allIndividuals],
-	);
-
 	const aggregatedActiveCount = useMemo(() => {
 		return aggregatedHeadcount?.net ?? 0;
 	}, [aggregatedHeadcount]);
-
-	const countSummary = useMemo(() => {
-		if (asset?.mode === "individual") {
-			return `${taggedMembersCount} individuos etiquetados`;
-		}
-		if (asset?.mode === "aggregated") {
-			return aggregatedActiveCount > 0
-				? `${aggregatedActiveCount} en conteo`
-				: "sin conteo registrado";
-		}
-		return "";
-	}, [asset?.mode, taggedMembersCount, aggregatedActiveCount]);
 
 	const countCardValue = useMemo(() => {
 		if (asset?.mode === "aggregated") {
@@ -548,7 +614,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		async (data: IndividualFormData) => {
 			if (!farmId || !unitId) return;
 
-			await apiCreateIndividual({
+			await createIndividualMutation.mutateAsync({
 				farmId,
 				assetId: unitId,
 				data: {
@@ -562,26 +628,21 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			});
 
 			setIsCreatingIndividual(false);
-			await refetchIndividuals();
-			await refetchListedIndividuals();
 		},
-		[farmId, unitId, refetchIndividuals, refetchListedIndividuals],
+		[farmId, unitId, createIndividualMutation],
 	);
 
 	const handleDeleteIndividual = useCallback(
 		async (individual: ILivestockIndividual) => {
 			if (!farmId || !unitId) return;
 
-			await apiDeleteIndividual({
+			await deleteIndividualMutation.mutateAsync({
 				farmId,
 				assetId: unitId,
 				individualId: String(individual.id),
 			});
-
-			await refetchIndividuals();
-			await refetchListedIndividuals();
 		},
-		[farmId, unitId, refetchIndividuals, refetchListedIndividuals],
+		[farmId, unitId, deleteIndividualMutation],
 	);
 
 	const handleSelectIndividual = useCallback(
@@ -589,9 +650,10 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			navigate({
 				to: "/v2/production-units/flock/$unitId/individuals/$individualId",
 				params: { unitId, individualId: String(individual.id) },
+				search: { eventType: selectedEventType },
 			});
 		},
-		[navigate, unitId],
+		[navigate, unitId, selectedEventType],
 	);
 
 	const handleCreateEvent = useCallback(
@@ -602,7 +664,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			setIsSavingEvent(true);
 			try {
 				if (data.type === "production") {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -618,7 +680,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					});
 				} else if (data.type === "expense" || data.type === "income") {
 					const eventPairPrefix = buildEventPairIdempotencyPrefix(data.type);
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -647,7 +709,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							data.type === "expense"
 								? "purchase_inventory_adjustment"
 								: "sale_inventory_adjustment";
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -667,7 +729,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						});
 					}
 				} else if (data.type === "observation") {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -687,7 +749,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					if (shouldCreateExpensePair) {
 						const eventPairPrefix =
 							buildEventPairIdempotencyPrefix("acquisition");
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -704,7 +766,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							},
 						});
 
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -725,7 +787,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 							},
 						});
 					} else {
-						await createEventByAssetId({
+						await createEventMutation.mutateAsync({
 							farmId,
 							assetId: unitId,
 							data: {
@@ -742,7 +804,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						});
 					}
 				} else if (data.type === "mortality") {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -756,7 +818,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 						},
 					});
 				} else {
-					await createEventByAssetId({
+					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
@@ -771,12 +833,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				}
 
 				setIsCreatingEvent(false);
-				await Promise.all([
-					refetchEventsLog(),
-					refetchProfitability(),
-					refetchProductionReport(),
-					refetchAggregatedHeadcount(),
-				]);
 			} finally {
 				setIsSavingEvent(false);
 			}
@@ -784,10 +840,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 		[
 			farmId,
 			unitId,
-			refetchEventsLog,
-			refetchProfitability,
-			refetchProductionReport,
-			refetchAggregatedHeadcount,
+			createEventMutation,
 			preferredSecondaryCategoryByType,
 			asset,
 		],
@@ -818,7 +871,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			setDeletingEventId(event.id);
 			try {
-				await deleteEventByAssetId({
+				await deleteEventMutation.mutateAsync({
 					farmId,
 					assetId: unitId,
 					eventId: event.id,
@@ -828,26 +881,11 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 					setEditingEvent(null);
 					setIsCreatingEvent(false);
 				}
-
-				await Promise.all([
-					refetchEventsLog(),
-					refetchProfitability(),
-					refetchProductionReport(),
-					refetchAggregatedHeadcount(),
-				]);
 			} finally {
 				setDeletingEventId(null);
 			}
 		},
-		[
-			farmId,
-			unitId,
-			editingEvent,
-			refetchEventsLog,
-			refetchProfitability,
-			refetchProductionReport,
-			refetchAggregatedHeadcount,
-		],
+		[farmId, unitId, editingEvent, deleteEventMutation],
 	);
 
 	const handleSubmitEvent = useCallback(
@@ -870,7 +908,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			try {
 				const nextIndividualId =
 					asset.mode === "individual" ? (data.individualId ?? null) : null;
-				await updateEventByAssetId({
+				await updateEventMutation.mutateAsync({
 					farmId,
 					assetId: unitId,
 					eventId: editingEvent.id,
@@ -910,12 +948,6 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 				setEditingEvent(null);
 				setIsCreatingEvent(false);
-				await Promise.all([
-					refetchEventsLog(),
-					refetchProfitability(),
-					refetchProductionReport(),
-					refetchAggregatedHeadcount(),
-				]);
 			} finally {
 				setIsSavingEvent(false);
 			}
@@ -925,10 +957,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			handleCreateEvent,
 			farmId,
 			unitId,
-			refetchEventsLog,
-			refetchProfitability,
-			refetchProductionReport,
-			refetchAggregatedHeadcount,
+			updateEventMutation,
 			asset,
 		],
 	);
@@ -947,7 +976,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				throw new Error("Farm id is required to create categories.");
 			}
 
-			const createdCategory = await createEventCategoryByFarmId({
+			const createdCategory = await createEventCategoryMutation.mutateAsync({
 				farmId,
 				data: {
 					type,
@@ -956,10 +985,9 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 				},
 			});
 
-			await refetchEventCategories();
 			return createdCategory.id;
 		},
-		[farmId, refetchEventCategories],
+		[farmId, createEventCategoryMutation],
 	);
 
 	const resetSwipeTracking = useCallback(() => {
@@ -1116,28 +1144,74 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 			onTouchCancel={resetSwipeTracking}
 		>
 			<div className="v2-card p-5">
-				<div className="flex items-start justify-between gap-3">
-					<div>
+				<div className="min-w-0 flex-1">
+					<div className="mb-2 flex items-center justify-between gap-3">
 						<div className="flex items-center gap-2">
-							<Link
-								to="/v2/production-units"
-								className="text-sm text-[color:var(--v2-ink-soft)]"
-							>
-								‹
-							</Link>
-							<h1 className="text-2xl font-semibold">{asset.name}</h1>
+							<span className="rounded-md bg-[#e7d7ae] px-2.5 py-1 text-xs font-semibold text-[#6f5413]">
+								{toKindLabel(asset)}
+							</span>
+							<span className="rounded-md border border-[color:var(--v2-border)] bg-white px-2.5 py-1 text-xs font-semibold text-[color:var(--v2-ink)]">
+								{toModeLabel(asset)}
+							</span>
 						</div>
-						<p className="mt-2 text-sm italic text-[color:var(--v2-ink-soft)]">
-							{toBreedLabel(asset)} · {countSummary} ·{" "}
-							{asset.location ?? "Sin ubicacion"}
-						</p>
-						{hasDescription ? (
-							<p className="mt-2 text-sm text-(--v2-ink-soft) wrap-break-word text-center">
-								&quot;{asset.description?.trim()}&quot;
-							</p>
-						) : null}
+						<Link
+							to="/v2/production-units"
+							className="inline-flex items-center justify-center p-1 text-[color:var(--v2-ink-soft)] transition-colors hover:text-[color:var(--v2-ink)]"
+							aria-label="Volver a ganado"
+						>
+							<ArrowLeft
+								aria-hidden="true"
+								className="h-6 w-6"
+							/>
+						</Link>
 					</div>
-					<span className="text-[color:var(--v2-ink-soft)]">···</span>
+					<div className="flex items-center gap-2">
+						<h1
+							className="text-3xl font-bold leading-tight md:text-[2.35rem]"
+							style={{ color: "#006847", fontFamily: "var(--v2-font-display)" }}
+						>
+							{asset.name}
+						</h1>
+					</div>
+					<div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-[color:var(--v2-border)] bg-[#ecf0e8] px-3 py-1.5 text-sm text-[color:var(--v2-ink)]">
+						<span className="inline-flex h-5 w-5 items-center justify-center text-[#0e6b49]">
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="h-4 w-4"
+							>
+								<path d="M12 21s-6-5.5-6-11a6 6 0 1 1 12 0c0 5.5-6 11-6 11Z" />
+								<circle
+									cx="12"
+									cy="10"
+									r="2"
+								/>
+							</svg>
+						</span>
+						<span className="truncate">
+							{asset.location ?? "Sin ubicacion"}
+						</span>
+					</div>
+					{hasDescription ? (
+						<>
+							<div className="mt-4 border-t border-[color:var(--v2-border)]" />
+							<div className="mt-4 flex justify-center">
+								<blockquote
+									className="max-w-2xl text-center text-lg italic leading-snug text-[color:var(--v2-primary)] md:text-xl"
+									style={{
+										fontFamily:
+											'"Segoe Script", "Bradley Hand", "Comic Sans MS", cursive',
+									}}
+								>
+									&quot;{asset.description?.trim()}&quot;
+								</blockquote>
+							</div>
+						</>
+					) : null}
 				</div>
 			</div>
 
@@ -1164,7 +1238,36 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 
 			<div className="v2-card p-4">
 				<div className="mb-3 flex items-center justify-between gap-3">
-					<p className="v2-kicker">Eventos del lote</p>
+					<div className="flex items-center gap-2">
+						<p className="v2-kicker">Eventos del lote</p>
+						<select
+							value={selectedEventType ?? "all"}
+							onChange={(event) => {
+								const nextValue = event.target.value;
+								if (nextValue === "all") {
+									onEventTypeFilterChange?.("all");
+									return;
+								}
+
+								if (!isLivestockEventType(nextValue)) {
+									return;
+								}
+
+								onEventTypeFilterChange?.(nextValue);
+							}}
+							className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-medium text-(--v2-ink)"
+							aria-label="Filtrar eventos por tipo"
+						>
+							{EVENT_TYPE_FILTER_OPTIONS.map((option) => (
+								<option
+									key={option.value}
+									value={option.value}
+								>
+									{option.label}
+								</option>
+							))}
+						</select>
+					</div>
 					<button
 						type="button"
 						onClick={() => {
@@ -1174,9 +1277,28 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								return next;
 							});
 						}}
-						className="rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
+						className="inline-flex items-center gap-2 rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
+						aria-label={isCreatingEvent ? "Cerrar" : "Nuevo evento"}
 					>
-						{isCreatingEvent ? "Cerrar" : "Nuevo evento"}
+						{isCreatingEvent ? (
+							<>
+								<span className="hidden md:inline">Cerrar</span>
+								<span
+									className="md:hidden"
+									aria-hidden="true"
+								>
+									×
+								</span>
+							</>
+						) : (
+							<>
+								<Plus
+									aria-hidden="true"
+									className="h-3.5 w-3.5 md:hidden"
+								/>
+								<span className="hidden md:inline">Nuevo evento</span>
+							</>
+						)}
 					</button>
 				</div>
 
@@ -1282,6 +1404,7 @@ export function FlockDetailPage({ unitId }: FlockDetailPageProps) {
 								navigate({
 									to: "/v2/production-units/flock/$unitId/individuals/$individualId",
 									params: { unitId, individualId: String(individual.id) },
+									search: { eventType: selectedEventType },
 								})
 							}
 							onDeleteIndividual={handleDeleteIndividual}

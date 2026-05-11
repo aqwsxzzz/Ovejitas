@@ -4,10 +4,10 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
-	deleteLivestockAssetById,
-	updateLivestockAssetById,
-} from "@/features/livestock/api/livestock-api";
-import { useListLivestockAssetsByFarmId } from "@/features/livestock/api/livestock-queries";
+	useListLivestockAssetsByFarmId,
+	useUpdateLivestockAssetById,
+	useDeleteLivestockAssetById,
+} from "@/features/livestock/api/livestock-queries";
 import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
 import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
@@ -102,6 +102,7 @@ function LivestockUnitRow(props: {
 		navigate({
 			to: "/v2/production-units/flock/$unitId",
 			params: { unitId: String(props.id) },
+			search: { eventType: undefined },
 		});
 	};
 
@@ -214,21 +215,21 @@ export function LivestockPage() {
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
 
-	const {
-		data: farmAssetsResponse,
-		isLoading,
-		refetch,
-	} = useListLivestockAssetsByFarmId({
-		farmId,
-		filters: {
-			q: query.trim() || undefined,
-			sort: "-updated_at",
-			kind: "animal",
-			page: 1,
-			pageSize: 20,
-		},
-		enabled: !!farmId,
-	});
+	const { data: farmAssetsResponse, isLoading } =
+		useListLivestockAssetsByFarmId({
+			farmId,
+			filters: {
+				q: query.trim() || undefined,
+				sort: "-updated_at",
+				kind: "animal",
+				page: 1,
+				pageSize: 20,
+			},
+			enabled: !!farmId,
+		});
+
+	const updateAssetMutation = useUpdateLivestockAssetById();
+	const deleteAssetMutation = useDeleteLivestockAssetById();
 
 	const units = farmAssetsResponse?.data ?? [];
 
@@ -245,7 +246,7 @@ export function LivestockPage() {
 	const handleSaveEdit = async () => {
 		if (!farmId || editingAssetId == null || !editName.trim()) return;
 
-		await updateLivestockAssetById({
+		await updateAssetMutation.mutateAsync({
 			farmId,
 			assetId: editingAssetId,
 			data: {
@@ -255,7 +256,6 @@ export function LivestockPage() {
 		});
 
 		setEditingAssetId(null);
-		await refetch();
 	};
 
 	const handleDeleteAsset = async (assetId: number) => {
@@ -263,11 +263,10 @@ export function LivestockPage() {
 
 		setDeletingAssetId(assetId);
 		try {
-			await deleteLivestockAssetById({ farmId, assetId });
+			await deleteAssetMutation.mutateAsync({ farmId, assetId });
 			if (editingAssetId === assetId) {
 				setEditingAssetId(null);
 			}
-			await refetch();
 		} finally {
 			setDeletingAssetId(null);
 		}

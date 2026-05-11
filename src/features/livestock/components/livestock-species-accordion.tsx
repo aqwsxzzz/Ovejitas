@@ -34,6 +34,7 @@ function SpeciesCard({ group }: { group: LivestockGroup }) {
 			<Link
 				to="/v2/production-units/flock/$unitId"
 				params={{ unitId: group.categoryKey }}
+				search={{ eventType: undefined }}
 				className="v2-card block p-4 transition hover:-translate-y-px"
 			>
 				{cardBody}
