@@ -29,10 +29,20 @@ export const DropdownHeaderMenu = () => {
 					<Menu />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent className="w-48">
-				<DropdownMenuLabel className="text-center text-chart-5">
-					{t("menuTitle")}
-				</DropdownMenuLabel>
+			<DropdownMenuContent className="w-56">
+				<div className="flex items-center justify-between gap-3 px-1 pt-1">
+					<DropdownMenuLabel className="p-0 text-chart-5">
+						{t("menuTitle")}
+					</DropdownMenuLabel>
+					<Button
+						variant="destructive"
+						size="sm"
+						onClick={() => logout()}
+						className="h-8 px-3 text-xs"
+					>
+						{t("Logout")}
+					</Button>
+				</div>
 				<DropdownMenuSeparator className="w-2/3 mx-auto" />
 				<DropdownMenuGroup>
 					<Link to="/v2/dashboard">
@@ -61,7 +71,6 @@ export const DropdownHeaderMenu = () => {
 					</Link>
 					<FarmInviteModal />
 				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
 				{/* <DropdownMenuGroup>
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger>Invite</DropdownMenuSubTrigger>
@@ -76,12 +85,6 @@ export const DropdownHeaderMenu = () => {
 					</DropdownMenuSub>
 				</DropdownMenuGroup>
 				<DropdownMenuSeparator /> */}
-				<DropdownMenuItem
-					onClick={() => logout()}
-					className="text-destructive font-semibold"
-				>
-					{t("Logout")}
-				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

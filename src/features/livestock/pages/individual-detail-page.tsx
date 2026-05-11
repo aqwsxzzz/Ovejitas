@@ -4,12 +4,10 @@ import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	useGetIndividualById,
 	useListIndividualsByAssetId,
+	useUpdateIndividual,
+	useDeleteIndividual,
 } from "@/features/livestock/api/livestock-queries";
 import { IndividualDetail } from "../components/individual-detail";
-import {
-	updateIndividual as apiUpdateIndividual,
-	deleteIndividual as apiDeleteIndividual,
-} from "@/features/livestock/api/livestock-api";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 interface IndividualDetailPageProps {
@@ -43,11 +41,14 @@ export function IndividualDetailPage({
 
 	const allIndividuals = individualsResponse?.data ?? [];
 
+	const updateIndividualMutation = useUpdateIndividual();
+	const deleteIndividualMutation = useDeleteIndividual();
+
 	const handleUpdate = useCallback(
 		async (updated: ILivestockIndividual) => {
 			if (!farmId || !assetId) return;
 
-			await apiUpdateIndividual({
+			await updateIndividualMutation.mutateAsync({
 				farmId,
 				assetId,
 				individualId,
@@ -61,13 +62,13 @@ export function IndividualDetailPage({
 				},
 			});
 		},
-		[farmId, assetId, individualId],
+		[farmId, assetId, individualId, updateIndividualMutation],
 	);
 
 	const handleDelete = useCallback(async () => {
 		if (!farmId || !assetId) return;
 
-		await apiDeleteIndividual({
+		await deleteIndividualMutation.mutateAsync({
 			farmId,
 			assetId,
 			individualId,
@@ -77,6 +78,7 @@ export function IndividualDetailPage({
 		navigate({
 			to: `/v2/production-units/flock/$unitId`,
 			params: { unitId: assetId },
+			search: { eventType: undefined },
 		});
 	}, [farmId, assetId, individualId, navigate]);
 
@@ -103,6 +105,7 @@ export function IndividualDetailPage({
 					navigate({
 						to: `/v2/production-units/flock/$unitId`,
 						params: { unitId: assetId },
+						search: { eventType: undefined },
 					})
 				}
 				className="text-sm text-blue-600 hover:underline"

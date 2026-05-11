@@ -4,10 +4,15 @@ import { useTranslation } from "react-i18next";
 import { authQueryKeys } from "@/features/auth/api/auth-queries";
 import { getUserProfile } from "@/features/auth/api/auth-api";
 import type { IMeResponse } from "@/features/auth/types/auth-types";
+import { hasStoredAccessToken } from "@/features/auth/utils/auth-session";
 import { FarmAnimalSpinner } from "@/components/common/farm-animal-spinner";
 
 export const Route = createFileRoute("/_public/_layout")({
 	beforeLoad: async ({ context }) => {
+		if (!hasStoredAccessToken()) {
+			return;
+		}
+
 		try {
 			await context.queryClient.ensureQueryData<IMeResponse>({
 				queryKey: authQueryKeys.all,
@@ -44,7 +49,7 @@ function RouteComponent() {
 			<div>
 				<img
 					src={redBarn}
-					className="w-[300px] md:w-[400px] lg:w-[500px] drop-shadow-lg"
+					className="w-75 md:w-100 lg:w-125 drop-shadow-lg"
 					alt="A big red barn"
 				/>
 			</div>

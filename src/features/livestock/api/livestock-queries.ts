@@ -1,4 +1,9 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+	useInfiniteQuery,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import {
 	listEventCategoriesByFarmId,
 	listEventsByAssetId,
@@ -9,6 +14,20 @@ import {
 	getProfitabilityReport,
 	getProductionReport,
 	getCostPerUnitReport,
+	createEventByAssetId,
+	updateEventByAssetId,
+	deleteEventByAssetId,
+	createIndividual,
+	updateIndividual,
+	deleteIndividual,
+	createEventCategoryByFarmId,
+	updateEventCategoryById,
+	deleteEventCategoryById,
+	createLivestockAsset,
+	updateLivestockAssetById,
+	deleteLivestockAssetById,
+	type LivestockEventCreatePayload,
+	type LivestockEventUpdatePayload,
 } from "@/features/livestock/api/livestock-api";
 import type {
 	ILivestockAsset,
@@ -492,3 +511,338 @@ export const useGetAggregatedHeadcountByAssetId = ({
 		},
 		enabled: enabled && !!farmId && !!assetId,
 	});
+
+// --- Mutation Hooks ---
+
+export const useCreateEventByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			data: LivestockEventCreatePayload;
+		}) => createEventByAssetId({ farmId, assetId, data }),
+		onSuccess: (_, { farmId, assetId }) => {
+			// Invalidate all related queries
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventsByAssetInfinite(
+					farmId,
+					assetId,
+					undefined,
+				),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventsByAsset(farmId, assetId, undefined),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"aggregatedHeadcount",
+					farmId,
+					assetId,
+				],
+			});
+		},
+	});
+};
+
+export const useUpdateEventByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			eventId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			eventId: number;
+			data: LivestockEventUpdatePayload;
+		}) => updateEventByAssetId({ farmId, assetId, eventId, data }),
+		onSuccess: (_, { farmId, assetId }) => {
+			// Invalidate all related queries
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventsByAssetInfinite(
+					farmId,
+					assetId,
+					undefined,
+				),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventsByAsset(farmId, assetId, undefined),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"aggregatedHeadcount",
+					farmId,
+					assetId,
+				],
+			});
+		},
+	});
+};
+
+export const useDeleteEventByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			eventId,
+		}: {
+			farmId: string;
+			assetId: string;
+			eventId: number;
+		}) => deleteEventByAssetId({ farmId, assetId, eventId }),
+		onSuccess: (_, { farmId, assetId }) => {
+			// Invalidate all related queries
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventsByAssetInfinite(
+					farmId,
+					assetId,
+					undefined,
+				),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventsByAsset(farmId, assetId, undefined),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"aggregatedHeadcount",
+					farmId,
+					assetId,
+				],
+			});
+		},
+	});
+};
+
+export const useCreateIndividual = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			data: Parameters<typeof createIndividual>[0]["data"];
+		}) => createIndividual({ farmId, assetId, data }),
+		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.individualsByAsset(
+					farmId,
+					assetId,
+					undefined,
+				),
+			});
+		},
+	});
+};
+
+export const useUpdateIndividual = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			individualId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			individualId: string;
+			data: Parameters<typeof updateIndividual>[0]["data"];
+		}) => updateIndividual({ farmId, assetId, individualId, data }),
+		onSuccess: (_, { farmId, assetId, individualId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.individualsByAsset(
+					farmId,
+					assetId,
+					undefined,
+				),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.individualById(
+					farmId,
+					assetId,
+					individualId,
+				),
+			});
+		},
+	});
+};
+
+export const useDeleteIndividual = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			individualId,
+		}: {
+			farmId: string;
+			assetId: string;
+			individualId: string;
+		}) => deleteIndividual({ farmId, assetId, individualId }),
+		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.individualsByAsset(
+					farmId,
+					assetId,
+					undefined,
+				),
+			});
+		},
+	});
+};
+
+export const useCreateEventCategoryByFarmId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			data,
+		}: {
+			farmId: string;
+			data: Parameters<typeof createEventCategoryByFarmId>[0]["data"];
+		}) => createEventCategoryByFarmId({ farmId, data }),
+		onSuccess: (_, { farmId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventCategoriesByFarm(farmId, undefined),
+			});
+		},
+	});
+};
+
+export const useUpdateEventCategoryById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			categoryId,
+			data,
+		}: {
+			farmId: string;
+			categoryId: number;
+			data: Parameters<typeof updateEventCategoryById>[0]["data"];
+		}) => updateEventCategoryById({ farmId, categoryId, data }),
+		onSuccess: (_, { farmId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventCategoriesByFarm(farmId, undefined),
+			});
+		},
+	});
+};
+
+export const useDeleteEventCategoryById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			categoryId,
+		}: {
+			farmId: string;
+			categoryId: number;
+		}) => deleteEventCategoryById({ farmId, categoryId }),
+		onSuccess: (_, { farmId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.eventCategoriesByFarm(farmId, undefined),
+			});
+		},
+	});
+};
+
+// --- Asset Mutation Hooks ---
+
+export const useCreateLivestockAsset = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			data,
+		}: {
+			farmId: string;
+			data: Parameters<typeof createLivestockAsset>[0]["data"];
+		}) => createLivestockAsset({ farmId, data }),
+		onSuccess: (_, { farmId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.assetsByFarm(farmId, undefined),
+			});
+		},
+	});
+};
+
+export const useUpdateLivestockAssetById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			data,
+		}: {
+			farmId: string;
+			assetId: number;
+			data: Parameters<typeof updateLivestockAssetById>[0]["data"];
+		}) => updateLivestockAssetById({ farmId, assetId, data }),
+		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.assetsByFarm(farmId, undefined),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.assetById(farmId, assetId),
+			});
+		},
+	});
+};
+
+export const useDeleteLivestockAssetById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ farmId, assetId }: { farmId: string; assetId: number }) =>
+			deleteLivestockAssetById({ farmId, assetId }),
+		onSuccess: (_, { farmId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.assetsByFarm(farmId, undefined),
+			});
+		},
+	});
+};
