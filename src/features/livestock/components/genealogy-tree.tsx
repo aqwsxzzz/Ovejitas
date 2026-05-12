@@ -112,7 +112,7 @@ export function GenealogyTree({
 
 		const uniqueAncestors = new Set(ancestors);
 		if (uniqueAncestors.size < ancestors.length) {
-			return "⚠️ Inbreeding detected in lineage";
+			return "⚠️ Se detecto consanguinidad en el linaje";
 		}
 		return null;
 	})();
@@ -129,7 +129,7 @@ export function GenealogyTree({
 			<div className="flex justify-between gap-2">
 				<div>
 					<div className="mb-2 text-xs font-semibold text-gray-600">
-						Grandparents (Maternal)
+						Abuelos (maternos)
 					</div>
 					<div className="flex gap-2">
 						{maternalGrandmother ? (
@@ -155,7 +155,7 @@ export function GenealogyTree({
 
 				<div>
 					<div className="mb-2 text-xs font-semibold text-gray-600">
-						Grandparents (Paternal)
+						Abuelos (paternos)
 					</div>
 					<div className="flex gap-2">
 						{paternalGrandmother ? (
@@ -183,7 +183,7 @@ export function GenealogyTree({
 			{/* Parents */}
 			<div className="flex justify-center gap-16">
 				<div>
-					<div className="mb-2 text-xs font-semibold text-gray-600">Mother</div>
+					<div className="mb-2 text-xs font-semibold text-gray-600">Madre</div>
 					{mother ? (
 						<GenealogyCellComponent
 							individual={mother}
@@ -196,7 +196,7 @@ export function GenealogyTree({
 				</div>
 
 				<div>
-					<div className="mb-2 text-xs font-semibold text-gray-600">Father</div>
+					<div className="mb-2 text-xs font-semibold text-gray-600">Padre</div>
 					{father ? (
 						<GenealogyCellComponent
 							individual={father}
@@ -215,10 +215,10 @@ export function GenealogyTree({
 					<div className="text-lg font-bold text-blue-900">{subjectLabel}</div>
 					<div className="text-sm text-blue-700">
 						{(individual.extra?.sex as string | undefined) === "male"
-							? "♂ Male"
+							? "♂ Macho"
 							: (individual.extra?.sex as string | undefined) === "female"
-								? "♀ Female"
-								: "– Unknown"}
+								? "♀ Hembra"
+								: "– Desconocido"}
 					</div>
 					{individual.birth_date && (
 						<div className="text-xs text-blue-600">
@@ -231,7 +231,7 @@ export function GenealogyTree({
 			{/* No Parents Info */}
 			{!mother && !father && (
 				<div className="text-center text-sm text-gray-500">
-					No genealogy information recorded
+					No hay informacion genealogica registrada
 				</div>
 			)}
 		</div>
