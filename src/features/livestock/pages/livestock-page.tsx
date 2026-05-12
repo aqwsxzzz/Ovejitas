@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MapPin } from "lucide-react";
 
 import { useNavigate } from "@tanstack/react-router";
 
@@ -42,17 +43,21 @@ function LivestockUnitRow(props: {
 	name: string;
 	kind: LivestockAssetKind;
 	location: string | null;
+	description: string | null;
 	mode: "aggregated" | "individual";
 	isEditing: boolean;
 	editName: string;
 	editLocation: string;
+	editDescription: string;
 	onStartEdit: () => void;
 	onCancelEdit: () => void;
 	onChangeName: (value: string) => void;
 	onChangeLocation: (value: string) => void;
+	onChangeDescription: (value: string) => void;
 	onSaveEdit: () => Promise<void>;
 	onDelete: () => Promise<void>;
 	isDeleting: boolean;
+	isSaving: boolean;
 }) {
 	const navigate = useNavigate();
 	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -76,17 +81,26 @@ function LivestockUnitRow(props: {
 						className="rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
 					/>
 				</div>
+				<textarea
+					value={props.editDescription}
+					onChange={(event) => props.onChangeDescription(event.target.value)}
+					placeholder="Descripcion"
+					rows={3}
+					className="w-full rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
+				/>
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
 						onClick={() => void props.onSaveEdit()}
+						disabled={props.isSaving}
 						className="rounded-full bg-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold text-white"
 					>
-						Guardar
+						{props.isSaving ? "Guardando..." : "Guardar"}
 					</button>
 					<button
 						type="button"
 						onClick={props.onCancelEdit}
+						disabled={props.isSaving}
 						className="rounded-full border border-[color:var(--v2-border)] px-3 py-1 text-xs font-semibold"
 					>
 						Cancelar
@@ -137,9 +151,12 @@ function LivestockUnitRow(props: {
 								{props.mode === "individual" ? "Individual" : "Agrupado"}
 							</span>
 						</div>
-						<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-							{props.location ?? "Sin ubicacion"}
-						</p>
+						<div className="mt-1 flex items-center gap-1">
+							<MapPin className="h-4 w-4 flex-shrink-0 text-[color:var(--v2-ink-soft)]" />
+							<p className="text-sm text-[color:var(--v2-ink-soft)]">
+								{props.location ?? "Sin ubicacion"}
+							</p>
+						</div>
 					</div>
 				</div>
 				{isConfirmingDelete ? null : (
@@ -211,6 +228,7 @@ export function LivestockPage() {
 	const [editingAssetId, setEditingAssetId] = useState<number | null>(null);
 	const [editName, setEditName] = useState("");
 	const [editLocation, setEditLocation] = useState("");
+	const [editDescription, setEditDescription] = useState("");
 	const [deletingAssetId, setDeletingAssetId] = useState<number | null>(null);
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
@@ -237,10 +255,12 @@ export function LivestockPage() {
 		id: number,
 		name: string,
 		location: string | null,
+		description: string | null,
 	) => {
 		setEditingAssetId(id);
 		setEditName(name);
 		setEditLocation(location ?? "");
+		setEditDescription(description ?? "");
 	};
 
 	const handleSaveEdit = async () => {
@@ -252,6 +272,7 @@ export function LivestockPage() {
 			data: {
 				name: editName.trim(),
 				location: editLocation.trim() || null,
+				description: editDescription.trim() || null,
 			},
 		});
 
@@ -318,19 +339,30 @@ export function LivestockPage() {
 							name={unit.name}
 							kind={unit.kind}
 							location={unit.location}
+							description={unit.description}
 							mode={unit.mode}
 							isEditing={editingAssetId === unit.id}
 							editName={editName}
 							editLocation={editLocation}
+							editDescription={editDescription}
 							onStartEdit={() =>
-								handleStartEdit(unit.id, unit.name, unit.location)
+								handleStartEdit(
+									unit.id,
+									unit.name,
+									unit.location,
+									unit.description,
+								)
 							}
 							onCancelEdit={() => setEditingAssetId(null)}
 							onChangeName={setEditName}
 							onChangeLocation={setEditLocation}
+							onChangeDescription={setEditDescription}
 							onSaveEdit={handleSaveEdit}
 							onDelete={() => handleDeleteAsset(unit.id)}
 							isDeleting={deletingAssetId === unit.id}
+							isSaving={
+								updateAssetMutation.isPending && editingAssetId === unit.id
+							}
 						/>
 					))}
 				</div>

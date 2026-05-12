@@ -27,6 +27,14 @@ function parseUnitIdFromPath(path?: string): string | null {
 	return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
 
+function resolveReturnPath(sourcePath?: string): string {
+	if (!sourcePath || sourcePath.startsWith("/v2/log")) {
+		return "/v2/dashboard";
+	}
+
+	return sourcePath;
+}
+
 function ActionCard(props: {
 	title: string;
 	subtitle: string;
@@ -112,7 +120,8 @@ export function V2LogPage() {
 
 	const goBack = () =>
 		navigate({
-			to: search.sourcePath ?? "/v2/dashboard",
+			to: resolveReturnPath(search.sourcePath),
+			replace: true,
 		});
 
 	async function handleCreateLot(event: FormEvent) {
@@ -411,7 +420,7 @@ export function V2LogPage() {
 				>
 					{!unitId ? (
 						<p className="text-sm text-(--v2-ink-soft)">
-							Abre Quicklog desde un lote para crear un individual.
+							Abre Acciones rapidas desde un lote para crear un individuo.
 						</p>
 					) : (
 						<form
@@ -426,7 +435,7 @@ export function V2LogPage() {
 							/>
 							<input
 								className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-								placeholder="Tag"
+								placeholder="Identificador"
 								value={individualTag}
 								onChange={(event) => setIndividualTag(event.target.value)}
 							/>
@@ -445,7 +454,7 @@ export function V2LogPage() {
 								disabled={isSaving}
 								className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white"
 							>
-								{isSaving ? "Guardando..." : "Crear individual"}
+								{isSaving ? "Guardando..." : "Crear individuo"}
 							</button>
 						</form>
 					)}

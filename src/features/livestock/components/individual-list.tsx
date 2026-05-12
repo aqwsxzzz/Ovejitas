@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { IndividualForm } from "@/features/livestock/components/individual-form";
+import type { IndividualFormData } from "@/features/livestock/components/individual-form";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 const STATUS_COLORS = {
@@ -13,16 +15,28 @@ const SEX_SYMBOL = {
 	unknown: "–",
 };
 
+const STATUS_LABELS = {
+	active: "Activo",
+	sold: "Vendido",
+	deceased: "Fallecido",
+	archived: "Archivado",
+} as const;
+
 interface IndividualListProps {
 	individuals: ILivestockIndividual[];
+	availableParents?: ILivestockIndividual[];
 	totalIndividuals?: number;
 	searchQuery: string;
 	onSearchQueryChange: (value: string) => void;
 	isLoading?: boolean;
 	onSelectIndividual?: (individual: ILivestockIndividual) => void;
-	onEditIndividual?: (individual: ILivestockIndividual) => void;
+	onUpdateIndividual?: (
+		individual: ILivestockIndividual,
+		data: IndividualFormData,
+	) => Promise<void>;
 	onDeleteIndividual?: (individual: ILivestockIndividual) => Promise<void>;
 	onCreateIndividual?: () => void;
+	isUpdatingIndividual?: boolean;
 }
 
 function getIndividualTag(individual: ILivestockIndividual): string {
@@ -42,24 +56,39 @@ function formatIndividualLabel(individual: ILivestockIndividual): string {
 
 export function IndividualList({
 	individuals,
+	availableParents = [],
 	totalIndividuals,
 	searchQuery,
 	onSearchQueryChange,
 	isLoading = false,
 	onSelectIndividual,
-	onEditIndividual,
+	onUpdateIndividual,
 	onDeleteIndividual,
 	onCreateIndividual,
+	isUpdatingIndividual = false,
 }: IndividualListProps) {
+	const [editingIndividualId, setEditingIndividualId] = useState<number | null>(
+		null,
+	);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const [pendingDeleteIndividual, setPendingDeleteIndividual] =
+		useState<ILivestockIndividual | null>(null);
 	const headerTotal = totalIndividuals ?? individuals.length;
 
-	const handleDelete = async (individual: ILivestockIndividual) => {
-		if (!confirm(`Eliminar ${formatIndividualLabel(individual)}?`)) return;
+	const handleUpdate = async (
+		individual: ILivestockIndividual,
+		data: IndividualFormData,
+	) => {
+		await onUpdateIndividual?.(individual, data);
+		setEditingIndividualId(null);
+	};
 
+	const handleDelete = async (individual: ILivestockIndividual) => {
 		try {
+			setEditingIndividualId(null);
 			setDeletingId(individual.id);
 			await onDeleteIndividual?.(individual);
+			setPendingDeleteIndividual(null);
 		} finally {
 			setDeletingId(null);
 		}
@@ -85,7 +114,7 @@ export function IndividualList({
 				<span className="text-gray-400">🔍</span>
 				<input
 					type="search"
-					placeholder="Buscar por nombre o tag..."
+					placeholder="Buscar por nombre o identificador..."
 					value={searchQuery}
 					onChange={(event) => onSearchQueryChange(event.target.value)}
 					className="flex-1 bg-transparent outline-none"
@@ -103,71 +132,145 @@ export function IndividualList({
 				</div>
 			) : (
 				<div className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
-					{individuals.map((individual) => (
-						<div
-							key={individual.id}
-							className="flex items-center justify-between gap-4 p-4 hover:bg-gray-50"
-						>
-							<button
-								onClick={() => onSelectIndividual?.(individual)}
-								className="flex-1 text-left"
+					{individuals.map((individual) => {
+						const isEditing = editingIndividualId === individual.id;
+						const isConfirmingDelete =
+							pendingDeleteIndividual?.id === individual.id;
+						const isDeleting = deletingId === individual.id;
+						const tag = getIndividualTag(individual);
+						const name = getIndividualName(individual);
+						const sex =
+							(individual.extra?.sex as keyof typeof SEX_SYMBOL | undefined) ??
+							"unknown";
+
+						if (isEditing) {
+							return (
+								<div
+									key={individual.id}
+									className="space-y-4 bg-blue-50/50 p-4"
+								>
+									<div className="flex items-center justify-between gap-3">
+										<div>
+											<p className="font-semibold">Editar individuo</p>
+											<p className="text-sm text-gray-600">
+												{formatIndividualLabel(individual)}
+											</p>
+										</div>
+										<div
+											className={`rounded-full px-2 py-1 text-xs font-semibold ${
+												STATUS_COLORS[
+													individual.status as keyof typeof STATUS_COLORS
+												]
+											}`}
+										>
+											{STATUS_LABELS[
+												individual.status as keyof typeof STATUS_LABELS
+											] ?? individual.status}
+										</div>
+									</div>
+									<IndividualForm
+										individual={individual}
+										availableParents={availableParents}
+										onSubmit={(data) => handleUpdate(individual, data)}
+										onCancel={() => setEditingIndividualId(null)}
+										isLoading={isUpdatingIndividual}
+									/>
+								</div>
+							);
+						}
+
+						return (
+							<div
+								key={individual.id}
+								className="p-4"
 							>
-								<div className="flex items-center gap-3">
-									<div>
-										{(() => {
-											const tag = getIndividualTag(individual);
-											const name = getIndividualName(individual);
-											const sex =
-												(individual.extra?.sex as
-													| keyof typeof SEX_SYMBOL
-													| undefined) ?? "unknown";
-											return (
-												<>
-													<p className="font-semibold">{tag}</p>
-													<p className="text-sm text-gray-600">
-														{name
-															? `${name} · ${SEX_SYMBOL[sex]}`
-															: SEX_SYMBOL[sex]}
-													</p>
-												</>
-											);
-										})()}
+								<div className="flex items-center justify-between gap-4 hover:bg-gray-50">
+									<button
+										type="button"
+										onClick={() => onSelectIndividual?.(individual)}
+										className="flex-1 text-left"
+									>
+										<div className="flex items-center gap-3">
+											<div>
+												<p className="font-semibold">{tag}</p>
+												<p className="text-sm text-gray-600">
+													{name
+														? `${name} · ${SEX_SYMBOL[sex]}`
+														: SEX_SYMBOL[sex]}
+												</p>
+											</div>
+										</div>
+									</button>
+
+									<div
+										className={`rounded-full px-2 py-1 text-xs font-semibold ${
+											STATUS_COLORS[
+												individual.status as keyof typeof STATUS_COLORS
+											]
+										}`}
+									>
+										{STATUS_LABELS[
+											individual.status as keyof typeof STATUS_LABELS
+										] ?? individual.status}
+									</div>
+
+									<div className="flex gap-1">
+										{onUpdateIndividual && (
+											<button
+												type="button"
+												onClick={() => {
+													setPendingDeleteIndividual(null);
+													setEditingIndividualId(individual.id);
+												}}
+												className="rounded px-2 py-1 text-xs hover:bg-gray-200"
+											>
+												Editar
+											</button>
+										)}
+										{onDeleteIndividual && (
+											<button
+												type="button"
+												onClick={() => {
+													setEditingIndividualId(null);
+													setPendingDeleteIndividual(individual);
+												}}
+												disabled={isDeleting}
+												className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+											>
+												{isDeleting ? "..." : "Eliminar"}
+											</button>
+										)}
 									</div>
 								</div>
-							</button>
 
-							{/* Status */}
-							<div
-								className={`rounded-full px-2 py-1 text-xs font-semibold ${
-									STATUS_COLORS[individual.status as keyof typeof STATUS_COLORS]
-								}`}
-							>
-								{individual.status.charAt(0).toUpperCase() +
-									individual.status.slice(1)}
+								{isConfirmingDelete ? (
+									<div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50/70 px-3 py-2">
+										<p className="text-sm font-medium text-red-700">
+											Eliminar {formatIndividualLabel(individual)}?
+										</p>
+										<div className="flex items-center gap-2">
+											<button
+												type="button"
+												onClick={() => setPendingDeleteIndividual(null)}
+												disabled={isDeleting}
+												className="rounded-full border border-gray-300 px-3 py-1 text-xs font-semibold disabled:opacity-60"
+											>
+												Cancelar
+											</button>
+											<button
+												type="button"
+												onClick={() => void handleDelete(individual)}
+												disabled={isDeleting}
+												className="rounded-full border border-red-200 bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
+											>
+												{isDeleting ? "Eliminando..." : "Confirmar eliminar"}
+											</button>
+										</div>
+									</div>
+								) : null}
 							</div>
-
-							{/* Actions */}
-							<div className="flex gap-1">
-								{onEditIndividual && (
-									<button
-										onClick={() => onEditIndividual(individual)}
-										className="rounded px-2 py-1 text-xs hover:bg-gray-200"
-									>
-										Editar
-									</button>
-								)}
-								{onDeleteIndividual && (
-									<button
-										onClick={() => handleDelete(individual)}
-										disabled={deletingId === individual.id}
-										className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
-									>
-										{deletingId === individual.id ? "..." : "Eliminar"}
-									</button>
-								)}
-							</div>
-						</div>
-					))}
+						);
+					})}
 				</div>
 			)}
 		</div>

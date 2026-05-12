@@ -13,11 +13,13 @@ import type { ILivestockIndividual } from "@/features/livestock/types/livestock-
 interface IndividualDetailPageProps {
 	assetId: string;
 	individualId: string;
+	startEditing?: boolean;
 }
 
 export function IndividualDetailPage({
 	assetId,
 	individualId,
+	startEditing = false,
 }: IndividualDetailPageProps) {
 	const navigate = useNavigate();
 	const { data: currentUser } = useGetUserProfile();
@@ -43,6 +45,8 @@ export function IndividualDetailPage({
 
 	const updateIndividualMutation = useUpdateIndividual();
 	const deleteIndividualMutation = useDeleteIndividual();
+	const isMutating =
+		updateIndividualMutation.isPending || deleteIndividualMutation.isPending;
 
 	const handleUpdate = useCallback(
 		async (updated: ILivestockIndividual) => {
@@ -93,7 +97,7 @@ export function IndividualDetailPage({
 	if (!individual) {
 		return (
 			<div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center text-red-700">
-				Individual not found
+				No se encontro el individuo
 			</div>
 		);
 	}
@@ -110,7 +114,7 @@ export function IndividualDetailPage({
 				}
 				className="text-sm text-blue-600 hover:underline"
 			>
-				← Back to Unit
+				← Volver al lote
 			</button>
 
 			<IndividualDetail
@@ -118,7 +122,8 @@ export function IndividualDetailPage({
 				allIndividuals={allIndividuals}
 				onUpdate={handleUpdate}
 				onDelete={handleDelete}
-				isLoading={isLoadingIndividual}
+				isLoading={isMutating}
+				startEditing={startEditing}
 			/>
 		</div>
 	);
