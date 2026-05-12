@@ -15,6 +15,7 @@ import {
 	useUpdateEventByAssetId,
 	useDeleteEventByAssetId,
 	useCreateIndividual,
+	useUpdateIndividual,
 	useDeleteIndividual,
 	useCreateEventCategoryByFarmId,
 } from "@/features/livestock/api/livestock-queries";
@@ -316,13 +317,12 @@ export function FlockDetailPage({
 		},
 	);
 
-	const { data: individualsResponse, isLoading: isLoadingIndividuals } =
-		useListIndividualsByAssetId({
-			farmId,
-			assetId: unitId,
-			filters: { pageSize: 100 },
-			enabled: !!farmId && !!unitId,
-		});
+	const { data: individualsResponse } = useListIndividualsByAssetId({
+		farmId,
+		assetId: unitId,
+		filters: { pageSize: 100 },
+		enabled: !!farmId && !!unitId,
+	});
 
 	const {
 		data: listedIndividualsResponse,
@@ -401,6 +401,7 @@ export function FlockDetailPage({
 	const updateEventMutation = useUpdateEventByAssetId();
 	const deleteEventMutation = useDeleteEventByAssetId();
 	const createIndividualMutation = useCreateIndividual();
+	const updateIndividualMutation = useUpdateIndividual();
 	const deleteIndividualMutation = useDeleteIndividual();
 	const createEventCategoryMutation = useCreateEventCategoryByFarmId();
 
@@ -645,12 +646,42 @@ export function FlockDetailPage({
 		[farmId, unitId, deleteIndividualMutation],
 	);
 
+	const handleUpdateIndividual = useCallback(
+		async (individual: ILivestockIndividual, data: IndividualFormData) => {
+			if (!farmId || !unitId) return;
+
+			await updateIndividualMutation.mutateAsync({
+				farmId,
+				assetId: unitId,
+				individualId: String(individual.id),
+				data: {
+					name: data.name ?? individual.name,
+					tag: data.tag,
+					mother_id:
+						data.motherId != null
+							? Number(data.motherId)
+							: individual.mother_id,
+					father_id:
+						data.fatherId != null
+							? Number(data.fatherId)
+							: individual.father_id,
+					status: data.status ?? individual.status,
+					extra: {
+						...individual.extra,
+						...(data.sex !== undefined ? { sex: data.sex } : {}),
+					},
+				},
+			});
+		},
+		[farmId, unitId, updateIndividualMutation],
+	);
+
 	const handleSelectIndividual = useCallback(
 		(individual: ILivestockIndividual) => {
 			navigate({
 				to: "/v2/production-units/flock/$unitId/individuals/$individualId",
 				params: { unitId, individualId: String(individual.id) },
-				search: { eventType: selectedEventType },
+				search: { eventType: selectedEventType, edit: false },
 			});
 		},
 		[navigate, unitId, selectedEventType],
@@ -1389,26 +1420,22 @@ export function FlockDetailPage({
 								availableParents={allIndividuals}
 								onSubmit={handleCreateIndividual}
 								onCancel={() => setIsCreatingIndividual(false)}
-								isLoading={isLoadingIndividuals}
+								isLoading={createIndividualMutation.isPending}
 							/>
 						</div>
 					) : (
 						<IndividualList
 							individuals={listedIndividuals}
+							availableParents={allIndividuals}
 							totalIndividuals={listedIndividualsResponse?.meta.total}
 							searchQuery={individualSearchQuery}
 							onSearchQueryChange={setIndividualSearchQuery}
 							isLoading={isLoadingListedIndividuals}
 							onSelectIndividual={handleSelectIndividual}
-							onEditIndividual={(individual) =>
-								navigate({
-									to: "/v2/production-units/flock/$unitId/individuals/$individualId",
-									params: { unitId, individualId: String(individual.id) },
-									search: { eventType: selectedEventType },
-								})
-							}
+							onUpdateIndividual={handleUpdateIndividual}
 							onDeleteIndividual={handleDeleteIndividual}
 							onCreateIndividual={() => setIsCreatingIndividual(true)}
+							isUpdatingIndividual={updateIndividualMutation.isPending}
 						/>
 					)}
 				</div>

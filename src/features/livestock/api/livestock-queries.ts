@@ -33,12 +33,70 @@ import type {
 	ILivestockAsset,
 	ILivestockEventCategory,
 	ILivestockIndividual,
+	ILivestockIndividualListResponse,
 	LivestockEventType,
 	LivestockAssetKind,
 	LivestockAssetMode,
 	LivestockEventUnit,
 	ReportBucket,
 } from "@/features/livestock/types/livestock-types";
+
+function appendIndividualToListCache(
+	current: ILivestockIndividualListResponse | undefined,
+	created: ILivestockIndividual,
+): ILivestockIndividualListResponse | undefined {
+	if (!current) return current;
+	if (current.data.some((individual) => individual.id === created.id)) {
+		return current;
+	}
+
+	return {
+		...current,
+		data: [created, ...current.data],
+		meta: {
+			...current.meta,
+			total: current.meta.total + 1,
+		},
+	};
+}
+
+function replaceIndividualInListCache(
+	current: ILivestockIndividualListResponse | undefined,
+	updated: ILivestockIndividual,
+): ILivestockIndividualListResponse | undefined {
+	if (!current) return current;
+
+	return {
+		...current,
+		data: current.data.map((individual) =>
+			individual.id === updated.id ? updated : individual,
+		),
+	};
+}
+
+function removeIndividualFromListCache(
+	current: ILivestockIndividualListResponse | undefined,
+	individualId: string,
+): ILivestockIndividualListResponse | undefined {
+	if (!current) return current;
+
+	const nextData = current.data.filter(
+		(individual) => String(individual.id) !== individualId,
+	);
+
+	if (nextData.length === current.data.length) {
+		return current;
+	}
+
+	return {
+		...current,
+		data: nextData,
+		meta: {
+			...current.meta,
+			total: Math.max(0, current.meta.total - 1),
+		},
+	};
+}
 
 interface ListLivestockAssetsFilters {
 	q?: string;
@@ -658,13 +716,29 @@ export const useCreateIndividual = () => {
 			assetId: string;
 			data: Parameters<typeof createIndividual>[0]["data"];
 		}) => createIndividual({ farmId, assetId, data }),
-		onSuccess: (_, { farmId, assetId }) => {
+		onSuccess: (created, { farmId, assetId }) => {
+			queryClient.setQueriesData<ILivestockIndividualListResponse>(
+				{
+					queryKey: [
+						...livestockQueryKeys.all,
+						"individualsByAsset",
+						farmId,
+						assetId,
+					],
+				},
+				(current) => appendIndividualToListCache(current, created),
+			);
+			queryClient.setQueryData(
+				livestockQueryKeys.individualById(farmId, assetId, String(created.id)),
+				created,
+			);
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.individualsByAsset(
+				queryKey: [
+					...livestockQueryKeys.all,
+					"individualsByAsset",
 					farmId,
 					assetId,
-					undefined,
-				),
+				],
 			});
 		},
 	});
@@ -685,13 +759,29 @@ export const useUpdateIndividual = () => {
 			individualId: string;
 			data: Parameters<typeof updateIndividual>[0]["data"];
 		}) => updateIndividual({ farmId, assetId, individualId, data }),
-		onSuccess: (_, { farmId, assetId, individualId }) => {
+		onSuccess: (updated, { farmId, assetId, individualId }) => {
+			queryClient.setQueriesData<ILivestockIndividualListResponse>(
+				{
+					queryKey: [
+						...livestockQueryKeys.all,
+						"individualsByAsset",
+						farmId,
+						assetId,
+					],
+				},
+				(current) => replaceIndividualInListCache(current, updated),
+			);
+			queryClient.setQueryData(
+				livestockQueryKeys.individualById(farmId, assetId, individualId),
+				updated,
+			);
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.individualsByAsset(
+				queryKey: [
+					...livestockQueryKeys.all,
+					"individualsByAsset",
 					farmId,
 					assetId,
-					undefined,
-				),
+				],
 			});
 			void queryClient.invalidateQueries({
 				queryKey: livestockQueryKeys.individualById(
@@ -717,13 +807,32 @@ export const useDeleteIndividual = () => {
 			assetId: string;
 			individualId: string;
 		}) => deleteIndividual({ farmId, assetId, individualId }),
-		onSuccess: (_, { farmId, assetId }) => {
-			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.individualsByAsset(
+		onSuccess: (_, { farmId, assetId, individualId }) => {
+			queryClient.setQueriesData<ILivestockIndividualListResponse>(
+				{
+					queryKey: [
+						...livestockQueryKeys.all,
+						"individualsByAsset",
+						farmId,
+						assetId,
+					],
+				},
+				(current) => removeIndividualFromListCache(current, individualId),
+			);
+			queryClient.removeQueries({
+				queryKey: livestockQueryKeys.individualById(
 					farmId,
 					assetId,
-					undefined,
+					individualId,
 				),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"individualsByAsset",
+					farmId,
+					assetId,
+				],
 			});
 		},
 	});
@@ -803,7 +912,7 @@ export const useCreateLivestockAsset = () => {
 		}) => createLivestockAsset({ farmId, data }),
 		onSuccess: (_, { farmId }) => {
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.assetsByFarm(farmId, undefined),
+				queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
 			});
 		},
 	});
@@ -824,7 +933,7 @@ export const useUpdateLivestockAssetById = () => {
 		}) => updateLivestockAssetById({ farmId, assetId, data }),
 		onSuccess: (_, { farmId, assetId }) => {
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.assetsByFarm(farmId, undefined),
+				queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
 			});
 			void queryClient.invalidateQueries({
 				queryKey: livestockQueryKeys.assetById(farmId, assetId),
@@ -841,7 +950,7 @@ export const useDeleteLivestockAssetById = () => {
 			deleteLivestockAssetById({ farmId, assetId }),
 		onSuccess: (_, { farmId }) => {
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.assetsByFarm(farmId, undefined),
+				queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
 			});
 		},
 	});

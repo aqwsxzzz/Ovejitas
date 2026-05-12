@@ -68,7 +68,7 @@ export function IndividualForm({
 	const validateForm = (): boolean => {
 		// Tag is required
 		if (!formData.tag?.trim()) {
-			setError("Tag is required");
+			setError("El identificador es obligatorio");
 			return false;
 		}
 
@@ -78,13 +78,13 @@ export function IndividualForm({
 				formData.motherId === String(individual.id) ||
 				formData.fatherId === String(individual.id)
 			) {
-				setError("An individual cannot be their own parent");
+				setError("Un individuo no puede ser su propio progenitor");
 				return false;
 			}
 
 			// Can't set same individual as mother and father
 			if (formData.motherId && formData.motherId === formData.fatherId) {
-				setError("Mother and father cannot be the same individual");
+				setError("Madre y padre no pueden ser el mismo individuo");
 				return false;
 			}
 		}
@@ -103,7 +103,7 @@ export function IndividualForm({
 			await onSubmit(formData);
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to save individual",
+				err instanceof Error ? err.message : "No se pudo guardar el individuo",
 			);
 		}
 	};
@@ -132,12 +132,14 @@ export function IndividualForm({
 
 			{/* Name */}
 			<div>
-				<label className="block text-sm font-medium text-gray-700">Name</label>
+				<label className="block text-sm font-medium text-gray-700">
+					Nombre
+				</label>
 				<input
 					type="text"
 					value={formData.name ?? ""}
 					onChange={(e) => handleChange("name", e.target.value || undefined)}
-					placeholder="Optional name"
+					placeholder="Nombre opcional"
 					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				/>
 			</div>
@@ -145,35 +147,35 @@ export function IndividualForm({
 			{/* Tag (Required) */}
 			<div>
 				<label className="block text-sm font-medium text-gray-700">
-					Tag <span className="text-red-600">*</span>
+					Identificador <span className="text-red-600">*</span>
 				</label>
 				<input
 					type="text"
 					value={formData.tag}
 					onChange={(e) => handleChange("tag", e.target.value)}
-					placeholder="e.g., SH-001, CT-042"
+					placeholder="Ej: SH-001, CT-042"
 					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				/>
 			</div>
 
 			{/* Sex */}
 			<div>
-				<label className="block text-sm font-medium text-gray-700">Sex</label>
+				<label className="block text-sm font-medium text-gray-700">Sexo</label>
 				<select
 					value={formData.sex ?? ""}
 					onChange={(e) => handleChange("sex", e.target.value || undefined)}
 					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				>
-					<option value="">Unknown</option>
-					<option value="male">Male ♂</option>
-					<option value="female">Female ♀</option>
+					<option value="">Desconocido</option>
+					<option value="male">Macho ♂</option>
+					<option value="female">Hembra ♀</option>
 				</select>
 			</div>
 
 			{/* Birth Date */}
 			<div>
 				<label className="block text-sm font-medium text-gray-700">
-					Birth Date
+					Fecha de nacimiento
 				</label>
 				<input
 					type="date"
@@ -187,9 +189,7 @@ export function IndividualForm({
 
 			{/* Mother */}
 			<div>
-				<label className="block text-sm font-medium text-gray-700">
-					Mother
-				</label>
+				<label className="block text-sm font-medium text-gray-700">Madre</label>
 				<select
 					value={formData.motherId ?? ""}
 					onChange={(e) =>
@@ -197,7 +197,7 @@ export function IndividualForm({
 					}
 					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				>
-					<option value="">None</option>
+					<option value="">Sin madre</option>
 					{motherOptions.map((individual) => (
 						<option
 							key={individual.id}
@@ -211,9 +211,7 @@ export function IndividualForm({
 
 			{/* Father */}
 			<div>
-				<label className="block text-sm font-medium text-gray-700">
-					Father
-				</label>
+				<label className="block text-sm font-medium text-gray-700">Padre</label>
 				<select
 					value={formData.fatherId ?? ""}
 					onChange={(e) =>
@@ -221,7 +219,7 @@ export function IndividualForm({
 					}
 					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				>
-					<option value="">None</option>
+					<option value="">Sin padre</option>
 					{fatherOptions.map((individual) => (
 						<option
 							key={individual.id}
@@ -237,7 +235,7 @@ export function IndividualForm({
 			{isEditMode && (
 				<div>
 					<label className="block text-sm font-medium text-gray-700">
-						Status
+						Estado
 					</label>
 					<select
 						value={formData.status ?? "active"}
@@ -249,9 +247,9 @@ export function IndividualForm({
 						}
 						className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 					>
-						<option value="active">Active</option>
-						<option value="sold">Sold</option>
-						<option value="deceased">Deceased</option>
+						<option value="active">Activo</option>
+						<option value="sold">Vendido</option>
+						<option value="deceased">Fallecido</option>
 					</select>
 				</div>
 			)}
@@ -263,7 +261,7 @@ export function IndividualForm({
 					disabled={isLoading}
 					className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
 				>
-					{isLoading ? "Saving..." : isEditMode ? "Update" : "Create"}
+					{isLoading ? "Guardando..." : isEditMode ? "Actualizar" : "Crear"}
 				</button>
 				{onCancel && (
 					<button
@@ -272,7 +270,7 @@ export function IndividualForm({
 						disabled={isLoading}
 						className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
 					>
-						Cancel
+						Cancelar
 					</button>
 				)}
 			</div>
