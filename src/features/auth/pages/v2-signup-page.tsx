@@ -1,21 +1,45 @@
-import { Loader } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "@tanstack/react-router";
+import { ArrowRight, Loader, Tractor } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/features/auth/api/auth-queries";
+import {
+	V2AuthPageFrame,
+	v2AuthInputClassName,
+	v2AuthLabelClassName,
+	v2AuthSubmitClassName,
+} from "@/features/auth/components/v2-auth-page-frame";
 
-const signupSchema = z.object({
-	email: z.string().email(),
-	displayName: z.string().min(2),
-	password: z.string().min(8),
-});
+const signupSchema = z
+	.object({
+		email: z.string().email("Ingresa un correo electronico valido."),
+		displayName: z.string().min(2, "Ingresa tu nombre completo."),
+		password: z
+			.string()
+			.min(8, "La contrasena debe tener al menos 8 caracteres."),
+		confirmPassword: z
+			.string()
+			.min(8, "Confirma la contrasena con al menos 8 caracteres."),
+	})
+	.refine((values) => values.password === values.confirmPassword, {
+		message: "Las contrasenas deben coincidir.",
+		path: ["confirmPassword"],
+	});
 
 type SignUpFormValues = z.infer<typeof signupSchema>;
 
 export function V2SignupPage() {
-	const { t } = useTranslation("signup");
 	const { mutateAsync: signUp, isPending } = useSignUp();
 	const form = useForm<SignUpFormValues>({
 		resolver: zodResolver(signupSchema),
@@ -23,118 +47,148 @@ export function V2SignupPage() {
 			email: "",
 			displayName: "",
 			password: "",
+			confirmPassword: "",
 		},
 	});
 
 	const handleSubmit = async (data: SignUpFormValues) => {
-		await signUp({ payload: data });
+		await signUp({
+			payload: {
+				email: data.email,
+				displayName: data.displayName,
+				password: data.password,
+			},
+		});
 	};
 
 	return (
-		<div className="v2-theme v2-page min-h-screen">
-			<div className="mx-auto grid min-h-screen w-full max-w-2xl grid-rows-1 gap-6 px-4 py-6 place-items-center md:px-6 md:py-8">
-				<section className="v2-card w-full p-5 md:p-8">
-					<div className="w-full">
-						<p className="v2-kicker">Ovejitas V2</p>
-						<h2 className="mt-2 text-2xl font-semibold md:text-3xl">
-							Crear cuenta
-						</h2>
+		<V2AuthPageFrame
+			eyebrow="Registro - Ovejitas V2"
+			brandIcon={<Tractor className="h-8 w-8" />}
+			title="Ovejitas V2"
+			subtitle="Sumate al manejo ganadero de precision con una experiencia clara y moderna."
+			formTitle="Crear cuenta"
+			formSubtitle="Activa tu espacio de trabajo y empieza a organizar tu finca"
+			footer={
+				<p>
+					Ya tienes una cuenta?{" "}
+					<Link
+						to="/v2/login"
+						className="font-semibold text-[#0b3445] underline-offset-4 hover:underline"
+					>
+						Inicia sesion en Ovejitas V2
+					</Link>
+				</p>
+			}
+			legal="Al crear una cuenta, aceptas nuestros terminos de servicio y politicas de privacidad."
+		>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(handleSubmit)}
+					className="space-y-4"
+				>
+					<FormField
+						control={form.control}
+						name="displayName"
+						render={({ field }) => (
+							<FormItem className="space-y-1.5">
+								<FormLabel className={v2AuthLabelClassName}>
+									Nombre completo
+								</FormLabel>
+								<FormControl>
+									<Input
+										type="text"
+										autoComplete="name"
+										placeholder="Juan Perez"
+										className={v2AuthInputClassName}
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-						<form
-							onSubmit={form.handleSubmit(handleSubmit)}
-							className="mt-6 space-y-4"
-						>
-							<div className="space-y-1.5">
-								<label
-									htmlFor="v2-signup-email"
-									className="text-sm font-medium"
-								>
-									{t("emailInputLabel")}
-								</label>
-								<input
-									id="v2-signup-email"
-									type="email"
-									autoComplete="email"
-									autoCapitalize="none"
-									autoCorrect="off"
-									spellCheck={false}
-									placeholder={t("emailPlaceholder")}
-									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
-									{...form.register("email")}
-								/>
-								{form.formState.errors.email ? (
-									<p className="text-sm text-destructive">
-										{form.formState.errors.email.message}
-									</p>
-								) : null}
-							</div>
+					<FormField
+						control={form.control}
+						name="email"
+						render={({ field }) => (
+							<FormItem className="space-y-1.5">
+								<FormLabel className={v2AuthLabelClassName}>
+									Correo electronico
+								</FormLabel>
+								<FormControl>
+									<Input
+										type="email"
+										autoComplete="email"
+										autoCapitalize="none"
+										autoCorrect="off"
+										spellCheck={false}
+										placeholder="manager@farm.com"
+										className={v2AuthInputClassName}
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-							<div className="space-y-1.5">
-								<label
-									htmlFor="v2-signup-displayName"
-									className="text-sm font-medium"
-								>
-									{t("displayNameInputLabel")}
-								</label>
-								<input
-									id="v2-signup-displayName"
-									type="text"
-									autoComplete="name"
-									placeholder={t("displayNamePlaceholder")}
-									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
-									{...form.register("displayName")}
-								/>
-								{form.formState.errors.displayName ? (
-									<p className="text-sm text-destructive">
-										{form.formState.errors.displayName.message}
-									</p>
-								) : null}
-							</div>
+					<FormField
+						control={form.control}
+						name="password"
+						render={({ field }) => (
+							<FormItem className="space-y-1.5">
+								<FormLabel className={v2AuthLabelClassName}>
+									Contrasena
+								</FormLabel>
+								<FormControl>
+									<Input
+										type="password"
+										autoComplete="new-password"
+										placeholder="Minimo 8 caracteres"
+										className={v2AuthInputClassName}
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-							<div className="space-y-1.5">
-								<label
-									htmlFor="v2-signup-password"
-									className="text-sm font-medium"
-								>
-									{t("passwordInputLabel")}
-								</label>
-								<input
-									id="v2-signup-password"
-									type="password"
-									autoComplete="new-password"
-									placeholder={t("passwordPlaceholder")}
-									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
-									{...form.register("password")}
-								/>
-								{form.formState.errors.password ? (
-									<p className="text-sm text-destructive">
-										{form.formState.errors.password.message}
-									</p>
-								) : null}
-							</div>
+					<FormField
+						control={form.control}
+						name="confirmPassword"
+						render={({ field }) => (
+							<FormItem className="space-y-1.5">
+								<FormLabel className={v2AuthLabelClassName}>
+									Confirmar contrasena
+								</FormLabel>
+								<FormControl>
+									<Input
+										type="password"
+										autoComplete="new-password"
+										placeholder="Repite tu contrasena"
+										className={v2AuthInputClassName}
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-							<button
-								type="submit"
-								disabled={isPending}
-								className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-black/20 bg-[#1f211d] px-4 text-sm font-semibold text-[#f5efe0] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
-							>
-								{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
-								{t("createAccountButton")}
-							</button>
-						</form>
-
-						<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--v2-border)] pt-4 text-sm text-[color:var(--v2-ink-soft)]">
-							<p>{t("footerTitle")}</p>
-							<Link
-								to="/v2/login"
-								className="font-semibold text-[color:var(--v2-ink)] underline-offset-4 hover:underline"
-							>
-								{t("footerLink")}
-							</Link>
-						</div>
-					</div>
-				</section>
-			</div>
-		</div>
+					<Button
+						type="submit"
+						disabled={isPending}
+						className={v2AuthSubmitClassName}
+					>
+						{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
+						Crear cuenta
+						<ArrowRight className="h-4 w-4" />
+					</Button>
+				</form>
+			</Form>
+		</V2AuthPageFrame>
 	);
 }

@@ -57,6 +57,18 @@ function toOccurredAtIso(value: string): string {
 	return new Date(`${value}T00:00:00`).toISOString();
 }
 
+function supportsFinancialAmount(type: LivestockEventType): boolean {
+	return type === "income" || type === "expense" || type === "acquisition";
+}
+
+function supportsCurrency(type: LivestockEventType): boolean {
+	return type === "income" || type === "expense" || type === "acquisition";
+}
+
+function requiresCurrency(type: LivestockEventType): boolean {
+	return type === "income" || type === "expense";
+}
+
 export function UnitEventForm({
 	categories,
 	individuals,
@@ -98,7 +110,8 @@ export function UnitEventForm({
 		initialValues?.amount != null ? String(initialValues.amount) : "",
 	);
 	const [currency, setCurrency] = useState<string>(
-		initialValues?.currency ?? "USD",
+		initialValues?.currency ??
+			(requiresCurrency(defaultType) ? "USD" : ""),
 	);
 	const [inventoryQuantityDelta, setInventoryQuantityDelta] =
 		useState<string>("");
@@ -111,6 +124,9 @@ export function UnitEventForm({
 	const canSelectIndividual = assetMode === "individual";
 	const canUseReproductive = assetKind === "animal";
 	const canCreateInventoryPair = !isEditMode && assetMode === "aggregated";
+	const allowsFinancialAmount = supportsFinancialAmount(type);
+	const allowsCurrency = supportsCurrency(type);
+	const currencyIsRequired = requiresCurrency(type);
 
 	const availableCategories = useMemo(
 		() => categories.filter((category) => category.type === type),
@@ -238,8 +254,11 @@ export function UnitEventForm({
 			occurredAt: toOccurredAtIso(occurredAt),
 			quantity: quantity ? Number(quantity) : undefined,
 			unit: type === "acquisition" ? undefined : unit,
-			amount: amount ? Number(amount) : undefined,
-			currency: currency.trim().toUpperCase() || undefined,
+			amount: allowsFinancialAmount && amount ? Number(amount) : undefined,
+			currency:
+				allowsCurrency && currency.trim()
+					? currency.trim().toUpperCase()
+					: undefined,
 			inventoryQuantityDelta: inventoryQuantityDelta
 				? Number(inventoryQuantityDelta)
 				: undefined,
@@ -258,8 +277,17 @@ export function UnitEventForm({
 					<select
 						value={type}
 						onChange={(event) => {
-							setType(event.target.value as LivestockEventType);
+							const nextType = event.target.value as LivestockEventType;
+							setType(nextType);
 							setCategoryId("");
+							if (!supportsFinancialAmount(nextType)) {
+								setAmount("");
+							}
+							if (!supportsCurrency(nextType)) {
+								setCurrency("");
+							} else if (requiresCurrency(nextType) && !currency.trim()) {
+								setCurrency("USD");
+							}
 						}}
 						disabled={isEditMode}
 						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
@@ -364,7 +392,7 @@ export function UnitEventForm({
 								key={individual.id}
 								value={individual.id}
 							>
-								{individual.name || individual.tag || `#${individual.id}`}
+								{individual.tag || individual.name || `#${individual.id}`}
 							</option>
 						))}
 					</select>
@@ -441,7 +469,7 @@ export function UnitEventForm({
 				</label>
 			)}
 
-			{(type === "income" || type === "expense" || type === "acquisition") && (
+			{allowsFinancialAmount ? (
 				<div className="grid gap-3 md:grid-cols-2">
 					<label className="space-y-1 text-sm">
 						<span className="font-medium">
@@ -456,21 +484,23 @@ export function UnitEventForm({
 							className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 						/>
 					</label>
-					<label className="space-y-1 text-sm">
-						<span className="font-medium">
-							Moneda
-							{type === "acquisition" ? " (opcional)" : " (requerida)"}
-						</span>
-						<input
-							type="text"
-							value={currency}
-							onChange={(event) => setCurrency(event.target.value)}
-							placeholder="USD"
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-						/>
-					</label>
+					{allowsCurrency ? (
+						<label className="space-y-1 text-sm">
+							<span className="font-medium">
+								Moneda
+								{currencyIsRequired ? " (requerida)" : " (opcional)"}
+							</span>
+							<input
+								type="text"
+								value={currency}
+								onChange={(event) => setCurrency(event.target.value)}
+								placeholder="USD"
+								className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
+							/>
+						</label>
+					) : null}
 				</div>
-			)}
+			) : null}
 			{canCreateInventoryPair && (type === "income" || type === "expense") ? (
 				<div className="rounded-lg border border-(--v2-border) bg-white/60 p-3">
 					<p className="text-sm font-medium">Impacto en conteo</p>

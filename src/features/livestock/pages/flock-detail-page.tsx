@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Loader2 } from "lucide-react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	useGetLivestockAssetById,
+	useListEventsByAssetId,
 	useListInfiniteEventsByAssetId,
 	useListEventCategoriesByFarmId,
 	useListIndividualsByAssetId,
@@ -196,13 +197,24 @@ function ProductionSeriesSlider({
 	);
 }
 
-function MetricCard(props: { label: string; value: string; note: string }) {
+function MetricCard(props: {
+	label: string;
+	value: string;
+	note: string;
+	isLoading?: boolean;
+}) {
 	return (
 		<div className="v2-card flex-1 p-3">
 			<p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
 				{props.label}
 			</p>
-			<p className="mt-1 text-2xl font-semibold leading-none">{props.value}</p>
+			<p className="mt-1 text-2xl font-semibold leading-none">
+				{props.isLoading ? (
+					<Loader2 className="h-6 w-6 animate-spin" />
+				) : (
+					props.value
+				)}
+			</p>
 			<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
 				{props.note}
 			</p>
@@ -376,11 +388,12 @@ export function FlockDetailPage({
 		enabled: hasValidAssetId && !!farmId,
 	});
 
-	const { data: aggregatedHeadcount } = useGetAggregatedHeadcountByAssetId({
-		farmId,
-		assetId: unitId,
-		enabled: !!farmId && !!unitId,
-	});
+	const { data: aggregatedHeadcount, isPending: isAggregatedHeadcountPending } =
+		useGetAggregatedHeadcountByAssetId({
+			farmId,
+			assetId: unitId,
+			enabled: !!farmId && !!unitId,
+		});
 
 	const {
 		data: eventsLogData,
@@ -393,6 +406,13 @@ export function FlockDetailPage({
 		assetId: unitId,
 		filters: { sort: "-occurred_at", type: selectedEventType },
 		pageSize: EVENTS_LOG_PAGE_SIZE,
+		enabled: !!farmId && !!unitId,
+	});
+
+	const { data: eventsSummaryResponse } = useListEventsByAssetId({
+		farmId,
+		assetId: unitId,
+		filters: { page: 1, pageSize: 1 },
 		enabled: !!farmId && !!unitId,
 	});
 
@@ -414,6 +434,7 @@ export function FlockDetailPage({
 		() => eventsLogData?.items ?? [],
 		[eventsLogData?.items],
 	);
+	const hasAssetEvents = (eventsSummaryResponse?.meta.total ?? 0) > 0;
 
 	const preferredSecondaryCategoryByType = useMemo(() => {
 		const resolveByType = (
@@ -1258,6 +1279,7 @@ export function FlockDetailPage({
 						label="Conteo"
 						value={countCardValue}
 						note={countCardNote}
+						isLoading={isAggregatedHeadcountPending}
 					/>
 				) : null}
 				<MetricCard
@@ -1271,33 +1293,35 @@ export function FlockDetailPage({
 				<div className="mb-3 flex items-center justify-between gap-3">
 					<div className="flex items-center gap-2">
 						<p className="v2-kicker">Eventos del lote</p>
-						<select
-							value={selectedEventType ?? "all"}
-							onChange={(event) => {
-								const nextValue = event.target.value;
-								if (nextValue === "all") {
-									onEventTypeFilterChange?.("all");
-									return;
-								}
+						{hasAssetEvents ? (
+							<select
+								value={selectedEventType ?? "all"}
+								onChange={(event) => {
+									const nextValue = event.target.value;
+									if (nextValue === "all") {
+										onEventTypeFilterChange?.("all");
+										return;
+									}
 
-								if (!isLivestockEventType(nextValue)) {
-									return;
-								}
+									if (!isLivestockEventType(nextValue)) {
+										return;
+									}
 
-								onEventTypeFilterChange?.(nextValue);
-							}}
-							className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-medium text-(--v2-ink)"
-							aria-label="Filtrar eventos por tipo"
-						>
-							{EVENT_TYPE_FILTER_OPTIONS.map((option) => (
-								<option
-									key={option.value}
-									value={option.value}
-								>
-									{option.label}
-								</option>
-							))}
-						</select>
+									onEventTypeFilterChange?.(nextValue);
+								}}
+								className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-medium text-(--v2-ink)"
+								aria-label="Filtrar eventos por tipo"
+							>
+								{EVENT_TYPE_FILTER_OPTIONS.map((option) => (
+									<option
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</option>
+								))}
+							</select>
+						) : null}
 					</div>
 					<button
 						type="button"

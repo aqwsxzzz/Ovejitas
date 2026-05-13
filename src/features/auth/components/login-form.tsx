@@ -12,7 +12,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useLogin } from "@/features/auth/api/auth-queries";
-import { useTranslation } from "react-i18next";
 import { Loader } from "lucide-react";
 
 const formSchema = z.object({
@@ -33,7 +32,6 @@ export const LoginForm = () => {
 
 	const password = form.watch("password");
 
-	const { t } = useTranslation("login");
 	return (
 		<Form {...form}>
 			<form
@@ -45,7 +43,7 @@ export const LoginForm = () => {
 					name="email"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>{t("emailInputLabel")}</FormLabel>
+							<FormLabel>Correo electronico</FormLabel>
 							<FormControl>
 								<Input
 									type="email"
@@ -53,7 +51,7 @@ export const LoginForm = () => {
 									autoCapitalize="none"
 									autoCorrect="off"
 									spellCheck={false}
-									placeholder={t("emailPlaceholder")}
+									placeholder="Ingresa tu correo electronico"
 									{...field}
 								/>
 							</FormControl>
@@ -66,11 +64,11 @@ export const LoginForm = () => {
 					name="password"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>{t("passwordInputLabel")}</FormLabel>
+							<FormLabel>Contrasena</FormLabel>
 							<FormControl>
 								<Input
 									autoComplete="new-password"
-									placeholder={t("passwordPlaceholder")}
+									placeholder="Ingresa tu contrasena"
 									{...field}
 									type="password"
 								/>
@@ -83,7 +81,7 @@ export const LoginForm = () => {
 					type="submit"
 					disabled={password.length < 8}
 				>
-					{isPending ? <Loader className="animate-spin" /> : t("loginButton")}
+					{isPending ? <Loader className="animate-spin" /> : "Iniciar sesion"}
 				</Button>
 			</form>
 		</Form>

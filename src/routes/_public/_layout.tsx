@@ -45,7 +45,7 @@ function RouteComponent() {
 	const { t } = useTranslation(login);
 
 	return (
-		<div className="h-screen w-screen flex justify-center items-center md:p-4 p-2 flex-col">
+		<div className="flex h-screen w-screen flex-col items-center justify-center p-2 md:p-4">
 			<div>
 				<img
 					src={redBarn}
@@ -55,7 +55,9 @@ function RouteComponent() {
 			</div>
 			<h1>{t("headerTitle")}</h1>
 			<h2>{t("headerDescription")}</h2>
-			<Outlet />
+			<div className="w-full self-stretch">
+				<Outlet />
+			</div>
 		</div>
 	);
 }
