@@ -12,14 +12,15 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/features/auth/api/auth-queries";
-import { useTranslation } from "react-i18next";
 import { Loader } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const formSchema = z.object({
 	email: z.string().email(),
-	displayName: z.string().min(2, "Name must have at least 2 characters."),
-	password: z.string().min(8, "Password must have at least 8 characters."),
+	displayName: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
+	password: z
+		.string()
+		.min(8, "La contrasena debe tener al menos 8 caracteres."),
 });
 
 export const SignUpForm = ({
@@ -44,7 +45,6 @@ export const SignUpForm = ({
 		}
 	};
 
-	const { t } = useTranslation("signup");
 	return (
 		<Form {...form}>
 			<form
@@ -56,7 +56,7 @@ export const SignUpForm = ({
 					name="email"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>{t("emailInputLabel")}</FormLabel>
+							<FormLabel>Correo electronico</FormLabel>
 							<FormControl>
 								{email ? (
 									<div className="bg-muted text-muted-foreground px-3 py-2 rounded">
@@ -65,7 +65,7 @@ export const SignUpForm = ({
 											to="/signup"
 											className="ml-2 text-blue-600 underline text-xs"
 										>
-											{t("notMeLink")}
+											No soy yo?
 										</Link>{" "}
 									</div>
 								) : (
@@ -75,7 +75,7 @@ export const SignUpForm = ({
 										autoCapitalize="none"
 										autoCorrect="off"
 										spellCheck={false}
-										placeholder={t("emailPlaceholder")}
+										placeholder="Ingresa tu correo electronico"
 										{...field}
 									/>
 								)}
@@ -89,10 +89,10 @@ export const SignUpForm = ({
 					name="displayName"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>{t("displayNameInputLabel")}</FormLabel>
+							<FormLabel>Nombre</FormLabel>
 							<FormControl>
 								<Input
-									placeholder={t("displayNamePlaceholder")}
+									placeholder="Ingresa tu nombre"
 									{...field}
 								/>
 							</FormControl>
@@ -105,11 +105,11 @@ export const SignUpForm = ({
 					name="password"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>{t("passwordInputLabel")}</FormLabel>
+							<FormLabel>Contrasena</FormLabel>
 							<FormControl>
 								<Input
 									autoComplete="new-password"
-									placeholder={t("passwordPlaceholder")}
+									placeholder="Ingresa tu contrasena"
 									{...field}
 									type="password"
 								/>
@@ -120,11 +120,7 @@ export const SignUpForm = ({
 				/>
 				{error && <p className="text-destructive">{error.message}</p>}
 				<Button type="submit">
-					{isPending ? (
-						<Loader className="animate-spin" />
-					) : (
-						t("createAccountButton")
-					)}
+					{isPending ? <Loader className="animate-spin" /> : "Crear cuenta"}
 				</Button>
 			</form>
 		</Form>

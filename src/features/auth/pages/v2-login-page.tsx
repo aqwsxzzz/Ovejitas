@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "react-i18next";
 import { useLogin } from "@/features/auth/api/auth-queries";
 
 const loginSchema = z.object({
@@ -14,7 +13,6 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function V2LoginPage() {
-	const { t } = useTranslation("login");
 	const { mutateAsync: login, isPending } = useLogin();
 	const form = useForm<LoginFormValues>({
 		resolver: zodResolver(loginSchema),
@@ -45,7 +43,7 @@ export function V2LoginPage() {
 									htmlFor="v2-login-email"
 									className="text-sm font-medium"
 								>
-									{t("emailInputLabel")}
+									Correo electronico
 								</label>
 								<input
 									id="v2-login-email"
@@ -54,7 +52,7 @@ export function V2LoginPage() {
 									autoCapitalize="none"
 									autoCorrect="off"
 									spellCheck={false}
-									placeholder={t("emailPlaceholder")}
+									placeholder="Ingresa tu correo electronico"
 									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
 									{...form.register("email")}
 								/>
@@ -70,13 +68,13 @@ export function V2LoginPage() {
 									htmlFor="v2-login-password"
 									className="text-sm font-medium"
 								>
-									{t("passwordInputLabel")}
+									Contrasena
 								</label>
 								<input
 									id="v2-login-password"
 									type="password"
 									autoComplete="current-password"
-									placeholder={t("passwordPlaceholder")}
+									placeholder="Ingresa tu contrasena"
 									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
 									{...form.register("password")}
 								/>
@@ -93,17 +91,17 @@ export function V2LoginPage() {
 								className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-black/20 bg-[#1f211d] px-4 text-sm font-semibold text-[#f5efe0] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
 							>
 								{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
-								{t("loginButton")}
+								Iniciar sesion
 							</button>
 						</form>
 
 						<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--v2-border)] pt-4 text-sm text-[color:var(--v2-ink-soft)]">
-							<p>{t("footerTitle")}</p>
+							<p>No tienes una cuenta?</p>
 							<Link
 								to="/v2/signup"
 								className="font-semibold text-[color:var(--v2-ink)] underline-offset-4 hover:underline"
 							>
-								{t("footerLink")}
+								Registrate aqui
 							</Link>
 						</div>
 					</div>
