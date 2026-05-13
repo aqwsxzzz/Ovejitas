@@ -127,7 +127,12 @@ export const axiosHelper = async <Res, Params = unknown, Data = unknown>({
 			withCredentials,
 		})
 		.then((res: AxiosResponse<Res>) => {
-			if (!res || !res.data) {
+			if (!res) {
+				throw new Error("No response or response data is undefined");
+			}
+
+			// DELETE endpoints may legitimately return 204/empty body.
+			if (typeof res.data === "undefined" && method !== "delete") {
 				throw new Error("No response or response data is undefined");
 			}
 
