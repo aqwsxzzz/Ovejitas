@@ -586,16 +586,17 @@ export const useCreateEventByAssetId = () => {
 			data: LivestockEventCreatePayload;
 		}) => createEventByAssetId({ farmId, assetId, data }),
 		onSuccess: (_, { farmId, assetId }) => {
-			// Invalidate all related queries
+			// Invalidate all event queries for this asset (respects individual filter preferences)
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventsByAssetInfinite(
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventsByAssetInfinite",
 					farmId,
 					assetId,
-					undefined,
-				),
+				],
 			});
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventsByAsset(farmId, assetId, undefined),
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
 			});
 			void queryClient.invalidateQueries({
 				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
@@ -631,16 +632,17 @@ export const useUpdateEventByAssetId = () => {
 			data: LivestockEventUpdatePayload;
 		}) => updateEventByAssetId({ farmId, assetId, eventId, data }),
 		onSuccess: (_, { farmId, assetId }) => {
-			// Invalidate all related queries
+			// Invalidate all event queries for this asset (respects individual filter preferences)
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventsByAssetInfinite(
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventsByAssetInfinite",
 					farmId,
 					assetId,
-					undefined,
-				),
+				],
 			});
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventsByAsset(farmId, assetId, undefined),
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
 			});
 			void queryClient.invalidateQueries({
 				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
@@ -674,16 +676,17 @@ export const useDeleteEventByAssetId = () => {
 			eventId: number;
 		}) => deleteEventByAssetId({ farmId, assetId, eventId }),
 		onSuccess: (_, { farmId, assetId }) => {
-			// Invalidate all related queries
+			// Invalidate all event queries for this asset (respects individual filter preferences)
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventsByAssetInfinite(
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventsByAssetInfinite",
 					farmId,
 					assetId,
-					undefined,
-				),
+				],
 			});
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventsByAsset(farmId, assetId, undefined),
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
 			});
 			void queryClient.invalidateQueries({
 				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
@@ -808,14 +811,22 @@ export const useDeleteIndividual = () => {
 			individualId: string;
 		}) => deleteIndividual({ farmId, assetId, individualId }),
 		onSuccess: (_, { farmId, assetId, individualId }) => {
+			const matchesIndividualsByAssetQuery = ({
+				queryKey,
+			}: {
+				queryKey: readonly unknown[];
+			}) => {
+				return (
+					queryKey[0] === "livestock" &&
+					queryKey[1] === "individualsByAsset" &&
+					String(queryKey[2] ?? "") === farmId &&
+					String(queryKey[3] ?? "") === assetId
+				);
+			};
+
 			queryClient.setQueriesData<ILivestockIndividualListResponse>(
 				{
-					queryKey: [
-						...livestockQueryKeys.all,
-						"individualsByAsset",
-						farmId,
-						assetId,
-					],
+					predicate: matchesIndividualsByAssetQuery,
 				},
 				(current) => removeIndividualFromListCache(current, individualId),
 			);
@@ -827,12 +838,8 @@ export const useDeleteIndividual = () => {
 				),
 			});
 			void queryClient.invalidateQueries({
-				queryKey: [
-					...livestockQueryKeys.all,
-					"individualsByAsset",
-					farmId,
-					assetId,
-				],
+				predicate: matchesIndividualsByAssetQuery,
+				refetchType: "active",
 			});
 		},
 	});

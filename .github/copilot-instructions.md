@@ -35,6 +35,14 @@ Only use `useEffect` when item 7 is true.
 - Prefer existing feature patterns and abstractions over introducing new patterns.
 - Do not add dependencies unless explicitly requested and justified.
 
+## 2.5 Shadcn-First UI Rule
+- For React UI implementation, always use existing shadcn/ui components from `src/components/ui` whenever an equivalent exists.
+- Do not introduce raw HTML controls (`input`, `select`, `textarea`, `button`, form wrappers, modal primitives, cards, labels, separators) when shadcn components already cover the use case.
+- Prefer composing shadcn primitives (for example `Form`, `FormField`, `Input`, `Button`, `Card`, `Dialog`, `Select`, `Label`, `Separator`) over custom-styled native elements.
+- Only fall back to native HTML/CSS when there is no suitable shadcn component or composition path.
+- If fallback is required, document the reason in the PR/change summary and keep the fallback minimal and isolated.
+- Match existing repository structure and patterns first; avoid per-feature custom UI architecture when a shared shadcn pattern exists.
+
 ## 3. Preserve Boundaries
 - Keep separation between UI components, state management, and API/data layers.
 - Avoid breaking route/API behavior unless explicitly requested.

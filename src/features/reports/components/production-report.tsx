@@ -63,6 +63,8 @@ export const ProductionReport = ({
 	dateTo,
 	assetId,
 }: ProductionReportProps) => {
+	const unitFilter = eventType === "production" ? unit : undefined;
+
 	const {
 		data: report,
 		isPending,
@@ -75,7 +77,7 @@ export const ProductionReport = ({
 		date_from: dateFrom,
 		date_to: dateTo,
 		asset_id: assetId,
-		unit,
+		unit: unitFilter,
 	});
 
 	// Also fetch profitability to get asset names as reference
