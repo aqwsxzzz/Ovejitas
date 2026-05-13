@@ -1,19 +1,46 @@
-import { Loader } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "@tanstack/react-router";
+import {
+	ArrowRight,
+	Eye,
+	EyeOff,
+	Loader,
+	PawPrint,
+	ShieldCheck,
+} from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useLogin } from "@/features/auth/api/auth-queries";
+import {
+	V2AuthPageFrame,
+	v2AuthInputClassName,
+	v2AuthLabelClassName,
+	v2AuthSubmitClassName,
+} from "@/features/auth/components/v2-auth-page-frame";
 
 const loginSchema = z.object({
-	email: z.string().email(),
-	password: z.string().min(8),
+	email: z.string().email("Ingresa un correo electronico valido."),
+	password: z
+		.string()
+		.min(8, "La contrasena debe tener al menos 8 caracteres."),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function V2LoginPage() {
 	const { mutateAsync: login, isPending } = useLogin();
+	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 	const form = useForm<LoginFormValues>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
@@ -27,86 +54,119 @@ export function V2LoginPage() {
 	};
 
 	return (
-		<div className="v2-theme v2-page min-h-screen">
-			<div className="mx-auto grid min-h-screen w-full max-w-2xl grid-rows-1 gap-6 px-4 py-6 place-items-center md:px-6 md:py-8">
-				<section className="v2-card w-full p-5 md:p-8">
-					<div className="w-full">
-						<p className="v2-kicker">Ovejitas V2</p>
-						<h2 className="mt-2 text-2xl font-semibold md:text-3xl">Entrar</h2>
-
-						<form
-							onSubmit={form.handleSubmit(handleSubmit)}
-							className="mt-6 space-y-4"
-						>
-							<div className="space-y-1.5">
-								<label
-									htmlFor="v2-login-email"
-									className="text-sm font-medium"
-								>
+		<V2AuthPageFrame
+			eyebrow="Ingreso - Ovejitas V2"
+			brandIcon={<PawPrint className="h-8 w-8" />}
+			title="Ovejitas V2"
+			subtitle="Agricultura de precision y manejo ganadero en un solo lugar."
+			formTitle="Bienvenido otra vez"
+			formSubtitle="Accede al tablero principal de tu finca"
+			footer={
+				<p>
+					No tienes una cuenta?{" "}
+					<Link
+						to="/v2/signup"
+						className="font-semibold text-[#0b3445] underline-offset-4 hover:underline"
+					>
+						Crear cuenta
+					</Link>
+				</p>
+			}
+			bottomSlot={
+				<div className="flex items-center justify-center gap-2 rounded-full border border-[rgba(27,54,48,0.1)] bg-white/80 px-4 py-2 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-[rgba(27,54,48,0.45)]">
+					<ShieldCheck className="h-3.5 w-3.5" />
+					Seguridad de nivel empresarial
+				</div>
+			}
+		>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(handleSubmit)}
+					className="space-y-4"
+				>
+					<FormField
+						control={form.control}
+						name="email"
+						render={({ field }) => (
+							<FormItem className="space-y-1.5">
+								<FormLabel className={v2AuthLabelClassName}>
 									Correo electronico
-								</label>
-								<input
-									id="v2-login-email"
-									type="email"
-									autoComplete="email"
-									autoCapitalize="none"
-									autoCorrect="off"
-									spellCheck={false}
-									placeholder="Ingresa tu correo electronico"
-									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
-									{...form.register("email")}
-								/>
-								{form.formState.errors.email ? (
-									<p className="text-sm text-destructive">
-										{form.formState.errors.email.message}
-									</p>
-								) : null}
-							</div>
+								</FormLabel>
+								<FormControl>
+									<Input
+										type="email"
+										autoComplete="email"
+										autoCapitalize="none"
+										autoCorrect="off"
+										spellCheck={false}
+										placeholder="manager@farm.com"
+										className={v2AuthInputClassName}
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-							<div className="space-y-1.5">
-								<label
-									htmlFor="v2-login-password"
-									className="text-sm font-medium"
-								>
-									Contrasena
-								</label>
-								<input
-									id="v2-login-password"
-									type="password"
-									autoComplete="current-password"
-									placeholder="Ingresa tu contrasena"
-									className="h-12 w-full rounded-2xl border border-[color:var(--v2-border)] bg-white px-4 text-sm outline-none transition focus:border-[color:var(--v2-ink)]"
-									{...form.register("password")}
-								/>
-								{form.formState.errors.password ? (
-									<p className="text-sm text-destructive">
-										{form.formState.errors.password.message}
-									</p>
-								) : null}
-							</div>
+					<FormField
+						control={form.control}
+						name="password"
+						render={({ field }) => (
+							<FormItem className="space-y-1.5">
+								<div className="flex items-center justify-between gap-3">
+									<FormLabel className={v2AuthLabelClassName}>
+										Contrasena
+									</FormLabel>
+									<span className="text-xs font-medium text-[rgba(27,54,48,0.58)]">
+										Recuperacion pronto
+									</span>
+								</div>
+								<div className="relative">
+									<FormControl>
+										<Input
+											type={isPasswordVisible ? "text" : "password"}
+											autoComplete="current-password"
+											placeholder="Ingresa tu contrasena"
+											className={`${v2AuthInputClassName} pr-12`}
+											{...field}
+										/>
+									</FormControl>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon"
+										onClick={() => setIsPasswordVisible((current) => !current)}
+										className="absolute inset-y-0 right-0 h-full w-12 rounded-none bg-transparent text-[rgba(27,54,48,0.65)] shadow-none hover:bg-transparent hover:text-(--v2-ink)"
+										aria-label={
+											isPasswordVisible
+												? "Ocultar contrasena"
+												: "Mostrar contrasena"
+										}
+									>
+										{isPasswordVisible ? (
+											<EyeOff className="h-4 w-4" />
+										) : (
+											<Eye className="h-4 w-4" />
+										)}
+									</Button>
+								</div>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 
-							<button
-								type="submit"
-								disabled={isPending}
-								className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-black/20 bg-[#1f211d] px-4 text-sm font-semibold text-[#f5efe0] transition hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-70"
-							>
-								{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
-								Iniciar sesion
-							</button>
-						</form>
-
-						<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--v2-border)] pt-4 text-sm text-[color:var(--v2-ink-soft)]">
-							<p>No tienes una cuenta?</p>
-							<Link
-								to="/v2/signup"
-								className="font-semibold text-[color:var(--v2-ink)] underline-offset-4 hover:underline"
-							>
-								Registrate aqui
-							</Link>
-						</div>
-					</div>
-				</section>
-			</div>
-		</div>
+					<Button
+						type="submit"
+						disabled={isPending}
+						className={v2AuthSubmitClassName}
+					>
+						{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
+						Iniciar sesion
+						<ArrowRight className="h-4 w-4" />
+					</Button>
+				</form>
+			</Form>
+		</V2AuthPageFrame>
 	);
 }
