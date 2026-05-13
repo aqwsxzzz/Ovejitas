@@ -30,7 +30,7 @@ export interface ReportFilters {
 	scope: ReportScope;
 	eventType: EventType;
 	bucket: ProductionBucket;
-	unit: Unit;
+	unit?: Unit;
 	dateFrom?: string;
 	dateTo?: string;
 	assetId?: number;
@@ -102,6 +102,9 @@ export const ReportsFilterPanel = ({
 
 	const requiresAsset = scope === "specific-asset" || scope === "individual";
 	const requiresIndividual = scope === "individual";
+	const shouldShowBucketFilter = scope !== "individual";
+	const shouldShowUnitFilter =
+		scope !== "individual" && eventType === "production";
 	const isDateRangeValid = !dateFrom || !dateTo || dateFrom <= dateTo;
 	const dateFromApi = toApiDateTime(dateFrom, false);
 	const dateToApi = toApiDateTime(dateTo, true);
@@ -275,7 +278,7 @@ export const ReportsFilterPanel = ({
 			scope,
 			eventType,
 			bucket,
-			unit,
+			unit: shouldShowUnitFilter ? unit : undefined,
 			dateFrom: dateFromApi,
 			dateTo: dateToApi,
 			assetId: selectedAssetId ? Number(selectedAssetId) : undefined,
@@ -331,29 +334,31 @@ export const ReportsFilterPanel = ({
 					</Select>
 				</div>
 
-				<div className="space-y-2">
-					<Label>Período</Label>
-					<Select
-						value={bucket}
-						onValueChange={(v) => setBucket(v as ProductionBucket)}
-					>
-						<SelectTrigger>
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							{BUCKET_OPTIONS.map((option) => (
-								<SelectItem
-									key={option}
-									value={option}
-								>
-									{formatBucketLabel(option)}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
+				{shouldShowBucketFilter && (
+					<div className="space-y-2">
+						<Label>Período</Label>
+						<Select
+							value={bucket}
+							onValueChange={(v) => setBucket(v as ProductionBucket)}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{BUCKET_OPTIONS.map((option) => (
+									<SelectItem
+										key={option}
+										value={option}
+									>
+										{formatBucketLabel(option)}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+				)}
 
-				{scope !== "individual" && (
+				{shouldShowUnitFilter && (
 					<div className="space-y-2">
 						<Label>Unidad</Label>
 						<Select

@@ -75,7 +75,7 @@ function ReportsPage() {
 								/>
 								<CostPerUnitReport
 									farmId={farmId}
-									unit={activeFilters.unit}
+									unit={activeFilters.unit ?? "dozen"}
 									dateFrom={activeFilters.dateFrom}
 									dateTo={activeFilters.dateTo}
 									assetId={activeFilters.assetId}
