@@ -4,7 +4,10 @@ import { Outlet, useLocation } from "@tanstack/react-router";
 export function V2ShellLayout() {
 	const location = useLocation();
 	const isAuthRoute =
-		location.pathname === "/v2/login" || location.pathname === "/v2/signup";
+		location.pathname === "/v2/login" ||
+		location.pathname === "/v2/signup" ||
+		location.pathname === "/v2" ||
+		location.pathname === "/v2/";
 
 	if (isAuthRoute) {
 		return <Outlet />;
