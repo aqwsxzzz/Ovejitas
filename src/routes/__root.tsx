@@ -18,7 +18,7 @@ const PUBLIC_AUTH_PATHS = new Set([
 	"/v2/login",
 	"/v2/signup",
 ]);
-const LANDING_PATHS = new Set(["/", "/v2/"]);
+const LANDING_PATHS = new Set(["/", "/v2", "/v2/"]);
 
 interface MyRouterContext {
 	queryClient: QueryClient;
@@ -30,7 +30,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 		const hasToken = hasStoredAccessToken();
 
 		if (!hasToken) {
-			if (PUBLIC_AUTH_PATHS.has(pathname)) {
+			if (PUBLIC_AUTH_PATHS.has(pathname) || LANDING_PATHS.has(pathname)) {
 				return;
 			}
 
