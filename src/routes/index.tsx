@@ -1,6 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getAuthLandingPath } from "@/features/auth/utils/auth-session";
+import { V2LandingPage } from "@/features/auth/pages/v2-landing-page";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-	beforeLoad: () => redirect({ to: getAuthLandingPath() }),
+	component: V2LandingPage,
 });
