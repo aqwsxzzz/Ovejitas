@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ComponentProps } from "react";
 import { ArrowLeft, Plus, Loader2 } from "lucide-react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	useGetLivestockAssetById,
+	useListLivestockAssetsByFarmId,
 	useListEventsByAssetId,
 	useListInfiniteEventsByAssetId,
 	useListEventCategoriesByFarmId,
@@ -13,6 +15,12 @@ import {
 	useGetProductionReport,
 	useGetAggregatedHeadcountByAssetId,
 	useCreateEventByAssetId,
+	useCreateMaterialPurchaseByFarmId,
+	useCreateMaterialConsumptionByFarmId,
+	useCreateMaterialSaleByAssetId,
+	useCreateFlockAcquisitionByAssetId,
+	useCreateFlockSaleByAssetId,
+	useCreateFlockMortalityByAssetId,
 	useUpdateEventByAssetId,
 	useDeleteEventByAssetId,
 	useCreateIndividual,
@@ -20,6 +28,7 @@ import {
 	useDeleteIndividual,
 	useCreateEventCategoryByFarmId,
 } from "@/features/livestock/api/livestock-queries";
+import { useGetInventorySummaryReport } from "@/features/reports/api/reports-queries";
 import type {
 	ILivestockAsset,
 	ILivestockEvent,
@@ -30,6 +39,10 @@ import type {
 import { IndividualForm } from "../components/individual-form";
 import type { IndividualFormData } from "../components/individual-form";
 import { IndividualList } from "../components/individual-list";
+import { getMaterialActionErrorMessage } from "@/features/inventory/components/material-action-utils";
+import { MaterialConsumptionForm } from "@/features/inventory/components/material-consumption-form";
+import { MaterialPurchaseForm } from "@/features/inventory/components/material-purchase-form";
+import { MaterialSaleForm } from "@/features/inventory/components/material-sale-form";
 import { UnitEventForm } from "../components/unit-event-form";
 import type { UnitEventFormData } from "../components/unit-event-form";
 import { UnitEventTimeline } from "../components/unit-event-timeline";
@@ -188,7 +201,7 @@ function ProductionSeriesSlider({
 							setActiveIndex(index);
 						}}
 						className={`h-2 w-2 rounded-full transition ${
-							index === activeIndex ? "bg-[color:var(--v2-ink)]" : "bg-black/30"
+							index === activeIndex ? "bg-(--v2-ink)" : "bg-black/30"
 						}`}
 					/>
 				))}
@@ -205,7 +218,7 @@ function MetricCard(props: {
 }) {
 	return (
 		<div className="v2-card flex-1 p-3">
-			<p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
+			<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
 				{props.label}
 			</p>
 			<p className="mt-1 text-2xl font-semibold leading-none">
@@ -215,9 +228,7 @@ function MetricCard(props: {
 					props.value
 				)}
 			</p>
-			<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-				{props.note}
-			</p>
+			<p className="mt-1 text-sm text-(--v2-ink-soft)">{props.note}</p>
 		</div>
 	);
 }
@@ -238,6 +249,8 @@ interface ProductionProductSeries {
 	series: number[];
 }
 
+type MaterialActionMode = "purchase" | "consumption" | "sale";
+
 const EVENTS_LOG_PAGE_SIZE = 3;
 
 const EVENT_TYPE_FILTER_OPTIONS: Array<{
@@ -249,10 +262,36 @@ const EVENT_TYPE_FILTER_OPTIONS: Array<{
 	{ value: "income", label: "Ingreso" },
 	{ value: "expense", label: "Gasto" },
 	{ value: "observation", label: "Observacion" },
+	{ value: "inventory", label: "Inventario" },
 	{ value: "reproductive", label: "Reproductivo" },
 	{ value: "acquisition", label: "Adquisicion" },
 	{ value: "mortality", label: "Mortalidad" },
 ];
+
+function getEventTypeFilterOptions(
+	assetKind: ILivestockAsset["kind"] | undefined,
+): Array<{ value: "all" | LivestockEventType; label: string }> {
+	if (assetKind === "material") {
+		return EVENT_TYPE_FILTER_OPTIONS.filter(
+			(option) =>
+				option.value !== "reproductive" &&
+				option.value !== "acquisition" &&
+				option.value !== "mortality",
+		);
+	}
+
+	if (assetKind === "animal") {
+		return EVENT_TYPE_FILTER_OPTIONS;
+	}
+
+	return EVENT_TYPE_FILTER_OPTIONS.filter(
+		(option) =>
+			option.value !== "reproductive" &&
+			option.value !== "acquisition" &&
+			option.value !== "mortality" &&
+			option.value !== "inventory",
+	);
+}
 
 function isLivestockEventType(value: string): value is LivestockEventType {
 	return (
@@ -262,7 +301,8 @@ function isLivestockEventType(value: string): value is LivestockEventType {
 		value === "observation" ||
 		value === "reproductive" ||
 		value === "acquisition" ||
-		value === "mortality"
+		value === "mortality" ||
+		value === "inventory"
 	);
 }
 
@@ -281,14 +321,8 @@ function toKindLabel(asset: ILivestockAsset): string {
 	return `${asset.kind.charAt(0).toUpperCase()}${asset.kind.slice(1)}`;
 }
 
-function buildEventPairIdempotencyPrefix(
-	type: "income" | "expense" | "acquisition",
-): string {
-	return `${type}-${crypto.randomUUID()}`;
-}
-
-function isChainedLegEvent(event: ILivestockEvent): boolean {
-	return typeof event.payload.chain_role === "string";
+function isActionOwnedEvent(event: ILivestockEvent): boolean {
+	return typeof event.payload.source === "string";
 }
 
 export function FlockDetailPage({
@@ -308,12 +342,30 @@ export function FlockDetailPage({
 
 	const [isCreatingIndividual, setIsCreatingIndividual] = useState(false);
 	const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+	const [materialActionMode, setMaterialActionMode] =
+		useState<MaterialActionMode | null>(null);
 	const [individualSearchQuery, setIndividualSearchQuery] = useState("");
 	const [isSavingEvent, setIsSavingEvent] = useState(false);
+	const [materialPurchaseError, setMaterialPurchaseError] = useState<
+		string | null
+	>(null);
+	const [materialConsumptionError, setMaterialConsumptionError] = useState<
+		string | null
+	>(null);
+	const [materialSaleError, setMaterialSaleError] = useState<string | null>(
+		null,
+	);
 	const [editingEvent, setEditingEvent] = useState<ILivestockEvent | null>(
 		null,
 	);
 	const [deletingEventId, setDeletingEventId] = useState<number | null>(null);
+	const [isAdjustingHeadcount, setIsAdjustingHeadcount] = useState(false);
+	const [headcountDraft, setHeadcountDraft] = useState("");
+	const [headcountAmountDraft, setHeadcountAmountDraft] = useState("");
+	const [headcountDecreaseMode, setHeadcountDecreaseMode] = useState<
+		"mortality" | "sale"
+	>("mortality");
+	const [headcountError, setHeadcountError] = useState<string>("");
 	const eventsLoadMoreRef = useRef<HTMLDivElement | null>(null);
 	const eventsScrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const hasAutoLoadedEventsPageRef = useRef(false);
@@ -388,12 +440,33 @@ export function FlockDetailPage({
 		enabled: hasValidAssetId && !!farmId,
 	});
 
+	const { data: inventorySummaryReport } = useGetInventorySummaryReport(
+		{
+			farmId,
+			asset_id: parsedAssetId,
+		},
+		hasValidAssetId && !!farmId && asset?.kind === "material",
+	);
+
 	const { data: aggregatedHeadcount, isPending: isAggregatedHeadcountPending } =
 		useGetAggregatedHeadcountByAssetId({
 			farmId,
 			assetId: unitId,
 			enabled: !!farmId && !!unitId,
 		});
+
+	const eventTypeFilterOptions = useMemo(
+		() => getEventTypeFilterOptions(asset?.kind),
+		[asset?.kind],
+	);
+	const effectiveSelectedEventType = useMemo(() => {
+		if (!selectedEventType) return undefined;
+		return eventTypeFilterOptions.some(
+			(option) => option.value === selectedEventType,
+		)
+			? selectedEventType
+			: undefined;
+	}, [eventTypeFilterOptions, selectedEventType]);
 
 	const {
 		data: eventsLogData,
@@ -404,7 +477,7 @@ export function FlockDetailPage({
 	} = useListInfiniteEventsByAssetId({
 		farmId,
 		assetId: unitId,
-		filters: { sort: "-occurred_at", type: selectedEventType },
+		filters: { sort: "-occurred_at", type: effectiveSelectedEventType },
 		pageSize: EVENTS_LOG_PAGE_SIZE,
 		enabled: !!farmId && !!unitId,
 	});
@@ -416,8 +489,21 @@ export function FlockDetailPage({
 		enabled: !!farmId && !!unitId,
 	});
 
+	const { data: consumerAssetsResponse } = useListLivestockAssetsByFarmId({
+		farmId,
+		filters: { kind: "animal", pageSize: 100 },
+		enabled: !!farmId && asset?.kind === "material",
+	});
+
 	// Mutation hooks
 	const createEventMutation = useCreateEventByAssetId();
+	const createMaterialPurchaseMutation = useCreateMaterialPurchaseByFarmId();
+	const createMaterialConsumptionMutation =
+		useCreateMaterialConsumptionByFarmId();
+	const createMaterialSaleMutation = useCreateMaterialSaleByAssetId();
+	const createFlockAcquisitionMutation = useCreateFlockAcquisitionByAssetId();
+	const createFlockSaleMutation = useCreateFlockSaleByAssetId();
+	const createFlockMortalityMutation = useCreateFlockMortalityByAssetId();
 	const updateEventMutation = useUpdateEventByAssetId();
 	const deleteEventMutation = useDeleteEventByAssetId();
 	const createIndividualMutation = useCreateIndividual();
@@ -430,43 +516,30 @@ export function FlockDetailPage({
 		[individualsResponse?.data],
 	);
 	const listedIndividuals = listedIndividualsResponse?.data ?? [];
+	const consumerAssets = useMemo(
+		() =>
+			(consumerAssetsResponse?.data ?? []).map((item) => ({
+				id: item.id,
+				name: item.name,
+			})),
+		[consumerAssetsResponse?.data],
+	);
 	const timelineEvents = useMemo(
 		() => eventsLogData?.items ?? [],
 		[eventsLogData?.items],
 	);
+	const visibleTimelineEvents = useMemo(() => {
+		if (effectiveSelectedEventType) {
+			return timelineEvents;
+		}
+
+		return timelineEvents.filter((event) => event.type !== "inventory");
+	}, [effectiveSelectedEventType, timelineEvents]);
 	const hasAssetEvents = (eventsSummaryResponse?.meta.total ?? 0) > 0;
-
-	const preferredSecondaryCategoryByType = useMemo(() => {
-		const resolveByType = (
-			type: Extract<LivestockEventType, "acquisition" | "mortality">,
-		): number | undefined => {
-			const fromAssetEvents = timelineEvents.find(
-				(event) => event.type === type && event.category_id != null,
-			)?.category_id;
-			if (fromAssetEvents != null) {
-				return fromAssetEvents;
-			}
-
-			const matchingCategories = eventCategories
-				.filter((category) => category.type === type)
-				.sort((left, right) => left.id - right.id);
-
-			if (matchingCategories.length === 0) {
-				return undefined;
-			}
-
-			return matchingCategories[0]?.id;
-		};
-
-		return {
-			acquisition: resolveByType("acquisition"),
-			mortality: resolveByType("mortality"),
-		};
-	}, [timelineEvents, eventCategories]);
 
 	useEffect(() => {
 		hasAutoLoadedEventsPageRef.current = false;
-	}, [unitId, selectedEventType]);
+	}, [unitId, effectiveSelectedEventType]);
 
 	useEffect(() => {
 		const root = eventsScrollContainerRef.current;
@@ -494,6 +567,7 @@ export function FlockDetailPage({
 		isPendingEventsLog,
 		isFetchingNextEventsLogPage,
 		timelineEvents.length,
+		visibleTimelineEvents.length,
 	]);
 
 	useEffect(() => {
@@ -525,6 +599,7 @@ export function FlockDetailPage({
 		hasNextEventsLogPage,
 		isFetchingNextEventsLogPage,
 		timelineEvents.length,
+		visibleTimelineEvents.length,
 	]);
 
 	const productionSeries = useMemo<ProductionProductSeries[]>(() => {
@@ -616,6 +691,17 @@ export function FlockDetailPage({
 		return aggregatedHeadcount?.net ?? 0;
 	}, [aggregatedHeadcount]);
 
+	const parsedHeadcountTarget = useMemo(() => {
+		const parsed = Number(headcountDraft);
+		if (!Number.isFinite(parsed)) return null;
+		return Math.max(0, Math.floor(parsed));
+	}, [headcountDraft]);
+
+	const headcountDeltaPreview = useMemo(() => {
+		if (parsedHeadcountTarget == null) return null;
+		return parsedHeadcountTarget - aggregatedActiveCount;
+	}, [parsedHeadcountTarget, aggregatedActiveCount]);
+
 	const countCardValue = useMemo(() => {
 		if (asset?.mode === "aggregated") {
 			return String(aggregatedActiveCount);
@@ -623,14 +709,124 @@ export function FlockDetailPage({
 		return `${allIndividuals.length}`;
 	}, [asset?.mode, aggregatedActiveCount, allIndividuals.length]);
 
-	const countCardNote = useMemo(() => {
-		if (asset?.mode === "aggregated") {
-			return "Entradas por adquisicion menos salidas por mortalidad";
-		}
-		return "Conteo actual de individuos activos en este lote";
-	}, [asset?.mode]);
-
 	const hasDescription = Boolean(asset?.description?.trim());
+	const isAnimalAsset = asset?.kind === "animal";
+	const isMaterialAsset = asset?.kind === "material";
+	const inventoryRows = useMemo(
+		() =>
+			(inventorySummaryReport?.data ?? []).map((row) => ({
+				...row,
+				onHand: parseNumeric(row.on_hand),
+			})),
+		[inventorySummaryReport],
+	);
+	const totalOnHand = useMemo(
+		() => inventoryRows.reduce((sum, row) => sum + row.onHand, 0),
+		[inventoryRows],
+	);
+	const inventoryStatus = useMemo<"ok" | "low" | "critical">(() => {
+		if (!inventoryRows.length) return "critical";
+		if (totalOnHand <= 0) return "critical";
+		if (totalOnHand <= 10) return "low";
+		return "ok";
+	}, [inventoryRows.length, totalOnHand]);
+	const materialActionTitle = useMemo(() => {
+		if (materialActionMode === "purchase") return "Registrar compra";
+		if (materialActionMode === "consumption") return "Registrar consumo";
+		return "Registrar venta";
+	}, [materialActionMode]);
+
+	const closeMaterialActionPanel = useCallback(() => {
+		setMaterialActionMode(null);
+		setMaterialPurchaseError(null);
+		setMaterialConsumptionError(null);
+		setMaterialSaleError(null);
+	}, []);
+
+	const openMaterialActionPanel = useCallback((mode: MaterialActionMode) => {
+		setEditingEvent(null);
+		setIsCreatingEvent(false);
+		setMaterialActionMode(mode);
+		setMaterialPurchaseError(null);
+		setMaterialConsumptionError(null);
+		setMaterialSaleError(null);
+	}, []);
+
+	const handleSubmitMaterialPurchase: ComponentProps<
+		typeof MaterialPurchaseForm
+	>["onSubmit"] = useCallback(
+		async (payload) => {
+			if (!farmId) return;
+			setMaterialPurchaseError(null);
+
+			try {
+				await createMaterialPurchaseMutation.mutateAsync({
+					farmId,
+					data: payload,
+				});
+				closeMaterialActionPanel();
+			} catch (error) {
+				setMaterialPurchaseError(
+					getMaterialActionErrorMessage(
+						error,
+						"No se pudo registrar la compra de material.",
+					),
+				);
+			}
+		},
+		[farmId, createMaterialPurchaseMutation, closeMaterialActionPanel],
+	);
+
+	const handleSubmitMaterialConsumption: ComponentProps<
+		typeof MaterialConsumptionForm
+	>["onSubmit"] = useCallback(
+		async (payload) => {
+			if (!farmId) return;
+			setMaterialConsumptionError(null);
+
+			try {
+				await createMaterialConsumptionMutation.mutateAsync({
+					farmId,
+					data: payload,
+				});
+				closeMaterialActionPanel();
+			} catch (error) {
+				setMaterialConsumptionError(
+					getMaterialActionErrorMessage(
+						error,
+						"No se pudo registrar el consumo de material.",
+					),
+				);
+			}
+		},
+		[farmId, createMaterialConsumptionMutation, closeMaterialActionPanel],
+	);
+
+	const handleSubmitMaterialSale: ComponentProps<
+		typeof MaterialSaleForm
+	>["onSubmit"] = useCallback(
+		async (payload) => {
+			if (!farmId || !unitId) return;
+			setMaterialSaleError(null);
+
+			try {
+				await createMaterialSaleMutation.mutateAsync({
+					farmId,
+					assetId: unitId,
+					data: payload,
+				});
+				closeMaterialActionPanel();
+			} catch (error) {
+				setMaterialSaleError(
+					getMaterialActionErrorMessage(
+						error,
+						"No se pudo registrar la venta de material.",
+					),
+				);
+			}
+		},
+		[farmId, unitId, createMaterialSaleMutation, closeMaterialActionPanel],
+	);
 
 	const handleCreateIndividual = useCallback(
 		async (data: IndividualFormData) => {
@@ -702,10 +898,13 @@ export function FlockDetailPage({
 			navigate({
 				to: "/v2/production-units/flock/$unitId/individuals/$individualId",
 				params: { unitId, individualId: String(individual.id) },
-				search: { eventType: selectedEventType, edit: false },
+				search: {
+					eventType: effectiveSelectedEventType,
+					edit: false,
+				},
 			});
 		},
-		[navigate, unitId, selectedEventType],
+		[navigate, unitId, effectiveSelectedEventType],
 	);
 
 	const handleCreateEvent = useCallback(
@@ -731,7 +930,6 @@ export function FlockDetailPage({
 						},
 					});
 				} else if (data.type === "expense" || data.type === "income") {
-					const eventPairPrefix = buildEventPairIdempotencyPrefix(data.type);
 					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
@@ -739,47 +937,12 @@ export function FlockDetailPage({
 							type: data.type,
 							occurred_at: data.occurredAt,
 							amount: data.amount ?? 0,
-							currency: data.currency ?? "USD",
 							category_id: data.categoryId,
 							individual_id: data.individualId,
 							notes: data.notes,
 							payload: { status: data.status },
-							idempotency_key: `${eventPairPrefix}:${data.type}`,
 						},
 					});
-
-					if (
-						asset.mode === "aggregated" &&
-						data.inventoryQuantityDelta != null &&
-						data.inventoryQuantityDelta !== 0
-					) {
-						const inventoryEventType =
-							data.type === "expense" ? "acquisition" : "mortality";
-						const secondaryCategoryId =
-							preferredSecondaryCategoryByType[inventoryEventType];
-						const chainReason =
-							data.type === "expense"
-								? "purchase_inventory_adjustment"
-								: "sale_inventory_adjustment";
-						await createEventMutation.mutateAsync({
-							farmId,
-							assetId: unitId,
-							data: {
-								type: inventoryEventType,
-								occurred_at: data.occurredAt,
-								category_id: secondaryCategoryId,
-								quantity: Math.abs(data.inventoryQuantityDelta),
-								notes: data.notes,
-								payload: {
-									status: data.status,
-									paired_with: data.type,
-									chain_reason: chainReason,
-									chain_role: "inventory_leg",
-								},
-								idempotency_key: `${eventPairPrefix}:${inventoryEventType}`,
-							},
-						});
-					}
 				} else if (data.type === "observation") {
 					await createEventMutation.mutateAsync({
 						farmId,
@@ -795,76 +958,18 @@ export function FlockDetailPage({
 							payload: { status: data.status },
 						},
 					});
-				} else if (data.type === "acquisition") {
-					const shouldCreateExpensePair = (data.amount ?? 0) > 0;
-
-					if (shouldCreateExpensePair) {
-						const eventPairPrefix =
-							buildEventPairIdempotencyPrefix("acquisition");
-						await createEventMutation.mutateAsync({
-							farmId,
-							assetId: unitId,
-							data: {
-								type: "acquisition",
-								occurred_at: data.occurredAt,
-								category_id: data.categoryId,
-								individual_id: data.individualId,
-								quantity: data.quantity ?? 0,
-								amount: data.amount,
-								currency: data.currency,
-								notes: data.notes,
-								payload: { status: data.status },
-								idempotency_key: `${eventPairPrefix}:acquisition`,
-							},
-						});
-
-						await createEventMutation.mutateAsync({
-							farmId,
-							assetId: unitId,
-							data: {
-								type: "expense",
-								occurred_at: data.occurredAt,
-								amount: data.amount ?? 0,
-								currency: data.currency ?? "USD",
-								category_id: data.categoryId,
-								individual_id: data.individualId,
-								notes: data.notes,
-								payload: {
-									status: data.status,
-									paired_with: "acquisition",
-									chain_reason: "acquisition_cost",
-									chain_role: "financial_leg",
-								},
-								idempotency_key: `${eventPairPrefix}:expense`,
-							},
-						});
-					} else {
-						await createEventMutation.mutateAsync({
-							farmId,
-							assetId: unitId,
-							data: {
-								type: "acquisition",
-								occurred_at: data.occurredAt,
-								category_id: data.categoryId,
-								individual_id: data.individualId,
-								quantity: data.quantity ?? 0,
-								amount: data.amount,
-								currency: data.currency,
-								notes: data.notes,
-								payload: { status: data.status },
-							},
-						});
-					}
-				} else if (data.type === "mortality") {
+				} else if (data.type === "inventory") {
 					await createEventMutation.mutateAsync({
 						farmId,
 						assetId: unitId,
 						data: {
-							type: "mortality",
+							type: "inventory",
 							occurred_at: data.occurredAt,
+							adjustment: data.adjustment ?? "increment",
+							quantity: data.quantity ?? 0,
+							unit: data.unit ?? "unit",
 							category_id: data.categoryId,
 							individual_id: data.individualId,
-							quantity: data.quantity ?? 0,
 							notes: data.notes,
 							payload: { status: data.status },
 						},
@@ -889,19 +994,13 @@ export function FlockDetailPage({
 				setIsSavingEvent(false);
 			}
 		},
-		[
-			farmId,
-			unitId,
-			createEventMutation,
-			preferredSecondaryCategoryByType,
-			asset,
-		],
+		[farmId, unitId, createEventMutation, asset],
 	);
 
 	const handleStartEditEvent = useCallback((event: ILivestockEvent) => {
-		if (isChainedLegEvent(event)) {
+		if (isActionOwnedEvent(event)) {
 			alert(
-				"Este evento fue generado automaticamente por una operacion encadenada. Edita el evento financiero principal para mantener consistencia.",
+				"Este evento fue generado por una accion del sistema. Edita la accion original para mantener consistencia.",
 			);
 			return;
 		}
@@ -913,9 +1012,9 @@ export function FlockDetailPage({
 	const handleDeleteEvent = useCallback(
 		async (event: ILivestockEvent) => {
 			if (!farmId || !unitId) return;
-			if (isChainedLegEvent(event)) {
+			if (isActionOwnedEvent(event)) {
 				alert(
-					"Este evento fue generado automaticamente por una operacion encadenada. Eliminalo desde el evento financiero principal para evitar desbalances.",
+					"Este evento fue generado por una accion del sistema. Eliminalo desde la accion original para evitar desbalances.",
 				);
 				return;
 			}
@@ -946,9 +1045,9 @@ export function FlockDetailPage({
 				await handleCreateEvent(data);
 				return;
 			}
-			if (isChainedLegEvent(editingEvent)) {
+			if (isActionOwnedEvent(editingEvent)) {
 				alert(
-					"Este evento fue generado automaticamente por una operacion encadenada. Edita el evento financiero principal para mantener consistencia.",
+					"Este evento fue generado por una accion del sistema. Edita la accion original para mantener consistencia.",
 				);
 				setEditingEvent(null);
 				setIsCreatingEvent(false);
@@ -974,13 +1073,15 @@ export function FlockDetailPage({
 							editingEvent.type === "production" ||
 							editingEvent.type === "observation" ||
 							editingEvent.type === "acquisition" ||
-							editingEvent.type === "mortality"
+							editingEvent.type === "mortality" ||
+							editingEvent.type === "inventory"
 								? (data.quantity ?? null)
 								: null,
 						unit:
 							editingEvent.type === "production" ||
 							editingEvent.type === "observation" ||
-							editingEvent.type === "acquisition"
+							editingEvent.type === "acquisition" ||
+							editingEvent.type === "inventory"
 								? (data.unit ?? null)
 								: null,
 						amount:
@@ -989,11 +1090,9 @@ export function FlockDetailPage({
 							editingEvent.type === "acquisition"
 								? (data.amount ?? null)
 								: null,
-						currency:
-							editingEvent.type === "income" ||
-							editingEvent.type === "expense" ||
-							editingEvent.type === "acquisition"
-								? (data.currency ?? null)
+						adjustment:
+							editingEvent.type === "inventory"
+								? (data.adjustment ?? null)
 								: null,
 					},
 				});
@@ -1042,15 +1141,125 @@ export function FlockDetailPage({
 		[farmId, createEventCategoryMutation],
 	);
 
+	const openHeadcountAdjustment = useCallback(() => {
+		setHeadcountError("");
+		setHeadcountDraft(String(aggregatedActiveCount));
+		setHeadcountAmountDraft("");
+		setHeadcountDecreaseMode("mortality");
+		setIsAdjustingHeadcount(true);
+	}, [aggregatedActiveCount]);
+
+	const closeHeadcountAdjustment = useCallback(() => {
+		setIsAdjustingHeadcount(false);
+		setHeadcountError("");
+		setHeadcountAmountDraft("");
+		setHeadcountDecreaseMode("mortality");
+	}, []);
+
+	const handleApplyHeadcountAdjustment = useCallback(async () => {
+		if (!farmId || !unitId || !asset) return;
+		if (!(asset.kind === "animal" && asset.mode === "aggregated")) return;
+
+		const parsedTarget = Number(headcountDraft);
+		const target = Number.isFinite(parsedTarget)
+			? Math.max(0, Math.floor(parsedTarget))
+			: NaN;
+
+		if (!Number.isFinite(target)) {
+			setHeadcountError("Ingresa un conteo valido.");
+			return;
+		}
+
+		const delta = target - aggregatedActiveCount;
+		if (delta === 0) {
+			closeHeadcountAdjustment();
+			return;
+		}
+
+		setHeadcountError("");
+		if (delta > 0) {
+			const parsedAmount = Number(headcountAmountDraft);
+			const hasAmount = headcountAmountDraft.trim().length > 0;
+
+			if (hasAmount && (!Number.isFinite(parsedAmount) || parsedAmount < 0)) {
+				setHeadcountError("Ingresa un costo valido o dejalo vacio.");
+				return;
+			}
+
+			await createFlockAcquisitionMutation.mutateAsync({
+				farmId,
+				assetId: unitId,
+				payload: {
+					occurred_at: new Date().toISOString(),
+					quantity: delta,
+					amount: hasAmount ? parsedAmount : null,
+				},
+			});
+		} else {
+			if (headcountDecreaseMode === "sale") {
+				const parsedAmount = Number(headcountAmountDraft);
+
+				if (
+					headcountAmountDraft.trim().length === 0 ||
+					!Number.isFinite(parsedAmount) ||
+					parsedAmount < 0
+				) {
+					setHeadcountError("Para una venta debes ingresar un ingreso valido.");
+					return;
+				}
+
+				await createFlockSaleMutation.mutateAsync({
+					farmId,
+					assetId: unitId,
+					payload: {
+						occurred_at: new Date().toISOString(),
+						quantity: Math.abs(delta),
+						amount: parsedAmount,
+					},
+				});
+			} else {
+				await createFlockMortalityMutation.mutateAsync({
+					farmId,
+					assetId: unitId,
+					payload: {
+						occurred_at: new Date().toISOString(),
+						quantity: Math.abs(delta),
+						cause: "Ajuste manual de conteo",
+					},
+				});
+			}
+		}
+
+		closeHeadcountAdjustment();
+	}, [
+		farmId,
+		unitId,
+		asset,
+		headcountDraft,
+		headcountAmountDraft,
+		headcountDecreaseMode,
+		aggregatedActiveCount,
+		createFlockAcquisitionMutation,
+		createFlockSaleMutation,
+		createFlockMortalityMutation,
+		closeHeadcountAdjustment,
+	]);
+
 	const resetSwipeTracking = useCallback(() => {
 		swipeStartXRef.current = null;
 		swipeStartYRef.current = null;
 		isSwipeCandidateRef.current = false;
 	}, []);
 
+	const persistBackAssetKind = useCallback(() => {
+		if (typeof window === "undefined" || !asset?.kind) return;
+		window.sessionStorage.setItem("v2-active-asset-kind", asset.kind);
+	}, [asset?.kind]);
+
 	const handleSwipeBack = useCallback(() => {
+		persistBackAssetKind();
 		navigate({ to: "/v2/production-units", replace: true });
-	}, [navigate]);
+	}, [navigate, persistBackAssetKind]);
 
 	const handleTouchStart = useCallback(
 		(event: React.TouchEvent<HTMLElement>) => {
@@ -1133,9 +1342,9 @@ export function FlockDetailPage({
 				onTouchCancel={resetSwipeTracking}
 			>
 				<div className="v2-card p-5">
-					<p className="v2-kicker">Lotes</p>
+					<p className="v2-kicker">Activos</p>
 					<h1 className="mt-2 text-xl font-semibold">Selecciona una granja</h1>
-					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="mt-1 text-sm text-(--v2-ink-soft)">
 						No hay granja activa para cargar datos reales.
 					</p>
 				</div>
@@ -1153,9 +1362,7 @@ export function FlockDetailPage({
 				onTouchCancel={resetSwipeTracking}
 			>
 				<div className="v2-card p-5">
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						Cargando lote...
-					</p>
+					<p className="text-sm text-(--v2-ink-soft)">Cargando activo...</p>
 				</div>
 			</section>
 		);
@@ -1171,16 +1378,17 @@ export function FlockDetailPage({
 				onTouchCancel={resetSwipeTracking}
 			>
 				<div className="v2-card p-5">
-					<p className="v2-kicker">Lotes</p>
-					<h1 className="mt-2 text-xl font-semibold">Lote no encontrado</h1>
-					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-						No encontramos el lote solicitado.
+					<p className="v2-kicker">Activos</p>
+					<h1 className="mt-2 text-xl font-semibold">Activo no encontrado</h1>
+					<p className="mt-1 text-sm text-(--v2-ink-soft)">
+						No encontramos el activo solicitado.
 					</p>
 					<Link
 						to="/v2/production-units"
-						className="mt-4 inline-flex rounded-full border border-[color:var(--v2-ink)] px-3 py-1.5 text-xs font-semibold"
+						onClick={persistBackAssetKind}
+						className="mt-4 inline-flex rounded-full border border-(--v2-ink) px-3 py-1.5 text-xs font-semibold"
 					>
-						Volver a ganado
+						Volver a activos
 					</Link>
 				</div>
 			</section>
@@ -1202,14 +1410,15 @@ export function FlockDetailPage({
 							<span className="rounded-md bg-[#e7d7ae] px-2.5 py-1 text-xs font-semibold text-[#6f5413]">
 								{toKindLabel(asset)}
 							</span>
-							<span className="rounded-md border border-[color:var(--v2-border)] bg-white px-2.5 py-1 text-xs font-semibold text-[color:var(--v2-ink)]">
+							<span className="rounded-md border border-(--v2-border) bg-white px-2.5 py-1 text-xs font-semibold text-(--v2-ink)">
 								{toModeLabel(asset)}
 							</span>
 						</div>
 						<Link
 							to="/v2/production-units"
-							className="inline-flex items-center justify-center p-1 text-[color:var(--v2-ink-soft)] transition-colors hover:text-[color:var(--v2-ink)]"
-							aria-label="Volver a ganado"
+							onClick={persistBackAssetKind}
+							className="inline-flex items-center justify-center p-1 text-(--v2-ink-soft) transition-colors hover:text-(--v2-ink)"
+							aria-label="Volver a activos"
 						>
 							<ArrowLeft
 								aria-hidden="true"
@@ -1225,7 +1434,7 @@ export function FlockDetailPage({
 							{asset.name}
 						</h1>
 					</div>
-					<div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-[color:var(--v2-border)] bg-[#ecf0e8] px-3 py-1.5 text-sm text-[color:var(--v2-ink)]">
+					<div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-(--v2-border) bg-[#ecf0e8] px-3 py-1.5 text-sm text-(--v2-ink)">
 						<span className="inline-flex h-5 w-5 items-center justify-center text-[#0e6b49]">
 							<svg
 								viewBox="0 0 24 24"
@@ -1250,10 +1459,10 @@ export function FlockDetailPage({
 					</div>
 					{hasDescription ? (
 						<>
-							<div className="mt-4 border-t border-[color:var(--v2-border)]" />
+							<div className="mt-4 border-t border-(--v2-border)" />
 							<div className="mt-4 flex justify-center">
 								<blockquote
-									className="max-w-2xl text-center text-lg italic leading-snug text-[color:var(--v2-primary)] md:text-xl"
+									className="max-w-2xl text-center text-lg italic leading-snug text-(--v2-primary) md:text-xl"
 									style={{
 										fontFamily:
 											'"Segoe Script", "Bradley Hand", "Comic Sans MS", cursive',
@@ -1267,35 +1476,295 @@ export function FlockDetailPage({
 				</div>
 			</div>
 
-			{productionSeries.length > 0 ? (
+			{isMaterialAsset ? (
+				<div className="v2-card p-4">
+					<div className="mb-3 flex items-center justify-between gap-3">
+						<div>
+							<p className="v2-kicker">Inventario actual</p>
+							<p className="text-sm text-(--v2-ink-soft)">
+								{inventoryRows.length === 0
+									? "No hay movimientos registrados"
+									: `${inventoryRows.length} unidad(es) de medida activas`}
+							</p>
+						</div>
+						<span
+							className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+								inventoryStatus === "critical"
+									? "bg-red-100 text-red-700"
+									: inventoryStatus === "low"
+										? "bg-amber-100 text-amber-700"
+										: "bg-emerald-100 text-emerald-700"
+							}`}
+						>
+							{inventoryStatus === "critical"
+								? "Critico"
+								: inventoryStatus === "low"
+									? "Bajo"
+									: "OK"}
+						</span>
+					</div>
+
+					{inventoryRows.length === 0 ? (
+						<p className="text-sm text-(--v2-ink-soft)">
+							Registra un primer movimiento de inventario para activar stock.
+						</p>
+					) : (
+						<div className="space-y-2">
+							{inventoryRows.map((row) => (
+								<div
+									key={`${row.asset_id}-${row.unit}`}
+									className="flex items-center justify-between rounded-lg border border-(--v2-border) bg-white px-3 py-2"
+								>
+									<span className="text-sm font-medium">{row.unit}</span>
+									<span className="text-sm font-semibold">
+										{row.onHand.toFixed(2)}
+									</span>
+								</div>
+							))}
+						</div>
+					)}
+
+					<div className="mt-3 grid gap-2 sm:grid-cols-3">
+						<button
+							type="button"
+							onClick={() => {
+								openMaterialActionPanel("purchase");
+							}}
+							className="rounded-full bg-(--v2-ink) px-3 py-1.5 text-xs font-semibold text-white"
+						>
+							Agregar (compra)
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								openMaterialActionPanel("consumption");
+							}}
+							className="rounded-full border border-(--v2-border) bg-white px-3 py-1.5 text-xs font-semibold"
+						>
+							Reducir (consumo)
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								openMaterialActionPanel("sale");
+							}}
+							className="rounded-full border border-(--v2-border) bg-white px-3 py-1.5 text-xs font-semibold"
+						>
+							Reducir (venta)
+						</button>
+					</div>
+
+					{materialActionMode ? (
+						<div className="mt-3 rounded-xl border border-(--v2-border) bg-white p-3">
+							<div className="mb-3 flex items-center justify-between gap-3">
+								<p className="text-xs font-semibold uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+									{materialActionTitle}
+								</p>
+								<button
+									type="button"
+									onClick={closeMaterialActionPanel}
+									className="rounded-full border border-(--v2-border) px-2.5 py-1 text-xs font-semibold"
+								>
+									Cerrar
+								</button>
+							</div>
+
+							{materialActionMode === "purchase" ? (
+								<MaterialPurchaseForm
+									materialAssetId={asset.id}
+									isSubmitting={createMaterialPurchaseMutation.isPending}
+									errorMessage={materialPurchaseError}
+									onSubmit={handleSubmitMaterialPurchase}
+								/>
+							) : null}
+
+							{materialActionMode === "consumption" ? (
+								<MaterialConsumptionForm
+									materialAssetId={asset.id}
+									consumerAssets={consumerAssets}
+									isSubmitting={createMaterialConsumptionMutation.isPending}
+									errorMessage={materialConsumptionError}
+									onSubmit={handleSubmitMaterialConsumption}
+								/>
+							) : null}
+
+							{materialActionMode === "sale" ? (
+								<MaterialSaleForm
+									isSubmitting={createMaterialSaleMutation.isPending}
+									errorMessage={materialSaleError}
+									onSubmit={handleSubmitMaterialSale}
+								/>
+							) : null}
+						</div>
+					) : null}
+				</div>
+			) : null}
+
+			{!isMaterialAsset && productionSeries.length > 0 ? (
 				<div className="grid gap-3">
 					<ProductionSeriesSlider series={productionSeries} />
 				</div>
 			) : null}
 
 			<div className="grid gap-3 md:grid-cols-2">
-				{asset.mode === "aggregated" ? (
-					<MetricCard
-						label="Conteo"
-						value={countCardValue}
-						note={countCardNote}
-						isLoading={isAggregatedHeadcountPending}
-					/>
+				{!isMaterialAsset && asset.mode === "aggregated" ? (
+					<div className="v2-card flex-1 p-3">
+						<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+							<div className="min-w-0">
+								<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+									Existencia actual
+								</p>
+								<p className="mt-0.5 text-2xl font-semibold leading-none">
+									{isAggregatedHeadcountPending ? (
+										<Loader2 className="h-6 w-6 animate-spin" />
+									) : (
+										countCardValue
+									)}
+								</p>
+							</div>
+							{!isAdjustingHeadcount ? (
+								<div className="flex h-full items-center border-l border-(--v2-border) pl-3">
+									<button
+										type="button"
+										onClick={openHeadcountAdjustment}
+										className="h-fit whitespace-nowrap rounded-full border border-(--v2-ink) px-3 py-1 text-xs font-semibold"
+									>
+										Ajustar
+									</button>
+								</div>
+							) : null}
+						</div>
+
+						{isAdjustingHeadcount ? (
+							<div className="mt-2 rounded-xl border border-(--v2-border) bg-white p-2">
+								<div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
+									<label className="space-y-1 text-xs">
+										<span className="font-medium">Actual</span>
+										<p className="rounded-lg border border-(--v2-border) bg-gray-50 px-2 py-1.5">
+											{aggregatedActiveCount}
+										</p>
+									</label>
+									<label className="space-y-1 text-xs">
+										<span className="font-medium">Nuevo</span>
+										<input
+											type="number"
+											min="0"
+											step="1"
+											value={headcountDraft}
+											onChange={(event) =>
+												setHeadcountDraft(event.target.value)
+											}
+											className="w-full rounded-lg border border-(--v2-border) px-2 py-1.5"
+										/>
+									</label>
+								</div>
+								{headcountDeltaPreview != null && headcountDeltaPreview > 0 ? (
+									<div className="mt-2 grid gap-2 md:grid-cols-2">
+										<label className="space-y-1 text-xs">
+											<span className="font-medium">Costo (opcional)</span>
+											<input
+												type="number"
+												min="0"
+												step="0.01"
+												value={headcountAmountDraft}
+												onChange={(event) =>
+													setHeadcountAmountDraft(event.target.value)
+												}
+												placeholder="Ej: 125.50"
+												className="w-full rounded-lg border border-(--v2-border) px-2 py-1.5"
+											/>
+										</label>
+									</div>
+								) : null}
+								{headcountDeltaPreview != null && headcountDeltaPreview < 0 ? (
+									<div className="mt-2 grid gap-2 md:grid-cols-2">
+										<label className="space-y-1 text-xs">
+											<span className="font-medium">Tipo de salida</span>
+											<select
+												value={headcountDecreaseMode}
+												onChange={(event) =>
+													setHeadcountDecreaseMode(
+														event.target.value as "mortality" | "sale",
+													)
+												}
+												className="w-full rounded-lg border border-(--v2-border) px-2 py-1.5"
+											>
+												<option value="mortality">Mortalidad</option>
+												<option value="sale">Venta</option>
+											</select>
+										</label>
+										{headcountDecreaseMode === "sale" ? (
+											<>
+												<label className="space-y-1 text-xs">
+													<span className="font-medium">
+														Ingreso (requerido)
+													</span>
+													<input
+														type="number"
+														min="0"
+														step="0.01"
+														value={headcountAmountDraft}
+														onChange={(event) =>
+															setHeadcountAmountDraft(event.target.value)
+														}
+														placeholder="Ej: 250.00"
+														className="w-full rounded-lg border border-(--v2-border) px-2 py-1.5"
+													/>
+												</label>
+											</>
+										) : null}
+									</div>
+								) : null}
+								{headcountError ? (
+									<p className="mt-2 text-xs text-red-600">{headcountError}</p>
+								) : null}
+								<div className="mt-3 flex items-center gap-2 md:justify-end">
+									<button
+										type="button"
+										onClick={() => void handleApplyHeadcountAdjustment()}
+										disabled={
+											createFlockAcquisitionMutation.isPending ||
+											createFlockSaleMutation.isPending ||
+											createFlockMortalityMutation.isPending
+										}
+										className="rounded-full bg-(--v2-ink) px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+									>
+										{createFlockAcquisitionMutation.isPending ||
+										createFlockSaleMutation.isPending ||
+										createFlockMortalityMutation.isPending
+											? "Aplicando..."
+											: "Aplicar"}
+									</button>
+									<button
+										type="button"
+										onClick={closeHeadcountAdjustment}
+										className="rounded-full border border-(--v2-border) px-3 py-1.5 text-xs font-semibold"
+									>
+										Cancelar
+									</button>
+								</div>
+							</div>
+						) : null}
+					</div>
 				) : null}
 				<MetricCard
-					label="Neto · mes"
+					label={isMaterialAsset ? "Valor neto · mes" : "Neto · mes"}
 					value={formatMoney(netMonth)}
-					note="Calculado con eventos de ingreso y gasto del mes"
+					note={
+						isMaterialAsset
+							? "Calculado con movimientos financieros del activo"
+							: "Calculado con eventos de ingreso y gasto del mes"
+					}
 				/>
 			</div>
 
 			<div className="v2-card p-4">
 				<div className="mb-3 flex items-center justify-between gap-3">
 					<div className="flex items-center gap-2">
-						<p className="v2-kicker">Eventos del lote</p>
+						<p className="v2-kicker">Eventos del activo</p>
 						{hasAssetEvents ? (
 							<select
-								value={selectedEventType ?? "all"}
+								value={effectiveSelectedEventType ?? "all"}
 								onChange={(event) => {
 									const nextValue = event.target.value;
 									if (nextValue === "all") {
@@ -1312,7 +1781,7 @@ export function FlockDetailPage({
 								className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-medium text-(--v2-ink)"
 								aria-label="Filtrar eventos por tipo"
 							>
-								{EVENT_TYPE_FILTER_OPTIONS.map((option) => (
+								{eventTypeFilterOptions.map((option) => (
 									<option
 										key={option.value}
 										value={option.value}
@@ -1323,42 +1792,53 @@ export function FlockDetailPage({
 							</select>
 						) : null}
 					</div>
-					<button
-						type="button"
-						onClick={() => {
-							setIsCreatingEvent((previous) => {
-								const next = !previous;
-								if (!next) setEditingEvent(null);
-								return next;
-							});
-						}}
-						className="inline-flex items-center gap-2 rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
-						aria-label={isCreatingEvent ? "Cerrar" : "Nuevo evento"}
-					>
-						{isCreatingEvent ? (
-							<>
-								<span className="hidden md:inline">Cerrar</span>
-								<span
-									className="md:hidden"
-									aria-hidden="true"
-								>
-									×
-								</span>
-							</>
-						) : (
-							<>
-								<Plus
-									aria-hidden="true"
-									className="h-3.5 w-3.5 md:hidden"
-								/>
-								<span className="hidden md:inline">Nuevo evento</span>
-							</>
-						)}
-					</button>
+					{!isMaterialAsset ? (
+						<button
+							type="button"
+							onClick={() => {
+								setIsCreatingEvent((previous) => {
+									const next = !previous;
+									if (next) {
+										closeMaterialActionPanel();
+									}
+									if (!next) {
+										setEditingEvent(null);
+										setMaterialActionMode(null);
+									}
+									return next;
+								});
+								setMaterialPurchaseError(null);
+								setMaterialConsumptionError(null);
+								setMaterialSaleError(null);
+							}}
+							className="inline-flex items-center gap-2 rounded-full border border-(--v2-ink) px-3 py-1 text-xs font-semibold"
+							aria-label={isCreatingEvent ? "Cerrar" : "Nuevo evento"}
+						>
+							{isCreatingEvent ? (
+								<>
+									<span className="hidden md:inline">Cerrar</span>
+									<span
+										className="md:hidden"
+										aria-hidden="true"
+									>
+										×
+									</span>
+								</>
+							) : (
+								<>
+									<Plus
+										aria-hidden="true"
+										className="h-3.5 w-3.5 md:hidden"
+									/>
+									<span className="hidden md:inline">Nuevo evento</span>
+								</>
+							)}
+						</button>
+					) : null}
 				</div>
 
 				{isCreatingEvent ? (
-					<div className="mb-4 rounded-xl border border-[color:var(--v2-border)] bg-white p-3">
+					<div className="mb-4 rounded-xl border border-(--v2-border) bg-white p-3">
 						<UnitEventForm
 							categories={eventCategories}
 							individuals={allIndividuals}
@@ -1392,7 +1872,7 @@ export function FlockDetailPage({
 												editingEvent.amount != null
 													? Number(editingEvent.amount)
 													: undefined,
-											currency: editingEvent.currency ?? undefined,
+											adjustment: editingEvent.adjustment ?? undefined,
 											notes: editingEvent.notes ?? undefined,
 										}
 									: undefined
@@ -1409,10 +1889,10 @@ export function FlockDetailPage({
 					className="max-h-104 overflow-y-auto pr-1"
 				>
 					<UnitEventTimeline
-						events={timelineEvents}
+						events={visibleTimelineEvents}
 						categories={eventCategories}
-						onEditEvent={handleStartEditEvent}
-						onDeleteEvent={handleDeleteEvent}
+						onEditEvent={isMaterialAsset ? undefined : handleStartEditEvent}
+						onDeleteEvent={isMaterialAsset ? undefined : handleDeleteEvent}
 						deletingEventId={deletingEventId}
 						editingEventId={editingEvent?.id ?? null}
 					/>
@@ -1435,7 +1915,7 @@ export function FlockDetailPage({
 				) : null}
 			</div>
 
-			{asset.mode !== "aggregated" ? (
+			{isAnimalAsset && asset.mode !== "aggregated" ? (
 				<div className="rounded-lg border border-gray-200 bg-white p-6">
 					{isCreatingIndividual ? (
 						<div>

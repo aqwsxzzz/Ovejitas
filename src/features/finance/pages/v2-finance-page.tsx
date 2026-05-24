@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
@@ -6,6 +5,7 @@ import {
 	listEventsByAssetId,
 	listLivestockAssetsByFarmId,
 } from "@/features/livestock/api/livestock-api";
+import { getProfitabilityReport } from "@/features/reports/api/reports-api";
 
 type FinanceMovement = {
 	id: string;
@@ -55,25 +55,56 @@ function monthLabel(): string {
 	});
 }
 
+async function listAllMoneyEventsByAssetId({
+	farmId,
+	assetId,
+}: {
+	farmId: string;
+	assetId: string;
+}) {
+	const events: Awaited<ReturnType<typeof listEventsByAssetId>>["data"] = [];
+	let page = 1;
+	const pageSize = 100;
+
+	while (true) {
+		const response = await listEventsByAssetId({
+			farmId,
+			assetId,
+			filters: { page, pageSize, sort: "-occurred_at" },
+		});
+
+		events.push(
+			...response.data.filter(
+				(event) => event.type === "income" || event.type === "expense",
+			),
+		);
+
+		if (!response.meta.has_next) {
+			break;
+		}
+
+		page = response.meta.page + 1;
+	}
+
+	return events;
+}
+
 async function fetchFinanceSnapshot(farmId: string): Promise<FinanceSnapshot> {
+	const profitabilityReport = await getProfitabilityReport({ farmId });
 	const assetsResponse = await listLivestockAssetsByFarmId({
 		farmId,
-		filters: { kind: "animal", mode: "aggregated", pageSize: 100 },
+		filters: { pageSize: 100 },
 	});
 	const assets = assetsResponse.data;
 
 	const eventResponses = await Promise.all(
 		assets.map((asset) =>
-			listEventsByAssetId({
-				farmId,
-				assetId: String(asset.id),
-				filters: { pageSize: 100, sort: "-occurred_at" },
-			}),
+			listAllMoneyEventsByAssetId({ farmId, assetId: String(asset.id) }),
 		),
 	);
 
 	const allEvents = eventResponses.flatMap((response, index) =>
-		response.data.map((event) => ({
+		response.map((event) => ({
 			event,
 			unitId: assets[index]?.id ?? 0,
 			unitName: assets[index]?.name ?? "Sin unidad",
@@ -85,14 +116,12 @@ async function fetchFinanceSnapshot(farmId: string): Promise<FinanceSnapshot> {
 		return isLoggedEvent(event.payload as Record<string, unknown> | undefined);
 	});
 
-	const income = moneyEvents.reduce(
-		(sum, { event }) =>
-			sum + (event.type === "income" ? Number(event.amount ?? 0) : 0),
+	const income = profitabilityReport.totals.reduce(
+		(sum, row) => sum + Number(row.income_total ?? 0),
 		0,
 	);
-	const expense = moneyEvents.reduce(
-		(sum, { event }) =>
-			sum + (event.type === "expense" ? Number(event.amount ?? 0) : 0),
+	const expense = profitabilityReport.totals.reduce(
+		(sum, row) => sum + Number(row.expense_total ?? 0),
 		0,
 	);
 
@@ -124,13 +153,13 @@ async function fetchFinanceSnapshot(farmId: string): Promise<FinanceSnapshot> {
 			amount: Number(event.amount ?? 0),
 		}));
 
-	const netByUnit = new Map<number, UnitNet>();
-	for (const { event, unitId, unitName } of moneyEvents) {
-		const previous = netByUnit.get(unitId) ?? { unitId, unitName, net: 0 };
-		const amount = Number(event.amount ?? 0);
-		const delta = event.type === "income" ? amount : -amount;
-		netByUnit.set(unitId, { ...previous, net: previous.net + delta });
-	}
+	const ranking = profitabilityReport.data
+		.map((row) => ({
+			unitId: row.asset_id,
+			unitName: row.asset_name,
+			net: Number(row.net ?? 0),
+		}))
+		.sort((a, b) => b.net - a.net);
 
 	return {
 		income,
@@ -140,7 +169,7 @@ async function fetchFinanceSnapshot(farmId: string): Promise<FinanceSnapshot> {
 			.map(([categoryName, total]) => ({ categoryName, total }))
 			.sort((a, b) => b.total - a.total),
 		txns,
-		ranking: Array.from(netByUnit.values()).sort((a, b) => b.net - a.net),
+		ranking,
 	};
 }
 
@@ -174,21 +203,21 @@ export function V2FinancePage() {
 		<section className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold">Finanzas</h1>
-				<span className="rounded-full border border-[color:var(--v2-border)] bg-white px-3 py-1 text-xs font-semibold text-[color:var(--v2-ink-soft)]">
+				<span className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-semibold text-(--v2-ink-soft)">
 					{monthLabel()}
 				</span>
 			</div>
 
 			{!farmId ? (
 				<article className="v2-card p-4">
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="text-sm text-(--v2-ink-soft)">
 						Selecciona una granja para cargar datos financieros reales.
 					</p>
 				</article>
 			) : null}
 
 			<div className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
-				<p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
+				<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
 					neto · mes actual
 				</p>
 				<p className="mt-2 text-5xl font-semibold leading-none">
@@ -217,11 +246,11 @@ export function V2FinancePage() {
 			<article className="v2-card p-4">
 				<p className="v2-kicker mb-2">En que se fue el dinero</p>
 				{isLoading ? (
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="text-sm text-(--v2-ink-soft)">
 						Cargando movimientos...
 					</p>
 				) : summary.costByCategory.length === 0 ? (
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="text-sm text-(--v2-ink-soft)">
 						No hay gastos reales registrados.
 					</p>
 				) : (
@@ -234,9 +263,9 @@ export function V2FinancePage() {
 										{formatCurrency(item.total)}
 									</span>
 								</div>
-								<div className="h-2 overflow-hidden rounded-full bg-[color:var(--v2-border)]">
+								<div className="h-2 overflow-hidden rounded-full bg-(--v2-border)">
 									<div
-										className="h-full rounded-full bg-[color:var(--v2-primary)]"
+										className="h-full rounded-full bg-(--v2-primary)"
 										style={{
 											width: `${Math.max((item.total / maxCategory) * 100, item.total > 0 ? 12 : 0)}%`,
 										}}
@@ -258,7 +287,7 @@ export function V2FinancePage() {
 						<p className="mt-1 font-semibold">
 							{bestUnit?.unitName ?? "Sin datos"}
 						</p>
-						<p className="text-sm text-[color:var(--v2-ink-soft)]">
+						<p className="text-sm text-(--v2-ink-soft)">
 							{bestUnit ? formatSignedCurrency(bestUnit.net) : "—"}
 						</p>
 					</div>
@@ -269,7 +298,7 @@ export function V2FinancePage() {
 						<p className="mt-1 font-semibold">
 							{worstUnit?.unitName ?? "Sin datos"}
 						</p>
-						<p className="text-sm text-[color:var(--v2-ink-soft)]">
+						<p className="text-sm text-(--v2-ink-soft)">
 							{worstUnit ? formatSignedCurrency(worstUnit.net) : "—"}
 						</p>
 					</div>
@@ -279,35 +308,21 @@ export function V2FinancePage() {
 			<article className="v2-card p-4">
 				<div className="mb-2 flex items-center justify-between">
 					<p className="v2-kicker">Movimientos recientes</p>
-					<Link
-						to="/v2/log"
-						search={{
-							actionId: "nuevo-movimiento",
-							actionLabel: "Nuevo movimiento",
-							contextLabel: "Finanzas",
-							sourcePath: "/v2/finance",
-						}}
-						className="rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
-					>
-						Nuevo movimiento
-					</Link>
 				</div>
 				<div className="space-y-2">
 					{summary.txns.length === 0 ? (
-						<p className="text-sm text-[color:var(--v2-ink-soft)]">
-							Sin movimientos.
-						</p>
+						<p className="text-sm text-(--v2-ink-soft)">Sin movimientos.</p>
 					) : (
 						summary.txns.map((event) => (
 							<div
 								key={event.id}
-								className="flex items-center justify-between rounded-lg border border-[color:var(--v2-border)] px-3 py-2"
+								className="flex items-center justify-between rounded-lg border border-(--v2-border) px-3 py-2"
 							>
 								<div className="min-w-0">
 									<p className="truncate text-sm font-medium leading-tight">
 										{event.notes}
 									</p>
-									<p className="text-xs text-[color:var(--v2-ink-soft)]">
+									<p className="text-xs text-(--v2-ink-soft)">
 										{new Date(event.occurredAt).toLocaleDateString("es-EC")}
 									</p>
 								</div>

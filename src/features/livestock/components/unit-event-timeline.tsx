@@ -13,15 +13,15 @@ interface UnitEventTimelineProps {
 }
 
 function canEditEvent(event: ILivestockEvent): boolean {
-	return event.type !== "reproductive" && !isChainedLegEvent(event);
+	return event.type !== "reproductive" && !isActionOwnedEvent(event);
 }
 
 function canDeleteEvent(event: ILivestockEvent): boolean {
-	return !isChainedLegEvent(event);
+	return !isActionOwnedEvent(event);
 }
 
-function isChainedLegEvent(event: ILivestockEvent): boolean {
-	return typeof event.payload.chain_role === "string";
+function isActionOwnedEvent(event: ILivestockEvent): boolean {
+	return typeof event.payload.source === "string";
 }
 
 function eventTypeLabel(type: ILivestockEvent["type"]): string {
@@ -80,7 +80,7 @@ export function UnitEventTimeline({
 }: UnitEventTimelineProps) {
 	if (events.length === 0) {
 		return (
-			<p className="text-sm text-[color:var(--v2-ink-soft)]">
+			<p className="text-sm text-(--v2-ink-soft)">
 				No hay eventos registrados para este lote.
 			</p>
 		);
@@ -92,22 +92,22 @@ export function UnitEventTimeline({
 				const status = getEventStatus(event);
 				const isDeleting = deletingEventId === event.id;
 				const isEditing = editingEventId === event.id;
-				const isChainedLeg = isChainedLegEvent(event);
+				const isActionOwned = isActionOwnedEvent(event);
 				return (
 					<article
 						key={event.id}
-						className="rounded-xl border border-[color:var(--v2-border)] bg-white px-3 py-2"
+						className="rounded-xl border border-(--v2-border) bg-white px-3 py-2"
 					>
 						<div className="flex items-center justify-between gap-2">
 							<p className="text-sm font-semibold leading-tight">
 								{categoryLabel(categories, event.category_id)}
 							</p>
-							<span className="text-xs text-[color:var(--v2-ink-soft)]">
+							<span className="text-xs text-(--v2-ink-soft)">
 								{formatEventDate(event.occurred_at)}
 							</span>
 						</div>
-						<div className="mt-1 flex items-center gap-2 text-xs text-[color:var(--v2-ink-soft)]">
-							<span className="rounded-full border border-[color:var(--v2-border)] px-2 py-0.5">
+						<div className="mt-1 flex items-center gap-2 text-xs text-(--v2-ink-soft)">
+							<span className="rounded-full border border-(--v2-border) px-2 py-0.5">
 								{eventTypeLabel(event.type)}
 							</span>
 							<span
@@ -127,16 +127,14 @@ export function UnitEventTimeline({
 									Monto: ${Number(event.amount)} {event.currency ?? ""}
 								</span>
 							) : null}
-							{isChainedLeg ? (
+							{isActionOwned ? (
 								<span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
-									Encadenado
+									Gestionado por accion
 								</span>
 							) : null}
 						</div>
 						{event.notes ? (
-							<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-								{event.notes}
-							</p>
+							<p className="mt-1 text-sm text-(--v2-ink-soft)">{event.notes}</p>
 						) : null}
 						{onEditEvent || onDeleteEvent ? (
 							<div className="mt-3 flex items-center gap-2">
@@ -144,7 +142,7 @@ export function UnitEventTimeline({
 									<button
 										type="button"
 										onClick={() => onEditEvent(event)}
-										className="rounded-full border border-[color:var(--v2-border)] px-3 py-1 text-xs font-semibold"
+										className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 									>
 										{isEditing ? "Editando" : "Editar"}
 									</button>

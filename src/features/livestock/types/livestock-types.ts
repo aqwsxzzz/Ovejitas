@@ -20,7 +20,10 @@ export type LivestockEventType =
 	| "observation"
 	| "reproductive"
 	| "acquisition"
-	| "mortality";
+	| "mortality"
+	| "inventory";
+
+export type InventoryAdjustment = "increment" | "decrement" | "reset";
 
 export type LivestockEventStatus = "logged" | "planned";
 
@@ -32,6 +35,7 @@ export interface ILivestockAsset {
 	mode: LivestockAssetMode;
 	location: string | null;
 	description: string | null;
+	produce_asset_id: number | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -75,10 +79,69 @@ export interface ILivestockEvent {
 	amount: string | null;
 	currency: string | null;
 	notes: string | null;
+	adjustment: InventoryAdjustment | null;
 	payload: Record<string, unknown>;
 	created_by: number;
 	created_at: string;
 	updated_at: string;
+}
+
+export interface IInventoryBalanceRow {
+	unit: LivestockEventUnit;
+	on_hand: string;
+	last_reset_at: string | null;
+}
+
+export interface IInventoryBalance {
+	asset_id: number;
+	balances: IInventoryBalanceRow[];
+}
+
+export type MaterialConsumptionReason = "feeding" | "waste" | "spoilage";
+
+export interface IMaterialPurchaseRead {
+	id: number;
+	farm_id: number;
+	material_asset_id: number;
+	inventory_event_id: number;
+	expense_event_id: number;
+	occurred_at: string;
+	quantity: string;
+	unit: LivestockEventUnit;
+	amount: string;
+	currency: string;
+	supplier: string | null;
+	notes: string | null;
+	meta: Record<string, unknown>;
+	idempotency_key: string | null;
+	created_by: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface IMaterialConsumptionRead {
+	id: number;
+	farm_id: number;
+	material_asset_id: number;
+	consumer_asset_id: number | null;
+	individual_id: number | null;
+	inventory_event_id: number;
+	occurred_at: string;
+	quantity: string;
+	unit: LivestockEventUnit;
+	reason: MaterialConsumptionReason;
+	notes: string | null;
+	meta: Record<string, unknown>;
+	idempotency_key: string | null;
+	created_by: number;
+	created_at: string;
+	updated_at: string;
+}
+
+export interface IMaterialSaleRead {
+	inventory_event_id: number;
+	income_event_id: number;
+	on_hand: string;
 }
 
 export interface ILivestockPageMeta {
@@ -105,6 +168,16 @@ export interface ILivestockEventListResponse {
 
 export interface ILivestockEventCategoryListResponse {
 	data: ILivestockEventCategory[];
+	meta: ILivestockPageMeta;
+}
+
+export interface IMaterialPurchaseListResponse {
+	data: IMaterialPurchaseRead[];
+	meta: ILivestockPageMeta;
+}
+
+export interface IMaterialConsumptionListResponse {
+	data: IMaterialConsumptionRead[];
 	meta: ILivestockPageMeta;
 }
 

@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCreateFlockEvent } from "@/features/flock/api/flock-queries";
+import {
+	useCreateFlockAcquisition,
+	useCreateFlockMortality,
+} from "@/features/flock/api/flock-queries";
 import type { IFlock } from "@/features/flock/types/flock-types";
 import { cn } from "@/lib/utils";
 import { Minus, Pencil, Plus } from "lucide-react";
@@ -33,7 +36,11 @@ export const UpdateFlockCountModal = ({
 	const { t } = useTranslation("flocks");
 	const [isEditing, setIsEditing] = useState(false);
 	const [countValue, setCountValue] = useState(String(flock.currentCount));
-	const { mutateAsync: createFlockEvent, isPending } = useCreateFlockEvent();
+	const { mutateAsync: createFlockAcquisition, isPending: isAcquiring } =
+		useCreateFlockAcquisition();
+	const { mutateAsync: createFlockMortality, isPending: isApplyingMortality } =
+		useCreateFlockMortality();
+	const isPending = isAcquiring || isApplyingMortality;
 
 	const parsedCount = parseCountValue(countValue);
 	const isValueValid = Number.isFinite(parsedCount);
@@ -56,17 +63,27 @@ export const UpdateFlockCountModal = ({
 			return;
 		}
 
+		const payload = {
+			occurred_at: new Date().toISOString(),
+			quantity: Math.abs(deltaCount),
+		};
+
 		try {
-			const response = await createFlockEvent({
-				flockId: flock.id,
-				farmId,
-				payload: {
-					eventType: deltaCount > 0 ? "addition" : "mortality",
-					count: Math.abs(deltaCount),
-					date: new Date().toISOString().slice(0, 10),
-					reason: t("countEditor.adjustmentReason"),
-				},
-			});
+			const response =
+				deltaCount > 0
+					? await createFlockAcquisition({
+							assetId: flock.id,
+							farmId,
+							payload,
+						})
+					: await createFlockMortality({
+							assetId: flock.id,
+							farmId,
+							payload: {
+								...payload,
+								cause: t("countEditor.adjustmentReason"),
+							},
+						});
 
 			if (response.status === "success") {
 				setIsEditing(false);

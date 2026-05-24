@@ -12,6 +12,13 @@ export interface QuickActionSheetConfig {
 	actions: QuickActionItem[];
 }
 
+type AssetQuickActionKind =
+	| "animal"
+	| "crop"
+	| "equipment"
+	| "material"
+	| "location";
+
 function makeAction(
 	id: string,
 	label: string,
@@ -57,7 +64,51 @@ function dashboardActions(): QuickActionItem[] {
 	];
 }
 
-function livestockActions(): QuickActionItem[] {
+function livestockActions(kind?: AssetQuickActionKind): QuickActionItem[] {
+	if (kind === "material") {
+		return [
+			makeAction(
+				"nuevo-material",
+				"Nuevo material",
+				"Crear un activo de inventario",
+				"📦",
+			),
+		];
+	}
+
+	if (kind === "crop") {
+		return [
+			makeAction(
+				"nuevo-cultivo",
+				"Nuevo cultivo",
+				"Crear un activo de cultivo",
+				"🌱",
+			),
+		];
+	}
+
+	if (kind === "equipment") {
+		return [
+			makeAction(
+				"nuevo-equipo",
+				"Nuevo equipo",
+				"Crear un activo de equipo",
+				"🔧",
+			),
+		];
+	}
+
+	if (kind === "location") {
+		return [
+			makeAction(
+				"nueva-ubicacion",
+				"Nueva ubicacion",
+				"Crear un activo de ubicacion",
+				"📍",
+			),
+		];
+	}
+
 	return [
 		makeAction("nuevo-animal", "Nuevo animal", "Agregar animal", "🐑"),
 		makeAction("nuevo-lote", "Nuevo lote", "Crear lote o parvada", "🐔"),
@@ -152,8 +203,46 @@ function toHumanSlug(value: string): string {
 	return value.replace(/[-_]+/g, " ").trim();
 }
 
+function resolveAssetKindFromSourcePath(
+	sourcePath?: string,
+): AssetQuickActionKind | undefined {
+	if (!sourcePath) return undefined;
+	const queryIndex = sourcePath.indexOf("?");
+	if (queryIndex === -1) return undefined;
+
+	const query = sourcePath.slice(queryIndex + 1);
+	const kind = new URLSearchParams(query).get("kind");
+	if (
+		kind === "animal" ||
+		kind === "crop" ||
+		kind === "equipment" ||
+		kind === "material" ||
+		kind === "location"
+	) {
+		return kind;
+	}
+
+	return undefined;
+}
+
+function resolveAssetKind(value?: string): AssetQuickActionKind | undefined {
+	if (
+		value === "animal" ||
+		value === "crop" ||
+		value === "equipment" ||
+		value === "material" ||
+		value === "location"
+	) {
+		return value;
+	}
+
+	return undefined;
+}
+
 export function getQuickActionSheetConfig(
 	pathname: string,
+	sourcePath?: string,
+	assetKindContext?: string,
 ): QuickActionSheetConfig {
 	if (pathname.startsWith("/v2/production-units/flock/")) {
 		const unitId = decodeLastSegment(pathname) ?? "";
@@ -187,10 +276,46 @@ export function getQuickActionSheetConfig(
 		pathname === "/v2/production-units" ||
 		pathname === "/v2/production-units/"
 	) {
+		const selectedKind =
+			resolveAssetKind(assetKindContext) ??
+			resolveAssetKindFromSourcePath(sourcePath);
+		const titleByKind: Partial<Record<AssetQuickActionKind, string>> = {
+			animal: "Acciones de ganado",
+			material: "Acciones de materiales",
+			crop: "Acciones de cultivos",
+			equipment: "Acciones de equipos",
+			location: "Acciones de ubicaciones",
+		};
+		const descriptionByKind: Partial<Record<AssetQuickActionKind, string>> = {
+			animal: "Crear o registrar desde el modulo de ganado.",
+			material: "Crear materiales para inventario.",
+			crop: "Crear activos para seguimiento de cultivos.",
+			equipment: "Crear activos para seguimiento de equipos.",
+			location: "Crear activos para organizar ubicaciones.",
+		};
+
 		return {
-			title: "Acciones de ganado",
-			description: "Crear o registrar desde el modulo de ganado.",
-			actions: livestockActions(),
+			title: titleByKind[selectedKind ?? "animal"] ?? "Acciones de activos",
+			description:
+				descriptionByKind[selectedKind ?? "animal"] ??
+				"Crear o registrar desde el modulo de activos.",
+			actions: livestockActions(selectedKind),
+		};
+	}
+
+	if (pathname === "/v2/inventory" || pathname === "/v2/inventory/") {
+		return {
+			title: "Acciones de materiales",
+			description: "Crear materiales para inventario.",
+			actions: livestockActions("material"),
+		};
+	}
+
+	if (pathname.startsWith("/v2/inventory/materials/")) {
+		return {
+			title: "Acciones de material",
+			description: "Crear materiales o registrar cambios de inventario.",
+			actions: livestockActions("material"),
 		};
 	}
 

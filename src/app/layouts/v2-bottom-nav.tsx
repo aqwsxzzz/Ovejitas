@@ -8,7 +8,7 @@ const items = [
 	{ to: "/v2/dashboard", label: "Inicio", icon: Home, kind: "normal" as const },
 	{
 		to: "/v2/production-units",
-		label: "Ganado",
+		label: "Activos",
 		icon: ClipboardList,
 		kind: "normal" as const,
 	},
@@ -25,6 +25,14 @@ const items = [
 export function V2BottomNav() {
 	const location = useLocation();
 	const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
+	const sourcePath =
+		typeof window === "undefined"
+			? location.pathname
+			: `${location.pathname}${window.location.search}`;
+	const selectedAssetKind =
+		typeof window === "undefined"
+			? undefined
+			: (window.sessionStorage.getItem("v2-active-asset-kind") ?? undefined);
 
 	return (
 		<>
@@ -85,6 +93,8 @@ export function V2BottomNav() {
 				open={isQuickActionsOpen}
 				onOpenChange={setIsQuickActionsOpen}
 				pathname={location.pathname}
+				sourcePath={sourcePath}
+				assetKindContext={selectedAssetKind}
 			/>
 		</>
 	);

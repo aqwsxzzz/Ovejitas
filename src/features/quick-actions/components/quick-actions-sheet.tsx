@@ -10,6 +10,8 @@ interface QuickActionsSheetProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	pathname: string;
+	sourcePath?: string;
+	assetKindContext?: string;
 }
 
 function ActionCard(props: {
@@ -39,9 +41,15 @@ export function QuickActionsSheet({
 	open,
 	onOpenChange,
 	pathname,
+	sourcePath,
+	assetKindContext,
 }: QuickActionsSheetProps) {
 	const navigate = useNavigate();
-	const config = getQuickActionSheetConfig(pathname);
+	const config = getQuickActionSheetConfig(
+		pathname,
+		sourcePath,
+		assetKindContext,
+	);
 
 	function handleSelect(action: QuickActionItem) {
 		onOpenChange(false);
@@ -51,7 +59,7 @@ export function QuickActionsSheet({
 				actionId: action.id,
 				actionLabel: action.label,
 				contextLabel: config.contextLabel,
-				sourcePath: pathname,
+				sourcePath: sourcePath ?? pathname,
 			},
 		});
 	}

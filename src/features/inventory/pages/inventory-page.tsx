@@ -1,32 +1,22 @@
 import { useState } from "react";
-import { MapPin } from "lucide-react";
-
+import { MapPin, Package } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
+	useDeleteLivestockAssetById,
 	useListLivestockAssetsByFarmId,
 	useUpdateLivestockAssetById,
-	useDeleteLivestockAssetById,
 } from "@/features/livestock/api/livestock-queries";
-import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
-import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
 interface SearchBarProps {
 	value: string;
 	onChange: (value: string) => void;
-	placeholder: string;
-	ariaLabel: string;
 }
 
-function SearchBar({
-	value,
-	onChange,
-	placeholder,
-	ariaLabel,
-}: SearchBarProps) {
+function SearchBar({ value, onChange }: SearchBarProps) {
 	return (
-		<div className="flex items-center gap-2 rounded-xl border border-dashed border-[color:var(--v2-border)] bg-white px-3 py-2.5">
+		<div className="flex items-center gap-2 rounded-xl border border-dashed border-(--v2-border) bg-white px-3 py-2.5">
 			<span
 				className="text-base"
 				aria-hidden="true"
@@ -37,67 +27,33 @@ function SearchBar({
 				type="search"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
-				placeholder={placeholder}
-				className="flex-1 bg-transparent text-sm outline-none placeholder:text-[color:var(--v2-ink-soft)]"
-				aria-label={ariaLabel}
+				placeholder="Buscar material por nombre o ubicacion..."
+				className="flex-1 bg-transparent text-sm outline-none placeholder:text-(--v2-ink-soft)"
+				aria-label="Buscar materiales"
 			/>
 		</div>
 	);
 }
 
-const ASSET_KIND_OPTIONS: Array<{
-	kind: LivestockAssetKind;
-	label: string;
-	title: string;
-	pluralLabel: string;
-}> = [
-	{ kind: "animal", label: "Animal", title: "Ganado", pluralLabel: "lotes" },
-	{
-		kind: "material",
-		label: "Material",
-		title: "Materiales",
-		pluralLabel: "materiales",
-	},
-	{
-		kind: "crop",
-		label: "Cultivo",
-		title: "Cultivos",
-		pluralLabel: "cultivos",
-	},
-	{
-		kind: "equipment",
-		label: "Equipo",
-		title: "Equipos",
-		pluralLabel: "equipos",
-	},
-	{
-		kind: "location",
-		label: "Ubicacion",
-		title: "Ubicaciones",
-		pluralLabel: "ubicaciones",
-	},
-];
-
-function LivestockUnitRow(props: {
+function MaterialAssetRow(props: {
 	id: number;
 	name: string;
-	kind: LivestockAssetKind;
 	location: string | null;
 	description: string | null;
 	mode: "aggregated" | "individual";
 	isEditing: boolean;
+	isDeleting: boolean;
+	isSaving: boolean;
 	editName: string;
 	editLocation: string;
 	editDescription: string;
 	onStartEdit: () => void;
 	onCancelEdit: () => void;
+	onSaveEdit: () => Promise<void>;
+	onDelete: () => Promise<void>;
 	onChangeName: (value: string) => void;
 	onChangeLocation: (value: string) => void;
 	onChangeDescription: (value: string) => void;
-	onSaveEdit: () => Promise<void>;
-	onDelete: () => Promise<void>;
-	isDeleting: boolean;
-	isSaving: boolean;
 }) {
 	const navigate = useNavigate();
 	const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -110,15 +66,15 @@ function LivestockUnitRow(props: {
 						type="text"
 						value={props.editName}
 						onChange={(event) => props.onChangeName(event.target.value)}
-						placeholder="Nombre del lote"
-						className="rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
+						placeholder="Nombre del material"
+						className="rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
 					/>
 					<input
 						type="text"
 						value={props.editLocation}
 						onChange={(event) => props.onChangeLocation(event.target.value)}
 						placeholder="Ubicacion"
-						className="rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
+						className="rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
 					/>
 				</div>
 				<textarea
@@ -126,14 +82,14 @@ function LivestockUnitRow(props: {
 					onChange={(event) => props.onChangeDescription(event.target.value)}
 					placeholder="Descripcion"
 					rows={3}
-					className="w-full rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
+					className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
 				/>
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
 						onClick={() => void props.onSaveEdit()}
 						disabled={props.isSaving}
-						className="rounded-full bg-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold text-white"
+						className="rounded-full bg-(--v2-ink) px-3 py-1 text-xs font-semibold text-white"
 					>
 						{props.isSaving ? "Guardando..." : "Guardar"}
 					</button>
@@ -141,7 +97,7 @@ function LivestockUnitRow(props: {
 						type="button"
 						onClick={props.onCancelEdit}
 						disabled={props.isSaving}
-						className="rounded-full border border-[color:var(--v2-border)] px-3 py-1 text-xs font-semibold"
+						className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 					>
 						Cancelar
 					</button>
@@ -152,16 +108,9 @@ function LivestockUnitRow(props: {
 
 	const openDetail = () => {
 		if (isConfirmingDelete) return;
-		if (typeof window !== "undefined") {
-			window.sessionStorage.setItem("v2-active-asset-kind", props.kind);
-		}
-
 		navigate({
-			to: "/v2/production-units/flock/$unitId",
-			params: { unitId: String(props.id) },
-			search: {
-				eventType: props.kind === "material" ? "inventory" : undefined,
-			},
+			to: "/v2/inventory/materials/$materialId",
+			params: { materialId: String(props.id) },
 		});
 	};
 
@@ -172,7 +121,6 @@ function LivestockUnitRow(props: {
 			onClick={openDetail}
 			onKeyDown={(event) => {
 				if (isConfirmingDelete) return;
-
 				if (event.key === "Enter" || event.key === " ") {
 					event.preventDefault();
 					openDetail();
@@ -182,7 +130,13 @@ function LivestockUnitRow(props: {
 		>
 			<div className="flex items-center justify-between gap-3">
 				<div className="flex min-w-0 items-start gap-3">
-					<AssetKindMedal kind={props.kind} />
+					<div
+						className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-700 ring-1 ring-orange-200"
+						aria-label="Material"
+						title="Material"
+					>
+						<Package className="h-5 w-5" />
+					</div>
 					<div className="min-w-0">
 						<div className="flex flex-wrap items-center gap-2">
 							<p className="font-semibold leading-tight">{props.name}</p>
@@ -197,8 +151,8 @@ function LivestockUnitRow(props: {
 							</span>
 						</div>
 						<div className="mt-1 flex items-center gap-1">
-							<MapPin className="h-4 w-4 flex-shrink-0 text-[color:var(--v2-ink-soft)]" />
-							<p className="text-sm text-[color:var(--v2-ink-soft)]">
+							<MapPin className="h-4 w-4 shrink-0 text-(--v2-ink-soft)" />
+							<p className="text-sm text-(--v2-ink-soft)">
 								{props.location ?? "Sin ubicacion"}
 							</p>
 						</div>
@@ -242,7 +196,7 @@ function LivestockUnitRow(props: {
 					onClick={(event) => event.stopPropagation()}
 				>
 					<p className="text-sm font-medium text-red-700">
-						Eliminar este lote?
+						Eliminar este material?
 					</p>
 					<div className="flex items-center gap-2">
 						<button
@@ -268,24 +222,8 @@ function LivestockUnitRow(props: {
 	);
 }
 
-export function LivestockPage() {
+export function InventoryPage() {
 	const [query, setQuery] = useState("");
-	const [selectedKind, setSelectedKind] = useState<
-		LivestockAssetKind | undefined
-	>(() => {
-		if (typeof window === "undefined") return undefined;
-		const storedKind = window.sessionStorage.getItem("v2-active-asset-kind");
-		if (
-			storedKind === "animal" ||
-			storedKind === "material" ||
-			storedKind === "crop" ||
-			storedKind === "equipment" ||
-			storedKind === "location"
-		) {
-			return storedKind;
-		}
-		return undefined;
-	});
 	const [editingAssetId, setEditingAssetId] = useState<number | null>(null);
 	const [editName, setEditName] = useState("");
 	const [editLocation, setEditLocation] = useState("");
@@ -294,26 +232,22 @@ export function LivestockPage() {
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
 
-	const { data: farmAssetsResponse, isLoading } =
+	const { data: materialAssetsResponse, isLoading } =
 		useListLivestockAssetsByFarmId({
 			farmId,
 			filters: {
 				q: query.trim() || undefined,
 				sort: "-updated_at",
-				kind: selectedKind,
+				kind: "material",
 				page: 1,
 				pageSize: 20,
 			},
-			enabled: !!farmId && !!selectedKind,
+			enabled: !!farmId,
 		});
 
 	const updateAssetMutation = useUpdateLivestockAssetById();
 	const deleteAssetMutation = useDeleteLivestockAssetById();
-	const activeKindMeta =
-		ASSET_KIND_OPTIONS.find((option) => option.kind === selectedKind) ??
-		ASSET_KIND_OPTIONS[0]!;
-
-	const units = farmAssetsResponse?.data ?? [];
+	const materials = materialAssetsResponse?.data ?? [];
 
 	const handleStartEdit = (
 		id: number,
@@ -361,58 +295,10 @@ export function LivestockPage() {
 		return (
 			<section className="space-y-4">
 				<div className="v2-card p-5">
-					<h1 className="text-2xl font-semibold">Activos</h1>
-					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-						Selecciona una granja para cargar datos reales.
+					<h1 className="text-2xl font-semibold">Inventario</h1>
+					<p className="mt-1 text-sm text-(--v2-ink-soft)">
+						Selecciona una granja para cargar materiales reales.
 					</p>
-				</div>
-			</section>
-		);
-	}
-
-	if (!selectedKind) {
-		return (
-			<section className="space-y-4">
-				<div className="v2-card p-5">
-					<h1 className="text-2xl font-semibold">Activos</h1>
-					<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-						Elige el tipo de activo que quieres administrar.
-					</p>
-				</div>
-
-				<div className="space-y-2">
-					{ASSET_KIND_OPTIONS.map((option) => (
-						<button
-							key={option.kind}
-							type="button"
-							onClick={() => {
-								setSelectedKind(option.kind);
-								if (typeof window !== "undefined") {
-									window.sessionStorage.setItem(
-										"v2-active-asset-kind",
-										option.kind,
-									);
-								}
-							}}
-							className="v2-card flex w-full items-center justify-between p-4 text-left transition hover:-translate-y-px"
-						>
-							<div className="flex items-center gap-3">
-								<AssetKindMedal kind={option.kind} />
-								<div>
-									<p className="text-base font-semibold">{option.title}</p>
-									<p className="text-sm text-[color:var(--v2-ink-soft)]">
-										Ver y gestionar {option.pluralLabel}
-									</p>
-								</div>
-							</div>
-							<span
-								className="text-xl leading-none text-[color:var(--v2-ink-soft)]"
-								aria-hidden="true"
-							>
-								›
-							</span>
-						</button>
-					))}
 				</div>
 			</section>
 		);
@@ -422,76 +308,57 @@ export function LivestockPage() {
 		<section className="space-y-4">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-semibold">Activos</h1>
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						{farmAssetsResponse?.meta.total ?? units.length}{" "}
-						{activeKindMeta.pluralLabel}
+					<p className="v2-kicker">Inventario</p>
+					<h1 className="mt-1 text-2xl font-semibold">Materiales</h1>
+					<p className="text-sm text-(--v2-ink-soft)">
+						{materialAssetsResponse?.meta.total ?? materials.length} materiales
 					</p>
 				</div>
-				<button
-					type="button"
-					onClick={() => {
-						setSelectedKind(undefined);
-						if (typeof window !== "undefined") {
-							window.sessionStorage.removeItem("v2-active-asset-kind");
-						}
-						setQuery("");
-					}}
-					className="rounded-full border border-[color:var(--v2-border)] bg-white px-3 py-1.5 text-xs font-semibold"
-				>
-					Cambiar tipo
-				</button>
 			</div>
 
 			<SearchBar
 				value={query}
 				onChange={setQuery}
-				placeholder={`Buscar ${activeKindMeta.title.toLowerCase()} por nombre o ubicacion...`}
-				ariaLabel={`Buscar ${activeKindMeta.title.toLowerCase()} por nombre o ubicacion`}
 			/>
 
 			{isLoading ? (
-				<p className="text-sm text-[color:var(--v2-ink-soft)]">
-					Cargando {activeKindMeta.title.toLowerCase()}...
-				</p>
-			) : units.length === 0 ? (
-				<p className="text-sm text-[color:var(--v2-ink-soft)]">
-					No hay {activeKindMeta.title.toLowerCase()} reales que coincidan con "
-					{query}".
+				<p className="text-sm text-(--v2-ink-soft)">Cargando materiales...</p>
+			) : materials.length === 0 ? (
+				<p className="text-sm text-(--v2-ink-soft)">
+					No hay materiales reales que coincidan con "{query}".
 				</p>
 			) : (
 				<div className="space-y-2">
-					{units.map((unit) => (
-						<LivestockUnitRow
-							key={unit.id}
-							id={unit.id}
-							name={unit.name}
-							kind={unit.kind}
-							location={unit.location}
-							description={unit.description}
-							mode={unit.mode}
-							isEditing={editingAssetId === unit.id}
+					{materials.map((material) => (
+						<MaterialAssetRow
+							key={material.id}
+							id={material.id}
+							name={material.name}
+							location={material.location}
+							description={material.description}
+							mode={material.mode}
+							isEditing={editingAssetId === material.id}
+							isDeleting={deletingAssetId === material.id}
+							isSaving={
+								updateAssetMutation.isPending && editingAssetId === material.id
+							}
 							editName={editName}
 							editLocation={editLocation}
 							editDescription={editDescription}
 							onStartEdit={() =>
 								handleStartEdit(
-									unit.id,
-									unit.name,
-									unit.location,
-									unit.description,
+									material.id,
+									material.name,
+									material.location,
+									material.description,
 								)
 							}
 							onCancelEdit={() => setEditingAssetId(null)}
+							onSaveEdit={handleSaveEdit}
+							onDelete={() => handleDeleteAsset(material.id)}
 							onChangeName={setEditName}
 							onChangeLocation={setEditLocation}
 							onChangeDescription={setEditDescription}
-							onSaveEdit={handleSaveEdit}
-							onDelete={() => handleDeleteAsset(unit.id)}
-							isDeleting={deletingAssetId === unit.id}
-							isSaving={
-								updateAssetMutation.isPending && editingAssetId === unit.id
-							}
 						/>
 					))}
 				</div>

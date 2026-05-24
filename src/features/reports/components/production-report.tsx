@@ -1,10 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-	useGetProductionReport,
-	useGetProfitabilityReport,
-} from "@/features/reports/api/reports-queries";
+import { useGetAggregateReport } from "@/features/reports/api/reports-queries";
 import type {
 	ProductionBucket,
 	EventType,
@@ -24,13 +21,14 @@ interface ProductionReportProps {
 
 const formatEventType = (type: EventType): string => {
 	const map: Record<EventType, string> = {
-		production: "Producción",
-		observation: "Observación",
+		production: "Produccion",
+		observation: "Observacion",
 		expense: "Gasto",
 		income: "Ingreso",
-		reproductive: "Reproducción",
-		acquisition: "Adquisición",
+		reproductive: "Reproduccion",
+		acquisition: "Adquisicion",
 		mortality: "Mortalidad",
+		inventory: "Inventario",
 	};
 	return map[type];
 };
@@ -41,8 +39,6 @@ const formatBucketStart = (isoDate: string): string => {
 			year: "numeric",
 			month: "2-digit",
 			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
 		}).format(new Date(isoDate));
 	} catch {
 		return isoDate;
@@ -52,6 +48,35 @@ const formatBucketStart = (isoDate: string): string => {
 const parseDecimal = (value: string | null | undefined): number => {
 	if (!value) return 0;
 	return parseFloat(value);
+};
+
+const isWholeUnitEventType = (eventType: EventType): boolean =>
+	eventType === "mortality" ||
+	eventType === "acquisition" ||
+	eventType === "reproductive";
+
+const formatMeasureLabel = (measure: string): string => {
+	if (measure === "sum_quantity") return "Cantidad total";
+	if (measure === "sum_amount") return "Monto total";
+	if (measure === "count") return "Conteo";
+	return measure;
+};
+
+const formatGroupLabel = (groupKey: string | null | undefined): string => {
+	if (groupKey === "unit") return "Unidad";
+	if (groupKey === "currency") return "Moneda";
+	if (groupKey === "asset") return "Activo";
+	return "Grupo";
+};
+
+const formatValue = (value: number, asInteger: boolean): string => {
+	if (asInteger) {
+		return new Intl.NumberFormat(undefined, {
+			maximumFractionDigits: 0,
+		}).format(Math.round(value));
+	}
+
+	return value.toFixed(2);
 };
 
 export const ProductionReport = ({
@@ -64,13 +89,17 @@ export const ProductionReport = ({
 	assetId,
 }: ProductionReportProps) => {
 	const unitFilter = eventType === "production" ? unit : undefined;
+	const groupByAsset =
+		eventType === "mortality" || eventType === "acquisition"
+			? "asset"
+			: undefined;
 
 	const {
 		data: report,
 		isPending,
 		isError,
 		error,
-	} = useGetProductionReport({
+	} = useGetAggregateReport({
 		farmId,
 		bucket,
 		type: eventType,
@@ -78,82 +107,76 @@ export const ProductionReport = ({
 		date_to: dateTo,
 		asset_id: assetId,
 		unit: unitFilter,
+		group_by: groupByAsset,
 	});
-
-	// Also fetch profitability to get asset names as reference
-	const { data: profitability } = useGetProfitabilityReport({
-		farmId,
-		date_from: dateFrom,
-		date_to: dateTo,
-		asset_id: assetId,
-	});
-
-	const assetNameMap = useMemo(() => {
-		if (!profitability?.data) return {};
-		return profitability.data.reduce(
-			(acc, row) => {
-				acc[row.asset_id] = row.asset_name;
-				return acc;
-			},
-			{} as Record<number, string>,
-		);
-	}, [profitability?.data]);
 
 	const apiError = error instanceof ApiRequestError ? error : null;
 	const hasDateRangeFilter = !!dateFrom || !!dateTo;
 	const periodsWithRecords = report?.data?.length ?? 0;
+	const hasGroupData = (report?.data ?? []).some(
+		(row) => !!row.group || !!row.group_label,
+	);
+	const shouldDisplayWholeUnits =
+		isWholeUnitEventType(eventType) || report?.meta.measure === "count";
 
-	const totalsByUnit = useMemo(() => {
+	const totalsByGroup = useMemo(() => {
 		if (!report?.data) return [];
-
-		if (report.totals && report.totals.length > 0) {
-			return report.totals.map((item) => ({
-				unit: item.unit,
-				total: parseDecimal(item.total),
-			}));
-		}
 
 		const grouped = report.data.reduce(
 			(acc, row) => {
-				acc[row.unit] = (acc[row.unit] ?? 0) + parseDecimal(row.total);
+				const groupKey = row.group_label ?? row.group ?? "Sin grupo";
+				acc[groupKey] = (acc[groupKey] ?? 0) + parseDecimal(row.value);
 				return acc;
 			},
 			{} as Record<string, number>,
 		);
 
-		return Object.entries(grouped).map(([groupedUnit, total]) => ({
-			unit: groupedUnit,
+		return Object.entries(grouped).map(([group, total]) => ({
+			group,
 			total,
 		}));
 	}, [report]);
+
+	const groupLabel = formatGroupLabel(report?.meta.group_key);
+	const measureLabel = formatMeasureLabel(
+		report?.meta.measure ?? "sum_quantity",
+	);
 
 	return (
 		<Card className="v2-card">
 			<CardHeader>
 				<CardTitle className="text-lg">
-					{formatEventType(eventType)} por período
+					{formatEventType(eventType)} por periodo
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				{totalsByUnit.length > 0 && (
+				{!assetId && !hasGroupData && (
+					<p className="text-xs text-muted-foreground">
+						Este reporte muestra un agregado de toda la granja para el periodo
+						seleccionado. Para ver un activo especifico, usa el filtro "Un
+						activo especifico".
+					</p>
+				)}
+				{totalsByGroup.length > 0 && (
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-						{totalsByUnit.map((item) => (
+						{totalsByGroup.map((item) => (
 							<div
-								key={item.unit}
+								key={item.group}
 								className="rounded-lg border p-4"
 							>
 								<p className="text-xs font-medium text-muted-foreground">
-									Total ({item.unit})
+									{item.group === "Sin grupo"
+										? "Total general"
+										: `Total (${item.group})`}
 								</p>
 								<p className="text-lg font-semibold mt-2">
-									{item.total.toFixed(2)}
+									{formatValue(item.total, shouldDisplayWholeUnits)}
 								</p>
 							</div>
 						))}
 					</div>
 				)}
 
-				{/* Report */}
 				{isPending ? (
 					<p className="text-sm text-muted-foreground">Cargando...</p>
 				) : isError ? (
@@ -170,38 +193,39 @@ export const ProductionReport = ({
 					<div className="rounded-lg border overflow-hidden">
 						{hasDateRangeFilter && (
 							<div className="border-b bg-muted/30 px-4 py-2 text-xs text-muted-foreground">
-								Mostrando {periodsWithRecords} período(s) con registros en el
-								rango seleccionado.
+								Mostrando {periodsWithRecords} periodo(s) con registros en el
+								rango seleccionado. Medida: {measureLabel}.
 							</div>
 						)}
-						<div className="grid grid-cols-5 border-b bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
-							<span>Período</span>
-							<span>Activo</span>
-							<span>Categoría</span>
-							<span>Unidad</span>
-							<span className="text-right">Total</span>
+						<div
+							className={`grid ${hasGroupData ? "grid-cols-3" : "grid-cols-2"} border-b bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground`}
+						>
+							<span>Periodo</span>
+							{hasGroupData && <span>{groupLabel}</span>}
+							<span className="text-right">Valor</span>
 						</div>
 						{report.data.map((row, idx) => (
 							<div
 								key={idx}
-								className="grid grid-cols-5 border-b px-4 py-3 text-sm last:border-b-0 items-center"
+								className={`grid ${hasGroupData ? "grid-cols-3" : "grid-cols-2"} border-b px-4 py-3 text-sm last:border-b-0 items-center`}
 							>
-								<span>{formatBucketStart(row.bucket_start)}</span>
-								<span className="font-medium">
-									{assetNameMap[row.asset_id] || `Asset #${row.asset_id}`}
-								</span>
-								<span>
-									{row.category_id ? (
-										<Badge variant="outline">Cat #{row.category_id}</Badge>
-									) : (
-										<span className="text-muted-foreground">—</span>
-									)}
-								</span>
-								<span>
-									<Badge variant="secondary">{row.unit}</Badge>
-								</span>
+								<span>{formatBucketStart(row.bucket)}</span>
+								{hasGroupData && (
+									<span>
+										{row.group_label || row.group ? (
+											<Badge variant="secondary">
+												{row.group_label ?? row.group}
+											</Badge>
+										) : (
+											<span className="text-muted-foreground">Sin grupo</span>
+										)}
+									</span>
+								)}
 								<span className="text-right font-medium">
-									{parseDecimal(row.total).toFixed(2)}
+									{formatValue(
+										parseDecimal(row.value),
+										shouldDisplayWholeUnits,
+									)}
 								</span>
 							</div>
 						))}

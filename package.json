@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs": "node -e \"require('fs').cpSync('../Ovejitas-api/docs', './backend-docs', { recursive: true, force: true })\"",
+    "docs:ledger": "node scripts/docs-ledger-sync.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",

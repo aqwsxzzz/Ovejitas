@@ -29,6 +29,8 @@ You are a React developer focused on strict architecture, high-quality implement
 - If `*-api.ts`, `*-queries.ts`, or `*-types.ts` already exist in a feature, update those first.
 - Do not create duplicate modules such as both `breed-api.ts` and `breed.api.ts` for the same responsibility unless explicitly requested.
 - Keep naming aligned with nearby files in the same folder before applying generalized conventions.
+- If required behavior is backend-owned and missing, do not implement frontend workaround logic.
+- In backend-gap cases, create a BE request using `.github/prompts/be-capability-request.prompt.md` and keep FE in a clear blocked/disabled state until backend support exists.
 
 ## Approach
 1. Gather context from nearby files, existing patterns, and architecture docs before editing.

@@ -2,12 +2,15 @@ import { axiosHelper } from "@/lib/axios/axios-helper";
 import type { IResponse } from "@/lib/axios";
 import type {
 	ICreateEggCollectionPayload,
+	IFlockAcquisitionCreate,
+	IFlockActionRead,
 	ICreateFlockPayload,
-	ICreateFlockEventPayload,
 	IEggCollection,
 	IFlock,
 	IFlockEvent,
 	IFlockListFilters,
+	IFlockMortalityCreate,
+	IFlockSaleCreate,
 	IUpdateEggCollectionPayload,
 	IUpdateFlockPayload,
 } from "@/features/flock/types/flock-types";
@@ -166,16 +169,48 @@ export const getFlockEvents = ({
 	});
 };
 
-export const createFlockEvent = ({
-	flockId,
+export const createFlockAcquisition = ({
+	farmId,
+	assetId,
 	payload,
 }: {
-	flockId: string;
-	payload: ICreateFlockEventPayload;
+	farmId: string;
+	assetId: string;
+	payload: IFlockAcquisitionCreate;
 }) =>
-	axiosHelper<IResponse<IFlockEvent>>({
+	axiosHelper<IResponse<IFlockActionRead>>({
 		method: "post",
-		url: `/flocks/${flockId}/events`,
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/flock/acquisitions`,
+		data: payload,
+	});
+
+export const createFlockSale = ({
+	farmId,
+	assetId,
+	payload,
+}: {
+	farmId: string;
+	assetId: string;
+	payload: IFlockSaleCreate;
+}) =>
+	axiosHelper<IResponse<IFlockActionRead>>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/flock/sales`,
+		data: payload,
+	});
+
+export const createFlockMortality = ({
+	farmId,
+	assetId,
+	payload,
+}: {
+	farmId: string;
+	assetId: string;
+	payload: IFlockMortalityCreate;
+}) =>
+	axiosHelper<IResponse<IFlockActionRead>>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/flock/mortalities`,
 		data: payload,
 	});
 
