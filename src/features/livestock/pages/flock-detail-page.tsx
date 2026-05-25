@@ -43,6 +43,7 @@ import { getMaterialActionErrorMessage } from "@/features/inventory/components/m
 import { MaterialConsumptionForm } from "@/features/inventory/components/material-consumption-form";
 import { MaterialPurchaseForm } from "@/features/inventory/components/material-purchase-form";
 import { MaterialSaleForm } from "@/features/inventory/components/material-sale-form";
+import { ManualFeedingPanel } from "@/features/livestock/components/manual-feeding-panel";
 import { UnitEventForm } from "../components/unit-event-form";
 import type { UnitEventFormData } from "../components/unit-event-form";
 import { UnitEventTimeline } from "../components/unit-event-timeline";
@@ -1604,6 +1605,14 @@ export function FlockDetailPage({
 				<div className="grid gap-3">
 					<ProductionSeriesSlider series={productionSeries} />
 				</div>
+			) : null}
+
+			{isAnimalAsset ? (
+				<ManualFeedingPanel
+					farmId={farmId}
+					consumerAssetId={asset.id}
+					consumerAssetName={asset.name}
+				/>
 			) : null}
 
 			<div className="grid gap-3 md:grid-cols-2">

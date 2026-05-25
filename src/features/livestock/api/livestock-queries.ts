@@ -750,12 +750,7 @@ const invalidateMaterialDetailQueries = async ({
 			],
 		}),
 		queryClient.invalidateQueries({
-			queryKey: [
-				...livestockQueryKeys.all,
-				"materialConsumptions",
-				farmId,
-				Number(assetId),
-			],
+			queryKey: [...livestockQueryKeys.all, "materialConsumptions", farmId],
 		}),
 		queryClient.invalidateQueries({
 			queryKey: reportsQueryKeys.farm(farmId),
