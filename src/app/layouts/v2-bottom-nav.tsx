@@ -14,8 +14,8 @@ const items = [
 	},
 	{ to: "/v2/log", label: "Registro", icon: Plus, kind: "center" as const },
 	{
-		to: "/v2/reports",
-		label: "Reportes",
+		to: "/v2/finance",
+		label: "Finanzas",
 		icon: BarChart3,
 		kind: "normal" as const,
 	},
@@ -29,10 +29,6 @@ export function V2BottomNav() {
 		typeof window === "undefined"
 			? location.pathname
 			: `${location.pathname}${window.location.search}`;
-	const selectedAssetKind =
-		typeof window === "undefined"
-			? undefined
-			: (window.sessionStorage.getItem("v2-active-asset-kind") ?? undefined);
 
 	return (
 		<>
@@ -47,6 +43,8 @@ export function V2BottomNav() {
 					{items.map((item) => {
 						const isActive =
 							location.pathname === item.to ||
+							(item.to === "/v2/production-units" &&
+								location.pathname.startsWith("/v2/production-units")) ||
 							(item.to === "/v2/dashboard" && location.pathname === "/v2/");
 						const Icon = item.icon;
 
@@ -94,7 +92,6 @@ export function V2BottomNav() {
 				onOpenChange={setIsQuickActionsOpen}
 				pathname={location.pathname}
 				sourcePath={sourcePath}
-				assetKindContext={selectedAssetKind}
 			/>
 		</>
 	);

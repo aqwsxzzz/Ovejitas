@@ -122,25 +122,6 @@ function livestockActions(kind?: AssetQuickActionKind): QuickActionItem[] {
 	];
 }
 
-function speciesActions(): QuickActionItem[] {
-	return [
-		makeAction(
-			"nuevo-animal",
-			"Nuevo animal",
-			"Agregar dentro de esta especie",
-			"🐑",
-		),
-		makeAction("registrar-peso", "Registrar peso", "Nueva medicion", "⚖️"),
-		makeAction("registrar-salud", "Registrar salud", "Evento sanitario", "🩺"),
-		makeAction(
-			"registrar-reproduccion",
-			"Registrar reproduccion",
-			"Monta, preniez o parto",
-			"🌱",
-		),
-	];
-}
-
 function flockActions(): QuickActionItem[] {
 	return [
 		makeAction(
@@ -198,11 +179,6 @@ function decodeLastSegment(pathname: string): string | null {
 	return last ? decodeURIComponent(last) : null;
 }
 
-function toHumanSlug(value: string): string {
-	if (!value.trim()) return "especie";
-	return value.replace(/[-_]+/g, " ").trim();
-}
-
 function resolveAssetKindFromSourcePath(
 	sourcePath?: string,
 ): AssetQuickActionKind | undefined {
@@ -242,7 +218,6 @@ function resolveAssetKind(value?: string): AssetQuickActionKind | undefined {
 export function getQuickActionSheetConfig(
 	pathname: string,
 	sourcePath?: string,
-	assetKindContext?: string,
 ): QuickActionSheetConfig {
 	if (pathname.startsWith("/v2/production-units/flock/")) {
 		const unitId = decodeLastSegment(pathname) ?? "";
@@ -262,13 +237,38 @@ export function getQuickActionSheetConfig(
 		pathname !== "/v2/production-units" &&
 		pathname !== "/v2/production-units/"
 	) {
-		const speciesKey = decodeLastSegment(pathname) ?? "";
-		const label = toHumanSlug(speciesKey);
+		const selectedKind = resolveAssetKind(
+			decodeLastSegment(pathname) ?? undefined,
+		);
+		if (selectedKind) {
+			const titleByKind: Partial<Record<AssetQuickActionKind, string>> = {
+				animal: "Acciones de ganado",
+				material: "Acciones de materiales",
+				crop: "Acciones de cultivos",
+				equipment: "Acciones de equipos",
+				location: "Acciones de ubicaciones",
+			};
+			const descriptionByKind: Partial<Record<AssetQuickActionKind, string>> = {
+				animal: "Crear o registrar desde el modulo de ganado.",
+				material: "Crear materiales para inventario.",
+				crop: "Crear activos para seguimiento de cultivos.",
+				equipment: "Crear activos para seguimiento de equipos.",
+				location: "Crear activos para organizar ubicaciones.",
+			};
+
+			return {
+				title: titleByKind[selectedKind] ?? "Acciones de activos",
+				description:
+					descriptionByKind[selectedKind] ??
+					"Crear o registrar desde el modulo de activos.",
+				actions: livestockActions(selectedKind),
+			};
+		}
+
 		return {
-			title: `Acciones para ${label.toLowerCase()}`,
-			description: "Registrar o crear dentro de esta especie.",
-			contextLabel: label,
-			actions: speciesActions(),
+			title: "Acciones de activos",
+			description: "Crear o registrar desde el modulo de activos.",
+			actions: livestockActions(),
 		};
 	}
 
@@ -276,29 +276,11 @@ export function getQuickActionSheetConfig(
 		pathname === "/v2/production-units" ||
 		pathname === "/v2/production-units/"
 	) {
-		const selectedKind =
-			resolveAssetKind(assetKindContext) ??
-			resolveAssetKindFromSourcePath(sourcePath);
-		const titleByKind: Partial<Record<AssetQuickActionKind, string>> = {
-			animal: "Acciones de ganado",
-			material: "Acciones de materiales",
-			crop: "Acciones de cultivos",
-			equipment: "Acciones de equipos",
-			location: "Acciones de ubicaciones",
-		};
-		const descriptionByKind: Partial<Record<AssetQuickActionKind, string>> = {
-			animal: "Crear o registrar desde el modulo de ganado.",
-			material: "Crear materiales para inventario.",
-			crop: "Crear activos para seguimiento de cultivos.",
-			equipment: "Crear activos para seguimiento de equipos.",
-			location: "Crear activos para organizar ubicaciones.",
-		};
+		const selectedKind = resolveAssetKindFromSourcePath(sourcePath);
 
 		return {
-			title: titleByKind[selectedKind ?? "animal"] ?? "Acciones de activos",
-			description:
-				descriptionByKind[selectedKind ?? "animal"] ??
-				"Crear o registrar desde el modulo de activos.",
+			title: "Acciones de activos",
+			description: "Crear o registrar desde el modulo de activos.",
 			actions: livestockActions(selectedKind),
 		};
 	}

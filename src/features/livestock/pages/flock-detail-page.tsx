@@ -370,9 +370,6 @@ export function FlockDetailPage({
 	const eventsLoadMoreRef = useRef<HTMLDivElement | null>(null);
 	const eventsScrollContainerRef = useRef<HTMLDivElement | null>(null);
 	const hasAutoLoadedEventsPageRef = useRef(false);
-	const swipeStartXRef = useRef<number | null>(null);
-	const swipeStartYRef = useRef<number | null>(null);
-	const isSwipeCandidateRef = useRef(false);
 
 	const { data: asset, isFetching: isAssetFetching } = useGetLivestockAssetById(
 		{
@@ -1246,102 +1243,36 @@ export function FlockDetailPage({
 		closeHeadcountAdjustment,
 	]);
 
-	const resetSwipeTracking = useCallback(() => {
-		swipeStartXRef.current = null;
-		swipeStartYRef.current = null;
-		isSwipeCandidateRef.current = false;
+	const backToAssetsPath = asset?.kind != null ? "kind" : "root";
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+
+		// Keep this page at the top of history so edge-swipe back does not leave it.
+		window.history.pushState(
+			{ flockDetailGuard: true },
+			"",
+			window.location.href,
+		);
+
+		const handlePopState = () => {
+			window.history.pushState(
+				{ flockDetailGuard: true },
+				"",
+				window.location.href,
+			);
+		};
+
+		window.addEventListener("popstate", handlePopState);
+
+		return () => {
+			window.removeEventListener("popstate", handlePopState);
+		};
 	}, []);
-
-	const persistBackAssetKind = useCallback(() => {
-		if (typeof window === "undefined" || !asset?.kind) return;
-		window.sessionStorage.setItem("v2-active-asset-kind", asset.kind);
-	}, [asset?.kind]);
-
-	const handleSwipeBack = useCallback(() => {
-		persistBackAssetKind();
-		navigate({ to: "/v2/production-units", replace: true });
-	}, [navigate, persistBackAssetKind]);
-
-	const handleTouchStart = useCallback(
-		(event: React.TouchEvent<HTMLElement>) => {
-			if (event.touches.length !== 1) {
-				resetSwipeTracking();
-				return;
-			}
-
-			const touch = event.touches[0];
-			swipeStartXRef.current = touch.clientX;
-			swipeStartYRef.current = touch.clientY;
-			isSwipeCandidateRef.current = touch.clientX <= 32;
-		},
-		[resetSwipeTracking],
-	);
-
-	const handleTouchEnd = useCallback(
-		(event: React.TouchEvent<HTMLElement>) => {
-			const startX = swipeStartXRef.current;
-			const startY = swipeStartYRef.current;
-			const touch = event.changedTouches[0];
-
-			if (
-				!isSwipeCandidateRef.current ||
-				!touch ||
-				startX == null ||
-				startY == null
-			) {
-				resetSwipeTracking();
-				return;
-			}
-
-			const deltaX = touch.clientX - startX;
-			const deltaY = Math.abs(touch.clientY - startY);
-			const isValidSwipe =
-				deltaX >= 72 && deltaY <= 48 && deltaX > deltaY * 1.5;
-
-			if (isValidSwipe) {
-				handleSwipeBack();
-			}
-
-			resetSwipeTracking();
-		},
-		[handleSwipeBack, resetSwipeTracking],
-	);
-
-	const handleTouchMove = useCallback(
-		(event: React.TouchEvent<HTMLElement>) => {
-			const startX = swipeStartXRef.current;
-			const startY = swipeStartYRef.current;
-			const touch = event.touches[0];
-
-			if (
-				!isSwipeCandidateRef.current ||
-				!touch ||
-				startX == null ||
-				startY == null
-			) {
-				return;
-			}
-
-			const deltaX = touch.clientX - startX;
-			const deltaY = Math.abs(touch.clientY - startY);
-			const isHorizontalEdgeSwipe = deltaX > 12 && deltaX > deltaY;
-
-			if (isHorizontalEdgeSwipe && event.nativeEvent.cancelable) {
-				event.preventDefault();
-			}
-		},
-		[],
-	);
 
 	if (!farmId) {
 		return (
-			<section
-				className="space-y-4"
-				onTouchStart={handleTouchStart}
-				onTouchMove={handleTouchMove}
-				onTouchEnd={handleTouchEnd}
-				onTouchCancel={resetSwipeTracking}
-			>
+			<section className="space-y-4">
 				<div className="v2-card p-5">
 					<p className="v2-kicker">Activos</p>
 					<h1 className="mt-2 text-xl font-semibold">Selecciona una granja</h1>
@@ -1355,13 +1286,7 @@ export function FlockDetailPage({
 
 	if (hasValidAssetId && !asset && isAssetFetching) {
 		return (
-			<section
-				className="space-y-4"
-				onTouchStart={handleTouchStart}
-				onTouchMove={handleTouchMove}
-				onTouchEnd={handleTouchEnd}
-				onTouchCancel={resetSwipeTracking}
-			>
+			<section className="space-y-4">
 				<div className="v2-card p-5">
 					<p className="text-sm text-(--v2-ink-soft)">Cargando activo...</p>
 				</div>
@@ -1371,13 +1296,7 @@ export function FlockDetailPage({
 
 	if (!asset) {
 		return (
-			<section
-				className="space-y-4"
-				onTouchStart={handleTouchStart}
-				onTouchMove={handleTouchMove}
-				onTouchEnd={handleTouchEnd}
-				onTouchCancel={resetSwipeTracking}
-			>
+			<section className="space-y-4">
 				<div className="v2-card p-5">
 					<p className="v2-kicker">Activos</p>
 					<h1 className="mt-2 text-xl font-semibold">Activo no encontrado</h1>
@@ -1386,7 +1305,6 @@ export function FlockDetailPage({
 					</p>
 					<Link
 						to="/v2/production-units"
-						onClick={persistBackAssetKind}
 						className="mt-4 inline-flex rounded-full border border-(--v2-ink) px-3 py-1.5 text-xs font-semibold"
 					>
 						Volver a activos
@@ -1397,13 +1315,7 @@ export function FlockDetailPage({
 	}
 
 	return (
-		<section
-			className="space-y-4"
-			onTouchStart={handleTouchStart}
-			onTouchMove={handleTouchMove}
-			onTouchEnd={handleTouchEnd}
-			onTouchCancel={resetSwipeTracking}
-		>
+		<section className="space-y-4">
 			<div className="v2-card p-5">
 				<div className="min-w-0 flex-1">
 					<div className="mb-2 flex items-center justify-between gap-3">
@@ -1415,17 +1327,30 @@ export function FlockDetailPage({
 								{toModeLabel(asset)}
 							</span>
 						</div>
-						<Link
-							to="/v2/production-units"
-							onClick={persistBackAssetKind}
-							className="inline-flex items-center justify-center p-1 text-(--v2-ink-soft) transition-colors hover:text-(--v2-ink)"
-							aria-label="Volver a activos"
-						>
-							<ArrowLeft
-								aria-hidden="true"
-								className="h-6 w-6"
-							/>
-						</Link>
+						{backToAssetsPath === "kind" && asset.kind ? (
+							<Link
+								to="/v2/production-units/$assetKind"
+								params={{ assetKind: asset.kind }}
+								className="inline-flex items-center justify-center p-1 text-(--v2-ink-soft) transition-colors hover:text-(--v2-ink)"
+								aria-label="Volver a activos"
+							>
+								<ArrowLeft
+									aria-hidden="true"
+									className="h-6 w-6"
+								/>
+							</Link>
+						) : (
+							<Link
+								to="/v2/production-units"
+								className="inline-flex items-center justify-center p-1 text-(--v2-ink-soft) transition-colors hover:text-(--v2-ink)"
+								aria-label="Volver a activos"
+							>
+								<ArrowLeft
+									aria-hidden="true"
+									className="h-6 w-6"
+								/>
+							</Link>
+						)}
 					</div>
 					<div className="flex items-center gap-2">
 						<h1

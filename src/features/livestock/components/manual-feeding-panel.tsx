@@ -61,6 +61,40 @@ function setProfileMapToStorage(nextMap: FeedingProfileMap) {
 	);
 }
 
+function formatRemainingDuration(totalHours: number): string {
+	const totalMinutes = Math.max(0, Math.ceil(totalHours * 60));
+	const hours = Math.floor(totalMinutes / 60);
+	const minutes = totalMinutes % 60;
+
+	if (hours === 0) {
+		return `${minutes} min`;
+	}
+
+	if (minutes === 0) {
+		return `${hours} h`;
+	}
+
+	return `${hours} h ${minutes} min`;
+}
+
+function formatNextDayHint(reference: Date): string {
+	const next = new Date(reference);
+	next.setDate(next.getDate() + 1);
+	next.setHours(0, 0, 0, 0);
+
+	const dateLabel = next.toLocaleDateString("es-EC", {
+		day: "2-digit",
+		month: "2-digit",
+	});
+	const timeLabel = next.toLocaleTimeString("es-EC", {
+		hour: "2-digit",
+		minute: "2-digit",
+		hour12: false,
+	});
+
+	return `${dateLabel} ${timeLabel}`;
+}
+
 export function ManualFeedingPanel({
 	farmId,
 	consumerAssetId,
@@ -388,14 +422,18 @@ export function ManualFeedingPanel({
 
 		const warningMessages: string[] = [];
 		const maxFeedsPerDayLimit = Math.max(1, Math.floor(parsedMaxFeedsPerDay));
+		const reachedDailyLimit =
+			effectiveCountForSelectedMaterial >= maxFeedsPerDayLimit;
 
-		if (effectiveCountForSelectedMaterial >= maxFeedsPerDayLimit) {
+		if (reachedDailyLimit) {
+			const nextDayHint = formatNextDayHint(new Date());
 			warningMessages.push(
-				`Este material ya alcanzo ${effectiveCountForSelectedMaterial} registro(s) hoy, y tu limite configurado es ${maxFeedsPerDayLimit}.`,
+				`Este material ya alcanzo ${effectiveCountForSelectedMaterial} registro(s) hoy, y tu limite configurado es ${maxFeedsPerDayLimit}. Proximo registro sugerido: ${nextDayHint}.`,
 			);
 		}
 
 		if (
+			!reachedDailyLimit &&
 			parsedMinHoursBetweenFeeds > 0 &&
 			effectiveLatestFeedAtForSelectedMaterial
 		) {
@@ -410,7 +448,7 @@ export function ManualFeedingPanel({
 					parsedMinHoursBetweenFeeds - elapsedHours,
 				);
 				warningMessages.push(
-					`Aun no se cumple el intervalo minimo entre alimentaciones. Faltan aproximadamente ${hoursLeft.toFixed(2)} hora(s).`,
+					`Aun no se cumple el intervalo minimo entre alimentaciones. Tiempo restante sugerido: ${formatRemainingDuration(hoursLeft)}.`,
 				);
 			}
 		}
@@ -418,7 +456,7 @@ export function ManualFeedingPanel({
 		if (warningMessages.length > 0 && !needsExtraFeedConfirmation) {
 			setFeedConfirmationMessage(warningMessages.join(" "));
 			setNeedsExtraFeedConfirmation(true);
-			setFeedError(warningMessages.join(" "));
+			setFeedError(null);
 			return;
 		}
 

@@ -27,7 +27,7 @@ import { Route as V2AlertsRouteImport } from './routes/v2.alerts'
 import { Route as PublicLayoutRouteImport } from './routes/_public/_layout'
 import { Route as V2ProductionUnitsIndexRouteImport } from './routes/v2.production-units.index'
 import { Route as V2MoreIndexRouteImport } from './routes/v2.more.index'
-import { Route as V2ProductionUnitsSpeciesKeyRouteImport } from './routes/v2.production-units.$speciesKey'
+import { Route as V2ProductionUnitsAssetKindRouteImport } from './routes/v2.production-units.$assetKind'
 import { Route as V2MoreEventCategoriesRouteImport } from './routes/v2.more.event-categories'
 import { Route as PublicLayoutSignupRouteImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginRouteImport } from './routes/_public/_layout/login'
@@ -125,10 +125,10 @@ const V2MoreIndexRoute = V2MoreIndexRouteImport.update({
   path: '/',
   getParentRoute: () => V2MoreRoute,
 } as any)
-const V2ProductionUnitsSpeciesKeyRoute =
-  V2ProductionUnitsSpeciesKeyRouteImport.update({
-    id: '/$speciesKey',
-    path: '/$speciesKey',
+const V2ProductionUnitsAssetKindRoute =
+  V2ProductionUnitsAssetKindRouteImport.update({
+    id: '/$assetKind',
+    path: '/$assetKind',
     getParentRoute: () => V2ProductionUnitsRoute,
   } as any)
 const V2MoreEventCategoriesRoute = V2MoreEventCategoriesRouteImport.update({
@@ -190,7 +190,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
-  '/v2/production-units/$speciesKey': typeof V2ProductionUnitsSpeciesKeyRoute
+  '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
   '/v2/production-units/': typeof V2ProductionUnitsIndexRoute
   '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
@@ -214,7 +214,7 @@ export interface FileRoutesByTo {
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
-  '/v2/production-units/$speciesKey': typeof V2ProductionUnitsSpeciesKeyRoute
+  '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more': typeof V2MoreIndexRoute
   '/v2/production-units': typeof V2ProductionUnitsIndexRoute
   '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
@@ -243,7 +243,7 @@ export interface FileRoutesById {
   '/_public/_layout/login': typeof PublicLayoutLoginRoute
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
-  '/v2/production-units/$speciesKey': typeof V2ProductionUnitsSpeciesKeyRoute
+  '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
   '/v2/production-units/': typeof V2ProductionUnitsIndexRoute
   '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
@@ -272,7 +272,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/v2/more/event-categories'
-    | '/v2/production-units/$speciesKey'
+    | '/v2/production-units/$assetKind'
     | '/v2/more/'
     | '/v2/production-units/'
     | '/compat/$farmId/$speciesId/$animalId'
@@ -296,7 +296,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/v2/more/event-categories'
-    | '/v2/production-units/$speciesKey'
+    | '/v2/production-units/$assetKind'
     | '/v2/more'
     | '/v2/production-units'
     | '/compat/$farmId/$speciesId/$animalId'
@@ -324,7 +324,7 @@ export interface FileRouteTypes {
     | '/_public/_layout/login'
     | '/_public/_layout/signup'
     | '/v2/more/event-categories'
-    | '/v2/production-units/$speciesKey'
+    | '/v2/production-units/$assetKind'
     | '/v2/more/'
     | '/v2/production-units/'
     | '/compat/$farmId/$speciesId/$animalId'
@@ -468,11 +468,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2MoreIndexRouteImport
       parentRoute: typeof V2MoreRoute
     }
-    '/v2/production-units/$speciesKey': {
-      id: '/v2/production-units/$speciesKey'
-      path: '/$speciesKey'
-      fullPath: '/v2/production-units/$speciesKey'
-      preLoaderRoute: typeof V2ProductionUnitsSpeciesKeyRouteImport
+    '/v2/production-units/$assetKind': {
+      id: '/v2/production-units/$assetKind'
+      path: '/$assetKind'
+      fullPath: '/v2/production-units/$assetKind'
+      preLoaderRoute: typeof V2ProductionUnitsAssetKindRouteImport
       parentRoute: typeof V2ProductionUnitsRoute
     }
     '/v2/more/event-categories': {
@@ -568,13 +568,13 @@ const V2ProductionUnitsFlockUnitIdRouteWithChildren =
   )
 
 interface V2ProductionUnitsRouteChildren {
-  V2ProductionUnitsSpeciesKeyRoute: typeof V2ProductionUnitsSpeciesKeyRoute
+  V2ProductionUnitsAssetKindRoute: typeof V2ProductionUnitsAssetKindRoute
   V2ProductionUnitsIndexRoute: typeof V2ProductionUnitsIndexRoute
   V2ProductionUnitsFlockUnitIdRoute: typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
 }
 
 const V2ProductionUnitsRouteChildren: V2ProductionUnitsRouteChildren = {
-  V2ProductionUnitsSpeciesKeyRoute: V2ProductionUnitsSpeciesKeyRoute,
+  V2ProductionUnitsAssetKindRoute: V2ProductionUnitsAssetKindRoute,
   V2ProductionUnitsIndexRoute: V2ProductionUnitsIndexRoute,
   V2ProductionUnitsFlockUnitIdRoute:
     V2ProductionUnitsFlockUnitIdRouteWithChildren,

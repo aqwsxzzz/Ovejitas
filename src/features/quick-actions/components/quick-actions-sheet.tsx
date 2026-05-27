@@ -11,7 +11,6 @@ interface QuickActionsSheetProps {
 	onOpenChange: (open: boolean) => void;
 	pathname: string;
 	sourcePath?: string;
-	assetKindContext?: string;
 }
 
 function ActionCard(props: {
@@ -42,14 +41,9 @@ export function QuickActionsSheet({
 	onOpenChange,
 	pathname,
 	sourcePath,
-	assetKindContext,
 }: QuickActionsSheetProps) {
 	const navigate = useNavigate();
-	const config = getQuickActionSheetConfig(
-		pathname,
-		sourcePath,
-		assetKindContext,
-	);
+	const config = getQuickActionSheetConfig(pathname, sourcePath);
 
 	function handleSelect(action: QuickActionItem) {
 		onOpenChange(false);
