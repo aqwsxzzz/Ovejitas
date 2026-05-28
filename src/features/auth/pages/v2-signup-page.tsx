@@ -63,9 +63,9 @@ export function V2SignupPage() {
 
 	return (
 		<V2AuthPageFrame
-			eyebrow="Registro - Ovejitas V2"
+			eyebrow="Registro - Ovejitas"
 			brandIcon={<Tractor className="h-8 w-8" />}
-			title="Ovejitas V2"
+			title="Ovejitas"
 			subtitle="Sumate al manejo ganadero de precision con una experiencia clara y moderna."
 			formTitle="Crear cuenta"
 			formSubtitle="Activa tu espacio de trabajo y empieza a organizar tu finca"
@@ -76,7 +76,7 @@ export function V2SignupPage() {
 						to="/v2/login"
 						className="font-semibold text-[#0b3445] underline-offset-4 hover:underline"
 					>
-						Inicia sesion en Ovejitas V2
+						Inicia sesion en Ovejitas
 					</Link>
 				</p>
 			}

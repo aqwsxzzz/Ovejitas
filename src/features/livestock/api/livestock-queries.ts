@@ -7,6 +7,18 @@ import {
 import {
 	listEventCategoriesByFarmId,
 	listEventsByAssetId,
+	getInventoryBalanceByAssetId,
+	listMaterialPurchasesByFarmId,
+	createMaterialPurchaseByFarmId,
+	getMaterialPurchaseById,
+	updateMaterialPurchaseById,
+	deleteMaterialPurchaseById,
+	listMaterialConsumptionsByFarmId,
+	createMaterialConsumptionByFarmId,
+	getMaterialConsumptionById,
+	updateMaterialConsumptionById,
+	deleteMaterialConsumptionById,
+	createMaterialSaleByAssetId,
 	getLivestockAssetById,
 	listLivestockAssetsByFarmId,
 	listIndividualsByAssetId,
@@ -26,14 +38,31 @@ import {
 	createLivestockAsset,
 	updateLivestockAssetById,
 	deleteLivestockAssetById,
+	createFlockAcquisitionByAssetId,
+	createFlockMortalityByAssetId,
+	createFlockSaleByAssetId,
+	type IFlockAcquisitionCreatePayload,
+	type IFlockMortalityCreatePayload,
+	type IFlockSaleCreatePayload,
+	type IMaterialPurchaseCreatePayload,
+	type IMaterialPurchaseUpdatePayload,
+	type IMaterialConsumptionCreatePayload,
+	type IMaterialConsumptionUpdatePayload,
+	type IMaterialSaleCreatePayload,
 	type LivestockEventCreatePayload,
 	type LivestockEventUpdatePayload,
 } from "@/features/livestock/api/livestock-api";
+import { getInventorySummaryReport } from "@/features/reports/api/reports-api";
+import { reportsQueryKeys } from "@/features/reports/api/reports-queries";
 import type {
 	ILivestockAsset,
 	ILivestockEventCategory,
 	ILivestockIndividual,
 	ILivestockIndividualListResponse,
+	IInventoryBalance,
+	IMaterialPurchaseRead,
+	IMaterialConsumptionRead,
+	MaterialConsumptionReason,
 	LivestockEventType,
 	LivestockAssetKind,
 	LivestockAssetMode,
@@ -138,6 +167,24 @@ interface ListEventCategoriesFilters {
 	pageSize?: number;
 }
 
+interface ListMaterialPurchasesFilters {
+	materialAssetId?: number;
+	from?: string;
+	to?: string;
+	page?: number;
+	pageSize?: number;
+}
+
+interface ListMaterialConsumptionsFilters {
+	materialAssetId?: number;
+	consumerAssetId?: number;
+	reason?: MaterialConsumptionReason;
+	from?: string;
+	to?: string;
+	page?: number;
+	pageSize?: number;
+}
+
 export const livestockQueryKeys = {
 	all: ["livestock"] as const,
 	assetsByFarm: (farmId: string, filters?: ListLivestockAssetsFilters) =>
@@ -217,6 +264,54 @@ export const livestockQueryKeys = {
 			filters?.categoryId ?? "",
 			filters?.individualId ?? "",
 			pageSize,
+		] as const,
+	inventoryBalanceByAsset: (farmId: string, assetId: string) =>
+		[
+			...livestockQueryKeys.all,
+			"inventoryBalanceByAsset",
+			farmId,
+			assetId,
+		] as const,
+	materialPurchases: (farmId: string, filters?: ListMaterialPurchasesFilters) =>
+		[
+			...livestockQueryKeys.all,
+			"materialPurchases",
+			farmId,
+			filters?.materialAssetId ?? "",
+			filters?.from ?? "",
+			filters?.to ?? "",
+			filters?.page ?? 1,
+			filters?.pageSize ?? 20,
+		] as const,
+	materialPurchaseById: (farmId: string, purchaseId: number) =>
+		[
+			...livestockQueryKeys.all,
+			"materialPurchaseById",
+			farmId,
+			purchaseId,
+		] as const,
+	materialConsumptions: (
+		farmId: string,
+		filters?: ListMaterialConsumptionsFilters,
+	) =>
+		[
+			...livestockQueryKeys.all,
+			"materialConsumptions",
+			farmId,
+			filters?.materialAssetId ?? "",
+			filters?.consumerAssetId ?? "",
+			filters?.reason ?? "",
+			filters?.from ?? "",
+			filters?.to ?? "",
+			filters?.page ?? 1,
+			filters?.pageSize ?? 20,
+		] as const,
+	materialConsumptionById: (farmId: string, consumptionId: number) =>
+		[
+			...livestockQueryKeys.all,
+			"materialConsumptionById",
+			farmId,
+			consumptionId,
 		] as const,
 	eventCategoriesByFarm: (
 		farmId: string,
@@ -406,6 +501,81 @@ export const useListInfiniteEventsByAssetId = ({
 		enabled: enabled && !!farmId && !!assetId,
 	});
 
+export const useGetInventoryBalanceByAssetId = ({
+	farmId,
+	assetId,
+	enabled = true,
+}: {
+	farmId: string;
+	assetId: string;
+	enabled?: boolean;
+}) =>
+	useQuery<IInventoryBalance>({
+		queryKey: livestockQueryKeys.inventoryBalanceByAsset(farmId, assetId),
+		queryFn: () => getInventoryBalanceByAssetId({ farmId, assetId }),
+		enabled: enabled && !!farmId && !!assetId,
+	});
+
+export const useListMaterialPurchasesByFarmId = ({
+	farmId,
+	filters,
+	enabled = true,
+}: {
+	farmId: string;
+	filters?: ListMaterialPurchasesFilters;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.materialPurchases(farmId, filters),
+		queryFn: () => listMaterialPurchasesByFarmId({ farmId, filters }),
+		enabled: enabled && !!farmId,
+	});
+
+export const useGetMaterialPurchaseById = ({
+	farmId,
+	purchaseId,
+	enabled = true,
+}: {
+	farmId: string;
+	purchaseId: number;
+	enabled?: boolean;
+}) =>
+	useQuery<IMaterialPurchaseRead>({
+		queryKey: livestockQueryKeys.materialPurchaseById(farmId, purchaseId),
+		queryFn: () => getMaterialPurchaseById({ farmId, purchaseId }),
+		enabled: enabled && !!farmId && Number.isFinite(purchaseId),
+	});
+
+export const useListMaterialConsumptionsByFarmId = ({
+	farmId,
+	filters,
+	enabled = true,
+}: {
+	farmId: string;
+	filters?: ListMaterialConsumptionsFilters;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.materialConsumptions(farmId, filters),
+		queryFn: () => listMaterialConsumptionsByFarmId({ farmId, filters }),
+		enabled: enabled && !!farmId,
+	});
+
+export const useGetMaterialConsumptionById = ({
+	farmId,
+	consumptionId,
+	enabled = true,
+}: {
+	farmId: string;
+	consumptionId: number;
+	enabled?: boolean;
+}) =>
+	useQuery<IMaterialConsumptionRead>({
+		queryKey: livestockQueryKeys.materialConsumptionById(farmId, consumptionId),
+		queryFn: () => getMaterialConsumptionById({ farmId, consumptionId }),
+		enabled: enabled && !!farmId && Number.isFinite(consumptionId),
+	});
+
 export const useListEventCategoriesByFarmId = ({
 	farmId,
 	filters,
@@ -523,54 +693,248 @@ export const useGetAggregatedHeadcountByAssetId = ({
 			assetId,
 		],
 		queryFn: async () => {
-			const pageSize = 100;
+			const report = await getInventorySummaryReport({
+				farmId,
+				asset_id: Number(assetId),
+			});
 
-			const sumQuantityByType = async (
-				type: Extract<LivestockEventType, "acquisition" | "mortality">,
-			): Promise<number> => {
-				let page = 1;
-				let total = 0;
-
-				while (true) {
-					const response = await listEventsByAssetId({
-						farmId,
-						assetId,
-						filters: {
-							type,
-							page,
-							pageSize,
-						},
-					});
-
-					for (const event of response.data) {
-						total += Number(event.quantity ?? 0) || 0;
-					}
-
-					if (!response.meta.has_next) {
-						break;
-					}
-
-					page = response.meta.page + 1;
-				}
-
-				return total;
-			};
-
-			const [acquisitionTotal, mortalityTotal] = await Promise.all([
-				sumQuantityByType("acquisition"),
-				sumQuantityByType("mortality"),
-			]);
+			const net = report.data.reduce((sum, row) => {
+				const onHand = Number(row.on_hand);
+				return sum + (Number.isFinite(onHand) ? onHand : 0);
+			}, 0);
 
 			return {
-				acquisitionTotal,
-				mortalityTotal,
-				net: Math.max(acquisitionTotal - mortalityTotal, 0),
+				acquisitionTotal: 0,
+				mortalityTotal: 0,
+				net,
 			};
 		},
 		enabled: enabled && !!farmId && !!assetId,
 	});
 
 // --- Mutation Hooks ---
+
+const invalidateMaterialDetailQueries = async ({
+	queryClient,
+	farmId,
+	assetId,
+}: {
+	queryClient: ReturnType<typeof useQueryClient>;
+	farmId: string;
+	assetId: string;
+}) => {
+	await Promise.all([
+		queryClient.invalidateQueries({
+			queryKey: livestockQueryKeys.inventoryBalanceByAsset(farmId, assetId),
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [
+				...livestockQueryKeys.all,
+				"eventsByAssetInfinite",
+				farmId,
+				assetId,
+			],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [
+				...livestockQueryKeys.all,
+				"materialPurchases",
+				farmId,
+				Number(assetId),
+			],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: [...livestockQueryKeys.all, "materialConsumptions", farmId],
+		}),
+		queryClient.invalidateQueries({
+			queryKey: reportsQueryKeys.farm(farmId),
+		}),
+		queryClient.invalidateQueries({
+			queryKey: ["v2", "finance", "snapshot", farmId],
+		}),
+	]);
+};
+
+export const useCreateMaterialPurchaseByFarmId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			data,
+		}: {
+			farmId: string;
+			data: IMaterialPurchaseCreatePayload;
+		}) => createMaterialPurchaseByFarmId({ farmId, data }),
+		onSuccess: async (_, { farmId, data }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId: String(data.material_asset_id),
+			});
+		},
+	});
+};
+
+export const useUpdateMaterialPurchaseById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			purchaseId,
+			data,
+		}: {
+			farmId: string;
+			purchaseId: number;
+			data: IMaterialPurchaseUpdatePayload;
+			materialAssetId: number;
+		}) => updateMaterialPurchaseById({ farmId, purchaseId, data }),
+		onSuccess: async (_, { farmId, purchaseId, materialAssetId }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId: String(materialAssetId),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.materialPurchaseById(farmId, purchaseId),
+			});
+		},
+	});
+};
+
+export const useDeleteMaterialPurchaseById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			purchaseId,
+		}: {
+			farmId: string;
+			purchaseId: number;
+			materialAssetId: number;
+		}) => deleteMaterialPurchaseById({ farmId, purchaseId }),
+		onSuccess: async (_, { farmId, purchaseId, materialAssetId }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId: String(materialAssetId),
+			});
+			queryClient.removeQueries({
+				queryKey: livestockQueryKeys.materialPurchaseById(farmId, purchaseId),
+			});
+		},
+	});
+};
+
+export const useCreateMaterialConsumptionByFarmId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			data,
+		}: {
+			farmId: string;
+			data: IMaterialConsumptionCreatePayload;
+		}) => createMaterialConsumptionByFarmId({ farmId, data }),
+		onSuccess: async (_, { farmId, data }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId: String(data.material_asset_id),
+			});
+		},
+	});
+};
+
+export const useUpdateMaterialConsumptionById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			consumptionId,
+			data,
+		}: {
+			farmId: string;
+			consumptionId: number;
+			data: IMaterialConsumptionUpdatePayload;
+			materialAssetId: number;
+		}) => updateMaterialConsumptionById({ farmId, consumptionId, data }),
+		onSuccess: async (_, { farmId, consumptionId, materialAssetId }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId: String(materialAssetId),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: livestockQueryKeys.materialConsumptionById(
+					farmId,
+					consumptionId,
+				),
+			});
+		},
+	});
+};
+
+export const useDeleteMaterialConsumptionById = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			consumptionId,
+		}: {
+			farmId: string;
+			consumptionId: number;
+			materialAssetId: number;
+		}) => deleteMaterialConsumptionById({ farmId, consumptionId }),
+		onSuccess: async (_, { farmId, consumptionId, materialAssetId }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId: String(materialAssetId),
+			});
+			queryClient.removeQueries({
+				queryKey: livestockQueryKeys.materialConsumptionById(
+					farmId,
+					consumptionId,
+				),
+			});
+		},
+	});
+};
+
+export const useCreateMaterialSaleByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			data: IMaterialSaleCreatePayload;
+		}) => createMaterialSaleByAssetId({ farmId, assetId, data }),
+		onSuccess: async (_, { farmId, assetId }) => {
+			await invalidateMaterialDetailQueries({
+				queryClient,
+				farmId,
+				assetId,
+			});
+		},
+	});
+};
 
 export const useCreateEventByAssetId = () => {
 	const queryClient = useQueryClient();
@@ -587,6 +951,135 @@ export const useCreateEventByAssetId = () => {
 		}) => createEventByAssetId({ farmId, assetId, data }),
 		onSuccess: (_, { farmId, assetId }) => {
 			// Invalidate all event queries for this asset (respects individual filter preferences)
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventsByAssetInfinite",
+					farmId,
+					assetId,
+				],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"aggregatedHeadcount",
+					farmId,
+					assetId,
+				],
+			});
+		},
+	});
+};
+
+export const useCreateFlockAcquisitionByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			payload,
+		}: {
+			farmId: string;
+			assetId: string;
+			payload: IFlockAcquisitionCreatePayload;
+		}) => createFlockAcquisitionByAssetId({ farmId, assetId, payload }),
+		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventsByAssetInfinite",
+					farmId,
+					assetId,
+				],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"aggregatedHeadcount",
+					farmId,
+					assetId,
+				],
+			});
+		},
+	});
+};
+
+export const useCreateFlockSaleByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			payload,
+		}: {
+			farmId: string;
+			assetId: string;
+			payload: IFlockSaleCreatePayload;
+		}) => createFlockSaleByAssetId({ farmId, assetId, payload }),
+		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventsByAssetInfinite",
+					farmId,
+					assetId,
+				],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "profitabilityReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"aggregatedHeadcount",
+					farmId,
+					assetId,
+				],
+			});
+		},
+	});
+};
+
+export const useCreateFlockMortalityByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			payload,
+		}: {
+			farmId: string;
+			assetId: string;
+			payload: IFlockMortalityCreatePayload;
+		}) => createFlockMortalityByAssetId({ farmId, assetId, payload }),
+		onSuccess: (_, { farmId, assetId }) => {
 			void queryClient.invalidateQueries({
 				queryKey: [
 					...livestockQueryKeys.all,

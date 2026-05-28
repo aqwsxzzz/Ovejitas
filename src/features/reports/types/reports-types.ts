@@ -38,26 +38,49 @@ export type EventType =
 	| "observation"
 	| "reproductive"
 	| "acquisition"
-	| "mortality";
+	| "mortality"
+	| "inventory";
 
-export interface IProductionRow {
-	bucket_start: string; // ISO datetime
-	asset_id: number;
-	unit: Unit;
-	category_id: number | null;
-	total: string; // decimal as string
+export type AggregateMeasure = "sum_quantity" | "sum_amount" | "count";
+export type InventoryAdjustment = "increment" | "decrement" | "reset";
+export type GroupBy = "asset";
+export type MaterialConsumptionGroupBy = "material" | "consumer" | "both";
+export type MaterialConsumptionReason = "feeding" | "waste" | "spoilage";
+
+export interface IAggregateRow {
+	bucket: string; // ISO datetime
+	group: string | null;
+	group_label?: string | null;
+	measure: AggregateMeasure;
+	value: string; // decimal as string
+	asset_id?: number | null;
 }
 
-export interface IProductionTotal {
-	unit: Unit;
-	total: string;
-}
-
-export interface IProductionReport {
-	data: IProductionRow[];
-	bucket: ProductionBucket;
+export interface IAggregateMeta {
 	type: EventType;
-	totals: IProductionTotal[];
+	measure: AggregateMeasure;
+	bucket: ProductionBucket;
+	group_key: string | null;
+	group_by?: GroupBy | null;
+}
+
+export interface IAggregateReport {
+	data: IAggregateRow[];
+	meta: IAggregateMeta;
+}
+
+export interface IMaterialConsumptionAggregateTotal {
+	group: string | null;
+	group_label: string | null;
+	unit: Unit;
+	total_qty: string;
+}
+
+export interface IMaterialConsumptionAggregateReport {
+	data: IAggregateRow[];
+	totals: IMaterialConsumptionAggregateTotal[];
+	bucket: ProductionBucket;
+	group_by: MaterialConsumptionGroupBy;
 }
 
 // Cost Per Unit Report
@@ -96,6 +119,7 @@ export interface IEventRead {
 	unit: Unit | null;
 	amount: string | null;
 	currency: string | null;
+	adjustment: InventoryAdjustment | null;
 	notes: string | null;
 	payload: Record<string, unknown>;
 	idempotency_key: string | null;
@@ -116,6 +140,18 @@ export interface ITimelineReport {
 	meta: IPageMeta;
 }
 
+// Inventory Summary Report
+export interface IInventorySummaryRow {
+	asset_id: number;
+	asset_name: string;
+	unit: Unit;
+	on_hand: string;
+}
+
+export interface IInventorySummaryReport {
+	data: IInventorySummaryRow[];
+}
+
 // Query Parameters
 export interface IProfitabilityReportParams {
 	farmId: string | number;
@@ -124,14 +160,17 @@ export interface IProfitabilityReportParams {
 	asset_id?: number;
 }
 
-export interface IProductionReportParams {
+export interface IAggregateReportParams {
 	farmId: string | number;
 	bucket?: ProductionBucket;
-	type?: EventType;
+	type: EventType;
 	date_from?: string;
 	date_to?: string;
 	asset_id?: number;
 	unit?: Unit;
+	adjustment?: InventoryAdjustment;
+	currency?: string;
+	group_by?: GroupBy;
 }
 
 export interface ICostPerUnitReportParams {
@@ -150,4 +189,31 @@ export interface ITimelineReportParams {
 	date_from?: string;
 	date_to?: string;
 	type?: EventType;
+}
+
+export interface IInventorySummaryReportParams {
+	farmId: string | number;
+	date_from?: string;
+	date_to?: string;
+	asset_id?: number;
+	unit?: Unit;
+}
+
+export interface IMaterialConsumptionAggregateReportParams {
+	farmId: string | number;
+	bucket?: ProductionBucket;
+	group_by?: MaterialConsumptionGroupBy;
+	material_asset_id?: number;
+	consumer_asset_id?: number;
+	reason?: MaterialConsumptionReason;
+	date_from?: string;
+	date_to?: string;
+}
+
+export interface IReportPdfParams {
+	farmId: string | number;
+	date_from?: string;
+	date_to?: string;
+	asset_id?: number;
+	unit?: Unit;
 }

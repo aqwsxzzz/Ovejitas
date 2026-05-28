@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docs": "node -e \"require('fs').cpSync('../Ovejitas-api/docs', './backend-docs', { recursive: true, force: true })\"",
+    "docs:ledger": "node scripts/docs-ledger-sync.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -42,6 +44,7 @@
     "react-hook-form": "^7.56.4",
     "react-i18next": "^15.5.3",
     "react-leaflet": "^5.0.0",
+    "recharts": "^3.8.1",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^4.1.6",

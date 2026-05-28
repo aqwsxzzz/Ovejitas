@@ -3,18 +3,18 @@ import { useQueries } from "@tanstack/react-query";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
-	listEventsByAssetId,
+	getProductionReport,
 	listIndividualsByAssetId,
 } from "@/features/livestock/api/livestock-api";
 import {
-	useGetCostPerUnitReport,
-	useGetProductionReport,
 	useGetProfitabilityReport,
 	useListEventCategoriesByFarmId,
 	useListLivestockAssetsByFarmId,
 } from "@/features/livestock/api/livestock-queries";
+import { getInventorySummaryReport } from "@/features/reports/api/reports-api";
 import type {
 	UnitDashboardSlice,
+	UnitKpiCard,
 	UnitKpiSlide,
 } from "@/shared/types/v2-domain-types";
 
@@ -38,42 +38,30 @@ function formatMoneyCompact(value: number): string {
 	return `$${value.toFixed(2)}`;
 }
 
-async function sumEventQuantityByType({
-	farmId,
-	assetId,
-	type,
-}: {
-	farmId: string;
-	assetId: number;
-	type: "acquisition" | "mortality";
-}): Promise<number> {
-	let page = 1;
-	const pageSize = 100;
-	let total = 0;
+type StockItem = { unit: string; onHand: number };
 
-	while (true) {
-		const eventsResponse = await listEventsByAssetId({
-			farmId,
-			assetId: String(assetId),
-			filters: {
-				type,
-				page,
-				pageSize,
-			},
-		});
-
-		for (const event of eventsResponse.data) {
-			total += Number(event.quantity ?? 0) || 0;
-		}
-
-		if (!eventsResponse.meta.has_next) {
-			break;
-		}
-
-		page = eventsResponse.meta.page + 1;
+function buildInventoryKpi(
+	items: StockItem[] | undefined,
+): Omit<UnitKpiCard, "label"> {
+	if (!items || items.length === 0) {
+		return { value: "Sin dato", sub: "Sin registros de inventario" };
 	}
-
-	return total;
+	if (items.length === 1) {
+		const item = items[0]!;
+		return {
+			value: item.onHand > 0 ? item.onHand.toFixed(0) : "0",
+			sub: `En stock · ${item.unit}`,
+		};
+	}
+	const slides: UnitKpiSlide[] = items.map((item) => ({
+		unit: item.unit,
+		value: item.onHand > 0 ? item.onHand.toFixed(0) : "0",
+	}));
+	return {
+		value: slides[0]!.value,
+		slides,
+		sub: "En stock",
+	};
 }
 
 interface ProductionUnitData {
@@ -98,15 +86,13 @@ function mapAssetToSlice(
 		aggregatedAnimalsByAssetId: Map<number, number>;
 		productionByAssetAndUnit: Map<number, Map<string, ProductionUnitData>>;
 		netByAssetId: Map<number, number>;
-		costPerUnitByAssetId: Map<number, number>;
-		currencyByAssetId: Map<number, string>;
+		inventoryByAssetId: Map<number, StockItem[]>;
 		individualCountByAssetId: Map<number, number>;
 		categoryNameById: Map<number, string>;
 	},
 ): UnitDashboardSlice {
 	const netValue = context.netByAssetId.get(asset.id) ?? 0;
-	const costPerUnitValue = context.costPerUnitByAssetId.get(asset.id);
-	const currency = context.currencyByAssetId.get(asset.id) ?? "USD";
+	const inventoryItems = context.inventoryByAssetId.get(asset.id);
 
 	const animalsValue =
 		asset.mode === "individual"
@@ -164,11 +150,7 @@ function mapAssetToSlice(
 			},
 			{
 				label: "Alimento",
-				value:
-					typeof costPerUnitValue === "number"
-						? `${formatMoneyCompact(costPerUnitValue)}/u`
-						: "Sin dato",
-				sub: `Costo por unidad (${currency})`,
+				...buildInventoryKpi(inventoryItems),
 			},
 		],
 	};
@@ -204,25 +186,6 @@ export function V2DashboardPage() {
 	const { data: profitabilityReport } = useGetProfitabilityReport({
 		farmId,
 		filters: { dateFrom: currentMonthStart },
-		enabled: !!farmId,
-	});
-
-	const { data: productionReport } = useGetProductionReport({
-		farmId,
-		filters: {
-			type: "production",
-			bucket: "day",
-			dateFrom: sevenDaysAgo,
-		},
-		enabled: !!farmId,
-	});
-
-	const { data: costPerUnitReport } = useGetCostPerUnitReport({
-		farmId,
-		filters: {
-			unit: "head",
-			dateFrom: currentMonthStart,
-		},
 		enabled: !!farmId,
 	});
 
@@ -265,6 +228,30 @@ export function V2DashboardPage() {
 		[assets],
 	);
 
+	const productionReportQueries = useQueries({
+		queries: assets.map((asset) => ({
+			queryKey: [
+				"livestock",
+				"dashboard",
+				"productionReportByAsset",
+				farmId,
+				asset.id,
+				sevenDaysAgo,
+			],
+			queryFn: () =>
+				getProductionReport({
+					farmId,
+					filters: {
+						assetId: asset.id,
+						type: "production",
+						bucket: "day",
+						dateFrom: sevenDaysAgo,
+					},
+				}),
+			enabled: !!farmId,
+		})),
+	});
+
 	const aggregatedCountQueries = useQueries({
 		queries: aggregatedAssets.map((asset) => ({
 			queryKey: [
@@ -275,20 +262,15 @@ export function V2DashboardPage() {
 				asset.id,
 			],
 			queryFn: async () => {
-				const [acquisitions, mortalities] = await Promise.all([
-					sumEventQuantityByType({
-						farmId,
-						assetId: asset.id,
-						type: "acquisition",
-					}),
-					sumEventQuantityByType({
-						farmId,
-						assetId: asset.id,
-						type: "mortality",
-					}),
-				]);
+				const summary = await getInventorySummaryReport({
+					farmId,
+					asset_id: asset.id,
+				});
 
-				return Math.max(acquisitions - mortalities, 0);
+				return summary.data.reduce((sum, row) => {
+					const onHand = Number(row.on_hand);
+					return sum + (Number.isFinite(onHand) ? onHand : 0);
+				}, 0);
 			},
 			enabled: !!farmId,
 		})),
@@ -332,33 +314,36 @@ export function V2DashboardPage() {
 		>;
 		const assetUnitDayTotals: Intermediate = new Map();
 
-		for (const row of productionReport?.data ?? []) {
-			const dayKey = row.bucket_start.slice(0, 10);
-			if (!dayKeys.includes(dayKey)) continue;
+		assets.forEach((asset, queryIndex) => {
+			const reportRows = productionReportQueries[queryIndex]?.data?.data ?? [];
+			for (const row of reportRows) {
+				const dayKey = row.bucket_start.slice(0, 10);
+				if (!dayKeys.includes(dayKey)) continue;
 
-			const unit = row.unit ?? "unit";
-			const catId = row.category_id;
-			const compositeKey = `${unit}::${catId ?? ""}`;
+				const unit = row.unit ?? "unit";
+				const catId = row.category_id;
+				const compositeKey = `${unit}::${catId ?? ""}`;
 
-			if (!assetUnitDayTotals.has(row.asset_id)) {
-				assetUnitDayTotals.set(row.asset_id, new Map());
+				if (!assetUnitDayTotals.has(asset.id)) {
+					assetUnitDayTotals.set(asset.id, new Map());
+				}
+				const byComposite = assetUnitDayTotals.get(asset.id)!;
+
+				if (!byComposite.has(compositeKey)) {
+					byComposite.set(compositeKey, {
+						unit,
+						categoryId: catId,
+						byDay: new Map(dayKeys.map((k) => [k, 0])),
+					});
+				}
+				const entry = byComposite.get(compositeKey)!;
+
+				entry.byDay.set(
+					dayKey,
+					(entry.byDay.get(dayKey) ?? 0) + parseNumeric(row.total),
+				);
 			}
-			const byComposite = assetUnitDayTotals.get(row.asset_id)!;
-
-			if (!byComposite.has(compositeKey)) {
-				byComposite.set(compositeKey, {
-					unit,
-					categoryId: catId,
-					byDay: new Map(dayKeys.map((k) => [k, 0])),
-				});
-			}
-			const entry = byComposite.get(compositeKey)!;
-
-			entry.byDay.set(
-				dayKey,
-				(entry.byDay.get(dayKey) ?? 0) + parseNumeric(row.total),
-			);
-		}
+		});
 
 		const result = new Map<number, Map<string, ProductionUnitData>>();
 		for (const [assetId, byComposite] of assetUnitDayTotals.entries()) {
@@ -380,30 +365,45 @@ export function V2DashboardPage() {
 			result.set(assetId, unitMap);
 		}
 		return result;
-	}, [productionReport, now]);
+	}, [assets, now, productionReportQueries]);
 
 	const categoryNameById = useMemo(
 		() => new Map(eventCategories.map((c) => [c.id, c.name])),
 		[eventCategories],
 	);
 
-	const costPerUnitByAssetId = useMemo(() => {
-		const byAssetId = new Map<number, number>();
-		for (const row of costPerUnitReport?.data ?? []) {
-			byAssetId.set(row.asset_id, parseNumeric(row.cost_per_unit));
-		}
-		return byAssetId;
-	}, [costPerUnitReport]);
+	const inventorySummaryQueries = useQueries({
+		queries: assets.map((asset) => ({
+			queryKey: [
+				"livestock",
+				"dashboard",
+				"inventorySummary",
+				farmId,
+				asset.id,
+			],
+			queryFn: () =>
+				getInventorySummaryReport({
+					farmId,
+					asset_id: asset.id,
+				}),
+			enabled: !!farmId,
+		})),
+	});
 
-	const currencyByAssetId = useMemo(() => {
-		const byAssetId = new Map<number, string>();
-		for (const row of costPerUnitReport?.data ?? []) {
-			if (row.currency) {
-				byAssetId.set(row.asset_id, row.currency);
+	const inventoryByAssetId = useMemo(() => {
+		const byAssetId = new Map<number, StockItem[]>();
+		assets.forEach((asset, index) => {
+			const rows = inventorySummaryQueries[index]?.data?.data ?? [];
+			const items = rows.map((row) => ({
+				unit: row.unit,
+				onHand: parseNumeric(row.on_hand),
+			}));
+			if (items.length > 0) {
+				byAssetId.set(asset.id, items);
 			}
-		}
+		});
 		return byAssetId;
-	}, [costPerUnitReport]);
+	}, [assets, inventorySummaryQueries]);
 
 	const slices = useMemo(
 		() =>
@@ -412,8 +412,7 @@ export function V2DashboardPage() {
 					aggregatedAnimalsByAssetId,
 					productionByAssetAndUnit,
 					netByAssetId,
-					costPerUnitByAssetId,
-					currencyByAssetId,
+					inventoryByAssetId,
 					individualCountByAssetId,
 					categoryNameById,
 				}),
@@ -423,8 +422,7 @@ export function V2DashboardPage() {
 			aggregatedAnimalsByAssetId,
 			productionByAssetAndUnit,
 			netByAssetId,
-			costPerUnitByAssetId,
-			currencyByAssetId,
+			inventoryByAssetId,
 			individualCountByAssetId,
 			categoryNameById,
 		],
@@ -439,19 +437,19 @@ export function V2DashboardPage() {
 
 			{!farmId ? (
 				<article className="v2-card p-4">
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="text-sm text-(--v2-ink-soft)">
 						Selecciona una granja para cargar datos reales del dashboard.
 					</p>
 				</article>
 			) : isLoading ? (
 				<article className="v2-card p-4">
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="text-sm text-(--v2-ink-soft)">
 						Cargando unidades reales...
 					</p>
 				</article>
 			) : slices.length === 0 ? (
 				<article className="v2-card p-4">
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
+					<p className="text-sm text-(--v2-ink-soft)">
 						No hay unidades de produccion reales para mostrar.
 					</p>
 				</article>
@@ -461,7 +459,7 @@ export function V2DashboardPage() {
 
 			<article className="v2-card p-4">
 				<p className="v2-kicker mb-3">Alertas urgentes</p>
-				<p className="text-sm text-[color:var(--v2-ink-soft)]">
+				<p className="text-sm text-(--v2-ink-soft)">
 					Las alertas se mostraran cuando el backend de reportes este disponible
 					para este modulo.
 				</p>
@@ -469,7 +467,7 @@ export function V2DashboardPage() {
 
 			<article className="v2-card p-4">
 				<p className="v2-kicker mb-3">Tareas de hoy</p>
-				<p className="text-sm text-[color:var(--v2-ink-soft)]">
+				<p className="text-sm text-(--v2-ink-soft)">
 					No hay tareas con datos reales disponibles en esta vista.
 				</p>
 			</article>

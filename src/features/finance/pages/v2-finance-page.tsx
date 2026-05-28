@@ -1,331 +1,652 @@
-import { Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
-	listEventsByAssetId,
-	listLivestockAssetsByFarmId,
-} from "@/features/livestock/api/livestock-api";
+	FinanceDashboardShell,
+	type FinanceAlertItem,
+	type FinanceInsightRow,
+	type FinancePeriodWheel,
+	type FinanceSummaryCardData,
+	type FinanceTrendSection,
+} from "@/features/finance/components/finance-dashboard-shell";
+import {
+	formatCurrency,
+	getChartBucket,
+	getPreviousRange,
+	parseDateInput,
+	parseDecimal,
+	startOfDay,
+	toDateInput,
+	type FinanceDateRange,
+	type FinanceRangePreset,
+} from "@/features/finance/finance-dashboard-utils";
+import {
+	useGetAggregateReport,
+	useGetProfitabilityReport,
+} from "@/features/reports/api/reports-queries";
+const PERIOD_WHEEL_RADIUS = 2;
 
-type FinanceMovement = {
-	id: string;
-	notes: string;
-	occurredAt: string;
-	type: "income" | "expense";
-	amount: number;
+const addDays = (value: Date, days: number): Date => {
+	const next = new Date(value);
+	next.setDate(next.getDate() + days);
+	return next;
 };
 
-type UnitNet = {
-	unitId: number;
-	unitName: string;
-	net: number;
+const getWeekStart = (value: Date): Date => {
+	const next = startOfDay(value);
+	const dayIndex = (next.getDay() + 6) % 7;
+	next.setDate(next.getDate() - dayIndex);
+	return next;
 };
 
-type FinanceSnapshot = {
-	income: number;
-	expense: number;
-	net: number;
-	costByCategory: Array<{ categoryName: string; total: number }>;
-	txns: FinanceMovement[];
-	ranking: UnitNet[];
+const buildWeekRange = (start: Date, today: Date): FinanceDateRange => {
+	const from = startOfDay(start);
+	const end = addDays(from, 6);
+	const to = end > today ? today : end;
+	return { from: toDateInput(from), to: toDateInput(to) };
 };
 
-function isLoggedEvent(payload: Record<string, unknown> | undefined): boolean {
-	if (!payload) return true;
-	const status = payload.status;
-	if (typeof status !== "string") return true;
-	return status === "logged";
-}
+const buildMonthRange = (
+	year: number,
+	month: number,
+	today: Date,
+): FinanceDateRange => {
+	const from = new Date(year, month, 1);
+	const end = new Date(year, month + 1, 0);
+	const to = end > today ? today : end;
+	return { from: toDateInput(from), to: toDateInput(to) };
+};
 
-function formatCurrency(value: number): string {
-	if (Math.abs(value) >= 1000) {
-		return `$${(value / 1000).toFixed(1)}k`;
+const buildYearRange = (year: number, today: Date): FinanceDateRange => {
+	const from = new Date(year, 0, 1);
+	const end = new Date(year, 11, 31);
+	const to = end > today ? today : end;
+	return { from: toDateInput(from), to: toDateInput(to) };
+};
+
+const getDefaultPresetRange = (
+	preset: FinanceRangePreset,
+	today: Date,
+): FinanceDateRange => {
+	if (preset === "week") return buildWeekRange(getWeekStart(today), today);
+	if (preset === "month")
+		return buildMonthRange(today.getFullYear(), today.getMonth(), today);
+	if (preset === "year") return buildYearRange(today.getFullYear(), today);
+	return { from: toDateInput(today), to: toDateInput(today) };
+};
+
+const formatShortDate = (value: string): string =>
+	new Intl.DateTimeFormat("es-ES", {
+		day: "2-digit",
+		month: "short",
+	}).format(parseDateInput(value));
+
+const formatRangeOptionLabel = (range: FinanceDateRange): string =>
+	`${formatShortDate(range.from)} - ${formatShortDate(range.to)}`;
+
+const monthLabel = (year: number, month: number): string =>
+	new Intl.DateTimeFormat("es-ES", { month: "short" }).format(
+		new Date(year, month, 1),
+	);
+
+const parseBucketYearMonth = (
+	bucket: string,
+): { year: number; month: number } | null => {
+	const isoMatch = bucket.match(/^(\d{4})-(\d{2})/);
+	if (isoMatch) {
+		const year = Number(isoMatch[1]);
+		const month = Number(isoMatch[2]) - 1;
+		if (month >= 0 && month <= 11) {
+			return { year, month };
+		}
 	}
-	return `$${value.toFixed(2)}`;
-}
 
-function formatSignedCurrency(value: number): string {
-	return `${value >= 0 ? "+" : "-"}${formatCurrency(Math.abs(value))}`;
-}
+	const bucketDate = new Date(bucket);
+	if (Number.isNaN(bucketDate.getTime())) return null;
+	return {
+		year: bucketDate.getFullYear(),
+		month: bucketDate.getMonth(),
+	};
+};
 
-function monthLabel(): string {
-	return new Date().toLocaleDateString("es-EC", {
-		month: "long",
-		year: "numeric",
+const buildAvailableMonths = (
+	rows: Array<{ bucket: string }> = [],
+	selectedYear: number,
+): Set<number> => {
+	const available = new Set<number>();
+	for (const row of rows) {
+		const parsed = parseBucketYearMonth(row.bucket);
+		if (!parsed) continue;
+		if (parsed.year !== selectedYear) continue;
+		available.add(parsed.month);
+	}
+	return available;
+};
+
+const createEmptyRange = (): FinanceDateRange => {
+	const today = startOfDay(new Date());
+	return getDefaultPresetRange("month", today);
+};
+
+const getPrimaryCurrency = (
+	currentTotals: Array<{ currency: string }>,
+	previousTotals: Array<{ currency: string }>,
+): string => currentTotals[0]?.currency ?? previousTotals[0]?.currency ?? "USD";
+
+const pickTotal = <T extends { currency: string }>(
+	items: T[],
+	currency: string,
+): T | undefined => items.find((item) => item.currency === currency);
+
+const calculateTrend = (current: number, previous: number): number | null => {
+	if (previous === 0) return null;
+	return ((current - previous) / Math.abs(previous)) * 100;
+};
+
+const mapInsightRows = (
+	rows: Array<{
+		asset_id: number;
+		asset_name: string;
+		currency: string;
+		income_total: string;
+		expense_total: string;
+		net: string;
+	}>,
+	metric: "income" | "expense" | "net",
+	currency: string,
+	options?: {
+		netMode?: "positive" | "negative" | "all";
+	},
+): FinanceInsightRow[] => {
+	const netMode = options?.netMode ?? "positive";
+	const sorted = [...rows].sort((left, right) => {
+		if (metric === "income")
+			return parseDecimal(right.income_total) - parseDecimal(left.income_total);
+		if (metric === "expense")
+			return (
+				parseDecimal(right.expense_total) - parseDecimal(left.expense_total)
+			);
+		if (netMode === "negative") {
+			return parseDecimal(left.net) - parseDecimal(right.net);
+		}
+		return parseDecimal(right.net) - parseDecimal(left.net);
 	});
-}
+	const filtered =
+		metric === "net"
+			? netMode === "negative"
+				? sorted.filter((row) => parseDecimal(row.net) < 0)
+				: netMode === "all"
+					? sorted
+					: sorted.filter((row) => parseDecimal(row.net) >= 0)
+			: sorted;
+	const total = filtered.reduce((sum, row) => {
+		if (metric === "income") return sum + parseDecimal(row.income_total);
+		if (metric === "expense") return sum + parseDecimal(row.expense_total);
+		const netValue = parseDecimal(row.net);
+		return netMode === "negative" ? sum + Math.abs(netValue) : sum + netValue;
+	}, 0);
 
-async function fetchFinanceSnapshot(farmId: string): Promise<FinanceSnapshot> {
-	const assetsResponse = await listLivestockAssetsByFarmId({
-		farmId,
-		filters: { kind: "animal", mode: "aggregated", pageSize: 100 },
+	return filtered.slice(0, 5).map((row) => {
+		const value =
+			metric === "income"
+				? parseDecimal(row.income_total)
+				: metric === "expense"
+					? parseDecimal(row.expense_total)
+					: parseDecimal(row.net);
+		const normalizedValue =
+			metric === "net" && netMode === "negative" ? Math.abs(value) : value;
+		const share = total > 0 ? (normalizedValue / total) * 100 : 0;
+		return {
+			assetId: String(row.asset_id),
+			label: row.asset_name,
+			subtitle:
+				metric === "net"
+					? netMode === "negative"
+						? "Contribucion a perdida"
+						: "Contribucion a ganancia"
+					: `${metric === "income" ? "Impulsor de ingresos" : "Impulsor de gastos"}`,
+			value: formatCurrency(value, currency),
+			shareLabel: `${share.toFixed(1)}% del total`,
+			fill: share,
+			trend:
+				metric === "expense" || (metric === "net" && value < 0)
+					? "negative"
+					: "positive",
+		};
 	});
-	const assets = assetsResponse.data;
+};
 
-	const eventResponses = await Promise.all(
-		assets.map((asset) =>
-			listEventsByAssetId({
-				farmId,
-				assetId: String(asset.id),
-				filters: { pageSize: 100, sort: "-occurred_at" },
-			}),
-		),
-	);
+const buildTrendSections = (
+	incomeRows: Array<{
+		bucket: string;
+		group_label?: string | null;
+		group: string | null;
+		value: string;
+	}>,
+	expenseRows: Array<{
+		bucket: string;
+		group_label?: string | null;
+		group: string | null;
+		value: string;
+	}>,
+): FinanceTrendSection[] => {
+	const sectionMap = new Map<
+		string,
+		Map<string, { income: number; expense: number }>
+	>();
+	for (const row of incomeRows) {
+		const currency = row.group_label ?? row.group ?? "USD";
+		const byBucket = sectionMap.get(currency) ?? new Map();
+		const current = byBucket.get(row.bucket) ?? { income: 0, expense: 0 };
+		current.income += parseDecimal(row.value);
+		byBucket.set(row.bucket, current);
+		sectionMap.set(currency, byBucket);
+	}
+	for (const row of expenseRows) {
+		const currency = row.group_label ?? row.group ?? "USD";
+		const byBucket = sectionMap.get(currency) ?? new Map();
+		const current = byBucket.get(row.bucket) ?? { income: 0, expense: 0 };
+		current.expense += parseDecimal(row.value);
+		byBucket.set(row.bucket, current);
+		sectionMap.set(currency, byBucket);
+	}
 
-	const allEvents = eventResponses.flatMap((response, index) =>
-		response.data.map((event) => ({
-			event,
-			unitId: assets[index]?.id ?? 0,
-			unitName: assets[index]?.name ?? "Sin unidad",
-		})),
-	);
+	return Array.from(sectionMap.entries()).map(([currency, byBucket]) => ({
+		currency,
+		rows: Array.from(byBucket.entries())
+			.sort(([left], [right]) => left.localeCompare(right))
+			.map(([bucket, values]) => ({
+				label: bucket,
+				income: values.income,
+				expense: values.expense,
+				net: values.income - values.expense,
+			})),
+	}));
+};
 
-	const moneyEvents = allEvents.filter(({ event }) => {
-		if (event.type !== "income" && event.type !== "expense") return false;
-		return isLoggedEvent(event.payload as Record<string, unknown> | undefined);
-	});
+const buildYearMonthSections = (
+	year: number,
+	incomeRows: Array<{
+		bucket: string;
+		group_label?: string | null;
+		group: string | null;
+		value: string;
+	}>,
+	expenseRows: Array<{
+		bucket: string;
+		group_label?: string | null;
+		group: string | null;
+		value: string;
+	}>,
+): FinanceTrendSection[] => {
+	const monthFormatter = new Intl.DateTimeFormat("es-ES", { month: "short" });
+	const currencyMap = new Map<
+		string,
+		Array<{ income: number; expense: number }>
+	>();
 
-	const income = moneyEvents.reduce(
-		(sum, { event }) =>
-			sum + (event.type === "income" ? Number(event.amount ?? 0) : 0),
-		0,
-	);
-	const expense = moneyEvents.reduce(
-		(sum, { event }) =>
-			sum + (event.type === "expense" ? Number(event.amount ?? 0) : 0),
-		0,
-	);
+	for (const row of incomeRows) {
+		const currency = row.group_label ?? row.group ?? "USD";
+		const parsed = parseBucketYearMonth(row.bucket);
+		if (!parsed || parsed.year !== year) continue;
+		const monthIndex = parsed.month;
+		const months =
+			currencyMap.get(currency) ??
+			Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
+		months[monthIndex].income += parseDecimal(row.value);
+		currencyMap.set(currency, months);
+	}
 
-	const costByCategoryMap = new Map<string, number>();
-	for (const { event } of moneyEvents) {
-		if (event.type !== "expense") continue;
-		const key =
-			event.category_id != null
-				? `Categoria ${event.category_id}`
-				: "Sin categoria";
-		costByCategoryMap.set(
-			key,
-			(costByCategoryMap.get(key) ?? 0) + Number(event.amount ?? 0),
+	for (const row of expenseRows) {
+		const currency = row.group_label ?? row.group ?? "USD";
+		const parsed = parseBucketYearMonth(row.bucket);
+		if (!parsed || parsed.year !== year) continue;
+		const monthIndex = parsed.month;
+		const months =
+			currencyMap.get(currency) ??
+			Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
+		months[monthIndex].expense += parseDecimal(row.value);
+		currencyMap.set(currency, months);
+	}
+
+	if (currencyMap.size === 0) {
+		currencyMap.set(
+			"USD",
+			Array.from({ length: 12 }, () => ({ income: 0, expense: 0 })),
 		);
 	}
 
-	const txns = moneyEvents
-		.sort(
-			(a, b) =>
-				new Date(b.event.occurred_at).getTime() -
-				new Date(a.event.occurred_at).getTime(),
-		)
-		.slice(0, 5)
-		.map(({ event }) => ({
-			id: String(event.id),
-			notes: event.notes ?? event.type,
-			occurredAt: event.occurred_at,
-			type: event.type as "income" | "expense",
-			amount: Number(event.amount ?? 0),
-		}));
+	return Array.from(currencyMap.entries()).map(([currency, months]) => ({
+		currency,
+		rows: months.map((values, monthIndex) => ({
+			label: monthFormatter.format(new Date(year, monthIndex, 1)),
+			income: values.income,
+			expense: values.expense,
+			net: values.income - values.expense,
+		})),
+	}));
+};
 
-	const netByUnit = new Map<number, UnitNet>();
-	for (const { event, unitId, unitName } of moneyEvents) {
-		const previous = netByUnit.get(unitId) ?? { unitId, unitName, net: 0 };
-		const amount = Number(event.amount ?? 0);
-		const delta = event.type === "income" ? amount : -amount;
-		netByUnit.set(unitId, { ...previous, net: previous.net + delta });
+const buildAlerts = (
+	currentIncome: number,
+	previousIncome: number,
+	currentExpense: number,
+	previousExpense: number,
+	lossRows: FinanceInsightRow[],
+): FinanceAlertItem[] => {
+	const alerts: FinanceAlertItem[] = [];
+	const incomeTrend = calculateTrend(currentIncome, previousIncome);
+	const expenseTrend = calculateTrend(currentExpense, previousExpense);
+
+	if (expenseTrend !== null && expenseTrend > 15) {
+		alerts.push({
+			tone: "warning",
+			title: `Gastos +${expenseTrend.toFixed(0)}%`,
+			detail:
+				"La granja esta gastando mas que en el periodo anterior. Revisa primero los mayores impulsores de costo.",
+		});
+	}
+	if (incomeTrend !== null && incomeTrend < -10) {
+		alerts.push({
+			tone: "warning",
+			title: `Ingresos -${Math.abs(incomeTrend).toFixed(0)}%`,
+			detail:
+				"El flujo de ingresos es mas debil que en el periodo anterior. Revisa ventas y tiempos de produccion.",
+		});
+	}
+	if (lossRows.length > 0) {
+		alerts.push({
+			tone: "warning",
+			title: `${lossRows.length} activos con perdida`,
+			detail: `${lossRows[0].label} es el mayor contribuyente de perdida ahora.`,
+		});
+	}
+	if (alerts.length === 0) {
+		alerts.push({
+			tone: "info",
+			title: "Finanzas estables",
+			detail:
+				"No se detectaron senales de alerta importantes para el periodo seleccionado.",
+		});
 	}
 
-	return {
-		income,
-		expense,
-		net: income - expense,
-		costByCategory: Array.from(costByCategoryMap.entries())
-			.map(([categoryName, total]) => ({ categoryName, total }))
-			.sort((a, b) => b.total - a.total),
-		txns,
-		ranking: Array.from(netByUnit.values()).sort((a, b) => b.net - a.net),
-	};
-}
+	return alerts.slice(0, 3);
+};
 
 export function V2FinancePage() {
+	const navigate = useNavigate();
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
-
-	const { data: snapshot, isLoading } = useQuery({
-		queryKey: ["v2", "finance", "snapshot", farmId],
-		queryFn: () => fetchFinanceSnapshot(farmId),
-		enabled: !!farmId,
-	});
-
-	const summary = snapshot ?? {
-		income: 0,
-		expense: 0,
-		net: 0,
-		costByCategory: [],
-		txns: [],
-		ranking: [],
-	};
-
-	const bestUnit = summary.ranking[0];
-	const worstUnit = summary.ranking[summary.ranking.length - 1];
-	const maxCategory = Math.max(
-		...summary.costByCategory.map((item) => item.total),
-		1,
+	const today = startOfDay(new Date());
+	const [rangePreset, setRangePreset] = useState<FinanceRangePreset>("month");
+	const [range, setRange] = useState<FinanceDateRange>(() =>
+		createEmptyRange(),
 	);
 
+	const currentRange = range;
+	const selectedFromDate = parseDateInput(currentRange.from);
+	const selectedYear = selectedFromDate.getFullYear();
+	const currentYear = today.getFullYear();
+	const previousRange = getPreviousRange(currentRange);
+	const bucket = getChartBucket(rangePreset, currentRange);
+	const isRangeValid = currentRange.from <= currentRange.to;
+	const hasFarm = !!farmId;
+	const yearStart = toDateInput(new Date(selectedYear, 0, 1));
+	const yearEnd = toDateInput(new Date(selectedYear, 11, 31));
+
+	const currentProfitabilityQuery = useGetProfitabilityReport(
+		{
+			farmId,
+			date_from: currentRange.from,
+			date_to: currentRange.to,
+		},
+		hasFarm && isRangeValid,
+	);
+	const previousProfitabilityQuery = useGetProfitabilityReport(
+		{
+			farmId,
+			date_from: previousRange.from,
+			date_to: previousRange.to,
+		},
+		hasFarm && isRangeValid,
+	);
+	const incomeQuery = useGetAggregateReport(
+		{
+			farmId,
+			bucket,
+			type: "income",
+			date_from: currentRange.from,
+			date_to: currentRange.to,
+		},
+		hasFarm && isRangeValid,
+	);
+	const expenseQuery = useGetAggregateReport(
+		{
+			farmId,
+			bucket,
+			type: "expense",
+			date_from: currentRange.from,
+			date_to: currentRange.to,
+		},
+		hasFarm && isRangeValid,
+	);
+	const monthlyIncomeAvailabilityQuery = useGetAggregateReport(
+		{
+			farmId,
+			bucket: "month",
+			type: "income",
+			date_from: yearStart,
+			date_to: yearEnd,
+		},
+		hasFarm && rangePreset === "month",
+	);
+	const monthlyExpenseAvailabilityQuery = useGetAggregateReport(
+		{
+			farmId,
+			bucket: "month",
+			type: "expense",
+			date_from: yearStart,
+			date_to: yearEnd,
+		},
+		hasFarm && rangePreset === "month",
+	);
+
+	const currentTotals = currentProfitabilityQuery.data?.totals ?? [];
+	const previousTotals = previousProfitabilityQuery.data?.totals ?? [];
+	const primaryCurrency = getPrimaryCurrency(currentTotals, previousTotals);
+	const currentSummary = pickTotal(currentTotals, primaryCurrency);
+	const previousSummary = pickTotal(previousTotals, primaryCurrency);
+	const currentRows = currentProfitabilityQuery.data?.data ?? [];
+
+	const currentIncome = parseDecimal(currentSummary?.income_total);
+	const currentExpense = parseDecimal(currentSummary?.expense_total);
+	const currentNet = parseDecimal(currentSummary?.net);
+	const previousIncome = parseDecimal(previousSummary?.income_total);
+	const previousExpense = parseDecimal(previousSummary?.expense_total);
+	const previousNet = parseDecimal(previousSummary?.net);
+
+	const summaryCards: FinanceSummaryCardData[] = [
+		{
+			label: "Ingresos",
+			metric: "income",
+			value: currentSummary
+				? formatCurrency(currentIncome, primaryCurrency)
+				: "—",
+			trendLabel: "comparado al periodo anterior",
+			trendValue: calculateTrend(currentIncome, previousIncome),
+			currency: primaryCurrency,
+		},
+		{
+			label: "Gastos",
+			metric: "expense",
+			value: currentSummary
+				? formatCurrency(currentExpense, primaryCurrency)
+				: "—",
+			trendLabel: "comparado al periodo anterior",
+			trendValue: calculateTrend(currentExpense, previousExpense),
+			currency: primaryCurrency,
+		},
+		{
+			label: "Balance neto",
+			metric: "net",
+			value: currentSummary ? formatCurrency(currentNet, primaryCurrency) : "—",
+			trendLabel: "comparado al periodo anterior",
+			trendValue: calculateTrend(currentNet, previousNet),
+			currency: primaryCurrency,
+		},
+	];
+
+	const profitabilityRows = mapInsightRows(currentRows, "net", primaryCurrency);
+	const lossRows = mapInsightRows(currentRows, "net", primaryCurrency, {
+		netMode: "negative",
+	});
+	const expenseRows = mapInsightRows(currentRows, "expense", primaryCurrency);
+	const incomeRows = mapInsightRows(currentRows, "income", primaryCurrency);
+	const chartSections =
+		rangePreset === "month"
+			? buildYearMonthSections(
+					selectedYear,
+					monthlyIncomeAvailabilityQuery.data?.data ?? [],
+					monthlyExpenseAvailabilityQuery.data?.data ?? [],
+				)
+			: buildTrendSections(
+					incomeQuery.data?.data ?? [],
+					expenseQuery.data?.data ?? [],
+				);
+	const alerts = buildAlerts(
+		currentIncome,
+		previousIncome,
+		currentExpense,
+		previousExpense,
+		lossRows,
+	);
+	const availableMonths = buildAvailableMonths(
+		[
+			...(monthlyIncomeAvailabilityQuery.data?.data ?? []),
+			...(monthlyExpenseAvailabilityQuery.data?.data ?? []),
+		],
+		selectedYear,
+	);
+
+	const periodWheel: FinancePeriodWheel | undefined =
+		rangePreset === "custom"
+			? undefined
+			: rangePreset === "week"
+				? {
+						label: "Semanas",
+						options: Array.from(
+							{ length: PERIOD_WHEEL_RADIUS * 2 + 1 },
+							(_, index) => {
+								const offset = index - PERIOD_WHEEL_RADIUS;
+								const selectedWeekStart = getWeekStart(selectedFromDate);
+								const weekStart = addDays(selectedWeekStart, offset * 7);
+								const weekRange = buildWeekRange(weekStart, today);
+								return {
+									key: `week:${weekRange.from}`,
+									label: formatRangeOptionLabel(weekRange),
+									selected:
+										weekRange.from === currentRange.from &&
+										weekRange.to === currentRange.to,
+									disabled: weekStart > today,
+								};
+							},
+						).filter((option) => !option.disabled),
+						onSelect: (key) => {
+							const from = key.replace("week:", "");
+							setRange(buildWeekRange(parseDateInput(from), today));
+						},
+					}
+				: rangePreset === "month"
+					? {
+							label: `Meses ${selectedYear}`,
+							options: Array.from({ length: 12 }, (_, month) => {
+								const selected =
+									selectedFromDate.getFullYear() === selectedYear &&
+									selectedFromDate.getMonth() === month;
+								const isFutureMonth =
+									selectedYear === currentYear && month > today.getMonth();
+								const isCurrentMonth =
+									selectedYear === currentYear && month === today.getMonth();
+								const hasData = availableMonths.has(month);
+								return {
+									key: `month:${selectedYear}-${String(month + 1).padStart(2, "0")}`,
+									label: monthLabel(selectedYear, month),
+									selected,
+									disabled:
+										isFutureMonth || (!hasData && !selected && !isCurrentMonth),
+								};
+							}),
+							onSelect: (key) => {
+								const [, value] = key.split(":");
+								const [yearRaw, monthRaw] = value.split("-");
+								const nextYear = Number(yearRaw);
+								const nextMonth = Number(monthRaw) - 1;
+								setRange(buildMonthRange(nextYear, nextMonth, today));
+							},
+						}
+					: {
+							label: "Años",
+							options: Array.from(
+								{ length: PERIOD_WHEEL_RADIUS * 2 + 1 },
+								(_, index) => {
+									const year = selectedYear + (index - PERIOD_WHEEL_RADIUS);
+									return {
+										key: `year:${year}`,
+										label: String(year),
+										selected: year === selectedYear,
+										disabled: year > currentYear,
+									};
+								},
+							).filter((option) => !option.disabled),
+							onSelect: (key) => {
+								const year = Number(key.replace("year:", ""));
+								setRange(buildYearRange(year, today));
+							},
+						};
+
+	if (!hasFarm) {
+		return (
+			<section className="rounded-3xl border-0 bg-card/90 p-5 shadow-sm">
+				<p className="v2-kicker">Finanzas</p>
+				<h1 className="mt-2 text-2xl font-semibold tracking-tight">Finanzas</h1>
+				<p className="mt-1 text-sm text-muted-foreground">
+					Selecciona una granja para ver su panel financiero.
+				</p>
+			</section>
+		);
+	}
+
+	const handlePresetChange = (nextPreset: FinanceRangePreset) => {
+		setRangePreset(nextPreset);
+		setRange(getDefaultPresetRange(nextPreset, today));
+	};
+
+	const handleInsightAssetClick = (assetId: string) => {
+		void navigate({
+			to: "/v2/production-units/flock/$unitId",
+			params: { unitId: assetId },
+			search: {
+				eventType: undefined,
+			},
+		});
+	};
+
 	return (
-		<section className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-semibold">Finanzas</h1>
-				<span className="rounded-full border border-[color:var(--v2-border)] bg-white px-3 py-1 text-xs font-semibold text-[color:var(--v2-ink-soft)]">
-					{monthLabel()}
-				</span>
-			</div>
-
-			{!farmId ? (
-				<article className="v2-card p-4">
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						Selecciona una granja para cargar datos financieros reales.
-					</p>
-				</article>
-			) : null}
-
-			<div className="rounded-2xl border border-black/20 bg-[#f2df77] p-4 shadow-[0_10px_24px_-18px_rgba(0,0,0,0.45)]">
-				<p className="text-[10px] uppercase tracking-[0.08em] text-[color:var(--v2-ink-soft)]">
-					neto · mes actual
-				</p>
-				<p className="mt-2 text-5xl font-semibold leading-none">
-					{formatSignedCurrency(summary.net)}
-				</p>
-				<div className="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-white/45 p-3">
-					<div>
-						<p className="text-xs uppercase tracking-[0.08em] text-emerald-700">
-							entrada
-						</p>
-						<p className="text-lg font-semibold">
-							{formatCurrency(summary.income)}
-						</p>
-					</div>
-					<div>
-						<p className="text-xs uppercase tracking-[0.08em] text-red-700">
-							salida
-						</p>
-						<p className="text-lg font-semibold">
-							{formatCurrency(summary.expense)}
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<article className="v2-card p-4">
-				<p className="v2-kicker mb-2">En que se fue el dinero</p>
-				{isLoading ? (
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						Cargando movimientos...
-					</p>
-				) : summary.costByCategory.length === 0 ? (
-					<p className="text-sm text-[color:var(--v2-ink-soft)]">
-						No hay gastos reales registrados.
-					</p>
-				) : (
-					<div className="space-y-2.5">
-						{summary.costByCategory.map((item) => (
-							<div key={item.categoryName}>
-								<div className="mb-1 flex items-center justify-between text-sm">
-									<span>{item.categoryName}</span>
-									<span className="font-semibold">
-										{formatCurrency(item.total)}
-									</span>
-								</div>
-								<div className="h-2 overflow-hidden rounded-full bg-[color:var(--v2-border)]">
-									<div
-										className="h-full rounded-full bg-[color:var(--v2-primary)]"
-										style={{
-											width: `${Math.max((item.total / maxCategory) * 100, item.total > 0 ? 12 : 0)}%`,
-										}}
-									/>
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-			</article>
-
-			<article className="v2-card p-4">
-				<p className="v2-kicker mb-2">Quien esta pagando</p>
-				<div className="grid gap-2 md:grid-cols-2">
-					<div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-						<p className="text-xs uppercase tracking-[0.08em] text-emerald-700">
-							Mejor unidad
-						</p>
-						<p className="mt-1 font-semibold">
-							{bestUnit?.unitName ?? "Sin datos"}
-						</p>
-						<p className="text-sm text-[color:var(--v2-ink-soft)]">
-							{bestUnit ? formatSignedCurrency(bestUnit.net) : "—"}
-						</p>
-					</div>
-					<div className="rounded-xl border border-red-200 bg-red-50 p-3">
-						<p className="text-xs uppercase tracking-[0.08em] text-red-700">
-							Mas presion
-						</p>
-						<p className="mt-1 font-semibold">
-							{worstUnit?.unitName ?? "Sin datos"}
-						</p>
-						<p className="text-sm text-[color:var(--v2-ink-soft)]">
-							{worstUnit ? formatSignedCurrency(worstUnit.net) : "—"}
-						</p>
-					</div>
-				</div>
-			</article>
-
-			<article className="v2-card p-4">
-				<div className="mb-2 flex items-center justify-between">
-					<p className="v2-kicker">Movimientos recientes</p>
-					<Link
-						to="/v2/log"
-						search={{
-							actionId: "nuevo-movimiento",
-							actionLabel: "Nuevo movimiento",
-							contextLabel: "Finanzas",
-							sourcePath: "/v2/finance",
-						}}
-						className="rounded-full border border-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold"
-					>
-						Nuevo movimiento
-					</Link>
-				</div>
-				<div className="space-y-2">
-					{summary.txns.length === 0 ? (
-						<p className="text-sm text-[color:var(--v2-ink-soft)]">
-							Sin movimientos.
-						</p>
-					) : (
-						summary.txns.map((event) => (
-							<div
-								key={event.id}
-								className="flex items-center justify-between rounded-lg border border-[color:var(--v2-border)] px-3 py-2"
-							>
-								<div className="min-w-0">
-									<p className="truncate text-sm font-medium leading-tight">
-										{event.notes}
-									</p>
-									<p className="text-xs text-[color:var(--v2-ink-soft)]">
-										{new Date(event.occurredAt).toLocaleDateString("es-EC")}
-									</p>
-								</div>
-								<p
-									className={`text-sm font-semibold ${
-										event.type === "income"
-											? "text-emerald-700"
-											: "text-red-700"
-									}`}
-								>
-									{event.type === "income" ? "+" : "-"}
-									{formatCurrency(event.amount)}
-								</p>
-							</div>
-						))
-					)}
-				</div>
-			</article>
-		</section>
+		<FinanceDashboardShell
+			rangePreset={rangePreset}
+			onPresetChange={handlePresetChange}
+			range={currentRange}
+			onRangeChange={setRange}
+			summaryCards={summaryCards}
+			chartSections={chartSections}
+			profitabilityRows={profitabilityRows}
+			lossRows={lossRows}
+			expenseRows={expenseRows}
+			incomeRows={incomeRows}
+			alerts={alerts}
+			isCustomRange={rangePreset === "custom"}
+			periodWheel={periodWheel}
+			onInsightAssetClick={handleInsightAssetClick}
+		/>
 	);
 }

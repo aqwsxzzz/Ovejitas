@@ -44,8 +44,8 @@ function SpeciesCard({ group }: { group: LivestockGroup }) {
 
 	return (
 		<Link
-			to="/v2/production-units/$speciesKey"
-			params={{ speciesKey: group.categoryKey }}
+			to="/v2/production-units/$assetKind"
+			params={{ assetKind: group.categoryKey }}
 			className="v2-card block p-4 transition hover:-translate-y-px"
 		>
 			{cardBody}

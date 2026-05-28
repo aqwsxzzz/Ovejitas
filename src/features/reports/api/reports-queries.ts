@@ -1,15 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import {
 	getProfitabilityReport,
-	getProductionReport,
+	getAggregateReport,
 	getCostPerUnitReport,
 	getTimelineReport,
+	getInventorySummaryReport,
+	getMaterialConsumptionAggregateReport,
+	getProfitabilityReportPdf,
+	getCostPerUnitReportPdf,
 } from "@/features/reports/api/reports-api";
 import type {
 	IProfitabilityReportParams,
-	IProductionReportParams,
+	IAggregateReportParams,
 	ICostPerUnitReportParams,
 	ITimelineReportParams,
+	IInventorySummaryReportParams,
+	IMaterialConsumptionAggregateReportParams,
+	IReportPdfParams,
 } from "@/features/reports/types/reports-types";
 
 export const reportsQueryKeys = {
@@ -18,24 +25,30 @@ export const reportsQueryKeys = {
 		[...reportsQueryKeys.all, "farm", farmId] as const,
 	profitability: (farmId: string | number) =>
 		[...reportsQueryKeys.farm(farmId), "profitability"] as const,
-	production: (
+	aggregate: (
 		farmId: string | number,
+		eventType: string,
 		bucket?: string,
-		type?: string,
 		dateFrom?: string,
 		dateTo?: string,
 		assetId?: number,
 		unit?: string,
+		adjustment?: string,
+		currency?: string,
+		groupBy?: string,
 	) =>
 		[
 			...reportsQueryKeys.farm(farmId),
-			"production",
+			"aggregate",
+			eventType,
 			bucket ?? "month",
-			type ?? "production",
 			dateFrom ?? null,
 			dateTo ?? null,
 			assetId ?? null,
 			unit ?? null,
+			adjustment ?? null,
+			currency ?? null,
+			groupBy ?? null,
 		] as const,
 	profitabilityWithFilters: (
 		farmId: string | number,
@@ -84,6 +97,42 @@ export const reportsQueryKeys = {
 			page ?? 1,
 			pageSize ?? 20,
 		] as const,
+	inventorySummary: (
+		farmId: string | number,
+		dateFrom?: string,
+		dateTo?: string,
+		assetId?: number,
+		unit?: string,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"inventory-summary",
+			dateFrom ?? null,
+			dateTo ?? null,
+			assetId ?? null,
+			unit ?? null,
+		] as const,
+	materialConsumptionAggregate: (
+		farmId: string | number,
+		bucket?: string,
+		groupBy?: string,
+		materialAssetId?: number,
+		consumerAssetId?: number,
+		reason?: string,
+		dateFrom?: string,
+		dateTo?: string,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"material-consumption-aggregate",
+			bucket ?? "day",
+			groupBy ?? "material",
+			materialAssetId ?? null,
+			consumerAssetId ?? null,
+			reason ?? null,
+			dateFrom ?? null,
+			dateTo ?? null,
+		] as const,
 };
 
 /**
@@ -105,23 +154,26 @@ export const useGetProfitabilityReport = (
 	});
 
 /**
- * Get production report (SUM quantity bucketed over time)
+ * Get aggregate report (bucketed event aggregation)
  */
-export const useGetProductionReport = (
-	params: IProductionReportParams,
+export const useGetAggregateReport = (
+	params: IAggregateReportParams,
 	enabled = true,
 ) =>
 	useQuery({
-		queryKey: reportsQueryKeys.production(
+		queryKey: reportsQueryKeys.aggregate(
 			params.farmId,
-			params.bucket,
 			params.type,
+			params.bucket,
 			params.date_from,
 			params.date_to,
 			params.asset_id,
 			params.unit,
+			params.adjustment,
+			params.currency,
+			params.group_by,
 		),
-		queryFn: () => getProductionReport(params),
+		queryFn: () => getAggregateReport(params),
 		enabled: enabled && !!params.farmId,
 	});
 
@@ -164,4 +216,84 @@ export const useGetTimelineReport = (
 		),
 		queryFn: () => getTimelineReport(params),
 		enabled: enabled && !!params.farmId && !!params.individualId,
+	});
+
+/**
+ * Get current on-hand inventory summary
+ */
+export const useGetInventorySummaryReport = (
+	params: IInventorySummaryReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.inventorySummary(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+			params.asset_id,
+			params.unit,
+		),
+		queryFn: () => getInventorySummaryReport(params),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Get material consumption aggregate report
+ */
+export const useGetMaterialConsumptionAggregateReport = (
+	params: IMaterialConsumptionAggregateReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.materialConsumptionAggregate(
+			params.farmId,
+			params.bucket,
+			params.group_by,
+			params.material_asset_id,
+			params.consumer_asset_id,
+			params.reason,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getMaterialConsumptionAggregateReport(params),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Download profitability report PDF
+ */
+export const useGetProfitabilityReportPdf = (
+	params: IReportPdfParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: [
+			...reportsQueryKeys.farm(params.farmId),
+			"profitability-pdf",
+			params.date_from ?? null,
+			params.date_to ?? null,
+			params.asset_id ?? null,
+		] as const,
+		queryFn: () => getProfitabilityReportPdf(params).then((res) => res.data),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Download cost per unit report PDF
+ */
+export const useGetCostPerUnitReportPdf = (
+	params: IReportPdfParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: [
+			...reportsQueryKeys.farm(params.farmId),
+			"cost-per-unit-pdf",
+			params.unit ?? null,
+			params.date_from ?? null,
+			params.date_to ?? null,
+			params.asset_id ?? null,
+		] as const,
+		queryFn: () => getCostPerUnitReportPdf(params).then((res) => res.data),
+		enabled: enabled && !!params.farmId && !!params.unit,
 	});

@@ -20,8 +20,7 @@ export interface UnitEventFormData {
 	quantity?: number;
 	unit?: LivestockEventUnit;
 	amount?: number;
-	currency?: string;
-	inventoryQuantityDelta?: number;
+	adjustment?: "increment" | "decrement" | "reset";
 	notes?: string;
 }
 
@@ -58,14 +57,6 @@ function toOccurredAtIso(value: string): string {
 }
 
 function supportsFinancialAmount(type: LivestockEventType): boolean {
-	return type === "income" || type === "expense" || type === "acquisition";
-}
-
-function supportsCurrency(type: LivestockEventType): boolean {
-	return type === "income" || type === "expense" || type === "acquisition";
-}
-
-function requiresCurrency(type: LivestockEventType): boolean {
 	return type === "income" || type === "expense";
 }
 
@@ -82,7 +73,10 @@ export function UnitEventForm({
 	onCreateEventCategory,
 }: UnitEventFormProps) {
 	const defaultType: LivestockEventType =
-		initialValues?.type ?? categories[0]?.type ?? "production";
+		initialValues?.type ??
+		(assetKind === "material"
+			? "inventory"
+			: (categories[0]?.type ?? "production"));
 	const [type, setType] = useState<LivestockEventType>(defaultType);
 	const [categoryId, setCategoryId] = useState<string>(
 		initialValues?.categoryId != null ? String(initialValues.categoryId) : "",
@@ -109,12 +103,9 @@ export function UnitEventForm({
 	const [amount, setAmount] = useState<string>(
 		initialValues?.amount != null ? String(initialValues.amount) : "",
 	);
-	const [currency, setCurrency] = useState<string>(
-		initialValues?.currency ??
-			(requiresCurrency(defaultType) ? "USD" : ""),
-	);
-	const [inventoryQuantityDelta, setInventoryQuantityDelta] =
-		useState<string>("");
+	const [adjustment, setAdjustment] = useState<
+		"increment" | "decrement" | "reset" | ""
+	>(initialValues?.adjustment ?? "");
 	const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
 	const [error, setError] = useState<string>("");
 	const [newCategoryName, setNewCategoryName] = useState<string>("");
@@ -123,10 +114,8 @@ export function UnitEventForm({
 	const isEditMode = Boolean(initialValues);
 	const canSelectIndividual = assetMode === "individual";
 	const canUseReproductive = assetKind === "animal";
-	const canCreateInventoryPair = !isEditMode && assetMode === "aggregated";
+	const canUseInventory = assetKind === "material";
 	const allowsFinancialAmount = supportsFinancialAmount(type);
-	const allowsCurrency = supportsCurrency(type);
-	const currencyIsRequired = requiresCurrency(type);
 
 	const availableCategories = useMemo(
 		() => categories.filter((category) => category.type === type),
@@ -178,13 +167,25 @@ export function UnitEventForm({
 		event.preventDefault();
 		setError("");
 
-		if (
-			(type === "production" ||
-				type === "acquisition" ||
-				type === "mortality") &&
-			!quantity
-		) {
-			setError("Cantidad es requerida para eventos de produccion.");
+		if (type === "inventory" && !canUseInventory) {
+			setError(
+				"Eventos de inventario solo aplican a activos de tipo material.",
+			);
+			return;
+		}
+
+		if ((type === "production" || type === "inventory") && !quantity) {
+			setError("Cantidad es requerida para este tipo de evento.");
+			return;
+		}
+
+		if (type === "inventory" && !unit) {
+			setError("Unidad es requerida para eventos de inventario.");
+			return;
+		}
+
+		if (type === "inventory" && !adjustment) {
+			setError("Tipo de ajuste es requerido para eventos de inventario.");
 			return;
 		}
 
@@ -213,22 +214,6 @@ export function UnitEventForm({
 			return;
 		}
 
-		if ((type === "expense" || type === "income") && !currency.trim()) {
-			setError("Moneda es requerida para eventos de ingreso/gasto.");
-			return;
-		}
-
-		if (
-			(type === "expense" || type === "income") &&
-			inventoryQuantityDelta &&
-			Number(inventoryQuantityDelta) <= 0
-		) {
-			setError(
-				"Cantidad a ajustar debe ser mayor que cero para el impacto en conteo.",
-			);
-			return;
-		}
-
 		if (type === "reproductive" && !canUseReproductive) {
 			setError("Eventos reproductivos solo aplican a activos de tipo animal.");
 			return;
@@ -253,15 +238,12 @@ export function UnitEventForm({
 			status,
 			occurredAt: toOccurredAtIso(occurredAt),
 			quantity: quantity ? Number(quantity) : undefined,
-			unit: type === "acquisition" ? undefined : unit,
+			unit,
 			amount: allowsFinancialAmount && amount ? Number(amount) : undefined,
-			currency:
-				allowsCurrency && currency.trim()
-					? currency.trim().toUpperCase()
+			adjustment:
+				type === "inventory" && adjustment
+					? (adjustment as "increment" | "decrement" | "reset")
 					: undefined,
-			inventoryQuantityDelta: inventoryQuantityDelta
-				? Number(inventoryQuantityDelta)
-				: undefined,
 			notes: notes.trim() || undefined,
 		});
 	};
@@ -283,11 +265,6 @@ export function UnitEventForm({
 							if (!supportsFinancialAmount(nextType)) {
 								setAmount("");
 							}
-							if (!supportsCurrency(nextType)) {
-								setCurrency("");
-							} else if (requiresCurrency(nextType) && !currency.trim()) {
-								setCurrency("USD");
-							}
 						}}
 						disabled={isEditMode}
 						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
@@ -296,15 +273,13 @@ export function UnitEventForm({
 						<option value="income">Ingreso</option>
 						<option value="expense">Gasto</option>
 						<option value="observation">Observacion</option>
-						<option value="acquisition">Adquisicion</option>
-						<option value="mortality">Mortalidad</option>
 						{canUseReproductive ? (
 							<option value="reproductive">Reproductivo</option>
 						) : null}
+						{canUseInventory ? (
+							<option value="inventory">Inventario</option>
+						) : null}
 					</select>
-				</label>
-
-				<label className="space-y-1 text-sm">
 					<span className="font-medium">
 						Categoria {type === "production" ? "(requerida)" : "(opcional)"}
 					</span>
@@ -412,8 +387,7 @@ export function UnitEventForm({
 
 				{(type === "production" ||
 					type === "observation" ||
-					type === "acquisition" ||
-					type === "mortality") && (
+					type === "inventory") && (
 					<label className="space-y-1 text-sm">
 						<span className="font-medium">
 							Cantidad {type === "observation" ? "(opcional)" : "(requerida)"}
@@ -428,7 +402,9 @@ export function UnitEventForm({
 				)}
 			</div>
 
-			{(type === "production" || type === "observation") && (
+			{(type === "production" ||
+				type === "observation" ||
+				type === "inventory") && (
 				<label className="space-y-1 text-sm">
 					<span className="font-medium">
 						Unidad
@@ -469,13 +445,30 @@ export function UnitEventForm({
 				</label>
 			)}
 
+			{type === "inventory" && (
+				<label className="space-y-1 text-sm">
+					<span className="font-medium">Tipo de ajuste (requerido)</span>
+					<select
+						value={adjustment}
+						onChange={(event) =>
+							setAdjustment(
+								event.target.value as "increment" | "decrement" | "reset" | "",
+							)
+						}
+						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
+					>
+						<option value="">Selecciona tipo de ajuste</option>
+						<option value="increment">Incremento (agregar stock)</option>
+						<option value="decrement">Decremento (restar stock)</option>
+						<option value="reset">Resetear (establecer cantidad total)</option>
+					</select>
+				</label>
+			)}
+
 			{allowsFinancialAmount ? (
 				<div className="grid gap-3 md:grid-cols-2">
 					<label className="space-y-1 text-sm">
-						<span className="font-medium">
-							Monto
-							{type === "acquisition" ? " (opcional)" : " (requerido)"}
-						</span>
+						<span className="font-medium">Monto (requerido)</span>
 						<input
 							type="number"
 							step="0.01"
@@ -484,47 +477,6 @@ export function UnitEventForm({
 							className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 						/>
 					</label>
-					{allowsCurrency ? (
-						<label className="space-y-1 text-sm">
-							<span className="font-medium">
-								Moneda
-								{currencyIsRequired ? " (requerida)" : " (opcional)"}
-							</span>
-							<input
-								type="text"
-								value={currency}
-								onChange={(event) => setCurrency(event.target.value)}
-								placeholder="USD"
-								className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-							/>
-						</label>
-					) : null}
-				</div>
-			) : null}
-			{canCreateInventoryPair && (type === "income" || type === "expense") ? (
-				<div className="rounded-lg border border-(--v2-border) bg-white/60 p-3">
-					<p className="text-sm font-medium">Impacto en conteo</p>
-					<p className="mt-1 text-xs text-(--v2-ink-soft)">
-						Opcional. Si esta accion tambien cambia el conteo del lote agrupado,
-						se registrara un segundo evento de{" "}
-						{type === "expense" ? "adquisicion" : "mortalidad"} con el mismo
-						prefijo de idempotencia.
-					</p>
-					<div className="mt-3 grid gap-3 md:grid-cols-2">
-						<label className="space-y-1 text-sm">
-							<span className="font-medium">Cantidad a ajustar</span>
-							<input
-								type="number"
-								min="1"
-								value={inventoryQuantityDelta}
-								onChange={(event) =>
-									setInventoryQuantityDelta(event.target.value)
-								}
-								placeholder={type === "expense" ? "ej: 50" : "ej: 30"}
-								className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-							/>
-						</label>
-					</div>
 				</div>
 			) : null}
 

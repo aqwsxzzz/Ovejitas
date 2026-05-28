@@ -5,27 +5,51 @@ import type { FormEvent } from "react";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
-	createEventByAssetId,
-	createEventCategoryByFarmId,
+	createFlockAcquisitionByAssetId,
 	createIndividual,
 	createLivestockAsset,
 } from "@/features/livestock/api/livestock-api";
-import {
-	livestockQueryKeys,
-	useListEventCategoriesByFarmId,
-} from "@/features/livestock/api/livestock-queries";
+import { livestockQueryKeys } from "@/features/livestock/api/livestock-queries";
 import type {
 	IndividualSex,
+	LivestockAssetKind,
 	LivestockAssetMode,
 } from "@/features/livestock/types/livestock-types";
 
-const NEW_CATEGORY_OPTION_VALUE = "__new__";
-
 function parseUnitIdFromPath(path?: string): string | null {
 	if (!path) return null;
-	const match = path.match(/\/v2\/production-units\/flock\/([^/]+)/);
+	const pathOnly = path.split("?")[0] ?? path;
+	const match = pathOnly.match(/\/v2\/production-units\/flock\/([^/]+)/);
 	return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
+
+const QUICK_CREATE_ASSET_BY_ACTION_ID: Partial<
+	Record<
+		string,
+		{ kind: LivestockAssetKind; title: string; submitLabel: string }
+	>
+> = {
+	"nuevo-material": {
+		kind: "material",
+		title: "Crear material",
+		submitLabel: "Crear material",
+	},
+	"nuevo-cultivo": {
+		kind: "crop",
+		title: "Crear cultivo",
+		submitLabel: "Crear cultivo",
+	},
+	"nuevo-equipo": {
+		kind: "equipment",
+		title: "Crear equipo",
+		submitLabel: "Crear equipo",
+	},
+	"nueva-ubicacion": {
+		kind: "location",
+		title: "Crear ubicacion",
+		submitLabel: "Crear ubicacion",
+	},
+};
 
 function resolveReturnPath(sourcePath?: string): string {
 	if (!sourcePath || sourcePath.startsWith("/v2/log")) {
@@ -69,54 +93,12 @@ export function V2LogPage() {
 	const [lotDescription, setLotDescription] = useState("");
 	const [lotMode, setLotMode] = useState<LivestockAssetMode>("aggregated");
 
-	const [acquisitionCategoryId, setAcquisitionCategoryId] = useState("");
-	const [isCreatingAcqCategory, setIsCreatingAcqCategory] = useState(false);
-	const [newAcqCategoryName, setNewAcqCategoryName] = useState("");
-	const [newAcqCategoryColor, setNewAcqCategoryColor] = useState("#6b7280");
-
 	const [individualName, setIndividualName] = useState("");
 	const [individualTag, setIndividualTag] = useState("");
 	const [individualSex, setIndividualSex] = useState<IndividualSex>("unknown");
-
-	const {
-		data: acquisitionCategories = [],
-		refetch: refetchAcquisitionCategories,
-	} = useListEventCategoriesByFarmId({
-		farmId,
-		filters: { type: "acquisition" },
-		enabled: lotMode === "aggregated",
-	});
-
-	const isCreatingNewAcqCategory =
-		acquisitionCategoryId === NEW_CATEGORY_OPTION_VALUE;
-
-	const handleCreateAcquisitionCategory = async () => {
-		if (!farmId) return;
-		if (!newAcqCategoryName.trim()) {
-			setMessage("Escribe un nombre para la nueva categoria.");
-			return;
-		}
-
-		setIsCreatingAcqCategory(true);
-		setMessage("");
-		try {
-			const created = await createEventCategoryByFarmId({
-				farmId,
-				data: {
-					type: "acquisition",
-					name: newAcqCategoryName.trim(),
-					color: newAcqCategoryColor,
-				},
-			});
-			setAcquisitionCategoryId(String(created.id));
-			setNewAcqCategoryName("");
-			await refetchAcquisitionCategories();
-		} catch {
-			setMessage("No se pudo crear la categoria. Intenta con otro nombre.");
-		} finally {
-			setIsCreatingAcqCategory(false);
-		}
-	};
+	const [assetName, setAssetName] = useState("");
+	const [assetLocation, setAssetLocation] = useState("");
+	const [assetDescription, setAssetDescription] = useState("");
 
 	const goBack = () =>
 		navigate({
@@ -132,14 +114,11 @@ export function V2LogPage() {
 			lotMode === "aggregated" &&
 			(!lotInitialAmount.trim() ||
 				!Number.isFinite(parsedInitialAmount) ||
-				parsedInitialAmount < 0)
+				parsedInitialAmount <= 0 ||
+				!Number.isInteger(parsedInitialAmount))
 		) {
-			setMessage("Ingresa una cantidad inicial valida para el lote agrupado.");
-			return;
-		}
-		if (lotMode === "aggregated" && isCreatingNewAcqCategory) {
 			setMessage(
-				"Completa la creacion de la nueva categoria o elige otra opcion antes de guardar.",
+				"Ingresa una cantidad inicial entera mayor que cero para el lote agrupado.",
 			);
 			return;
 		}
@@ -158,18 +137,13 @@ export function V2LogPage() {
 			});
 
 			if (lotMode === "aggregated") {
-				await createEventByAssetId({
+				await createFlockAcquisitionByAssetId({
 					farmId,
 					assetId: String(createdAsset.id),
-					data: {
-						type: "acquisition",
+					payload: {
 						occurred_at: new Date().toISOString(),
 						quantity: parsedInitialAmount,
-						notes: "Conteo inicial del lote",
-						category_id: acquisitionCategoryId
-							? Number(acquisitionCategoryId)
-							: undefined,
-						payload: { source: "initial_asset_setup" },
+						amount: null,
 					},
 				});
 			}
@@ -231,7 +205,45 @@ export function V2LogPage() {
 		}
 	}
 
+	async function handleCreateAsset(event: FormEvent) {
+		event.preventDefault();
+		const actionId = search.actionId;
+		const config = actionId
+			? QUICK_CREATE_ASSET_BY_ACTION_ID[actionId]
+			: undefined;
+		if (!farmId || !config || !assetName.trim()) return;
+
+		setIsSaving(true);
+		setMessage("");
+		try {
+			await createLivestockAsset({
+				farmId,
+				data: {
+					name: assetName.trim(),
+					location: assetLocation.trim() || undefined,
+					description: assetDescription.trim() || undefined,
+					kind: config.kind,
+					mode: "aggregated" as LivestockAssetMode,
+				},
+			});
+
+			await queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
+			});
+
+			setMessage(`${config.title} creado.`);
+			goBack();
+		} catch {
+			setMessage(`No se pudo crear el activo. Intenta de nuevo.`);
+		} finally {
+			setIsSaving(false);
+		}
+	}
+
 	const actionId = search.actionId;
+	const quickCreateAssetConfig = actionId
+		? QUICK_CREATE_ASSET_BY_ACTION_ID[actionId]
+		: undefined;
 
 	return (
 		<section className="space-y-4">
@@ -322,80 +334,6 @@ export function V2LogPage() {
 									value={lotInitialAmount}
 									onChange={(event) => setLotInitialAmount(event.target.value)}
 								/>
-								<div className="space-y-1">
-									<p className="text-xs font-medium text-(--v2-ink-soft)">
-										Categoria del evento de adquisicion (opcional)
-									</p>
-									<select
-										className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-										value={acquisitionCategoryId}
-										onChange={(event) =>
-											setAcquisitionCategoryId(event.target.value)
-										}
-									>
-										<option value="">Sin categoria</option>
-										{acquisitionCategories.map((category) => (
-											<option
-												key={category.id}
-												value={String(category.id)}
-											>
-												{category.name}
-											</option>
-										))}
-										<option value={NEW_CATEGORY_OPTION_VALUE}>
-											+ Nueva categoria
-										</option>
-									</select>
-									{isCreatingNewAcqCategory ? (
-										<div className="mt-2 grid gap-2 rounded-lg border border-(--v2-border) bg-white/60 p-2">
-											<label className="space-y-1 text-xs">
-												<span className="font-medium">Nombre</span>
-												<input
-													type="text"
-													className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-													placeholder="Ej: Compra inicial"
-													value={newAcqCategoryName}
-													onChange={(event) =>
-														setNewAcqCategoryName(event.target.value)
-													}
-												/>
-											</label>
-											<label className="space-y-1 text-xs">
-												<span className="font-medium">Color</span>
-												<input
-													type="color"
-													className="h-10 w-full rounded-lg border border-(--v2-border) px-1 py-1"
-													value={newAcqCategoryColor}
-													onChange={(event) =>
-														setNewAcqCategoryColor(event.target.value)
-													}
-												/>
-											</label>
-											<div className="flex justify-end gap-2">
-												<button
-													type="button"
-													onClick={() => {
-														setAcquisitionCategoryId("");
-														setNewAcqCategoryName("");
-													}}
-													className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
-												>
-													Cancelar
-												</button>
-												<button
-													type="button"
-													onClick={() => void handleCreateAcquisitionCategory()}
-													disabled={isCreatingAcqCategory || isSaving}
-													className="rounded-full border border-(--v2-ink) px-3 py-1 text-xs font-semibold disabled:opacity-60"
-												>
-													{isCreatingAcqCategory
-														? "Creando..."
-														: "Crear categoria"}
-												</button>
-											</div>
-										</div>
-									) : null}
-								</div>
 							</>
 						) : null}
 						<textarea
@@ -458,6 +396,42 @@ export function V2LogPage() {
 							</button>
 						</form>
 					)}
+				</ActionCard>
+			) : quickCreateAssetConfig ? (
+				<ActionCard
+					title={quickCreateAssetConfig.title}
+					subtitle="Este flujo crea un nuevo activo para el tipo seleccionado."
+				>
+					<form
+						className="space-y-3"
+						onSubmit={handleCreateAsset}
+					>
+						<input
+							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
+							placeholder="Nombre"
+							value={assetName}
+							onChange={(event) => setAssetName(event.target.value)}
+						/>
+						<input
+							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
+							placeholder="Ubicacion"
+							value={assetLocation}
+							onChange={(event) => setAssetLocation(event.target.value)}
+						/>
+						<textarea
+							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
+							placeholder="Descripcion"
+							rows={3}
+							value={assetDescription}
+							onChange={(event) => setAssetDescription(event.target.value)}
+						/>
+						<button
+							disabled={isSaving}
+							className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white"
+						>
+							{isSaving ? "Guardando..." : quickCreateAssetConfig.submitLabel}
+						</button>
+					</form>
 				</ActionCard>
 			) : (
 				<ActionCard

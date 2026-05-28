@@ -55,9 +55,9 @@ export function V2LoginPage() {
 
 	return (
 		<V2AuthPageFrame
-			eyebrow="Ingreso - Ovejitas V2"
+			eyebrow="Ingreso - Ovejitas"
 			brandIcon={<PawPrint className="h-8 w-8" />}
-			title="Ovejitas V2"
+			title="Ovejitas"
 			subtitle="Agricultura de precision y manejo ganadero en un solo lugar."
 			formTitle="Bienvenido otra vez"
 			formSubtitle="Accede al tablero principal de tu finca"
