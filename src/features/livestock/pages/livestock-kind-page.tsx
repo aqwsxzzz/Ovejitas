@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MapPin } from "lucide-react";
 
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { ASSET_KIND_OPTIONS } from "@/features/livestock/constants/asset-kind-options";
@@ -238,6 +238,7 @@ export function LivestockKindPage({
 }: {
 	selectedKind: LivestockAssetKind;
 }) {
+	const location = useLocation();
 	const [query, setQuery] = useState("");
 	const [editingAssetId, setEditingAssetId] = useState<number | null>(null);
 	const [editName, setEditName] = useState("");
@@ -262,6 +263,10 @@ export function LivestockKindPage({
 
 	const updateAssetMutation = useUpdateLivestockAssetById();
 	const deleteAssetMutation = useDeleteLivestockAssetById();
+	const sourcePath =
+		typeof window === "undefined"
+			? location.pathname
+			: `${location.pathname}${window.location.search}`;
 	const activeKindMeta =
 		ASSET_KIND_OPTIONS.find((option) => option.kind === selectedKind) ??
 		ASSET_KIND_OPTIONS[0]!;
@@ -332,12 +337,20 @@ export function LivestockKindPage({
 						{activeKindMeta.pluralLabel}
 					</p>
 				</div>
-				<Link
-					to="/v2/production-units"
-					className="rounded-full border border-[color:var(--v2-border)] bg-white px-3 py-1.5 text-xs font-semibold"
-				>
-					Cambiar tipo
-				</Link>
+				{selectedKind === "animal" ? (
+					<Link
+						to="/v2/log"
+						search={{
+							actionId: "nuevo-lote",
+							actionLabel: "Nuevo lote",
+							contextLabel: activeKindMeta.title,
+							sourcePath,
+						}}
+						className="rounded-full border border-[color:var(--v2-border)] bg-white px-3 py-1.5 text-xs font-semibold"
+					>
+						Nuevo lote
+					</Link>
+				) : null}
 			</div>
 
 			<SearchBar
