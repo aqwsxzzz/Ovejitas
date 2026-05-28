@@ -42,7 +42,7 @@ export function V2LandingPage() {
 							className="text-[2rem] leading-none font-semibold tracking-tight"
 							style={{ fontFamily: "var(--font-serif)" }}
 						>
-							Ovejitas V2
+							Ovejitas
 						</p>
 					</div>
 					<Button
@@ -129,10 +129,10 @@ export function V2LandingPage() {
 						className="text-5xl font-medium text-[#004349]"
 						style={{ fontFamily: "var(--font-serif)" }}
 					>
-						Ovejitas V2
+						Ovejitas
 					</p>
 					<p className="text-base text-[#3f484a]">
-						© 2026 Ovejitas V2. Soluciones rurales modernas.
+						© 2026 Ovejitas. Soluciones rurales modernas.
 					</p>
 					<div className="mt-1 flex items-center gap-7 text-base text-[#3f484a]">
 						<a

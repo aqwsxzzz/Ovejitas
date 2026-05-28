@@ -188,6 +188,23 @@ Decision gate before writing any data-fetching code:
 2. If yes, use it. Wire it up in `*-api.ts` and `*-queries.ts`.
 3. If no, stop. Tell the user: "This needs a new BE endpoint. Do not implement client-side filtering as a workaround."
 
+## 9.5 Backend Capability Escalation Rule (No FE Workarounds)
+- If required behavior is unreachable with the current backend build, do not "fix" it in frontend with local hacks, derived fake logic, oversized fetches, manual event synthesis, or hidden fallback rules.
+- Frontend must escalate the missing capability to backend and request a proper backend endpoint or action.
+- The assistant must produce a ready-to-send prompt for the BE AI whenever this gap is detected.
+- Until backend support exists, frontend may only:
+	- show a clear blocked-state UX,
+	- hide/disable unsupported UI actions,
+	- document the dependency in the implementation summary.
+- This rule is mandatory for all server-owned concerns, especially event-ledger invariants, filtering/search/pagination, stock mutations, and action-owned event flows.
+
+Escalation workflow (required):
+1. Identify the exact missing backend capability and why FE cannot own it safely.
+2. Do not implement a frontend workaround for that capability.
+3. Create a BE AI request prompt using `.github/prompts/be-capability-request.prompt.md`.
+4. Share the prompt with the user, including acceptance criteria and API contract expectations.
+5. Proceed in FE only with non-deceptive blocked-state handling until BE support is delivered.
+
 ## 8. TypeScript Best Practices
 - Apply this rule whenever writing or editing TypeScript types, interfaces, generics, type guards, error handling patterns, or tsconfig configuration.
 - Follow TypeScript 5.x strict-mode best practices and favor patterns that improve type safety at compile-time.

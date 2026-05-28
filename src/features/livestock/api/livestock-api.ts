@@ -1,4 +1,5 @@
 import { axiosHelper } from "@/lib/axios/axios-helper";
+import { EVENT_UNITS } from "@/shared/types/unit-types";
 import type {
 	ILivestockAsset,
 	ILivestockEvent,
@@ -7,6 +8,13 @@ import type {
 	ILivestockEventListResponse,
 	ILivestockIndividual,
 	ILivestockIndividualListResponse,
+	IInventoryBalance,
+	IMaterialPurchaseRead,
+	IMaterialPurchaseListResponse,
+	IMaterialConsumptionRead,
+	IMaterialConsumptionListResponse,
+	IMaterialSaleRead,
+	MaterialConsumptionReason,
 	LivestockEventType,
 	LivestockEventUnit,
 	LivestockAssetKind,
@@ -55,6 +63,105 @@ interface ListEventCategoriesFilters {
 	archived?: boolean;
 	page?: number;
 	pageSize?: number;
+}
+
+interface ListMaterialPurchasesFilters {
+	materialAssetId?: number;
+	from?: string;
+	to?: string;
+	page?: number;
+	pageSize?: number;
+}
+
+interface ListMaterialConsumptionsFilters {
+	materialAssetId?: number;
+	consumerAssetId?: number;
+	reason?: MaterialConsumptionReason;
+	from?: string;
+	to?: string;
+	page?: number;
+	pageSize?: number;
+}
+
+export interface IFlockActionRead {
+	inventory_event_id: number;
+	paired_event_id: number | null;
+	headcount: string;
+}
+
+export interface IFlockAcquisitionCreatePayload {
+	occurred_at?: string;
+	quantity: number;
+	amount?: number | null;
+}
+
+export interface IFlockSaleCreatePayload {
+	occurred_at?: string;
+	quantity: number;
+	amount: number;
+	buyer?: string | null;
+}
+
+export interface IFlockMortalityCreatePayload {
+	occurred_at?: string;
+	quantity: number;
+	cause?: string | null;
+}
+
+export interface IMaterialPurchaseCreatePayload {
+	material_asset_id: number;
+	occurred_at: string;
+	quantity: number;
+	unit: LivestockEventUnit;
+	amount: number;
+	supplier?: string | null;
+	notes?: string | null;
+	meta?: Record<string, unknown>;
+	idempotency_key?: string | null;
+}
+
+export interface IMaterialPurchaseUpdatePayload {
+	occurred_at?: string | null;
+	quantity?: number | null;
+	unit?: LivestockEventUnit | null;
+	amount?: number | null;
+	supplier?: string | null;
+	notes?: string | null;
+	meta?: Record<string, unknown> | null;
+}
+
+export interface IMaterialConsumptionCreatePayload {
+	material_asset_id: number;
+	consumer_asset_id?: number | null;
+	individual_id?: number | null;
+	occurred_at: string;
+	quantity: number;
+	unit: LivestockEventUnit;
+	reason: MaterialConsumptionReason;
+	notes?: string | null;
+	meta?: Record<string, unknown>;
+	idempotency_key?: string | null;
+}
+
+export interface IMaterialConsumptionUpdatePayload {
+	consumer_asset_id?: number | null;
+	individual_id?: number | null;
+	occurred_at?: string | null;
+	quantity?: number | null;
+	unit?: LivestockEventUnit | null;
+	reason?: MaterialConsumptionReason | null;
+	notes?: string | null;
+	meta?: Record<string, unknown> | null;
+}
+
+export interface IMaterialSaleCreatePayload {
+	occurred_at?: string;
+	quantity: number;
+	unit: LivestockEventUnit;
+	amount: number;
+	buyer?: string | null;
+	category_id?: number | null;
+	notes?: string | null;
 }
 
 export const listLivestockAssetsByFarmId = ({
@@ -268,6 +375,177 @@ export const listEventsByAssetId = ({
 		},
 	});
 
+export const getInventoryBalanceByAssetId = ({
+	farmId,
+	assetId,
+}: {
+	farmId: string;
+	assetId: string;
+}) =>
+	axiosHelper<IInventoryBalance>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/events/balance`,
+	});
+
+export const listMaterialPurchasesByFarmId = ({
+	farmId,
+	filters,
+}: {
+	farmId: string;
+	filters?: ListMaterialPurchasesFilters;
+}) =>
+	axiosHelper<IMaterialPurchaseListResponse>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/material-purchases`,
+		urlParams: {
+			material_asset_id: filters?.materialAssetId,
+			from: filters?.from,
+			to: filters?.to,
+			page: filters?.page,
+			page_size: filters?.pageSize,
+		},
+	});
+
+export const createMaterialPurchaseByFarmId = ({
+	farmId,
+	data,
+}: {
+	farmId: string;
+	data: IMaterialPurchaseCreatePayload;
+}) =>
+	axiosHelper<IMaterialPurchaseRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/material-purchases`,
+		data,
+	});
+
+export const getMaterialPurchaseById = ({
+	farmId,
+	purchaseId,
+}: {
+	farmId: string;
+	purchaseId: number;
+}) =>
+	axiosHelper<IMaterialPurchaseRead>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/material-purchases/${purchaseId}`,
+	});
+
+export const updateMaterialPurchaseById = ({
+	farmId,
+	purchaseId,
+	data,
+}: {
+	farmId: string;
+	purchaseId: number;
+	data: IMaterialPurchaseUpdatePayload;
+}) =>
+	axiosHelper<IMaterialPurchaseRead>({
+		method: "patch",
+		url: `/api/v1/farms/${farmId}/material-purchases/${purchaseId}`,
+		data,
+	});
+
+export const deleteMaterialPurchaseById = ({
+	farmId,
+	purchaseId,
+}: {
+	farmId: string;
+	purchaseId: number;
+}) =>
+	axiosHelper<void>({
+		method: "delete",
+		url: `/api/v1/farms/${farmId}/material-purchases/${purchaseId}`,
+	});
+
+export const listMaterialConsumptionsByFarmId = ({
+	farmId,
+	filters,
+}: {
+	farmId: string;
+	filters?: ListMaterialConsumptionsFilters;
+}) =>
+	axiosHelper<IMaterialConsumptionListResponse>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/material-consumptions`,
+		urlParams: {
+			material_asset_id: filters?.materialAssetId,
+			consumer_asset_id: filters?.consumerAssetId,
+			reason: filters?.reason,
+			from: filters?.from,
+			to: filters?.to,
+			page: filters?.page,
+			page_size: filters?.pageSize,
+		},
+	});
+
+export const createMaterialConsumptionByFarmId = ({
+	farmId,
+	data,
+}: {
+	farmId: string;
+	data: IMaterialConsumptionCreatePayload;
+}) =>
+	axiosHelper<IMaterialConsumptionRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/material-consumptions`,
+		data,
+	});
+
+export const getMaterialConsumptionById = ({
+	farmId,
+	consumptionId,
+}: {
+	farmId: string;
+	consumptionId: number;
+}) =>
+	axiosHelper<IMaterialConsumptionRead>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/material-consumptions/${consumptionId}`,
+	});
+
+export const updateMaterialConsumptionById = ({
+	farmId,
+	consumptionId,
+	data,
+}: {
+	farmId: string;
+	consumptionId: number;
+	data: IMaterialConsumptionUpdatePayload;
+}) =>
+	axiosHelper<IMaterialConsumptionRead>({
+		method: "patch",
+		url: `/api/v1/farms/${farmId}/material-consumptions/${consumptionId}`,
+		data,
+	});
+
+export const deleteMaterialConsumptionById = ({
+	farmId,
+	consumptionId,
+}: {
+	farmId: string;
+	consumptionId: number;
+}) =>
+	axiosHelper<void>({
+		method: "delete",
+		url: `/api/v1/farms/${farmId}/material-consumptions/${consumptionId}`,
+	});
+
+export const createMaterialSaleByAssetId = ({
+	farmId,
+	assetId,
+	data,
+}: {
+	farmId: string;
+	assetId: string;
+	data: IMaterialSaleCreatePayload;
+}) =>
+	axiosHelper<IMaterialSaleRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/sales`,
+		data,
+	});
+
 export const listEventCategoriesByFarmId = ({
 	farmId,
 	filters,
@@ -370,7 +648,7 @@ export type LivestockEventCreatePayload =
 			type: "expense" | "income";
 			occurred_at: string;
 			amount: number;
-			currency: string;
+			currency?: string;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
@@ -418,6 +696,18 @@ export type LivestockEventCreatePayload =
 			notes?: string;
 			payload?: Record<string, unknown>;
 			idempotency_key?: string;
+	  }
+	| {
+			type: "inventory";
+			occurred_at: string;
+			adjustment: "increment" | "decrement" | "reset";
+			quantity: number;
+			unit: LivestockEventUnit;
+			category_id?: number;
+			individual_id?: number;
+			notes?: string;
+			payload?: Record<string, unknown>;
+			idempotency_key?: string;
 	  };
 
 export interface LivestockEventUpdatePayload {
@@ -427,7 +717,7 @@ export interface LivestockEventUpdatePayload {
 	quantity?: number | null;
 	unit?: LivestockEventUnit | null;
 	amount?: number | null;
-	currency?: string | null;
+	adjustment?: "increment" | "decrement" | "reset" | null;
 	notes?: string | null;
 	payload?: Record<string, unknown> | null;
 }
@@ -478,6 +768,51 @@ export const deleteEventByAssetId = ({
 		url: `/api/v1/farms/${farmId}/assets/${assetId}/events/${eventId}`,
 	});
 
+export const createFlockAcquisitionByAssetId = ({
+	farmId,
+	assetId,
+	payload,
+}: {
+	farmId: string;
+	assetId: string;
+	payload: IFlockAcquisitionCreatePayload;
+}) =>
+	axiosHelper<IFlockActionRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/flock/acquisitions`,
+		data: payload,
+	});
+
+export const createFlockSaleByAssetId = ({
+	farmId,
+	assetId,
+	payload,
+}: {
+	farmId: string;
+	assetId: string;
+	payload: IFlockSaleCreatePayload;
+}) =>
+	axiosHelper<IFlockActionRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/flock/sales`,
+		data: payload,
+	});
+
+export const createFlockMortalityByAssetId = ({
+	farmId,
+	assetId,
+	payload,
+}: {
+	farmId: string;
+	assetId: string;
+	payload: IFlockMortalityCreatePayload;
+}) =>
+	axiosHelper<IFlockActionRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/flock/mortalities`,
+		data: payload,
+	});
+
 // --- Reports ---
 
 interface ReportBaseFilters {
@@ -509,6 +844,26 @@ interface ProductionReportFilters extends ReportBaseFilters {
 	bucket?: ReportBucket;
 }
 
+interface IAggregateReportRow {
+	bucket: string;
+	group: string | null;
+	measure: "sum_quantity" | "sum_amount" | "count";
+	value: string;
+}
+
+interface IAggregateReportResponse {
+	data: IAggregateReportRow[];
+	meta: {
+		type: LivestockEventType;
+		measure: "sum_quantity" | "sum_amount" | "count";
+		bucket: ReportBucket;
+		group_key: string | null;
+	};
+}
+
+const isLivestockEventUnit = (value: string): value is LivestockEventUnit =>
+	(EVENT_UNITS as readonly string[]).includes(value);
+
 export const getProductionReport = ({
 	farmId,
 	filters,
@@ -516,17 +871,51 @@ export const getProductionReport = ({
 	farmId: string;
 	filters?: ProductionReportFilters;
 }) =>
-	axiosHelper<IProductionReport>({
+	axiosHelper<IAggregateReportResponse>({
 		method: "get",
-		url: `/api/v1/farms/${farmId}/reports/production`,
+		url: `/api/v1/farms/${farmId}/reports/aggregate`,
 		urlParams: {
 			asset_id: filters?.assetId,
 			date_from: filters?.dateFrom,
 			date_to: filters?.dateTo,
-			type: filters?.type,
+			type: filters?.type ?? "production",
 			unit: filters?.unit,
 			bucket: filters?.bucket ?? "day",
 		},
+	}).then((aggregate) => {
+		const fallbackAssetId = filters?.assetId ?? 0;
+		const data = aggregate.data.map((row) => {
+			const unit =
+				row.group && isLivestockEventUnit(row.group) ? row.group : "unit";
+
+			return {
+				bucket_start: row.bucket,
+				asset_id: fallbackAssetId,
+				unit,
+				category_id: null,
+				total: row.value,
+			};
+		});
+
+		const totalsByUnit = data.reduce(
+			(acc, row) => {
+				const current = Number(acc[row.unit] ?? "0");
+				const next = current + (Number(row.total) || 0);
+				acc[row.unit] = String(next);
+				return acc;
+			},
+			{} as Record<LivestockEventUnit, string>,
+		);
+
+		return {
+			data,
+			totals: Object.entries(totalsByUnit).map(([unit, total]) => ({
+				unit: unit as LivestockEventUnit,
+				total,
+			})),
+			bucket: aggregate.meta.bucket,
+			type: aggregate.meta.type,
+		} satisfies IProductionReport;
 	});
 
 interface CostPerUnitReportFilters extends ReportBaseFilters {

@@ -13,7 +13,7 @@ export const getFlockProfitabilityReport = ({
 }: IGetFlockProfitabilityParams) =>
 	axiosHelper<IResponse<IFlockProfitabilityReport>>({
 		method: "get",
-		url: "/reports/flock-profitability",
+		url: "/api/v1/reports/flock-profitability",
 		urlParams: {
 			period,
 			from,

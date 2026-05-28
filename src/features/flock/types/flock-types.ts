@@ -77,11 +77,29 @@ export interface IUpdateFlockPayload {
 	currentCount: number;
 }
 
-export interface ICreateFlockEventPayload {
-	eventType: IFlockEventType;
-	count: number;
-	date: string;
-	reason?: string;
+export interface IFlockAcquisitionCreate {
+	occurred_at?: string;
+	quantity: number;
+	amount?: number | string | null;
+}
+
+export interface IFlockSaleCreate {
+	occurred_at?: string;
+	quantity: number;
+	amount: number | string;
+	buyer?: string | null;
+}
+
+export interface IFlockMortalityCreate {
+	occurred_at?: string;
+	quantity: number;
+	cause?: string | null;
+}
+
+export interface IFlockActionRead {
+	inventory_event_id: number;
+	paired_event_id: number | null;
+	headcount: string;
 }
 
 export interface IFlockEvent {

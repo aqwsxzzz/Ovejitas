@@ -7,8 +7,10 @@ import {
 import { keepPreviousData } from "@tanstack/react-query";
 import {
 	createEggCollection,
-	createFlockEvent,
+	createFlockAcquisition,
+	createFlockMortality,
 	createFlock,
+	createFlockSale,
 	deleteFlockById,
 	deleteEggCollection,
 	getEggCollections,
@@ -22,9 +24,11 @@ import {
 import { feedConsumptionQueryKeys } from "@/features/feed-consumption/api/feed-consumption-queries";
 import type {
 	ICreateEggCollectionPayload,
+	IFlockAcquisitionCreate,
 	ICreateFlockPayload,
-	ICreateFlockEventPayload,
 	IFlockListFilters,
+	IFlockMortalityCreate,
+	IFlockSaleCreate,
 	IUpdateEggCollectionPayload,
 	IUpdateFlockPayload,
 } from "@/features/flock/types/flock-types";
@@ -193,31 +197,94 @@ export const useUpdateFlockById = () => {
 	});
 };
 
-export const useCreateFlockEvent = () => {
+export const useCreateFlockAcquisition = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: ({
-			flockId,
+			assetId,
+			farmId,
 			payload,
 		}: {
-			flockId: string;
+			assetId: string;
 			farmId: string;
-			payload: ICreateFlockEventPayload;
-		}) => createFlockEvent({ flockId, payload }),
+			payload: IFlockAcquisitionCreate;
+		}) => createFlockAcquisition({ assetId, farmId, payload }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (_, { farmId, flockId }) => {
+		onSuccess: (_, { farmId, assetId }) => {
 			toast.success(i18next.t("flocks:page.updateSuccess"));
 			void queryClient.invalidateQueries({
 				queryKey: [...flockQueryKeys.all, "list", farmId],
 			});
 			void queryClient.invalidateQueries({
-				queryKey: [...flockQueryKeys.all, "byId", flockId],
+				queryKey: [...flockQueryKeys.all, "byId", assetId],
 			});
 			void queryClient.invalidateQueries({
-				queryKey: [...flockQueryKeys.all, "events", flockId],
+				queryKey: [...flockQueryKeys.all, "events", assetId],
+			});
+		},
+	});
+};
+
+export const useCreateFlockSale = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			assetId,
+			farmId,
+			payload,
+		}: {
+			assetId: string;
+			farmId: string;
+			payload: IFlockSaleCreate;
+		}) => createFlockSale({ assetId, farmId, payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { farmId, assetId }) => {
+			toast.success(i18next.t("flocks:page.updateSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "list", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "byId", assetId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "events", assetId],
+			});
+		},
+	});
+};
+
+export const useCreateFlockMortality = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			assetId,
+			farmId,
+			payload,
+		}: {
+			assetId: string;
+			farmId: string;
+			payload: IFlockMortalityCreate;
+		}) => createFlockMortality({ assetId, farmId, payload }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: (_, { farmId, assetId }) => {
+			toast.success(i18next.t("flocks:page.updateSuccess"));
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "list", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "byId", assetId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...flockQueryKeys.all, "events", assetId],
 			});
 		},
 	});

@@ -15,7 +15,6 @@ import {
 	useListIndividualsByAssetId,
 } from "@/features/livestock/api/livestock-queries";
 import { listEventsByAssetId } from "@/features/livestock/api/livestock-api";
-import { useGetProductionReport } from "@/features/reports/api/reports-queries";
 import type {
 	EventType,
 	ProductionBucket,
@@ -50,6 +49,7 @@ const EVENT_TYPE_OPTIONS: EventType[] = [
 	"reproductive",
 	"acquisition",
 	"mortality",
+	"inventory",
 ];
 
 const BUCKET_OPTIONS: ProductionBucket[] = ["day", "week", "month"];
@@ -63,6 +63,7 @@ const formatEventType = (type: EventType): string => {
 		reproductive: "Reproducción",
 		acquisition: "Adquisición",
 		mortality: "Mortalidad",
+		inventory: "Inventario",
 	};
 	return map[type];
 };
@@ -86,6 +87,14 @@ const toApiDateTime = (
 	return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
 };
 
+const getTodayDateInput = (): string => {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, "0");
+	const day = String(now.getDate()).padStart(2, "0");
+	return `${year}-${month}-${day}`;
+};
+
 export const ReportsFilterPanel = ({
 	farmId,
 	onApply,
@@ -95,7 +104,7 @@ export const ReportsFilterPanel = ({
 	const [bucket, setBucket] = useState<ProductionBucket>("month");
 	const [unit, setUnit] = useState<Unit>("dozen");
 	const [dateFrom, setDateFrom] = useState("");
-	const [dateTo, setDateTo] = useState("");
+	const [dateTo, setDateTo] = useState<string>(() => getTodayDateInput());
 	const [selectedAssetId, setSelectedAssetId] = useState<string>("");
 	const [selectedIndividualId, setSelectedIndividualId] = useState<string>("");
 	const [hasAppliedOnce, setHasAppliedOnce] = useState(false);
@@ -120,32 +129,8 @@ export const ReportsFilterPanel = ({
 	const allAssets = assetsResponse?.data ?? [];
 	const individualModeAssets = allAssets.filter((a) => a.mode === "individual");
 
-	const isCoverageCheckActive = !!farmId && requiresAsset;
-
-	const {
-		data: assetCoverageReport,
-		isPending: isPendingAssetCoverage,
-		isError: hasAssetCoverageError,
-	} = useGetProductionReport(
-		{
-			farmId,
-			type: eventType,
-			bucket: "month",
-		},
-		isCoverageCheckActive,
-	);
-
-	const assetsWithCoverage = new Set(
-		(assetCoverageReport?.data ?? []).map((row) => Number(row.asset_id)),
-	);
-
-	const hasCoverageRows = (assetCoverageReport?.data?.length ?? 0) > 0;
 	const shouldCheckEventsCoverage =
-		requiresAsset &&
-		!!farmId &&
-		!isPendingAssets &&
-		allAssets.length > 0 &&
-		(hasAssetCoverageError || (!isPendingAssetCoverage && !hasCoverageRows));
+		requiresAsset && !!farmId && !isPendingAssets && allAssets.length > 0;
 
 	const { data: eventCoverageAssetIds, isPending: isPendingEventCoverage } =
 		useQuery({
@@ -183,26 +168,16 @@ export const ReportsFilterPanel = ({
 			staleTime: 60_000,
 		});
 
-	const effectiveCoverageIds = hasCoverageRows
-		? assetsWithCoverage
-		: new Set((eventCoverageAssetIds ?? []).map((id) => Number(id)));
-	const shouldFallbackToAllAssets =
-		hasAssetCoverageError &&
-		!isPendingEventCoverage &&
-		effectiveCoverageIds.size === 0;
+	const effectiveCoverageIds = new Set(
+		(eventCoverageAssetIds ?? []).map((id) => Number(id)),
+	);
 
 	const assetsForScope =
 		scope === "specific-asset"
-			? shouldFallbackToAllAssets
-				? allAssets
-				: allAssets.filter((asset) =>
-						effectiveCoverageIds.has(Number(asset.id)),
-					)
-			: shouldFallbackToAllAssets
-				? individualModeAssets
-				: individualModeAssets.filter((asset) =>
-						effectiveCoverageIds.has(Number(asset.id)),
-					);
+			? allAssets.filter((asset) => effectiveCoverageIds.has(Number(asset.id)))
+			: individualModeAssets.filter((asset) =>
+					effectiveCoverageIds.has(Number(asset.id)),
+				);
 
 	const { data: individualsResponse, isPending: isPendingIndividuals } =
 		useListIndividualsByAssetId({
@@ -243,11 +218,7 @@ export const ReportsFilterPanel = ({
 	const hasRequiredIndividual = !requiresIndividual || !!selectedIndividualId;
 	const hasAssetsMatchingFilters = !requiresAsset || assetsForScope.length > 0;
 	const noCoverageByType =
-		requiresAsset &&
-		!isPendingAssetCoverage &&
-		!isPendingEventCoverage &&
-		!hasAssetCoverageError &&
-		effectiveCoverageIds.size === 0;
+		requiresAsset && !isPendingEventCoverage && effectiveCoverageIds.size === 0;
 	const canApply =
 		!!farmId &&
 		isDateRangeValid &&
@@ -408,7 +379,6 @@ export const ReportsFilterPanel = ({
 							onValueChange={handleAssetChange}
 							disabled={
 								isPendingAssets ||
-								(isCoverageCheckActive && isPendingAssetCoverage) ||
 								(shouldCheckEventsCoverage && isPendingEventCoverage)
 							}
 						>
@@ -416,7 +386,6 @@ export const ReportsFilterPanel = ({
 								<SelectValue
 									placeholder={
 										isPendingAssets ||
-										(isCoverageCheckActive && isPendingAssetCoverage) ||
 										(shouldCheckEventsCoverage && isPendingEventCoverage)
 											? "Cargando..."
 											: "Seleccionar activo"
@@ -434,21 +403,11 @@ export const ReportsFilterPanel = ({
 								))}
 							</SelectContent>
 						</Select>
-						{!isPendingAssetCoverage &&
-							!isPendingEventCoverage &&
-							noCoverageByType && (
-								<p className="text-xs text-muted-foreground">
-									No hay activos con datos para ese tipo de evento.
-								</p>
-							)}
-						{!isPendingAssetCoverage &&
-							!isPendingEventCoverage &&
-							hasAssetCoverageError && (
-								<p className="text-xs text-muted-foreground">
-									No se pudo validar cobertura por tipo. Mostrando activos
-									disponibles.
-								</p>
-							)}
+						{!isPendingEventCoverage && noCoverageByType && (
+							<p className="text-xs text-muted-foreground">
+								No hay activos con datos para ese tipo de evento.
+							</p>
+						)}
 					</div>
 				)}
 
