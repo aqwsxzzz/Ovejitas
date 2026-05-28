@@ -59,6 +59,7 @@ export interface FinanceTrendSection {
 }
 
 export interface FinanceInsightRow {
+	assetId?: string;
 	label: string;
 	subtitle: string;
 	value: string;
@@ -100,6 +101,7 @@ interface FinanceDashboardShellProps {
 	alerts: FinanceAlertItem[];
 	isCustomRange: boolean;
 	periodWheel?: FinancePeriodWheel;
+	onInsightAssetClick?: (assetId: string) => void;
 }
 
 const RANGE_OPTIONS: Array<{ value: FinanceRangePreset; label: string }> = [
@@ -205,7 +207,13 @@ const BalanceSummaryCard = ({ cards }: { cards: FinanceSummaryCardData[] }) => (
 	</Card>
 );
 
-const MiniRows = ({ rows }: { rows: FinanceInsightRow[] }) => {
+const MiniRows = ({
+	rows,
+	onAssetClick,
+}: {
+	rows: FinanceInsightRow[];
+	onAssetClick?: (assetId: string) => void;
+}) => {
 	if (rows.length === 0) {
 		return (
 			<p className="text-sm text-muted-foreground">
@@ -216,42 +224,70 @@ const MiniRows = ({ rows }: { rows: FinanceInsightRow[] }) => {
 
 	return (
 		<div className="space-y-3">
-			{rows.map((row) => (
-				<div
-					key={`${row.label}-${row.value}`}
-					className="space-y-1.5"
-				>
-					<div className="flex items-center justify-between gap-3 text-sm">
-						<div className="min-w-0">
-							<p className="truncate font-medium">{row.label}</p>
-							<p className="truncate text-xs text-muted-foreground">
-								{row.subtitle}
-							</p>
+			{rows.map((row) => {
+				const isClickable = !!onAssetClick && !!row.assetId;
+				return (
+					<div
+						key={`${row.label}-${row.value}`}
+						className={cn(
+							"space-y-1.5 rounded-lg",
+							isClickable
+								? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+								: undefined,
+						)}
+						role={isClickable ? "button" : undefined}
+						tabIndex={isClickable ? 0 : undefined}
+						onClick={
+							isClickable
+								? () => {
+										onAssetClick(row.assetId as string);
+									}
+								: undefined
+						}
+						onKeyDown={
+							isClickable
+								? (event) => {
+										if (event.key !== "Enter" && event.key !== " ") return;
+										event.preventDefault();
+										onAssetClick(row.assetId as string);
+									}
+								: undefined
+						}
+					>
+						<div className="flex items-center justify-between gap-3 text-sm">
+							<div className="min-w-0">
+								<p className="truncate font-medium">{row.label}</p>
+								<p className="truncate text-xs text-muted-foreground">
+									{row.subtitle}
+								</p>
+							</div>
+							<div className="text-right">
+								<p
+									className={
+										row.trend === "negative"
+											? "font-semibold text-rose-600"
+											: "font-semibold text-emerald-600"
+									}
+								>
+									{row.value}
+								</p>
+								<p className="text-xs text-muted-foreground">
+									{row.shareLabel}
+								</p>
+							</div>
 						</div>
-						<div className="text-right">
-							<p
-								className={
-									row.trend === "negative"
-										? "font-semibold text-rose-600"
-										: "font-semibold text-emerald-600"
-								}
-							>
-								{row.value}
-							</p>
-							<p className="text-xs text-muted-foreground">{row.shareLabel}</p>
+						<div className="h-1.5 overflow-hidden rounded-full bg-muted">
+							<div
+								className={cn(
+									"h-full rounded-full",
+									row.trend === "negative" ? "bg-rose-400" : "bg-emerald-400",
+								)}
+								style={{ width: `${Math.max(4, row.fill)}%` }}
+							/>
 						</div>
 					</div>
-					<div className="h-1.5 overflow-hidden rounded-full bg-muted">
-						<div
-							className={cn(
-								"h-full rounded-full",
-								row.trend === "negative" ? "bg-rose-400" : "bg-emerald-400",
-							)}
-							style={{ width: `${Math.max(4, row.fill)}%` }}
-						/>
-					</div>
-				</div>
-			))}
+				);
+			})}
 		</div>
 	);
 };
@@ -523,6 +559,7 @@ export function FinanceDashboardShell({
 	alerts,
 	isCustomRange,
 	periodWheel,
+	onInsightAssetClick,
 }: FinanceDashboardShellProps) {
 	return (
 		<div className="space-y-4 pb-6">
@@ -605,7 +642,10 @@ export function FinanceDashboardShell({
 									<p className="text-sm font-medium">Activos mas rentables</p>
 									<Badge variant="secondary">Mejores 5</Badge>
 								</div>
-								<MiniRows rows={profitabilityRows} />
+								<MiniRows
+									rows={profitabilityRows}
+									onAssetClick={onInsightAssetClick}
+								/>
 							</div>
 							<Separator />
 							<div className="space-y-2">
@@ -615,7 +655,10 @@ export function FinanceDashboardShell({
 									</p>
 									<Badge variant="warning">Atencion</Badge>
 								</div>
-								<MiniRows rows={lossRows} />
+								<MiniRows
+									rows={lossRows}
+									onAssetClick={onInsightAssetClick}
+								/>
 							</div>
 						</TabsContent>
 

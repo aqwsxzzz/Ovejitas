@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	FinanceDashboardShell,
@@ -196,6 +197,7 @@ const mapInsightRows = (
 			metric === "net" && netMode === "negative" ? Math.abs(value) : value;
 		const share = total > 0 ? (normalizedValue / total) * 100 : 0;
 		return {
+			assetId: String(row.asset_id),
 			label: row.asset_name,
 			subtitle:
 				metric === "net"
@@ -372,6 +374,7 @@ const buildAlerts = (
 };
 
 export function V2FinancePage() {
+	const navigate = useNavigate();
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
 	const today = startOfDay(new Date());
@@ -618,6 +621,16 @@ export function V2FinancePage() {
 		setRange(getDefaultPresetRange(nextPreset, today));
 	};
 
+	const handleInsightAssetClick = (assetId: string) => {
+		void navigate({
+			to: "/v2/production-units/flock/$unitId",
+			params: { unitId: assetId },
+			search: {
+				eventType: undefined,
+			},
+		});
+	};
+
 	return (
 		<FinanceDashboardShell
 			rangePreset={rangePreset}
@@ -633,6 +646,7 @@ export function V2FinancePage() {
 			alerts={alerts}
 			isCustomRange={rangePreset === "custom"}
 			periodWheel={periodWheel}
+			onInsightAssetClick={handleInsightAssetClick}
 		/>
 	);
 }
