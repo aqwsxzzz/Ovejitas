@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { ASSET_KIND_OPTIONS } from "@/features/livestock/constants/asset-kind-options";
 import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
+import { CreateMaterialAssetDialog } from "@/features/livestock/components/create-material-asset-dialog";
 import {
 	useDeleteLivestockAssetById,
 	useListLivestockAssetsByFarmId,
@@ -350,6 +351,8 @@ export function LivestockKindPage({
 					>
 						Nuevo lote
 					</Link>
+				) : selectedKind === "material" ? (
+					<CreateMaterialAssetDialog farmId={farmId} />
 				) : null}
 			</div>
 
