@@ -1,9 +1,12 @@
 // Utility functions for mapping, calculations, and alert logic from v2-finance-page
-import { formatCurrency, parseDecimal } from "@/features/finance/finance-dashboard-utils";
+import {
+	formatCurrency,
+	parseDecimal,
+} from "@/features/finance/finance-dashboard-utils";
 import type {
 	FinanceInsightRow,
 	FinanceTrendSection,
-	FinanceAlertItem
+	FinanceAlertItem,
 } from "@/features/finance/components/finance-dashboard-shell";
 
 export const calculateTrend = (
