@@ -43,6 +43,23 @@ Only use `useEffect` when item 7 is true.
 - If fallback is required, document the reason in the PR/change summary and keep the fallback minimal and isolated.
 - Match existing repository structure and patterns first; avoid per-feature custom UI architecture when a shared shadcn pattern exists.
 
+## 2.6 UI Consistency And Reuse Gate (Mandatory)
+- Before creating or editing any UI element (buttons, badges/pills, cards, chips, action links, toggles), first check whether an existing reusable component/variant already represents that intent and visual role.
+- Reuse existing semantic variants first (for example create/destroy/neutral on Button, and established Badge variants) instead of per-screen custom styles.
+- Do not introduce custom visual styles directly on reusable primitives for core intent states (`className` color overrides like `bg-*`, `text-*`, `border-*`) when a semantic variant can express the same meaning.
+- If the needed style does not exist yet, extend the shared component variant definition in `src/components/ui/*` (for example `button.tsx`, `badge.tsx`) instead of styling one-off instances.
+- One intent must map to one visual language across the app (create actions look consistent everywhere, destructive actions look consistent everywhere, neutral actions look consistent everywhere).
+- Custom design is allowed only when there is a real product requirement not covered by existing variants. In that case, document why reuse is insufficient and keep the custom styling isolated.
+
+Decision gate before adding UI styling:
+1. Is there an existing shared component for this element type?
+2. Is there an existing semantic variant that matches this intent?
+3. Can I achieve this by reusing `src/components/ui/*` without local color overrides?
+4. If no, should I add a new semantic variant in the shared component instead of local styles?
+5. If still no, is this truly a requirement for a unique design?
+
+Only add local custom styling when step 5 is true.
+
 ## 3. Preserve Boundaries
 - Keep separation between UI components, state management, and API/data layers.
 - Avoid breaking route/API behavior unless explicitly requested.
