@@ -46,7 +46,7 @@ export const DeleteAnimalModal = ({
 			onOpenChange={setOpen}
 		>
 			<DialogTrigger asChild>
-				<Button className="bg-destructive">
+				<Button variant="destroy">
 					<Trash2 />
 				</Button>
 			</DialogTrigger>
@@ -63,11 +63,16 @@ export const DeleteAnimalModal = ({
 				<div className="flex justify-between mt-4">
 					<Button
 						onClick={onSubmit}
-						className="bg-destructive"
+						variant="destroy"
 					>
 						{t("deleteButton")}
 					</Button>
-					<Button onClick={() => setOpen(false)}>{t("cancelButton")}</Button>
+					<Button
+						variant="neutral"
+						onClick={() => setOpen(false)}
+					>
+						{t("cancelButton")}
+					</Button>
 				</div>
 			</DialogContent>
 		</Dialog>

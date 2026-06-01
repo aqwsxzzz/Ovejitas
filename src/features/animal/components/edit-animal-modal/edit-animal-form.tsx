@@ -485,7 +485,7 @@ export const EditAnimalForm = ({
 					</Button>
 					<Button
 						type="button"
-						className="bg-destructive"
+						variant="neutral"
 						onClick={closeDialog}
 					>
 						{t("cancelButton")}

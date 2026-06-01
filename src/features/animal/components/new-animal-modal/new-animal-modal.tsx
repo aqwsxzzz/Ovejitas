@@ -40,8 +40,8 @@ export const NewAnimalModal = ({
 			{!onOpenChange && (
 				<DialogTrigger asChild>
 					<Button
-						variant="outline"
-						className="bg-primary text-primary-foreground w-fit ml-auto"
+						variant="create"
+						className="w-fit ml-auto"
 					>
 						{t("addAnimalButton")}
 					</Button>

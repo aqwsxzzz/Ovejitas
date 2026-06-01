@@ -432,13 +432,14 @@ export const NewAnimalBulkForm = ({
 					<Button
 						type="submit"
 						disabled={isPending}
+						variant="create"
 					>
 						{t("createButton")}
 					</Button>
 					<Button
 						type="button"
 						onClick={closeDialog}
-						className="bg-destructive"
+						variant="neutral"
 					>
 						{t("cancelButton")}
 					</Button>
