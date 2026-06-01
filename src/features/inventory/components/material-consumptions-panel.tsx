@@ -410,7 +410,7 @@ export function MaterialConsumptionsPanel({
 								<div className="flex justify-end gap-2">
 									<Button
 										type="button"
-										variant="outline"
+										variant="neutral"
 										onClick={() => setEditingConsumptionId(null)}
 									>
 										Cancel

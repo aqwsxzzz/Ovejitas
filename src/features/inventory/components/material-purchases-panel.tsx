@@ -232,7 +232,7 @@ export function MaterialPurchasesPanel({
 								</Button>
 								<Button
 									type="button"
-									variant="outline"
+									variant="destroy"
 									size="sm"
 									onClick={() => void handleDeletePurchase(purchase.id)}
 									disabled={deletingPurchaseId === purchase.id}

@@ -152,7 +152,7 @@ export const FeedLotPanel = ({ farmId }: FeedLotPanelProps) => {
 								{t("feedLots.newButton")}
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="max-h-[90vh] overflow-y-auto">
+						<DialogContent className="max-w-sm">
 							<DialogTitle>{t("feedLots.modal.title")}</DialogTitle>
 							<DialogDescription>
 								{t("feedLots.modal.description")}
@@ -319,14 +319,14 @@ export const FeedLotPanel = ({ farmId }: FeedLotPanelProps) => {
 											</DialogDescription>
 											<div className="flex justify-end gap-2">
 												<Button
-													variant="outline"
+													variant="neutral"
 													onClick={() => setDeleteLotId(null)}
 													disabled={isDeleting}
 												>
 													{t("feedLots.deleteDialog.cancel")}
 												</Button>
 												<Button
-													variant="destructive"
+													variant="destroy"
 													disabled={isDeleting}
 													onClick={() =>
 														void deleteFeedLot({

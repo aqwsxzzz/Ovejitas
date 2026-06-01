@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MapPin, Package } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -85,22 +86,24 @@ function MaterialAssetRow(props: {
 					className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
 				/>
 				<div className="flex items-center gap-2">
-					<button
+					<Button
 						type="button"
+						variant="create"
+						size="sm"
 						onClick={() => void props.onSaveEdit()}
 						disabled={props.isSaving}
-						className="rounded-full bg-(--v2-ink) px-3 py-1 text-xs font-semibold text-white"
 					>
 						{props.isSaving ? "Guardando..." : "Guardar"}
-					</button>
-					<button
+					</Button>
+					<Button
 						type="button"
+						variant="neutral"
+						size="sm"
 						onClick={props.onCancelEdit}
 						disabled={props.isSaving}
-						className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 					>
 						Cancelar
-					</button>
+					</Button>
 				</div>
 			</div>
 		);
@@ -199,22 +202,24 @@ function MaterialAssetRow(props: {
 						Eliminar este material?
 					</p>
 					<div className="flex items-center gap-2">
-						<button
+						<Button
 							type="button"
+							variant="neutral"
+							size="sm"
 							onClick={() => setIsConfirmingDelete(false)}
 							disabled={props.isDeleting}
-							className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold disabled:opacity-60"
 						>
 							Cancelar
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
+							variant="destroy"
+							size="sm"
 							onClick={() => void props.onDelete()}
 							disabled={props.isDeleting}
-							className="rounded-full border border-red-200 bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
 						>
 							{props.isDeleting ? "Eliminando..." : "Confirmar eliminar"}
-						</button>
+						</Button>
 					</div>
 				</div>
 			) : null}
