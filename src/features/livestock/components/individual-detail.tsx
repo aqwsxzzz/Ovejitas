@@ -8,6 +8,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { GenealogyTree } from "./genealogy-tree";
 import { IndividualForm } from "./individual-form.tsx";
 import type { IndividualFormData } from "./individual-form.tsx";
@@ -88,23 +90,15 @@ export function IndividualDetail({
 			} as Record<string, string>
 		)[individual.status] ?? individual.status;
 
-	const statusColor =
+	const statusVariant =
 		(
 			{
-				active: "text-green-700",
-				sold: "text-amber-700",
-				deceased: "text-red-700",
-			} as Record<string, string>
-		)[individual.status] ?? "text-gray-700";
-
-	const statusBg =
-		(
-			{
-				active: "bg-green-50",
-				sold: "bg-amber-50",
-				deceased: "bg-red-50",
-			} as Record<string, string>
-		)[individual.status] ?? "bg-gray-50";
+				active: "success",
+				sold: "warning",
+				deceased: "error",
+				archived: "outline",
+			} as const
+		)[individual.status] ?? "outline";
 
 	const sex = (individual.extra?.sex as string | undefined) ?? "unknown";
 	const sexSymbol = { male: "♂", female: "♀", unknown: "–" }[sex] ?? "–";
@@ -124,21 +118,21 @@ export function IndividualDetail({
 					</DialogHeader>
 					<p className="text-sm text-gray-600">{individualLabel}</p>
 					<DialogFooter>
-						<button
+						<Button
 							type="button"
+							variant="neutral"
 							onClick={() => setIsDeleteDialogOpen(false)}
-							className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium"
 						>
 							Cancelar
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
+							variant="destroy"
 							onClick={() => void handleDelete()}
 							disabled={isLoading}
-							className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
 						>
 							{isLoading ? "Eliminando..." : "Eliminar"}
-						</button>
+						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -149,11 +143,12 @@ export function IndividualDetail({
 						<h1 className="text-3xl font-bold">{individualLabel}</h1>
 					</div>
 					<div className="text-right">
-						<div
-							className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${statusColor} ${statusBg}`}
+						<Badge
+							variant={statusVariant}
+							className="px-3 py-1 text-sm"
 						>
 							{statusLabel}
-						</div>
+						</Badge>
 					</div>
 				</div>
 
@@ -196,20 +191,21 @@ export function IndividualDetail({
 
 				{/* Actions */}
 				<div className="mt-6 flex gap-2">
-					<button
+					<Button
+						type="button"
+						variant={isEditingGenealogy ? "neutral" : "outline"}
 						onClick={() => setIsEditingGenealogy(!isEditingGenealogy)}
-						className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
 					>
 						{isEditingGenealogy ? "Cancelar edicion" : "Editar genealogia"}
-					</button>
-					<button
+					</Button>
+					<Button
 						type="button"
+						variant="destroy"
 						onClick={() => setIsDeleteDialogOpen(true)}
 						disabled={isLoading}
-						className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
 					>
 						Eliminar
-					</button>
+					</Button>
 				</div>
 			</div>
 

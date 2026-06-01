@@ -150,7 +150,7 @@ export function CreateMaterialAssetDialog({
 					<DialogFooter>
 						<Button
 							type="button"
-							variant="outline"
+							variant="neutral"
 							onClick={() => handleOpenChange(false)}
 							disabled={createMaterialMutation.isPending}
 						>
@@ -158,6 +158,7 @@ export function CreateMaterialAssetDialog({
 						</Button>
 						<Button
 							type="submit"
+							variant="create"
 							disabled={createMaterialMutation.isPending}
 						>
 							{createMaterialMutation.isPending

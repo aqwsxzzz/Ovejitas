@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import type { ILivestockAsset } from "@/features/livestock/types/livestock-types";
 
 import { toKindLabel, toModeLabel } from "./flock-detail-utils";
@@ -17,14 +18,6 @@ export function FlockHeaderCard({ asset }: FlockHeaderCardProps) {
 		<div className="v2-card p-5">
 			<div className="min-w-0 flex-1">
 				<div className="mb-2 flex items-center justify-between gap-3">
-					<div className="flex items-center gap-2">
-						<span className="rounded-md bg-[#e7d7ae] px-2.5 py-1 text-xs font-semibold text-[#6f5413]">
-							{toKindLabel(asset)}
-						</span>
-						<span className="rounded-md border border-(--v2-border) bg-white px-2.5 py-1 text-xs font-semibold text-(--v2-ink)">
-							{toModeLabel(asset)}
-						</span>
-					</div>
 					{backToAssetsPath === "kind" && asset.kind ? (
 						<Link
 							to="/v2/production-units/$assetKind"
@@ -49,6 +42,10 @@ export function FlockHeaderCard({ asset }: FlockHeaderCardProps) {
 							/>
 						</Link>
 					)}
+					<div className="flex items-center gap-2">
+						<Badge variant="kind">{toKindLabel(asset)}</Badge>
+						<Badge variant="mode">{toModeLabel(asset)}</Badge>
+					</div>
 				</div>
 				<div className="flex items-center gap-2">
 					<h1

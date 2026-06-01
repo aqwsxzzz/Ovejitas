@@ -92,7 +92,6 @@ export function UnitEventTimeline({
 				const status = getEventStatus(event);
 				const isDeleting = deletingEventId === event.id;
 				const isEditing = editingEventId === event.id;
-				const isActionOwned = isActionOwnedEvent(event);
 				return (
 					<article
 						key={event.id}
@@ -125,11 +124,6 @@ export function UnitEventTimeline({
 							{event.amount != null ? (
 								<span>
 									Monto: ${Number(event.amount)} {event.currency ?? ""}
-								</span>
-							) : null}
-							{isActionOwned ? (
-								<span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
-									Gestionado por accion
 								</span>
 							) : null}
 						</div>

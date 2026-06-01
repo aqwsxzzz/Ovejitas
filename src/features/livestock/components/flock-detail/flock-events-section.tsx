@@ -2,6 +2,7 @@ import type { ILivestockAsset } from "@/features/livestock/types/livestock-types
 import type { LivestockEventType } from "@/features/livestock/types/livestock-types";
 
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { UnitEventForm } from "../unit-event-form";
 import { UnitEventTimeline } from "../unit-event-timeline";
@@ -66,8 +67,10 @@ export function FlockEventsSection({
 					) : null}
 				</div>
 				{!isMaterialAsset ? (
-					<button
+					<Button
 						type="button"
+						variant={actions.isCreatingEvent ? "neutral" : "create"}
+						size="sm"
 						onClick={() => {
 							actions.setIsCreatingEvent((previous) => {
 								const next = !previous;
@@ -75,7 +78,6 @@ export function FlockEventsSection({
 								return next;
 							});
 						}}
-						className="inline-flex items-center gap-2 rounded-full border border-(--v2-ink) px-3 py-1 text-xs font-semibold"
 						aria-label={actions.isCreatingEvent ? "Cerrar" : "Nuevo evento"}
 					>
 						{actions.isCreatingEvent ? (
@@ -97,7 +99,7 @@ export function FlockEventsSection({
 								<span className="hidden md:inline">Nuevo evento</span>
 							</>
 						)}
-					</button>
+					</Button>
 				) : null}
 			</div>
 

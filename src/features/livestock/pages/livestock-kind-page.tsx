@@ -7,6 +7,7 @@ import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { ASSET_KIND_OPTIONS } from "@/features/livestock/constants/asset-kind-options";
 import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
 import { CreateMaterialAssetDialog } from "@/features/livestock/components/create-material-asset-dialog";
+import { Button } from "@/components/ui/button";
 import {
 	useDeleteLivestockAssetById,
 	useListLivestockAssetsByFarmId,
@@ -98,22 +99,24 @@ function LivestockUnitRow(props: {
 					className="w-full rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
 				/>
 				<div className="flex items-center gap-2">
-					<button
+					<Button
 						type="button"
+						variant="create"
+						size="sm"
 						onClick={() => void props.onSaveEdit()}
 						disabled={props.isSaving}
-						className="rounded-full bg-[color:var(--v2-ink)] px-3 py-1 text-xs font-semibold text-white"
 					>
 						{props.isSaving ? "Guardando..." : "Guardar"}
-					</button>
-					<button
+					</Button>
+					<Button
 						type="button"
+						variant="neutral"
+						size="sm"
 						onClick={props.onCancelEdit}
 						disabled={props.isSaving}
-						className="rounded-full border border-[color:var(--v2-border)] px-3 py-1 text-xs font-semibold"
 					>
 						Cancelar
-					</button>
+					</Button>
 				</div>
 			</div>
 		);
@@ -211,22 +214,24 @@ function LivestockUnitRow(props: {
 						Eliminar este lote?
 					</p>
 					<div className="flex items-center gap-2">
-						<button
+						<Button
 							type="button"
+							variant="neutral"
+							size="sm"
 							onClick={() => setIsConfirmingDelete(false)}
 							disabled={props.isDeleting}
-							className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold disabled:opacity-60"
 						>
 							Cancelar
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
+							variant="destroy"
+							size="sm"
 							onClick={() => void props.onDelete()}
 							disabled={props.isDeleting}
-							className="rounded-full border border-red-200 bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
 						>
 							{props.isDeleting ? "Eliminando..." : "Confirmar eliminar"}
-						</button>
+						</Button>
 					</div>
 				</div>
 			) : null}
@@ -339,18 +344,23 @@ export function LivestockKindPage({
 					</p>
 				</div>
 				{selectedKind === "animal" ? (
-					<Link
-						to="/v2/log"
-						search={{
-							actionId: "nuevo-lote",
-							actionLabel: "Nuevo lote",
-							contextLabel: activeKindMeta.title,
-							sourcePath,
-						}}
-						className="rounded-full border border-[color:var(--v2-border)] bg-white px-3 py-1.5 text-xs font-semibold"
+					<Button
+						asChild
+						variant="create"
+						size="sm"
 					>
-						Nuevo lote
-					</Link>
+						<Link
+							to="/v2/log"
+							search={{
+								actionId: "nuevo-lote",
+								actionLabel: "Nuevo lote",
+								contextLabel: activeKindMeta.title,
+								sourcePath,
+							}}
+						>
+							Nuevo lote
+						</Link>
+					</Button>
 				) : selectedKind === "material" ? (
 					<CreateMaterialAssetDialog farmId={farmId} />
 				) : null}

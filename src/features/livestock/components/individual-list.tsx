@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { IndividualForm } from "@/features/livestock/components/individual-form";
 import type { IndividualFormData } from "@/features/livestock/components/individual-form";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
@@ -100,12 +101,13 @@ export function IndividualList({
 			<div className="flex items-center justify-between gap-2">
 				<h2 className="text-lg font-bold">Individuos ({headerTotal})</h2>
 				{onCreateIndividual && (
-					<button
+					<Button
+						variant="create"
+						size="sm"
 						onClick={onCreateIndividual}
-						className="rounded-lg bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
 					>
 						+ Agregar individuo
-					</button>
+					</Button>
 				)}
 			</div>
 
@@ -249,22 +251,24 @@ export function IndividualList({
 											Eliminar {formatIndividualLabel(individual)}?
 										</p>
 										<div className="flex items-center gap-2">
-											<button
+											<Button
 												type="button"
+												variant="neutral"
+												size="sm"
 												onClick={() => setPendingDeleteIndividual(null)}
 												disabled={isDeleting}
-												className="rounded-full border border-gray-300 px-3 py-1 text-xs font-semibold disabled:opacity-60"
 											>
 												Cancelar
-											</button>
-											<button
+											</Button>
+											<Button
 												type="button"
+												variant="destroy"
+												size="sm"
 												onClick={() => void handleDelete(individual)}
 												disabled={isDeleting}
-												className="rounded-full border border-red-200 bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
 											>
 												{isDeleting ? "Eliminando..." : "Confirmar eliminar"}
-											</button>
+											</Button>
 										</div>
 									</div>
 								) : null}
