@@ -185,12 +185,13 @@ export const AddNewMeasurementForm = ({
 				<div className="flex justify-around">
 					<Button
 						disabled={isPending}
+						variant="create"
 						type="submit"
 					>
 						{t("createButton")}
 					</Button>
 					<Button
-						className="bg-destructive"
+						variant="neutral"
 						onClick={closeDialog}
 					>
 						{t("cancelButton")}

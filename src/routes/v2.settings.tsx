@@ -23,7 +23,7 @@ function SettingsPage() {
 
 			<div className="flex justify-end pt-2">
 				<Button
-					variant="destructive"
+					variant="destroy"
 					onClick={() => logout()}
 					className="w-full sm:w-auto"
 				>

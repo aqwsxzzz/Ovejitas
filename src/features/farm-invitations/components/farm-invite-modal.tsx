@@ -114,14 +114,13 @@ export const FarmInviteModal = () => {
 								<div className="flex justify-around">
 									<Button
 										disabled={isPending}
+										variant="create"
 										type="submit"
 									>
 										{tInvite("createButton")}
 									</Button>
 									<DialogClose asChild>
-										<Button className="bg-destructive">
-											{tInvite("cancelButton")}
-										</Button>
+										<Button variant="neutral">{tInvite("cancelButton")}</Button>
 									</DialogClose>
 								</div>
 							</div>

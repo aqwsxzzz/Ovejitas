@@ -39,7 +39,10 @@ export const RecordEggCollectionModal = (
 		>
 			<DialogTrigger asChild>
 				{props.mode === "create" ? (
-					<Button size="sm">
+					<Button
+						variant="create"
+						size="sm"
+					>
 						<Plus className="h-4 w-4" />
 						{t("detail.eggCollections.record")}
 					</Button>

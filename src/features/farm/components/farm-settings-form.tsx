@@ -185,7 +185,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 					{updateFarmMutation.isPending ? "Saving..." : "Save Farm Settings"}
 				</Button>
 				<Button
-					variant="outline"
+					variant="neutral"
 					disabled={!hasChanges || updateFarmMutation.isPending}
 					onClick={() => setDraft({})}
 				>

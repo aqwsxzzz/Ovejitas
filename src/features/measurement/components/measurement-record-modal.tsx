@@ -130,7 +130,7 @@ export const MeasurementRecordModal = ({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button className="">{t("modalButtonTrigger")}</Button>
+				<Button variant="create">{t("modalButtonTrigger")}</Button>
 			</DialogTrigger>
 			<DialogContent
 				aria-describedby={undefined}
