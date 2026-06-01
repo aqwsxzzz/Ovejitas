@@ -16,16 +16,21 @@ export function FlockNetMetricCard({
 	assetId,
 	isMaterialAsset,
 }: FlockNetMetricCardProps) {
-	const currentMonthStart = useMemo(() => {
+	const monthRange = useMemo(() => {
 		const now = new Date();
-		return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+		const start = new Date(now.getFullYear(), now.getMonth(), 1)
+			.toISOString()
+			.slice(0, 10);
+		const end = now.toISOString().slice(0, 10);
+		return { start, end };
 	}, []);
 
 	const { data: profitabilityReport } = useGetProfitabilityReport({
 		farmId,
 		filters: {
 			assetId,
-			dateFrom: currentMonthStart,
+			dateFrom: monthRange.start,
+			dateTo: monthRange.end,
 		},
 		enabled: !!farmId,
 	});
