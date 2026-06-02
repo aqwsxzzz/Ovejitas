@@ -1,7 +1,7 @@
 # Ovejitas BE Event Ledger Rules (FE/BE Working Agreement)
 
 Status: active FE/BE contract baseline.
-Date: 2026-05-21.
+Date: 2026-06-02.
 
 ## Context and source of truth
 
@@ -44,26 +44,35 @@ Implications:
 
 All action emission is atomic and rollback-safe.
 
-1. Individual create -> `acquisition` (+ `expense` if purchased)
-2. Individual status -> deceased -> `mortality`
-3. Individual status -> sold -> `income`
-4. Birth -> `reproductive` + N x `acquisition`
-5. Flock acquisition -> `inventory` increment + `acquisition` (+ `expense`)
-6. Flock sale -> `inventory` decrement + `income`
-7. Flock mortality -> `inventory` decrement + `mortality`
-8. Harvest -> `production` + `inventory` increment
-9. Material purchase -> `inventory` increment + `expense`
-10. Material consumption -> `inventory` decrement
-11. Material sale -> `inventory` decrement + `income`
+| # | Action | Endpoint | Emits |
+|---|--------|----------|-------|
+| 1 | Individual create | `POST .../individuals` | `acquisition` (+ `expense` if purchased) |
+| 2 | Individual → deceased | `PATCH .../individuals/{id}` | `mortality` |
+| 3 | Individual → sold | `PATCH .../individuals/{id}` | `income` |
+| 4 | Birth | `POST .../individuals/{id}/births` | `reproductive` + N × `acquisition` |
+| 5 | Flock acquisition | `POST .../assets/{id}/flock/acquisitions` | `inventory`+ + `acquisition` (+ `expense`) |
+| 6 | Flock sale | `POST .../assets/{id}/flock/sales` | `inventory`− + `income` |
+| 7 | Flock mortality | `POST .../assets/{id}/flock/mortalities` | `inventory`− + `mortality` |
+| 8 | Harvest | `POST .../assets/{id}/harvests` | `production` + `inventory`+ on produce asset |
+| 9 | Material purchase | `POST .../material-purchases` | `inventory`+ + `expense` |
+| 10 | Material consumption | `POST .../material-consumptions` | `inventory`− |
+| 11 | Material sale | `POST .../assets/{id}/sales` | `inventory`− + `income` |
 
 Every action-emitted event must carry `payload.source` (for example: `harvest`, `flock_acquisition`).
+
+### Harvest constraints (action #8)
+
+- Source asset MUST be `kind=animal` or `kind=crop`.
+- Source asset MUST have `produce_asset_id` set, linking it to a material asset that receives the stock.
+- `unit` in the request MUST match the produce asset's existing stock unit.
+- `HarvestRead` returns `{ production_event_id, inventory_event_id, produce_balance }`.
 
 ## Linkage model
 
 - Individuals can link lifecycle events through FK fields (`acquisition_event_id`, `mortality_event_id`, `sale_event_id`, `birth_event_id`).
-- Table-backed actions own their row and store FKs to emitted events.
-- Table-less actions are create-only and correlate by `payload.source` + `occurred_at`.
-- Harvest links producer asset to produce asset through `asset.produce_asset_id`.
+- Table-backed actions (`material_purchase`, `material_consumption`) own a row and store FKs to emitted events.
+- Table-less actions (`flock/*`, `harvest`, `material_sale`) are create-only and correlate by `payload.source` + `occurred_at` — no edit/reverse.
+- Harvest links a producer asset (`kind=animal` or `kind=crop`) to its produce asset via `asset.produce_asset_id`.
 
 ## Event write-path rules
 
@@ -134,24 +143,24 @@ Do not force one universal action abstraction if it introduces behavior flags an
 
 Reports are always derived from event replay (never cached mutable counters):
 
-- profitability: income - expense per asset
-- aggregate: per-type time buckets
-- cost-per-unit: expenses and consumption value against production
-- inventory-summary: on-hand by replaying full inventory history (do not truncate replay by date window)
+- **profitability** (`GET .../reports/profitability`): income − expense per asset per currency. Events with null amount/currency excluded. Different currencies never silently summed.
+- **aggregate** (`GET .../reports/aggregate`): generic per-type time buckets.
+  - `group_by=asset` is ONLY valid for `production`, `mortality`, `acquisition`. Passing it for any other type returns 422.
+  - `AggregateRow` shape: `{ bucket, group, group_label, measure, value, asset_id, unit }`. `unit` is present for production/observation rows.
+- **material-consumption-aggregate** (`GET .../reports/material-consumption-aggregate`): dedicated endpoint for material consumption totals. Supports `group_by=material|consumer|both`. Do NOT use the generic `aggregate` endpoint for consumption reporting.
+- **cost-per-unit** (`GET .../reports/cost-per-unit`): direct expenses + average-cost-valued feed consumption ÷ production quantity, per producer asset. Feed cost is not bounded by `date_from` (full purchase history used for average cost).
+- **inventory-summary** (`GET .../reports/inventory-summary`): on-hand balance per (asset, unit) for material assets and aggregated animal flocks. `date_to` gives the balance as of that moment (defaults to now). `date_from` DOES NOT apply to a running balance and is always ignored by the backend.
+- **inventory balance** (`GET .../assets/{id}/events/balance`): current on-hand balance per (asset, unit) computed from `inventory` events since the most recent reset. Only meaningful for `kind=material` assets.
 
 ## Priority roadmap (recommended)
 
-1. Aggregated animal lifecycle actions first
-- Add flock-level sale and mortality actions (inventory decrement + income/mortality).
-- This closes the gap between individual and aggregated assets.
+~~1. Aggregated animal lifecycle actions~~ — **DONE**: `flock/sales`, `flock/mortalities` shipped.
 
-2. Birth action second
+~~3. Production to inventory~~ — **DONE**: Harvest action ships `production` + `inventory`+ on produce asset.
+
+1. Birth action (next priority)
 - One action should create reproductive event + offspring individuals + offspring acquisition(born) events atomically.
 - Must wire parentage (`mother_id`) in the same transaction.
-
-3. Production to inventory third
-- Decide domain policy first: whether produced goods must be stock-tracked.
-- If yes, production action emits production + inventory increment.
 
 ## Definition of done for any new action
 
@@ -174,3 +183,17 @@ Reports are always derived from event replay (never cached mutable counters):
 - Non-transactional action + event writes.
 - Event edits that bypass action service.
 - A generic abstraction that erases domain intent behind flags.
+
+---
+
+## Contract change log
+
+### 2026-06-02
+
+- **Harvest source expanded**: Harvest action (`POST .../assets/{id}/harvests`) now supports `kind=crop` assets as producers, not only `kind=animal`. FE must allow crop assets to trigger harvest.
+- **Harvest unit constraint**: `unit` in the harvest request MUST match the produce asset's existing stock unit. A mismatch is rejected 422 before emission.
+- **Aggregate `group_by=asset` restricted**: `group_by=asset` on the aggregate report is valid ONLY for `production`, `mortality`, `acquisition`. All other types return 422. FE must not pass `group_by=asset` for expense, income, observation, inventory, or reproductive aggregates.
+- **`AggregateRow.unit` field added**: Aggregate report rows now carry a `unit` field (present for production/observation rows, null otherwise). FE type updated accordingly.
+- **`material-consumption-aggregate` report endpoint shipped**: Dedicated report for material consumption totals at `GET .../reports/material-consumption-aggregate`. Supports `group_by=material|consumer|both`. Use this endpoint instead of the generic aggregate for consumption reporting.
+- **Inventory balance endpoint available**: `GET .../assets/{id}/events/balance` returns current on-hand balances per unit for a material asset. FE can use this in place of replaying events client-side.
+- **Flock sale and mortality actions shipped**: `POST .../assets/{id}/flock/sales` and `POST .../assets/{id}/flock/mortalities` are now live, closing the gap noted in the previous roadmap.
