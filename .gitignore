@@ -25,7 +25,8 @@ dist-ssr
 *.sw?
 
 .bmad-core
-.claude
+.claude/*
+!.claude/commands
 .tanstack
 temp_repo
 ovejiitasnewui
