@@ -41,6 +41,7 @@ import {
 	createFlockAcquisitionByAssetId,
 	createFlockMortalityByAssetId,
 	createFlockSaleByAssetId,
+	createHarvestByAssetId,
 	type IFlockAcquisitionCreatePayload,
 	type IFlockMortalityCreatePayload,
 	type IFlockSaleCreatePayload,
@@ -49,6 +50,7 @@ import {
 	type IMaterialConsumptionCreatePayload,
 	type IMaterialConsumptionUpdatePayload,
 	type IMaterialSaleCreatePayload,
+	type IHarvestCreatePayload,
 	type LivestockEventCreatePayload,
 	type LivestockEventUpdatePayload,
 } from "@/features/livestock/api/livestock-api";
@@ -1451,6 +1453,33 @@ export const useDeleteLivestockAssetById = () => {
 		onSuccess: (_, { farmId }) => {
 			void queryClient.invalidateQueries({
 				queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
+			});
+		},
+	});
+};
+
+export const useCreateHarvestByAssetId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			data: IHarvestCreatePayload;
+		}) => createHarvestByAssetId({ farmId, assetId, data }),
+		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId, assetId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
+			});
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
 			});
 		},
 	});
