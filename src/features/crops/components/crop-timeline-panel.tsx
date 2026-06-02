@@ -31,6 +31,18 @@ const EVENT_TYPE_FILTERS: Array<"all" | LivestockEventType> = [
 	"observation",
 ];
 
+const EVENT_TYPE_LABELS: Record<"all" | LivestockEventType, string> = {
+	all: "Todos",
+	production: "Producción",
+	expense: "Gasto",
+	income: "Ingreso",
+	observation: "Observación",
+	reproductive: "Reproductivo",
+	acquisition: "Adquisición",
+	mortality: "Mortalidad",
+	inventory: "Inventario",
+};
+
 export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 	const [page, setPage] = useState(1);
 	const [typeFilter, setTypeFilter] = useState<"all" | LivestockEventType>(
@@ -77,7 +89,7 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 										key={type}
 										value={type}
 									>
-										{type}
+										{EVENT_TYPE_LABELS[type]}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -106,7 +118,7 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 							className="rounded-lg border px-3 py-2 text-sm"
 						>
 							<div className="flex items-center justify-between gap-2">
-								<span className="font-medium capitalize">{event.type}</span>
+								<span className="font-medium">{EVENT_TYPE_LABELS[event.type] ?? event.type}</span>
 								<span className="text-xs text-(--v2-ink-soft)">
 									{formatDate(event.occurred_at)}
 								</span>

@@ -90,9 +90,9 @@ export function CreateMaterialAssetDialog({
 		>
 			<DialogTrigger asChild>
 				<Button
-					variant="outline"
+					variant="create"
 					className={cn(
-						"rounded-full border-(--v2-border) bg-white px-3 py-1.5 text-xs font-semibold",
+						"rounded-full border-(--v2-border) px-3 py-1.5 text-xs font-semibold",
 						triggerClassName,
 					)}
 				>

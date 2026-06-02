@@ -115,9 +115,9 @@ export function CreateCropAssetDialog({
 		>
 			<DialogTrigger asChild>
 				<Button
-					variant="outline"
+					variant="create"
 					className={cn(
-						"rounded-full border-(--v2-border) bg-white px-3 py-1.5 text-xs font-semibold",
+						"rounded-full border-(--v2-border) px-3 py-1.5 text-xs font-semibold",
 						triggerClassName,
 					)}
 				>
@@ -182,7 +182,8 @@ export function CreateCropAssetDialog({
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-(--v2-ink-soft)">
-							Vincula un material para que las cosechas actualicen su inventario.
+							Vincula un material para que las cosechas actualicen su
+							inventario.
 						</p>
 					</div>
 
