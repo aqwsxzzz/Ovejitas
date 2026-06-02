@@ -29,6 +29,7 @@ import { Route as V2ProductionUnitsIndexRouteImport } from './routes/v2.producti
 import { Route as V2MoreIndexRouteImport } from './routes/v2.more.index'
 import { Route as V2ProductionUnitsAssetKindRouteImport } from './routes/v2.production-units.$assetKind'
 import { Route as V2MoreEventCategoriesRouteImport } from './routes/v2.more.event-categories'
+import { Route as V2CropsCropIdRouteImport } from './routes/v2.crops.$cropId'
 import { Route as PublicLayoutSignupRouteImport } from './routes/_public/_layout/signup'
 import { Route as PublicLayoutLoginRouteImport } from './routes/_public/_layout/login'
 import { Route as V2ProductionUnitsFlockUnitIdRouteImport } from './routes/v2.production-units.flock.$unitId'
@@ -136,6 +137,11 @@ const V2MoreEventCategoriesRoute = V2MoreEventCategoriesRouteImport.update({
   path: '/event-categories',
   getParentRoute: () => V2MoreRoute,
 } as any)
+const V2CropsCropIdRoute = V2CropsCropIdRouteImport.update({
+  id: '/crops/$cropId',
+  path: '/crops/$cropId',
+  getParentRoute: () => V2Route,
+} as any)
 const PublicLayoutSignupRoute = PublicLayoutSignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/v2/': typeof V2IndexRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
+  '/v2/crops/$cropId': typeof V2CropsCropIdRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/v2': typeof V2IndexRoute
   '/login': typeof PublicLayoutLoginRoute
   '/signup': typeof PublicLayoutSignupRoute
+  '/v2/crops/$cropId': typeof V2CropsCropIdRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more': typeof V2MoreIndexRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/v2/': typeof V2IndexRoute
   '/_public/_layout/login': typeof PublicLayoutLoginRoute
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
+  '/v2/crops/$cropId': typeof V2CropsCropIdRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/v2/'
     | '/login'
     | '/signup'
+    | '/v2/crops/$cropId'
     | '/v2/more/event-categories'
     | '/v2/production-units/$assetKind'
     | '/v2/more/'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/v2'
     | '/login'
     | '/signup'
+    | '/v2/crops/$cropId'
     | '/v2/more/event-categories'
     | '/v2/production-units/$assetKind'
     | '/v2/more'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/v2/'
     | '/_public/_layout/login'
     | '/_public/_layout/signup'
+    | '/v2/crops/$cropId'
     | '/v2/more/event-categories'
     | '/v2/production-units/$assetKind'
     | '/v2/more/'
@@ -482,6 +494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2MoreEventCategoriesRouteImport
       parentRoute: typeof V2MoreRoute
     }
+    '/v2/crops/$cropId': {
+      id: '/v2/crops/$cropId'
+      path: '/crops/$cropId'
+      fullPath: '/v2/crops/$cropId'
+      preLoaderRoute: typeof V2CropsCropIdRouteImport
+      parentRoute: typeof V2Route
+    }
     '/_public/_layout/signup': {
       id: '/_public/_layout/signup'
       path: '/signup'
@@ -597,6 +616,7 @@ interface V2RouteChildren {
   V2SettingsRoute: typeof V2SettingsRoute
   V2SignupRoute: typeof V2SignupRoute
   V2IndexRoute: typeof V2IndexRoute
+  V2CropsCropIdRoute: typeof V2CropsCropIdRoute
 }
 
 const V2RouteChildren: V2RouteChildren = {
@@ -613,6 +633,7 @@ const V2RouteChildren: V2RouteChildren = {
   V2SettingsRoute: V2SettingsRoute,
   V2SignupRoute: V2SignupRoute,
   V2IndexRoute: V2IndexRoute,
+  V2CropsCropIdRoute: V2CropsCropIdRoute,
 }
 
 const V2RouteWithChildren = V2Route._addFileChildren(V2RouteChildren)
