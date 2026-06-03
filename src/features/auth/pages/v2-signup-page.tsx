@@ -85,13 +85,13 @@ export function V2SignupPage() {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(handleSubmit)}
-					className="space-y-4"
+					className="space-y-2.5"
 				>
 					<FormField
 						control={form.control}
 						name="displayName"
 						render={({ field }) => (
-							<FormItem className="space-y-1.5">
+							<FormItem className="space-y-1">
 								<FormLabel className={v2AuthLabelClassName}>
 									Nombre completo
 								</FormLabel>
@@ -113,7 +113,7 @@ export function V2SignupPage() {
 						control={form.control}
 						name="email"
 						render={({ field }) => (
-							<FormItem className="space-y-1.5">
+							<FormItem className="space-y-1">
 								<FormLabel className={v2AuthLabelClassName}>
 									Correo electronico
 								</FormLabel>
@@ -138,7 +138,7 @@ export function V2SignupPage() {
 						control={form.control}
 						name="password"
 						render={({ field }) => (
-							<FormItem className="space-y-1.5">
+							<FormItem className="space-y-1">
 								<FormLabel className={v2AuthLabelClassName}>
 									Contrasena
 								</FormLabel>
@@ -160,7 +160,7 @@ export function V2SignupPage() {
 						control={form.control}
 						name="confirmPassword"
 						render={({ field }) => (
-							<FormItem className="space-y-1.5">
+							<FormItem className="space-y-1">
 								<FormLabel className={v2AuthLabelClassName}>
 									Confirmar contrasena
 								</FormLabel>
