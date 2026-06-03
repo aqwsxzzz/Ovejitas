@@ -6,6 +6,7 @@ import {
 	Package,
 	Settings,
 	Tractor,
+	Users,
 	Wallet,
 	type LucideIcon,
 } from "lucide-react";
@@ -18,6 +19,12 @@ interface MoreSectionItem {
 }
 
 const extraViews: MoreSectionItem[] = [
+	{
+		to: "/v2/more/acceso",
+		title: "Acceso",
+		description: "Miembros e invitaciones a la granja",
+		icon: Users,
+	},
 	{
 		to: "/v2/more/event-categories",
 		title: "Categorias de eventos",

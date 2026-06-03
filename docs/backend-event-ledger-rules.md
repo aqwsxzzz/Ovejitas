@@ -1,14 +1,14 @@
 # Ovejitas BE Event Ledger Rules (FE/BE Working Agreement)
 
 Status: active FE/BE contract baseline.
-Date: 2026-06-02.
+Date: 2026-06-03.
 
 ## Context and source of truth
 
 - This file is aligned with the backend `events-and-actions.md` guidance shared from the API repository docs.
 - Local supporting references:
-  - `temp_repo/docs/domain-rebuild-plan.md`
-  - `temp_repo/docs/domain-notes.md`
+  - `backend-docs/domain-rebuild-plan.md`
+  - `backend-docs/domain-notes.md`
 
 ## Core model (what the backend is)
 
@@ -145,12 +145,14 @@ Reports are always derived from event replay (never cached mutable counters):
 
 - **profitability** (`GET .../reports/profitability`): income − expense per asset per currency. Events with null amount/currency excluded. Different currencies never silently summed.
 - **aggregate** (`GET .../reports/aggregate`): generic per-type time buckets.
-  - `group_by=asset` is ONLY valid for `production`, `mortality`, `acquisition`. Passing it for any other type returns 422.
+  - `group_by=asset` is ONLY valid for `production`, `mortality`, `acquisition`. Passing it for `observation`, `inventory`, `expense`, `income`, or `reproductive` returns 422.
+  - For `inventory` type, pass `adjustment=reset|increment|decrement` to isolate one flow direction; omitting it returns the net flow.
   - `AggregateRow` shape: `{ bucket, group, group_label, measure, value, asset_id, unit }`. `unit` is present for production/observation rows.
 - **material-consumption-aggregate** (`GET .../reports/material-consumption-aggregate`): dedicated endpoint for material consumption totals. Supports `group_by=material|consumer|both`. Do NOT use the generic `aggregate` endpoint for consumption reporting.
-- **cost-per-unit** (`GET .../reports/cost-per-unit`): direct expenses + average-cost-valued feed consumption ÷ production quantity, per producer asset. Feed cost is not bounded by `date_from` (full purchase history used for average cost).
+- **cost-per-unit** (`GET .../reports/cost-per-unit`): direct expenses + average-cost-valued feed consumption ÷ production quantity, per producer asset. Feed cost is not bounded by `date_from` (full purchase history used for average cost). `has_unvalued_consumption: true` flags rows where feed has no purchase history to value it — FE should surface this warning.
 - **inventory-summary** (`GET .../reports/inventory-summary`): on-hand balance per (asset, unit) for material assets and aggregated animal flocks. `date_to` gives the balance as of that moment (defaults to now). `date_from` DOES NOT apply to a running balance and is always ignored by the backend.
 - **inventory balance** (`GET .../assets/{id}/events/balance`): current on-hand balance per (asset, unit) computed from `inventory` events since the most recent reset. Only meaningful for `kind=material` assets.
+- **individual timeline** (`GET .../reports/individuals/{id}/timeline`): paginated `EventRead` list for a single individual. Returns the full event history for that individual in `Page` envelope.
 
 ## Priority roadmap (recommended)
 
@@ -187,6 +189,10 @@ Reports are always derived from event replay (never cached mutable counters):
 ---
 
 ## Contract change log
+
+### 2026-06-03
+
+- **Clarification only — no contract changes** in this sync.
 
 ### 2026-06-02
 

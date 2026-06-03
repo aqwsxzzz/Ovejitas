@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BarChart3, CalendarDays, ClipboardList, Ellipsis, Home, Settings } from "lucide-react";
+import { BarChart3, CalendarDays, ClipboardList, Ellipsis, Home, Settings, Users } from "lucide-react";
 import { useState } from "react";
 import {
 	Sheet,
@@ -16,6 +16,7 @@ const navItems = [
 ] as const;
 
 const moreItems = [
+	{ to: "/v2/more/acceso", label: "Acceso", icon: Users },
 	{ to: "/v2/more/event-categories", label: "Categorias de eventos", icon: CalendarDays },
 	{ to: "/v2/settings", label: "Configuracion", icon: Settings },
 ] as const;

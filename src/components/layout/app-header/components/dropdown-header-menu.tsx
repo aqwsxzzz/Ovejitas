@@ -13,8 +13,6 @@ import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { useLogout } from "@/features/auth/api/auth-queries";
 import { useTranslation } from "react-i18next";
-import { FarmInviteModal } from "@/features/farm-invitations/components/farm-invite-modal";
-
 export const DropdownHeaderMenu = () => {
 	const { mutateAsync: logout } = useLogout();
 	const { t } = useTranslation("dropdownMenuHeader");
@@ -69,7 +67,6 @@ export const DropdownHeaderMenu = () => {
 							</DropdownMenuShortcut>
 						</DropdownMenuItem>
 					</Link>
-					<FarmInviteModal />
 				</DropdownMenuGroup>
 				{/* <DropdownMenuGroup>
 					<DropdownMenuSub>
