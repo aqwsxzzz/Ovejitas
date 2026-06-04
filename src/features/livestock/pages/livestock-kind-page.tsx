@@ -6,6 +6,7 @@ import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { ASSET_KIND_OPTIONS } from "@/features/livestock/constants/asset-kind-options";
 import { CreateMaterialAssetDialog } from "@/features/livestock/components/create-material-asset-dialog";
 import { CreateCropAssetDialog } from "@/features/crops/components/create-crop-asset-dialog";
+import { CreateEquipmentAssetDialog } from "@/features/equipment/components/create-equipment-asset-dialog";
 import { LivestockAssetSearchBar } from "@/features/livestock/components/livestock-asset-search-bar";
 import { LivestockUnitRow } from "@/features/livestock/components/livestock-unit-row";
 import { useLivestockAssetEdit } from "@/features/livestock/components/use-livestock-asset-edit";
@@ -100,6 +101,8 @@ export function LivestockKindPage({
 					<CreateMaterialAssetDialog farmId={farmId} />
 				) : selectedKind === "crop" ? (
 					<CreateCropAssetDialog farmId={farmId} />
+				) : selectedKind === "equipment" ? (
+					<CreateEquipmentAssetDialog farmId={farmId} />
 				) : null}
 			</div>
 

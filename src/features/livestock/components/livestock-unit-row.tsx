@@ -91,6 +91,14 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 			return;
 		}
 
+		if (props.kind === "equipment") {
+			navigate({
+				to: "/v2/equipment/$equipmentId",
+				params: { equipmentId: String(props.id) },
+			});
+			return;
+		}
+
 		navigate({
 			to: "/v2/production-units/flock/$unitId",
 			params: { unitId: String(props.id) },
