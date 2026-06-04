@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { useLocation } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -18,6 +19,7 @@ import type {
 	UnitKpiSlide,
 } from "@/shared/types/v2-domain-types";
 
+import { DashboardEmptyState } from "../components/dashboard-empty-state";
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
 
 const MONTH_LABEL = new Date().toLocaleDateString("es-EC", {
@@ -157,8 +159,13 @@ function mapAssetToSlice(
 }
 
 export function V2DashboardPage() {
+	const location = useLocation();
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
+	const sourcePath =
+		typeof window === "undefined"
+			? location.pathname
+			: `${location.pathname}${window.location.search}`;
 	const now = useMemo(() => new Date(), []);
 	const currentMonthStart = useMemo(
 		() => new Date(now.getFullYear(), now.getMonth(), 1).toISOString(),
@@ -448,11 +455,7 @@ export function V2DashboardPage() {
 					</p>
 				</article>
 			) : slices.length === 0 ? (
-				<article className="v2-card p-4">
-					<p className="text-sm text-(--v2-ink-soft)">
-						No hay unidades de produccion reales para mostrar.
-					</p>
-				</article>
+				<DashboardEmptyState sourcePath={sourcePath} />
 			) : (
 				<UnitKpiSlider slices={slices} />
 			)}
