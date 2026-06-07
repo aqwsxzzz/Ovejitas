@@ -485,7 +485,7 @@ export const EditAnimalForm = ({
 					</Button>
 					<Button
 						type="button"
-						variant="neutral"
+						variant="outline"
 						onClick={closeDialog}
 					>
 						{t("cancelButton")}

@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { IndividualForm } from "@/features/livestock/components/individual-form";
 import type { IndividualFormData } from "@/features/livestock/components/individual-form";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 const STATUS_COLORS = {
-	active: "text-green-700 bg-green-50",
-	sold: "text-amber-700 bg-amber-50",
-	deceased: "text-red-700 bg-red-50",
+	active: "text-success bg-success/10",
+	sold: "text-warning bg-warning/10",
+	deceased: "text-destructive bg-destructive/10",
 };
 
 const SEX_SYMBOL = {
@@ -102,7 +103,7 @@ export function IndividualList({
 				<h2 className="text-lg font-bold">Individuos ({headerTotal})</h2>
 				{onCreateIndividual && (
 					<Button
-						variant="create"
+						variant="default"
 						size="sm"
 						onClick={onCreateIndividual}
 					>
@@ -112,28 +113,28 @@ export function IndividualList({
 			</div>
 
 			{/* Search */}
-			<div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2">
-				<span className="text-gray-400">🔍</span>
-				<input
+			<div className="flex items-center gap-2 rounded-lg border border-input bg-white px-3 py-2">
+				<span className="text-muted-foreground">🔍</span>
+				<Input
 					type="search"
 					placeholder="Buscar por nombre o identificador..."
 					value={searchQuery}
 					onChange={(event) => onSearchQueryChange(event.target.value)}
-					className="flex-1 bg-transparent outline-none"
+					className="h-auto flex-1 border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
 				/>
 			</div>
 
 			{/* List */}
 			{isLoading ? (
-				<div className="py-8 text-center text-gray-500">Cargando...</div>
+				<div className="py-8 text-center text-muted-foreground">Cargando...</div>
 			) : individuals.length === 0 ? (
-				<div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 py-8 text-center text-gray-500">
+				<div className="rounded-lg border border-dashed border-input bg-muted py-8 text-center text-muted-foreground">
 					{searchQuery.trim()
 						? "No hay individuos que coincidan con tu busqueda"
 						: "Aun no hay individuos"}
 				</div>
 			) : (
-				<div className="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white">
+				<div className="divide-y divide-border rounded-lg border border-border bg-white">
 					{individuals.map((individual) => {
 						const isEditing = editingIndividualId === individual.id;
 						const isConfirmingDelete =
@@ -149,12 +150,12 @@ export function IndividualList({
 							return (
 								<div
 									key={individual.id}
-									className="space-y-4 bg-blue-50/50 p-4"
+									className="space-y-4 bg-info/10 p-4"
 								>
 									<div className="flex items-center justify-between gap-3">
 										<div>
 											<p className="font-semibold">Editar individuo</p>
-											<p className="text-sm text-gray-600">
+											<p className="text-sm text-muted-foreground">
 												{formatIndividualLabel(individual)}
 											</p>
 										</div>
@@ -186,23 +187,24 @@ export function IndividualList({
 								key={individual.id}
 								className="p-4"
 							>
-								<div className="flex items-center justify-between gap-4 hover:bg-gray-50">
-									<button
+								<div className="flex items-center justify-between gap-4 hover:bg-muted">
+									<Button
 										type="button"
+										variant="ghost"
 										onClick={() => onSelectIndividual?.(individual)}
-										className="flex-1 text-left"
+										className="h-auto flex-1 justify-start p-0 text-left hover:bg-transparent"
 									>
 										<div className="flex items-center gap-3">
 											<div>
 												<p className="font-semibold">{tag}</p>
-												<p className="text-sm text-gray-600">
+												<p className="text-sm text-muted-foreground">
 													{name
 														? `${name} · ${SEX_SYMBOL[sex]}`
 														: SEX_SYMBOL[sex]}
 												</p>
 											</div>
 										</div>
-									</button>
+									</Button>
 
 									<div
 										className={`rounded-full px-2 py-1 text-xs font-semibold ${
@@ -218,42 +220,45 @@ export function IndividualList({
 
 									<div className="flex gap-1">
 										{onUpdateIndividual && (
-											<button
+											<Button
 												type="button"
+												variant="ghost"
+												size="sm"
 												onClick={() => {
 													setPendingDeleteIndividual(null);
 													setEditingIndividualId(individual.id);
 												}}
-												className="rounded px-2 py-1 text-xs hover:bg-gray-200"
 											>
 												Editar
-											</button>
+											</Button>
 										)}
 										{onDeleteIndividual && (
-											<button
+											<Button
 												type="button"
+												variant="ghost"
+												size="sm"
 												onClick={() => {
 													setEditingIndividualId(null);
 													setPendingDeleteIndividual(individual);
 												}}
 												disabled={isDeleting}
-												className="rounded px-2 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50"
+												className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 											>
 												{isDeleting ? "..." : "Eliminar"}
-											</button>
+											</Button>
 										)}
 									</div>
 								</div>
 
 								{isConfirmingDelete ? (
-									<div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50/70 px-3 py-2">
-										<p className="text-sm font-medium text-red-700">
+									<div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2">
+										<p className="text-sm font-medium text-destructive">
 											Eliminar {formatIndividualLabel(individual)}?
 										</p>
 										<div className="flex items-center gap-2">
 											<Button
 												type="button"
-												variant="neutral"
+												variant="outline"
 												size="sm"
 												onClick={() => setPendingDeleteIndividual(null)}
 												disabled={isDeleting}
@@ -262,7 +267,7 @@ export function IndividualList({
 											</Button>
 											<Button
 												type="button"
-												variant="destroy"
+												variant="destructive"
 												size="sm"
 												onClick={() => void handleDelete(individual)}
 												disabled={isDeleting}

@@ -76,7 +76,7 @@ export const AnimalProfileCard = () => {
 
 	if (!animalData) {
 		return (
-			<div className="text-center text-gray-500">{t("missingAnimal")}</div>
+			<div className="text-center text-muted-foreground">{t("missingAnimal")}</div>
 		);
 	}
 

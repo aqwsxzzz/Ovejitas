@@ -473,14 +473,14 @@ export const NewAnimalForm = ({
 				<div className="flex justify-around">
 					<Button
 						disabled={isPending}
-						variant="create"
+						variant="default"
 						type="submit"
 					>
 						{t("createButton")}
 					</Button>
 					<Button
 						onClick={closeDialog}
-						variant="neutral"
+						variant="outline"
 					>
 						{t("cancelButton")}
 					</Button>

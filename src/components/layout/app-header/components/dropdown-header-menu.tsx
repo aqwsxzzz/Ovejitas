@@ -33,7 +33,7 @@ export const DropdownHeaderMenu = () => {
 						{t("menuTitle")}
 					</DropdownMenuLabel>
 					<Button
-						variant="destroy"
+						variant="destructive"
 						size="sm"
 						onClick={() => logout()}
 						className="h-8 px-3 text-xs"

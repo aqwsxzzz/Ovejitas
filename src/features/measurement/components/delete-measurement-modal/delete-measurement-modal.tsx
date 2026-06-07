@@ -38,7 +38,7 @@ export const DeleteMeasurementModal = ({
 			onOpenChange={setOpen}
 		>
 			<DialogTrigger asChild>
-				<Button variant="destroy">
+				<Button variant="destructive">
 					<Trash2 />
 				</Button>
 			</DialogTrigger>
@@ -48,12 +48,12 @@ export const DeleteMeasurementModal = ({
 				<div>
 					<Button
 						onClick={onSubmit}
-						variant="destroy"
+						variant="destructive"
 					>
 						{t("deleteButton")}
 					</Button>
 					<Button
-						variant="neutral"
+						variant="outline"
 						onClick={() => setOpen(false)}
 					>
 						{t("cancelButton")}

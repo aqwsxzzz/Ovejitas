@@ -197,7 +197,7 @@ export function MaterialPurchasesPanel({
 					<p className="text-sm text-(--v2-ink-soft)">Loading purchases...</p>
 				) : null}
 				{purchasesQuery.error ? (
-					<p className="text-sm text-red-700">Failed to load purchases.</p>
+					<p className="text-sm text-destructive">Failed to load purchases.</p>
 				) : null}
 				{!purchasesQuery.isLoading &&
 				!purchasesQuery.error &&
@@ -205,7 +205,7 @@ export function MaterialPurchasesPanel({
 					<p className="text-sm text-(--v2-ink-soft)">No purchases yet.</p>
 				) : null}
 				{purchaseError ? (
-					<p className="text-sm text-red-700">{purchaseError}</p>
+					<p className="text-sm text-destructive">{purchaseError}</p>
 				) : null}
 				{(purchasesQuery.data?.data ?? []).map((purchase) => (
 					<div
@@ -232,7 +232,7 @@ export function MaterialPurchasesPanel({
 								</Button>
 								<Button
 									type="button"
-									variant="destroy"
+									variant="destructive"
 									size="sm"
 									onClick={() => void handleDeletePurchase(purchase.id)}
 									disabled={deletingPurchaseId === purchase.id}

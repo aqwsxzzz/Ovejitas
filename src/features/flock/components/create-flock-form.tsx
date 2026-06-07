@@ -12,6 +12,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 import { SpecieSelect } from "@/features/specie/components/species-select";
@@ -172,22 +179,26 @@ export const CreateFlockForm = ({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>{t("fields.flockType")}</FormLabel>
-								<FormControl>
-									<select
-										className="h-9 rounded-md border border-input bg-background px-2 text-sm w-full"
-										value={field.value}
-										onChange={field.onChange}
-									>
+								<Select
+									value={field.value}
+									onValueChange={field.onChange}
+								>
+									<FormControl>
+										<SelectTrigger className="w-full">
+											<SelectValue />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
 										{flockTypeOptions.map((option) => (
-											<option
+											<SelectItem
 												key={option}
 												value={option}
 											>
 												{t(`flockType.${option}`)}
-											</option>
+											</SelectItem>
 										))}
-									</select>
-								</FormControl>
+									</SelectContent>
+								</Select>
 							</FormItem>
 						)}
 					/>
@@ -232,22 +243,26 @@ export const CreateFlockForm = ({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>{t("fields.acquisitionType")}</FormLabel>
-								<FormControl>
-									<select
-										className="h-9 rounded-md border border-input bg-background px-2 text-sm w-full"
-										value={field.value}
-										onChange={field.onChange}
-									>
+								<Select
+									value={field.value}
+									onValueChange={field.onChange}
+								>
+									<FormControl>
+										<SelectTrigger className="w-full">
+											<SelectValue />
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
 										{acquisitionTypeOptions.map((option) => (
-											<option
+											<SelectItem
 												key={option}
 												value={option}
 											>
 												{t(`acquisitionType.${option}`)}
-											</option>
+											</SelectItem>
 										))}
-									</select>
-								</FormControl>
+									</SelectContent>
+								</Select>
 							</FormItem>
 						)}
 					/>

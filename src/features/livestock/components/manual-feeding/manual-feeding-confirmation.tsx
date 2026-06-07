@@ -18,7 +18,7 @@ export function ManualFeedingConfirmation({
 	if (!isVisible) return null;
 
 	return (
-		<div className="mt-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+		<div className="mt-3 rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
 			<p className="font-semibold">Confirmacion requerida</p>
 			<p className="mt-1">
 				{message ??
@@ -27,7 +27,7 @@ export function ManualFeedingConfirmation({
 			<div className="mt-2 flex items-center gap-2">
 				<Button
 					type="button"
-					variant="create"
+					variant="default"
 					onClick={onConfirm}
 					size="sm"
 					disabled={isSubmittingFeed}

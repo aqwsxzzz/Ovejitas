@@ -55,14 +55,14 @@ export const DeleteEggCollectionDialog = ({
 				</DialogDescription>
 				<div className="flex justify-end gap-2">
 					<Button
-						variant="neutral"
+						variant="outline"
 						onClick={() => setOpen(false)}
 						disabled={isPending}
 					>
 						{t("detail.eggCollections.deleteDialog.cancel")}
 					</Button>
 					<Button
-						variant="destroy"
+						variant="destructive"
 						onClick={() => void handleConfirm()}
 						disabled={isPending}
 					>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Input } from "@/components/ui/input";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -28,12 +29,12 @@ function SpeciesSearchBar({ value, onChange }: SpeciesSearchBarProps) {
 			>
 				🔍
 			</span>
-			<input
+			<Input
 				type="search"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
 				placeholder="Buscar por nombre o tag..."
-				className="flex-1 bg-transparent text-sm outline-none placeholder:text-[color:var(--v2-ink-soft)]"
+				className="h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
 				aria-label="Buscar individuos por nombre o tag"
 			/>
 		</div>
@@ -138,7 +139,7 @@ export function LivestockSpeciesPage({
 							<span
 								className={`rounded-full px-2 py-0.5 text-xs font-medium ${
 									asset.mode === "individual"
-										? "bg-blue-50 text-blue-700"
+										? "bg-info/10 text-info"
 										: "bg-(--v2-surface) text-(--v2-ink-soft)"
 								}`}
 							>

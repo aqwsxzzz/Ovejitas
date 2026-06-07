@@ -90,7 +90,7 @@ export function CreateMaterialAssetDialog({
 		>
 			<DialogTrigger asChild>
 				<Button
-					variant="create"
+					variant="default"
 					className={cn(
 						"rounded-full border-(--v2-border) px-3 py-1.5 text-xs font-semibold",
 						triggerClassName,
@@ -144,13 +144,13 @@ export function CreateMaterialAssetDialog({
 					</div>
 
 					{errorMessage ? (
-						<p className="text-sm text-red-700">{errorMessage}</p>
+						<p className="text-sm text-destructive">{errorMessage}</p>
 					) : null}
 
 					<DialogFooter>
 						<Button
 							type="button"
-							variant="neutral"
+							variant="outline"
 							onClick={() => handleOpenChange(false)}
 							disabled={createMaterialMutation.isPending}
 						>
@@ -158,7 +158,7 @@ export function CreateMaterialAssetDialog({
 						</Button>
 						<Button
 							type="submit"
-							variant="create"
+							variant="default"
 							disabled={createMaterialMutation.isPending}
 						>
 							{createMaterialMutation.isPending

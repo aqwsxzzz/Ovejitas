@@ -101,7 +101,7 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 					<p className="text-sm text-(--v2-ink-soft)">Cargando eventos...</p>
 				) : null}
 				{eventsQuery.error ? (
-					<p className="text-sm text-red-700">Error al cargar eventos.</p>
+					<p className="text-sm text-destructive">Error al cargar eventos.</p>
 				) : null}
 				{!eventsQuery.isLoading &&
 				!eventsQuery.error &&

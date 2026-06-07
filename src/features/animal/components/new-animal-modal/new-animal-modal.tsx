@@ -40,7 +40,7 @@ export const NewAnimalModal = ({
 			{!onOpenChange && (
 				<DialogTrigger asChild>
 					<Button
-						variant="create"
+						variant="default"
 						className="w-fit ml-auto"
 					>
 						{t("addAnimalButton")}

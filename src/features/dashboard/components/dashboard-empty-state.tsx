@@ -45,7 +45,7 @@ export function DashboardEmptyState({ sourcePath }: DashboardEmptyStateProps) {
 					title="Crear tu primer lote de animales"
 					description="Registra un lote con el conteo inicial de cabezas para empezar a hacer seguimiento."
 					cta={
-						<Button asChild variant="create" size="sm" className="shrink-0">
+						<Button asChild variant="default" size="sm" className="shrink-0">
 							<Link
 								to="/v2/log"
 								search={{
@@ -66,7 +66,7 @@ export function DashboardEmptyState({ sourcePath }: DashboardEmptyStateProps) {
 					title="Registrar un material o insumo"
 					description="Agrega alimento, medicamentos u otros materiales que usas en la granja."
 					cta={
-						<Button asChild variant="neutral" size="sm" className="shrink-0">
+						<Button asChild variant="outline" size="sm" className="shrink-0">
 							<Link to="/v2/production-units/$assetKind" params={{ assetKind: "material" }}>
 								Ver materiales
 							</Link>
@@ -79,7 +79,7 @@ export function DashboardEmptyState({ sourcePath }: DashboardEmptyStateProps) {
 					title="Agregar un equipo"
 					description="Registra maquinaria, herramientas o infraestructura que forma parte de tu operacion."
 					cta={
-						<Button asChild variant="neutral" size="sm" className="shrink-0">
+						<Button asChild variant="outline" size="sm" className="shrink-0">
 							<Link to="/v2/production-units/$assetKind" params={{ assetKind: "equipment" }}>
 								Ver equipos
 							</Link>

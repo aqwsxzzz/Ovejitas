@@ -112,7 +112,7 @@ export function EquipmentTimelinePanel({ farmId, equipmentId }: EquipmentTimelin
 
 				<Button
 					type="button"
-					variant={isCreating ? "neutral" : "create"}
+					variant={isCreating ? "outline" : "default"}
 					size="sm"
 					onClick={handleToggleCreate}
 					aria-label={isCreating ? "Cerrar" : "Nuevo evento"}
@@ -146,7 +146,7 @@ export function EquipmentTimelinePanel({ farmId, equipmentId }: EquipmentTimelin
 				<p className="text-sm text-(--v2-ink-soft)">Cargando eventos...</p>
 			) : null}
 			{timelineQuery.error ? (
-				<p className="text-sm text-red-700">No se pudieron cargar los eventos.</p>
+				<p className="text-sm text-destructive">No se pudieron cargar los eventos.</p>
 			) : null}
 			{!timelineQuery.isLoading && !timelineQuery.error && events.length === 0 ? (
 				<p className="text-sm text-(--v2-ink-soft)">Sin eventos registrados.</p>

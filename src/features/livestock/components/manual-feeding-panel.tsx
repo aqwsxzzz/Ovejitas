@@ -114,10 +114,10 @@ export function ManualFeedingPanel({
 			/>
 
 			{saveError ? (
-				<p className="mt-2 text-sm text-red-700">{saveError}</p>
+				<p className="mt-2 text-sm text-destructive">{saveError}</p>
 			) : null}
 			{feedError ? (
-				<p className="mt-2 text-sm text-red-700">{feedError}</p>
+				<p className="mt-2 text-sm text-destructive">{feedError}</p>
 			) : null}
 		</div>
 	);

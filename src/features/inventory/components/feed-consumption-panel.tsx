@@ -301,7 +301,7 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 								>
 									<DialogTrigger asChild>
 										<Button
-											variant="destroy"
+											variant="destructive"
 											size="sm"
 											disabled={isDeleting}
 										>
@@ -315,14 +315,14 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 										</DialogDescription>
 										<div className="flex justify-end gap-2">
 											<Button
-												variant="neutral"
+												variant="outline"
 												onClick={() => setDeleteConsumptionId(null)}
 												disabled={isDeleting}
 											>
 												{t("feedLog.deleteDialog.cancel")}
 											</Button>
 											<Button
-												variant="destroy"
+												variant="destructive"
 												disabled={isDeleting}
 												onClick={() =>
 													void deleteConsumption({

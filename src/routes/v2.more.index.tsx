@@ -83,10 +83,10 @@ function MorePage() {
 					<Link
 						key={view.to}
 						to={view.to}
-						className="group block rounded-3xl border border-black/5 bg-[#f8f8f7] px-4 py-4 shadow-xs transition hover:-translate-y-px hover:shadow-sm"
+						className="group block rounded-3xl border border-black/5 bg-(--v2-paper) px-4 py-4 shadow-xs transition hover:-translate-y-px hover:shadow-sm"
 					>
 						<div className="flex items-center gap-3">
-							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#dff1e8] text-[#2f6f5a]">
+							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-(--v2-mint-100) text-(--v2-emerald-600)">
 								<view.icon className="h-5 w-5" />
 							</div>
 							<div className="min-w-0 flex-1">
@@ -99,7 +99,7 @@ function MorePage() {
 							</div>
 							<div className="ml-1 flex items-center gap-2">
 								{view.badge ? (
-									<span className="rounded-full bg-[#b91c1c] px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white">
+									<span className="rounded-full bg-(--v2-danger) px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white">
 										{view.badge}
 									</span>
 								) : null}

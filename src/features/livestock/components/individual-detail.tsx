@@ -116,18 +116,18 @@ export function IndividualDetail({
 							Esta accion no se puede deshacer.
 						</DialogDescription>
 					</DialogHeader>
-					<p className="text-sm text-gray-600">{individualLabel}</p>
+					<p className="text-sm text-muted-foreground">{individualLabel}</p>
 					<DialogFooter>
 						<Button
 							type="button"
-							variant="neutral"
+							variant="outline"
 							onClick={() => setIsDeleteDialogOpen(false)}
 						>
 							Cancelar
 						</Button>
 						<Button
 							type="button"
-							variant="destroy"
+							variant="destructive"
 							onClick={() => void handleDelete()}
 							disabled={isLoading}
 						>
@@ -137,7 +137,7 @@ export function IndividualDetail({
 				</DialogContent>
 			</Dialog>
 			{/* Header */}
-			<div className="rounded-lg border border-gray-200 bg-white p-6">
+			<div className="rounded-lg border border-border bg-white p-6">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<h1 className="text-3xl font-bold">{individualLabel}</h1>
@@ -155,7 +155,7 @@ export function IndividualDetail({
 				{/* Quick Info Grid */}
 				<div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
 					<div>
-						<p className="text-xs uppercase text-gray-600">Sexo</p>
+						<p className="text-xs uppercase text-muted-foreground">Sexo</p>
 						<p className="mt-1 text-lg font-semibold">
 							{sex === "male"
 								? `Macho ${sexSymbol}`
@@ -166,7 +166,7 @@ export function IndividualDetail({
 					</div>
 
 					<div>
-						<p className="text-xs uppercase text-gray-600">Nacimiento</p>
+						<p className="text-xs uppercase text-muted-foreground">Nacimiento</p>
 						<p className="mt-1 text-lg font-semibold">
 							{individual.birth_date
 								? new Date(individual.birth_date).toLocaleDateString()
@@ -175,14 +175,14 @@ export function IndividualDetail({
 					</div>
 
 					<div>
-						<p className="text-xs uppercase text-gray-600">Creado</p>
+						<p className="text-xs uppercase text-muted-foreground">Creado</p>
 						<p className="mt-1 text-lg font-semibold">
 							{new Date(individual.created_at).toLocaleDateString()}
 						</p>
 					</div>
 
 					<div>
-						<p className="text-xs uppercase text-gray-600">Actualizado</p>
+						<p className="text-xs uppercase text-muted-foreground">Actualizado</p>
 						<p className="mt-1 text-lg font-semibold">
 							{new Date(individual.updated_at).toLocaleDateString()}
 						</p>
@@ -193,14 +193,14 @@ export function IndividualDetail({
 				<div className="mt-6 flex gap-2">
 					<Button
 						type="button"
-						variant={isEditingGenealogy ? "neutral" : "outline"}
+						variant="outline"
 						onClick={() => setIsEditingGenealogy(!isEditingGenealogy)}
 					>
 						{isEditingGenealogy ? "Cancelar edicion" : "Editar genealogia"}
 					</Button>
 					<Button
 						type="button"
-						variant="destroy"
+						variant="destructive"
 						onClick={() => setIsDeleteDialogOpen(true)}
 						disabled={isLoading}
 					>
@@ -210,12 +210,12 @@ export function IndividualDetail({
 			</div>
 
 			{/* Genealogy Section */}
-			<div className="rounded-lg border border-gray-200 bg-white p-6">
+			<div className="rounded-lg border border-border bg-white p-6">
 				<h2 className="mb-4 text-xl font-bold">Genealogia</h2>
 
 				{isEditingGenealogy ? (
-					<div className="rounded-lg bg-blue-50 p-4">
-						<h3 className="mb-4 font-semibold text-blue-900">
+					<div className="rounded-lg bg-info/10 p-4">
+						<h3 className="mb-4 font-semibold text-info">
 							Editar genealogia
 						</h3>
 						<IndividualForm
@@ -240,7 +240,7 @@ export function IndividualDetail({
 
 			{/* Extra metadata (if any) */}
 			{Object.keys(individual.extra).length > 0 && (
-				<div className="rounded-lg border border-gray-200 bg-white p-6">
+				<div className="rounded-lg border border-border bg-white p-6">
 					<h2 className="mb-4 text-xl font-bold">Metadatos</h2>
 					<div className="space-y-2">
 						{Object.entries(individual.extra).map(([key, value]) => (
@@ -248,7 +248,7 @@ export function IndividualDetail({
 								key={key}
 								className="flex justify-between"
 							>
-								<span className="text-gray-600">{key}</span>
+								<span className="text-muted-foreground">{key}</span>
 								<span className="font-semibold">{String(value)}</span>
 							</div>
 						))}

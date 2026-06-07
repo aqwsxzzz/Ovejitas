@@ -25,7 +25,7 @@ export function CropFinancialSnapshot({
 					</p>
 				) : null}
 				{isError ? (
-					<p className="text-sm text-red-700">
+					<p className="text-sm text-destructive">
 						Error al cargar el resumen financiero.
 					</p>
 				) : null}
@@ -42,16 +42,16 @@ export function CropFinancialSnapshot({
 							<span className="font-semibold">{total.currency}</span>
 						</div>
 						<div className="mt-3 grid gap-2 md:grid-cols-3">
-							<div className="rounded-lg bg-red-50 px-3 py-2">
-								<p className="text-xs uppercase tracking-[0.08em] text-red-700">
+							<div className="rounded-lg bg-destructive/10 px-3 py-2">
+								<p className="text-xs uppercase tracking-[0.08em] text-destructive">
 									Gastos
 								</p>
 								<p className="text-base font-semibold">
 									{toNumber(total.expense_total).toFixed(2)}
 								</p>
 							</div>
-							<div className="rounded-lg bg-emerald-50 px-3 py-2">
-								<p className="text-xs uppercase tracking-[0.08em] text-emerald-700">
+							<div className="rounded-lg bg-success/10 px-3 py-2">
+								<p className="text-xs uppercase tracking-[0.08em] text-success">
 									Ingresos
 								</p>
 								<p className="text-base font-semibold">

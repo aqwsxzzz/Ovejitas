@@ -5,6 +5,8 @@ import { useNavigate } from "@tanstack/react-router";
 
 import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
 interface LivestockUnitRowProps {
@@ -37,32 +39,29 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 		return (
 			<div className="v2-card space-y-3 p-4">
 				<div className="grid gap-2 md:grid-cols-2">
-					<input
+					<Input
 						type="text"
 						value={props.editName}
 						onChange={(event) => props.onChangeName(event.target.value)}
 						placeholder="Nombre del lote"
-						className="rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
 					/>
-					<input
+					<Input
 						type="text"
 						value={props.editLocation}
 						onChange={(event) => props.onChangeLocation(event.target.value)}
 						placeholder="Ubicacion"
-						className="rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
 					/>
 				</div>
-				<textarea
+				<Textarea
 					value={props.editDescription}
 					onChange={(event) => props.onChangeDescription(event.target.value)}
 					placeholder="Descripcion"
 					rows={3}
-					className="w-full rounded-lg border border-[color:var(--v2-border)] px-3 py-2 text-sm"
 				/>
 				<div className="flex items-center gap-2">
 					<Button
 						type="button"
-						variant="create"
+						variant="default"
 						size="sm"
 						onClick={() => void props.onSaveEdit()}
 						disabled={props.isSaving}
@@ -71,7 +70,7 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 					</Button>
 					<Button
 						type="button"
-						variant="neutral"
+						variant="outline"
 						size="sm"
 						onClick={props.onCancelEdit}
 						disabled={props.isSaving}
@@ -129,7 +128,7 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 							<span
 								className={`rounded-full px-2 py-0.5 text-xs font-medium ${
 									props.mode === "individual"
-										? "bg-blue-50 text-blue-700"
+										? "bg-info/10 text-info"
 										: "bg-(--v2-surface) text-(--v2-ink-soft)"
 								}`}
 							>
@@ -146,8 +145,10 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 				</div>
 				{isConfirmingDelete ? null : (
 					<div className="flex items-center gap-2">
-						<button
+						<Button
 							type="button"
+							variant="outline"
+							size="icon"
 							onClick={(event) => {
 								event.stopPropagation();
 								setIsConfirmingDelete(false);
@@ -155,12 +156,14 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 							}}
 							aria-label="Editar"
 							title="Editar"
-							className="rounded-full border border-(--v2-border) px-2.5 py-1 text-sm font-semibold"
+							className="size-9 rounded-full"
 						>
 							<span aria-hidden="true">✎</span>
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
+							variant="outline"
+							size="icon"
 							onClick={(event) => {
 								event.stopPropagation();
 								setIsConfirmingDelete(true);
@@ -168,24 +171,24 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 							disabled={props.isDeleting}
 							aria-label="Eliminar"
 							title="Eliminar"
-							className="rounded-full border border-red-200 px-2.5 py-1 text-sm font-semibold text-red-700 disabled:opacity-60"
+							className="size-9 rounded-full text-destructive hover:text-destructive"
 						>
 							<span aria-hidden="true">{props.isDeleting ? "⏳" : "🗑"}</span>
-						</button>
+						</Button>
 					</div>
 				)}
 			</div>
 
 			{isConfirmingDelete ? (
 				<div
-					className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50/70 px-3 py-2"
+					className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2"
 					onClick={(event) => event.stopPropagation()}
 				>
-					<p className="text-sm font-medium text-red-700">Eliminar este lote?</p>
+					<p className="text-sm font-medium text-destructive">Eliminar este lote?</p>
 					<div className="flex items-center gap-2">
 						<Button
 							type="button"
-							variant="neutral"
+							variant="outline"
 							size="sm"
 							onClick={() => setIsConfirmingDelete(false)}
 							disabled={props.isDeleting}
@@ -194,7 +197,7 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 						</Button>
 						<Button
 							type="button"
-							variant="destroy"
+							variant="destructive"
 							size="sm"
 							onClick={() => void props.onDelete()}
 							disabled={props.isDeleting}

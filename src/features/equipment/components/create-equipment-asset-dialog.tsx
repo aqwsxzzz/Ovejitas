@@ -87,7 +87,7 @@ export function CreateEquipmentAssetDialog({
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				<Button
-					variant="create"
+					variant="default"
 					className={cn(
 						"rounded-full border-(--v2-border) px-3 py-1.5 text-xs font-semibold",
 						triggerClassName,
@@ -138,13 +138,13 @@ export function CreateEquipmentAssetDialog({
 					</div>
 
 					{errorMessage ? (
-						<p className="text-sm text-red-700">{errorMessage}</p>
+						<p className="text-sm text-destructive">{errorMessage}</p>
 					) : null}
 
 					<DialogFooter>
 						<Button
 							type="button"
-							variant="neutral"
+							variant="outline"
 							onClick={() => handleOpenChange(false)}
 							disabled={createEquipmentMutation.isPending}
 						>
@@ -152,7 +152,7 @@ export function CreateEquipmentAssetDialog({
 						</Button>
 						<Button
 							type="submit"
-							variant="create"
+							variant="default"
 							disabled={createEquipmentMutation.isPending}
 						>
 							{createEquipmentMutation.isPending ? "Creando..." : "Crear equipo"}

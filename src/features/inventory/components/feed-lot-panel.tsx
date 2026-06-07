@@ -319,14 +319,14 @@ export const FeedLotPanel = ({ farmId }: FeedLotPanelProps) => {
 											</DialogDescription>
 											<div className="flex justify-end gap-2">
 												<Button
-													variant="neutral"
+													variant="outline"
 													onClick={() => setDeleteLotId(null)}
 													disabled={isDeleting}
 												>
 													{t("feedLots.deleteDialog.cancel")}
 												</Button>
 												<Button
-													variant="destroy"
+													variant="destructive"
 													disabled={isDeleting}
 													onClick={() =>
 														void deleteFeedLot({

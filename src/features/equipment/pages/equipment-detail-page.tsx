@@ -30,7 +30,7 @@ export function EquipmentDetailPage({ equipmentId }: EquipmentDetailPageProps) {
 	}
 
 	if (!hasValidAssetId) {
-		return <p className="text-sm text-red-700">ID de equipo no válido.</p>;
+		return <p className="text-sm text-destructive">ID de equipo no válido.</p>;
 	}
 
 	if (isLoading) {
@@ -40,7 +40,7 @@ export function EquipmentDetailPage({ equipmentId }: EquipmentDetailPageProps) {
 	if (!asset || asset.kind !== "equipment") {
 		return (
 			<div className="space-y-2">
-				<p className="text-sm text-red-700">Equipo no encontrado.</p>
+				<p className="text-sm text-destructive">Equipo no encontrado.</p>
 				<Link
 					to="/v2/production-units/$assetKind"
 					params={{ assetKind: "equipment" }}

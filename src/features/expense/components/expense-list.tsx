@@ -81,7 +81,7 @@ export const ExpenseList = ({
 					? speciesNameById.get(expense.speciesId)
 					: undefined;
 				const amountClassName =
-					expense.type === "income" ? "text-emerald-600" : "text-rose-600";
+					expense.type === "income" ? "text-success" : "text-destructive";
 
 				return (
 					<Card

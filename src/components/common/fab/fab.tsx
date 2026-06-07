@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -24,26 +25,21 @@ export const FAB = ({
 		"bottom-center": "bottom-20 left-1/2 -translate-x-1/2",
 	};
 
-	const variantClasses = {
-		primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-		secondary:
-			"bg-background text-foreground border-2 border-primary hover:bg-muted",
-	};
-
 	return (
-		<button
+		<Button
+			variant={variant === "primary" ? "default" : "outline"}
+			size="icon"
 			onClick={onClick}
 			className={cn(
-				"fixed z-50 w-14 h-14 rounded-full shadow-lg transition-all",
-				"flex items-center justify-center",
+				"fixed z-50 h-14 w-14 rounded-full shadow-lg",
 				"hover:scale-110 active:scale-95",
+				variant === "secondary" && "border-2 border-primary",
 				positionClasses[position],
-				variantClasses[variant],
 				className,
 			)}
 			aria-label={ariaLabel}
 		>
 			<Icon className="h-6 w-6" />
-		</button>
+		</Button>
 	);
 };

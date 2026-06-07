@@ -3,6 +3,13 @@ import type { LivestockEventType } from "@/features/livestock/types/livestock-ty
 
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 import { UnitEventForm } from "../unit-event-form";
 import { UnitEventTimeline } from "../unit-event-timeline";
@@ -40,10 +47,9 @@ export function FlockEventsSection({
 				<div className="flex items-center gap-2">
 					<p className="v2-kicker">Eventos del activo</p>
 					{data.hasAssetEvents ? (
-						<select
+						<Select
 							value={data.effectiveSelectedEventType ?? "all"}
-							onChange={(event) => {
-								const nextValue = event.target.value;
+							onValueChange={(nextValue) => {
 								if (nextValue === "all") {
 									onEventTypeFilterChange?.("all");
 									return;
@@ -52,24 +58,31 @@ export function FlockEventsSection({
 								if (!nextType) return;
 								onEventTypeFilterChange?.(nextType);
 							}}
-							className="rounded-full border border-(--v2-border) bg-white px-3 py-1 text-xs font-medium text-(--v2-ink)"
-							aria-label="Filtrar eventos por tipo"
 						>
-							{data.eventTypeFilterOptions.map((option) => (
-								<option
-									key={option.value}
-									value={option.value}
-								>
-									{option.label}
-								</option>
-							))}
-						</select>
+							<SelectTrigger
+								size="sm"
+								className="w-auto rounded-full text-xs"
+								aria-label="Filtrar eventos por tipo"
+							>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								{data.eventTypeFilterOptions.map((option) => (
+									<SelectItem
+										key={option.value}
+										value={option.value}
+									>
+										{option.label}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					) : null}
 				</div>
 				{!isMaterialAsset ? (
 					<Button
 						type="button"
-						variant={actions.isCreatingEvent ? "neutral" : "create"}
+						variant={actions.isCreatingEvent ? "outline" : "default"}
 						size="sm"
 						onClick={() => {
 							actions.setIsCreatingEvent((previous) => {

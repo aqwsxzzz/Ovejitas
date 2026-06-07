@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { FinanceDashboardShell } from "@/features/finance/components/finance-dashboard-shell";
+import { LogActionMenu } from "@/features/quick-actions/components/log-action-menu";
 import {
 	getChartBucket,
 	getPreviousRange,
@@ -244,6 +245,15 @@ export function V2FinancePage() {
 			isCustomRange={rangePreset === "custom"}
 			periodWheel={periodWheel}
 			onInsightAssetClick={handleInsightAssetClick}
+			headerActions={
+				<LogActionMenu
+					sourcePath="/v2/finance"
+					actions={[
+						{ actionId: "nuevo-gasto", label: "Gasto" },
+						{ actionId: "nuevo-ingreso", label: "Ingreso" },
+					]}
+				/>
+			}
 		/>
 	);
 }

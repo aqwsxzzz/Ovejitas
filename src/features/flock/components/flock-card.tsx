@@ -89,14 +89,14 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 					<p>{t("deleteDialog.confirm", { name: flock.name })}</p>
 					<DialogFooter>
 						<Button
-							variant="neutral"
+							variant="outline"
 							onClick={() => setDeleteDialogOpen(false)}
 							disabled={isDeleting}
 						>
 							{t("common.cancel")}
 						</Button>
 						<Button
-							variant="destroy"
+							variant="destructive"
 							onClick={handleDelete}
 							disabled={isDeleting}
 						>
@@ -124,7 +124,7 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 								{flock.name}
 							</CardTitle>
 							<Button
-								variant="destroy"
+								variant="destructive"
 								size="icon"
 								className="ml-2"
 								onClick={(event) => {
@@ -215,7 +215,7 @@ export const FlockCard = ({ flock }: FlockCardProps) => {
 									{flock.name}
 								</CardTitle>
 								<Button
-									variant="destroy"
+									variant="destructive"
 									size="icon"
 									className="ml-2"
 									onClick={(event) => {

@@ -1,5 +1,18 @@
 import { useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type {
 	ILivestockIndividual,
 	ILivestockEventCategory,
@@ -31,6 +44,8 @@ interface CreateEventCategoryInput {
 }
 
 const NEW_CATEGORY_OPTION_VALUE = "__new__";
+/** Radix Select forbids empty-string item values; use a sentinel for "none". */
+const NONE = "__none__";
 
 interface UnitEventFormProps {
 	categories: ILivestockEventCategory[];
@@ -248,283 +263,324 @@ export function UnitEventForm({
 		});
 	};
 
+	const showQuantity =
+		type === "production" || type === "observation" || type === "inventory";
+
 	return (
 		<form
 			onSubmit={handleSubmit}
 			className="space-y-3"
 		>
-			<div className="grid gap-3 md:grid-cols-2">
-				<label className="space-y-1 text-sm">
-					<span className="font-medium">Tipo</span>
-					<select
-						value={type}
-						onChange={(event) => {
-							const nextType = event.target.value as LivestockEventType;
-							setType(nextType);
-							setCategoryId("");
-							if (!supportsFinancialAmount(nextType)) {
-								setAmount("");
-							}
-						}}
-						disabled={isEditMode}
-						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-					>
-						<option value="production">Produccion</option>
-						<option value="income">Ingreso</option>
-						<option value="expense">Gasto</option>
-						<option value="observation">Observacion</option>
+			<div className="space-y-1">
+				<Label>Tipo</Label>
+				<Select
+					value={type}
+					onValueChange={(value) => {
+						const nextType = value as LivestockEventType;
+						setType(nextType);
+						setCategoryId("");
+						if (!supportsFinancialAmount(nextType)) {
+							setAmount("");
+						}
+					}}
+					disabled={isEditMode}
+				>
+					<SelectTrigger className="w-full">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="production">Produccion</SelectItem>
+						<SelectItem value="income">Ingreso</SelectItem>
+						<SelectItem value="expense">Gasto</SelectItem>
+						<SelectItem value="observation">Observacion</SelectItem>
 						{canUseReproductive ? (
-							<option value="reproductive">Reproductivo</option>
+							<SelectItem value="reproductive">Reproductivo</SelectItem>
 						) : null}
 						{canUseInventory ? (
-							<option value="inventory">Inventario</option>
+							<SelectItem value="inventory">Inventario</SelectItem>
 						) : null}
-					</select>
-					<span className="font-medium">
-						Categoria {type === "production" ? "(requerida)" : "(opcional)"}
-					</span>
-					<select
-						value={currentCategoryId}
-						onChange={(event) => setCategoryId(event.target.value)}
-						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-					>
-						{type === "production" ? (
-							<option
-								value=""
-								disabled
-							>
-								Selecciona categoria
-							</option>
-						) : (
-							<option value="">Sin categoria</option>
-						)}
-						{availableCategories.map((category) => (
-							<option
-								key={category.id}
-								value={category.id}
-							>
-								{category.name}
-							</option>
-						))}
-						<option value={NEW_CATEGORY_OPTION_VALUE}>Nueva categoria</option>
-					</select>
-					{type === "production" ? (
-						<p className="text-xs text-(--v2-ink-soft)">
-							Usa la categoria como nombre del producto (ej: huevos, leche,
-							lana).
-						</p>
-					) : null}
-					{isCreatingNewCategory ? (
-						<div className="mt-2 grid gap-2 rounded-lg border border-(--v2-border) bg-white/60 p-2">
-							<label className="space-y-1 text-xs">
-								<span className="font-medium">Nombre de categoria</span>
-								<input
-									type="text"
-									value={newCategoryName}
-									onChange={(event) => setNewCategoryName(event.target.value)}
-									placeholder="Ej: Huevos"
-									className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
-								/>
-							</label>
-							<label className="space-y-1 text-xs">
-								<span className="font-medium">Color</span>
-								<input
-									type="color"
-									value={newCategoryColor}
-									onChange={(event) => setNewCategoryColor(event.target.value)}
-									className="h-10 w-full rounded-lg border border-(--v2-border) px-1 py-1"
-								/>
-							</label>
-							<div className="flex justify-end">
-								<button
-									type="button"
-									onClick={() => void handleCreateCategory()}
-									disabled={isCreatingCategory || isSubmitting}
-									className="rounded-full border border-(--v2-ink) px-3 py-1 text-xs font-semibold disabled:opacity-60"
-								>
-									{isCreatingCategory ? "Creando..." : "Crear categoria"}
-								</button>
-							</div>
-						</div>
-					) : null}
-				</label>
+					</SelectContent>
+				</Select>
 			</div>
 
+			<div className="space-y-1">
+				<Label>
+					Categoria {type === "production" ? "(requerida)" : "(opcional)"}
+				</Label>
+				<Select
+					value={currentCategoryId || undefined}
+					onValueChange={(value) =>
+						setCategoryId(value === NONE ? "" : value)
+					}
+				>
+					<SelectTrigger className="w-full">
+						<SelectValue
+							placeholder={
+								type === "production"
+									? "Selecciona categoria"
+									: "Sin categoria"
+							}
+						/>
+					</SelectTrigger>
+					<SelectContent>
+						{type !== "production" ? (
+							<SelectItem value={NONE}>Sin categoria</SelectItem>
+						) : null}
+						{availableCategories.map((category) => (
+							<SelectItem
+								key={category.id}
+								value={String(category.id)}
+							>
+								{category.name}
+							</SelectItem>
+						))}
+						<SelectItem value={NEW_CATEGORY_OPTION_VALUE}>
+							Nueva categoria
+						</SelectItem>
+					</SelectContent>
+				</Select>
+				{type === "production" ? (
+					<p className="text-xs text-muted-foreground">
+						Usa la categoria como nombre del producto (ej: huevos, leche, lana).
+					</p>
+				) : null}
+			</div>
+
+			{isCreatingNewCategory ? (
+				<div className="grid gap-2 rounded-lg border bg-muted/40 p-2">
+					<div className="space-y-1">
+						<Label htmlFor="new-category-name">Nombre de categoria</Label>
+						<Input
+							id="new-category-name"
+							type="text"
+							value={newCategoryName}
+							onChange={(event) => setNewCategoryName(event.target.value)}
+							placeholder="Ej: Huevos"
+						/>
+					</div>
+					<div className="space-y-1">
+						<Label htmlFor="new-category-color">Color</Label>
+						<Input
+							id="new-category-color"
+							type="color"
+							value={newCategoryColor}
+							onChange={(event) => setNewCategoryColor(event.target.value)}
+							className="h-10 px-1 py-1"
+						/>
+					</div>
+					<div className="flex justify-end">
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={() => void handleCreateCategory()}
+							disabled={isCreatingCategory || isSubmitting}
+						>
+							{isCreatingCategory ? "Creando..." : "Crear categoria"}
+						</Button>
+					</div>
+				</div>
+			) : null}
+
 			{canSelectIndividual ? (
-				<label className="space-y-1 text-sm">
-					<span className="font-medium">
+				<div className="space-y-1">
+					<Label>
 						Individuo
 						{type === "reproductive" ? " (requerido)" : " (opcional)"}
-					</span>
-					<select
-						value={individualId}
-						onChange={(event) => setIndividualId(event.target.value)}
-						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
+					</Label>
+					<Select
+						value={individualId || undefined}
+						onValueChange={(value) =>
+							setIndividualId(value === NONE ? "" : value)
+						}
 					>
-						<option value="">Sin individuo</option>
-						{individuals.map((individual) => (
-							<option
-								key={individual.id}
-								value={individual.id}
-							>
-								{individual.tag || individual.name || `#${individual.id}`}
-							</option>
-						))}
-					</select>
-				</label>
+						<SelectTrigger className="w-full">
+							<SelectValue placeholder="Sin individuo" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value={NONE}>Sin individuo</SelectItem>
+							{individuals.map((individual) => (
+								<SelectItem
+									key={individual.id}
+									value={String(individual.id)}
+								>
+									{individual.tag || individual.name || `#${individual.id}`}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			) : null}
 
 			<div className="grid gap-3 md:grid-cols-2">
-				<label className="space-y-1 text-sm">
-					<span className="font-medium">Fecha</span>
-					<input
+				<div className="space-y-1">
+					<Label htmlFor="event-date">Fecha</Label>
+					<Input
+						id="event-date"
 						type="date"
 						value={occurredAt}
 						onChange={(event) => setOccurredAt(event.target.value)}
-						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 					/>
-				</label>
+				</div>
 
-				{(type === "production" ||
-					type === "observation" ||
-					type === "inventory") && (
-					<label className="space-y-1 text-sm">
-						<span className="font-medium">
+				{showQuantity && (
+					<div className="space-y-1">
+						<Label htmlFor="event-quantity">
 							Cantidad {type === "observation" ? "(opcional)" : "(requerida)"}
-						</span>
-						<input
+						</Label>
+						<Input
+							id="event-quantity"
 							type="number"
 							value={quantity}
 							onChange={(event) => setQuantity(event.target.value)}
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 						/>
-					</label>
+					</div>
 				)}
 			</div>
 
-			{(type === "production" ||
-				type === "observation" ||
-				type === "inventory") && (
-				<label className="space-y-1 text-sm">
-					<span className="font-medium">
+			{showQuantity && (
+				<div className="space-y-1">
+					<Label>
 						Unidad
 						{type === "production" ? " (requerida)" : " (opcional)"}
-					</span>
-					<select
+					</Label>
+					<Select
 						value={unit}
-						onChange={(event) =>
-							setUnit(event.target.value as LivestockEventUnit)
-						}
-						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
+						onValueChange={(value) => setUnit(value as LivestockEventUnit)}
 					>
-						{EVENT_UNITS_BY_DIMENSION.mass.map((unitValue) => (
-							<option
-								key={unitValue}
-								value={unitValue}
-							>
-								Masa: {unitValue}
-							</option>
-						))}
-						{EVENT_UNITS_BY_DIMENSION.volume.map((unitValue) => (
-							<option
-								key={unitValue}
-								value={unitValue}
-							>
-								Volumen: {unitValue}
-							</option>
-						))}
-						{EVENT_UNITS_BY_DIMENSION.count.map((unitValue) => (
-							<option
-								key={unitValue}
-								value={unitValue}
-							>
-								Conteo: {unitValue}
-							</option>
-						))}
-					</select>
-				</label>
+						<SelectTrigger className="w-full">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Masa</SelectLabel>
+								{EVENT_UNITS_BY_DIMENSION.mass.map((unitValue) => (
+									<SelectItem
+										key={unitValue}
+										value={unitValue}
+									>
+										{unitValue}
+									</SelectItem>
+								))}
+							</SelectGroup>
+							<SelectGroup>
+								<SelectLabel>Volumen</SelectLabel>
+								{EVENT_UNITS_BY_DIMENSION.volume.map((unitValue) => (
+									<SelectItem
+										key={unitValue}
+										value={unitValue}
+									>
+										{unitValue}
+									</SelectItem>
+								))}
+							</SelectGroup>
+							<SelectGroup>
+								<SelectLabel>Conteo</SelectLabel>
+								{EVENT_UNITS_BY_DIMENSION.count.map((unitValue) => (
+									<SelectItem
+										key={unitValue}
+										value={unitValue}
+									>
+										{unitValue}
+									</SelectItem>
+								))}
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</div>
 			)}
 
 			{type === "inventory" && (
-				<label className="space-y-1 text-sm">
-					<span className="font-medium">Tipo de ajuste (requerido)</span>
-					<select
-						value={adjustment}
-						onChange={(event) =>
-							setAdjustment(
-								event.target.value as "increment" | "decrement" | "reset" | "",
-							)
+				<div className="space-y-1">
+					<Label>Tipo de ajuste (requerido)</Label>
+					<Select
+						value={adjustment || undefined}
+						onValueChange={(value) =>
+							setAdjustment(value as "increment" | "decrement" | "reset")
 						}
-						className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 					>
-						<option value="">Selecciona tipo de ajuste</option>
-						<option value="increment">Incremento (agregar stock)</option>
-						<option value="decrement">Decremento (restar stock)</option>
-						<option value="reset">Resetear (establecer cantidad total)</option>
-					</select>
-				</label>
+						<SelectTrigger className="w-full">
+							<SelectValue placeholder="Selecciona tipo de ajuste" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="increment">
+								Incremento (agregar stock)
+							</SelectItem>
+							<SelectItem value="decrement">
+								Decremento (restar stock)
+							</SelectItem>
+							<SelectItem value="reset">
+								Resetear (establecer cantidad total)
+							</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 			)}
 
 			{allowsFinancialAmount ? (
 				<div className="grid gap-3 md:grid-cols-2">
-					<label className="space-y-1 text-sm">
-						<span className="font-medium">Monto (requerido)</span>
-						<input
+					<div className="space-y-1">
+						<Label htmlFor="event-amount">Monto (requerido)</Label>
+						<Input
+							id="event-amount"
 							type="number"
 							step="0.01"
 							value={amount}
 							onChange={(event) => setAmount(event.target.value)}
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 						/>
-					</label>
+					</div>
 				</div>
 			) : null}
 
-			<label className="space-y-1 text-sm">
-				<span className="font-medium">Notas</span>
-				<textarea
+			<div className="space-y-1">
+				<Label htmlFor="event-notes">Notas</Label>
+				<Textarea
+					id="event-notes"
 					value={notes}
 					onChange={(event) => setNotes(event.target.value)}
 					rows={3}
-					className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 					placeholder="Opcional"
 				/>
-			</label>
+			</div>
 
-			<label className="space-y-1 text-sm">
-				<span className="font-medium">Estado</span>
-				<select
+			<div className="space-y-1">
+				<Label>Estado</Label>
+				<Select
 					value={status}
-					onChange={(event) =>
-						setStatus(event.target.value as LivestockEventStatus)
+					onValueChange={(value) =>
+						setStatus(value as LivestockEventStatus)
 					}
-					className="w-full rounded-lg border border-(--v2-border) px-3 py-2"
 				>
-					<option value="logged">Registrado</option>
-					<option value="planned">Planificado</option>
-				</select>
-			</label>
+					<SelectTrigger className="w-full">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="logged">Registrado</SelectItem>
+						<SelectItem value="planned">Planificado</SelectItem>
+					</SelectContent>
+				</Select>
+			</div>
 
-			{error ? <p className="text-sm text-red-600">{error}</p> : null}
+			{error ? <p className="text-sm text-destructive">{error}</p> : null}
 
 			<div className="flex items-center gap-2">
-				<button
+				<Button
 					type="submit"
+					variant="default"
 					disabled={isSubmitting}
-					className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
 				>
 					{isSubmitting
 						? "Guardando..."
 						: (submitLabel ??
 							(isEditMode ? "Actualizar evento" : "Guardar evento"))}
-				</button>
-				<button
+				</Button>
+				<Button
 					type="button"
+					variant="outline"
 					onClick={onCancel}
-					className="rounded-full border border-(--v2-border) px-4 py-2 text-sm font-semibold"
 				>
 					Cancelar
-				</button>
+				</Button>
 			</div>
 		</form>
 	);

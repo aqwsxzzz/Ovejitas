@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	deleteEventCategoryById,
@@ -178,39 +180,40 @@ export function V2EventCategoriesPage() {
 										>
 											{isEditing ? (
 												<div className="space-y-2">
-													<input
+													<Input
 														value={nameDraft}
 														onChange={(event) =>
 															setNameDraft(event.target.value)
 														}
-														className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
 														placeholder="Nombre"
 													/>
 													<div className="flex items-center gap-2">
-														<input
+														<Input
 															type="color"
 															value={colorDraft}
 															onChange={(event) =>
 																setColorDraft(event.target.value)
 															}
-															className="h-9 w-20 rounded-lg border border-(--v2-border)"
+															className="w-20 px-1 py-1"
 														/>
 														<div className="ml-auto flex gap-2">
-															<button
+															<Button
 																type="button"
+																variant="outline"
+																size="sm"
 																onClick={cancelEdit}
-																className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 															>
 																Cancelar
-															</button>
-															<button
+															</Button>
+															<Button
 																type="button"
+																variant="default"
+																size="sm"
 																onClick={() => void saveEdit(category)}
 																disabled={isSaving || !nameDraft.trim()}
-																className="rounded-full bg-(--v2-ink) px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
 															>
 																{isSaving ? "Guardando..." : "Guardar"}
-															</button>
+															</Button>
 														</div>
 													</div>
 												</div>
@@ -224,21 +227,24 @@ export function V2EventCategoriesPage() {
 													/>
 													<p className="text-sm font-medium">{category.name}</p>
 													<div className="ml-auto flex gap-2">
-														<button
+														<Button
 															type="button"
+															variant="outline"
+															size="sm"
 															onClick={() => startEdit(category)}
-															className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 														>
 															Editar
-														</button>
-														<button
+														</Button>
+														<Button
 															type="button"
+															variant="ghost"
+															size="sm"
 															onClick={() => void deleteCategory(category)}
 															disabled={isDeleting}
-															className="rounded-full border border-rose-300 px-3 py-1 text-xs font-semibold text-rose-700 disabled:opacity-60"
+															className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 														>
 															{isDeleting ? "Eliminando..." : "Eliminar"}
-														</button>
+														</Button>
 													</div>
 												</div>
 											)}
@@ -251,7 +257,7 @@ export function V2EventCategoriesPage() {
 				</div>
 			)}
 
-			{message ? <p className="text-sm text-emerald-700">{message}</p> : null}
+			{message ? <p className="text-sm text-success">{message}</p> : null}
 		</section>
 	);
 }

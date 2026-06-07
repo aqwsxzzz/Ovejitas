@@ -33,7 +33,7 @@ export function ManualFeedingActionRow({
 			</div>
 			<Button
 				type="button"
-				variant="create"
+				variant="default"
 				onClick={onLogFeeding}
 				disabled={isSubmittingFeed}
 			>

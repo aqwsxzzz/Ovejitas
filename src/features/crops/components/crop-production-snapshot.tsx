@@ -23,7 +23,7 @@ export function CropProductionSnapshot({
 					<p className="text-sm text-(--v2-ink-soft)">Cargando produccion...</p>
 				) : null}
 				{isError ? (
-					<p className="text-sm text-red-700">
+					<p className="text-sm text-destructive">
 						Error al cargar el reporte de produccion.
 					</p>
 				) : null}

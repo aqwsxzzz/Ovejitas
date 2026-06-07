@@ -6,15 +6,15 @@ interface LivestockAttentionSectionProps {
 
 const ATTENTION_STYLES = {
 	overdue: {
-		border: "border-red-200",
-		bg: "bg-red-50",
-		pill: "bg-red-100 text-red-700",
+		border: "border-destructive/30",
+		bg: "bg-destructive/10",
+		pill: "bg-destructive/15 text-destructive",
 		label: "VENCIDO",
 	},
 	watch: {
-		border: "border-amber-200",
-		bg: "bg-amber-50",
-		pill: "bg-amber-100 text-amber-700",
+		border: "border-warning/30",
+		bg: "bg-warning/10",
+		pill: "bg-warning/15 text-warning",
 		label: "VIGILAR",
 	},
 } as const;

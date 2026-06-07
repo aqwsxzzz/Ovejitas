@@ -27,7 +27,7 @@ export function CropDetailPage({ cropId }: CropDetailPageProps) {
 		);
 	}
 	if (!data.hasValidAssetId) {
-		return <p className="text-sm text-red-700">ID de cultivo no válido.</p>;
+		return <p className="text-sm text-destructive">ID de cultivo no válido.</p>;
 	}
 	if (data.isLoadingAsset) {
 		return <p className="text-sm text-(--v2-ink-soft)">Cargando cultivo...</p>;
@@ -35,7 +35,7 @@ export function CropDetailPage({ cropId }: CropDetailPageProps) {
 	if (!data.asset || data.asset.kind !== "crop") {
 		return (
 			<div className="space-y-2">
-				<p className="text-sm text-red-700">Cultivo no encontrado.</p>
+				<p className="text-sm text-destructive">Cultivo no encontrado.</p>
 				<Link
 					to="/v2/production-units/$assetKind"
 					params={{ assetKind: "crop" }}

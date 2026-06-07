@@ -161,8 +161,8 @@ export function EquipmentEventForm({
 				/>
 			</div>
 
-			{localError ? <p className="text-sm text-red-700">{localError}</p> : null}
-			{errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+			{localError ? <p className="text-sm text-destructive">{localError}</p> : null}
+			{errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
 
 			<div className="flex justify-end">
 				<Button type="submit" disabled={isSubmitting}>

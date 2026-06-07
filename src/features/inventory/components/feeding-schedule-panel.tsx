@@ -338,7 +338,7 @@ export const FeedingSchedulePanel = ({ farmId }: FeedingSchedulePanelProps) => {
 											</Button>
 										)}
 										<Button
-											variant="destroy"
+											variant="destructive"
 											size="sm"
 											disabled={isDeleting}
 											onClick={() =>

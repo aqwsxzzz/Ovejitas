@@ -1,3 +1,5 @@
+import { Input } from "@/components/ui/input";
+
 interface LivestockAssetSearchBarProps {
 	value: string;
 	onChange: (value: string) => void;
@@ -19,12 +21,12 @@ export function LivestockAssetSearchBar({
 			>
 				🔍
 			</span>
-			<input
+			<Input
 				type="search"
 				value={value}
 				onChange={(event) => onChange(event.target.value)}
 				placeholder={placeholder}
-				className="flex-1 bg-transparent text-sm outline-none placeholder:text-[color:var(--v2-ink-soft)]"
+				className="h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
 				aria-label={ariaLabel}
 			/>
 		</div>

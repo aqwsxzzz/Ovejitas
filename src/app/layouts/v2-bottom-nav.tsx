@@ -1,6 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { BarChart3, CalendarDays, ClipboardList, Ellipsis, Home, Settings, Users } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
 	Sheet,
 	SheetClose,
@@ -27,7 +28,7 @@ export function V2BottomNav() {
 
 	return (
 		<>
-			<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-black/20 bg-[#f5efe0]/95 px-3 py-2 backdrop-blur md:px-6">
+			<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-black/20 bg-(--v2-cream)/95 px-3 py-2 backdrop-blur md:px-6">
 				<div className="mx-auto flex w-full max-w-4xl items-end justify-between">
 					{navItems.map((item) => {
 						const isActive =
@@ -42,14 +43,14 @@ export function V2BottomNav() {
 								key={item.to}
 								to={item.to}
 								className={`flex w-14 flex-col items-center gap-1 text-xs ${
-									isActive ? "font-semibold text-[#1f211d]" : "text-[#67695f]"
+									isActive ? "font-semibold text-(--v2-charcoal)" : "text-(--v2-stone)"
 								}`}
 							>
 								<span
 									className={`flex h-7 w-7 items-center justify-center rounded-md border ${
 										isActive
-											? "border-[#1f211d] bg-[#1f211d] text-[#f5efe0]"
-											: "border-black/25 bg-[#f5efe0]"
+											? "border-(--v2-charcoal) bg-(--v2-charcoal) text-(--v2-cream)"
+											: "border-black/25 bg-(--v2-cream)"
 									}`}
 								>
 									<Icon className="h-4 w-4" />
@@ -59,33 +60,34 @@ export function V2BottomNav() {
 						);
 					})}
 
-					<button
+					<Button
+						variant="ghost"
 						onClick={() => setOpen(true)}
-						className={`flex w-14 flex-col items-center gap-1 text-xs ${
-							open ? "font-semibold text-[#1f211d]" : "text-[#67695f]"
+						className={`flex h-auto w-14 flex-col items-center gap-1 p-0 text-xs hover:bg-transparent ${
+							open ? "font-semibold text-(--v2-charcoal)" : "text-(--v2-stone)"
 						}`}
 					>
 						<span
 							className={`flex h-7 w-7 items-center justify-center rounded-md border ${
 								open
-									? "border-[#1f211d] bg-[#1f211d] text-[#f5efe0]"
-									: "border-black/25 bg-[#f5efe0]"
+									? "border-(--v2-charcoal) bg-(--v2-charcoal) text-(--v2-cream)"
+									: "border-black/25 bg-(--v2-cream)"
 							}`}
 						>
 							<Ellipsis className="h-4 w-4" />
 						</span>
 						<span>Mas</span>
-					</button>
+					</Button>
 				</div>
 			</nav>
 
 			<Sheet open={open} onOpenChange={setOpen}>
 				<SheetContent
 					side="bottom"
-					className="rounded-t-2xl bg-[#f5efe0] pb-8"
+					className="rounded-t-2xl bg-(--v2-cream) pb-8"
 				>
 					<SheetHeader className="pb-2">
-						<SheetTitle className="text-left text-base font-semibold text-[#1f211d]">
+						<SheetTitle className="text-left text-base font-semibold text-(--v2-charcoal)">
 							Mas opciones
 						</SheetTitle>
 					</SheetHeader>
@@ -98,10 +100,10 @@ export function V2BottomNav() {
 										to={item.to}
 										className="flex items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-black/5"
 									>
-										<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#dff1e8] text-[#2f6f5a]">
+										<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-(--v2-mint-100) text-(--v2-emerald-600)">
 											<Icon className="h-4 w-4" />
 										</div>
-										<span className="text-sm font-medium text-[#1f211d]">
+										<span className="text-sm font-medium text-(--v2-charcoal)">
 											{item.label}
 										</span>
 									</Link>

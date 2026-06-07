@@ -55,8 +55,8 @@ export function FlockHeaderCard({ asset }: FlockHeaderCardProps) {
 						{asset.name}
 					</h1>
 				</div>
-				<div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-(--v2-border) bg-[#ecf0e8] px-3 py-1.5 text-sm text-(--v2-ink)">
-					<span className="inline-flex h-5 w-5 items-center justify-center text-[#0e6b49]">
+				<div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-xl border border-(--v2-border) bg-(--v2-sage-50) px-3 py-1.5 text-sm text-(--v2-ink)">
+					<span className="inline-flex h-5 w-5 items-center justify-center text-(--v2-emerald-700)">
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"

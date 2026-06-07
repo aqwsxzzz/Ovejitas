@@ -84,7 +84,7 @@ export function LivestockKindPage({
 					</p>
 				</div>
 				{selectedKind === "animal" ? (
-					<Button asChild variant="create" size="sm">
+					<Button asChild variant="default" size="sm">
 						<Link
 							to="/v2/log"
 							search={{

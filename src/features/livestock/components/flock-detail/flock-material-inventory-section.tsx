@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { MaterialConsumptionForm } from "@/features/inventory/components/material-consumption-form";
 import { MaterialPurchaseForm } from "@/features/inventory/components/material-purchase-form";
 import { MaterialSaleForm } from "@/features/inventory/components/material-sale-form";
@@ -31,10 +32,10 @@ export function FlockMaterialInventorySection({
 				<span
 					className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
 						material.inventoryStatus === "critical"
-							? "bg-red-100 text-red-700"
+							? "bg-destructive/15 text-destructive"
 							: material.inventoryStatus === "low"
-								? "bg-amber-100 text-amber-700"
-								: "bg-emerald-100 text-emerald-700"
+								? "bg-warning/15 text-warning"
+								: "bg-success/15 text-success"
 					}`}
 				>
 					{material.inventoryStatus === "critical"
@@ -66,27 +67,30 @@ export function FlockMaterialInventorySection({
 			)}
 
 			<div className="mt-3 grid gap-2 sm:grid-cols-3">
-				<button
+				<Button
 					type="button"
+					variant="default"
+					size="sm"
 					onClick={() => material.openMaterialActionPanel("purchase")}
-					className="rounded-full bg-(--v2-ink) px-3 py-1.5 text-xs font-semibold text-white"
 				>
 					Agregar (compra)
-				</button>
-				<button
+				</Button>
+				<Button
 					type="button"
+					variant="outline"
+					size="sm"
 					onClick={() => material.openMaterialActionPanel("consumption")}
-					className="rounded-full border border-(--v2-border) bg-white px-3 py-1.5 text-xs font-semibold"
 				>
 					Reducir (consumo)
-				</button>
-				<button
+				</Button>
+				<Button
 					type="button"
+					variant="outline"
+					size="sm"
 					onClick={() => material.openMaterialActionPanel("sale")}
-					className="rounded-full border border-(--v2-border) bg-white px-3 py-1.5 text-xs font-semibold"
 				>
 					Reducir (venta)
-				</button>
+				</Button>
 			</div>
 
 			{material.materialActionMode ? (
@@ -95,13 +99,14 @@ export function FlockMaterialInventorySection({
 						<p className="text-xs font-semibold uppercase tracking-[0.08em] text-(--v2-ink-soft)">
 							{material.materialActionTitle}
 						</p>
-						<button
+						<Button
 							type="button"
+							variant="outline"
+							size="sm"
 							onClick={material.closeMaterialActionPanel}
-							className="rounded-full border border-(--v2-border) px-2.5 py-1 text-xs font-semibold"
 						>
 							Cerrar
-						</button>
+						</Button>
 					</div>
 
 					{material.materialActionMode === "purchase" ? (

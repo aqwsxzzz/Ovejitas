@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import type { ProductionProductSeries } from "./flock-detail-types";
 
 function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
@@ -21,12 +22,12 @@ function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
 				});
 
 	return (
-		<div className="mt-3 rounded-xl border border-white/45 bg-[#cfd2d6] p-3">
+		<div className="mt-3 rounded-xl border border-white/45 bg-(--v2-gray-300) p-3">
 			<div className="relative h-28">
 				<div className="pointer-events-none absolute inset-x-0 top-4 border-t border-white/40" />
 				<div className="pointer-events-none absolute inset-x-0 top-14 border-t border-white/40" />
 				<div className="pointer-events-none absolute inset-x-0 top-24 border-t border-white/40" />
-				<div className="pointer-events-none absolute right-0 top-0 flex h-24 w-8 flex-col justify-between text-right text-[9px] font-medium text-[#6c798f]">
+				<div className="pointer-events-none absolute right-0 top-0 flex h-24 w-8 flex-col justify-between text-right text-[9px] font-medium text-(--v2-slate)">
 					<span>{max}</span>
 					<span>{mid}</span>
 					<span>0</span>
@@ -43,10 +44,10 @@ function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
 								<div
 									className={`h-full w-full rounded-md ${
 										value <= 0
-											? "bg-[#efd97b]/35"
+											? "bg-(--v2-gold-soft)/35"
 											: index === highlightedIndex
-												? "bg-[#f5a000]"
-												: "bg-[#efd97b]"
+												? "bg-(--v2-gold)"
+												: "bg-(--v2-gold-soft)"
 									}`}
 									style={{ height: `${barHeightPct}%` }}
 								/>
@@ -55,7 +56,7 @@ function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
 					})}
 				</div>
 			</div>
-			<div className="mt-2 grid grid-cols-7 gap-3 pl-3 pr-9 text-center text-[10px] font-medium text-[#6c798f]">
+			<div className="mt-2 grid grid-cols-7 gap-3 pl-3 pr-9 text-center text-[10px] font-medium text-(--v2-slate)">
 				{weekdayLabels.map((label, index) => (
 					<span key={`${label}-${index}`}>{label}</span>
 				))}
@@ -70,17 +71,17 @@ function ProductionSeriesCard({
 	productSeries: ProductionProductSeries;
 }) {
 	return (
-		<div className="rounded-2xl border border-(--v2-border) bg-[#d7d9dd] p-4 shadow-[0_10px_24px_-18px_rgba(24,33,49,0.35)]">
-			<p className="text-[10px] uppercase tracking-[0.08em] text-[#6c798f]">
+		<div className="rounded-2xl border border-(--v2-border) bg-(--v2-gray-200) p-4 shadow-[0_10px_24px_-18px_rgba(24,33,49,0.35)]">
+			<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-slate)">
 				{productSeries.productLabel} · ultimos 7 dias
 			</p>
 			<div className="mt-2 flex items-start justify-between gap-3">
-				<p className="text-5xl font-semibold leading-none text-[#243246]">
+				<p className="text-5xl font-semibold leading-none text-(--v2-navy)">
 					{productSeries.totalLast7Days}
 				</p>
-				<div className="text-right text-sm text-[#6c798f]">
+				<div className="text-right text-sm text-(--v2-slate)">
 					<p className="text-xs uppercase tracking-[0.08em]">Hoy</p>
-					<p className="text-xl font-semibold leading-none text-[#243246]">
+					<p className="text-xl font-semibold leading-none text-(--v2-navy)">
 						{productSeries.todayCount}
 					</p>
 				</div>
@@ -93,7 +94,7 @@ function ProductionSeriesCard({
 				}
 				labels={productSeries.dayLabels}
 			/>
-			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-[#6c798f]">
+			<div className="mt-2 flex items-center justify-between text-[11px] uppercase tracking-[0.08em] text-(--v2-slate)">
 				<span>{productSeries.firstDayLabel}</span>
 				<span>Hoy · {productSeries.todayCount}</span>
 			</div>
@@ -136,9 +137,11 @@ export function FlockProductionSeriesSlider({
 			</div>
 			<div className="flex items-center justify-center gap-1">
 				{series.map((productSeries, index) => (
-					<button
+					<Button
 						key={productSeries.productKey}
 						type="button"
+						variant="ghost"
+						size="icon"
 						aria-label={`Ver serie ${index + 1}`}
 						onClick={(event) => {
 							const container = event.currentTarget
@@ -151,7 +154,7 @@ export function FlockProductionSeriesSlider({
 							});
 							setActiveIndex(index);
 						}}
-						className={`h-2 w-2 rounded-full transition ${
+						className={`size-2 rounded-full p-0 hover:bg-transparent ${
 							index === activeIndex ? "bg-(--v2-ink)" : "bg-black/30"
 						}`}
 					/>

@@ -102,6 +102,7 @@ interface FinanceDashboardShellProps {
 	isCustomRange: boolean;
 	periodWheel?: FinancePeriodWheel;
 	onInsightAssetClick?: (assetId: string) => void;
+	headerActions?: React.ReactNode;
 }
 
 const RANGE_OPTIONS: Array<{ value: FinanceRangePreset; label: string }> = [
@@ -128,20 +129,20 @@ const SummaryTile = ({ card }: { card: FinanceSummaryCardData }) => {
 			? "text-muted-foreground"
 			: positiveTrend
 				? directionIsUp
-					? "text-emerald-600"
-					: "text-rose-600"
+					? "text-success"
+					: "text-destructive"
 				: directionIsUp
-					? "text-rose-600"
-					: "text-emerald-600";
+					? "text-destructive"
+					: "text-success";
 	const labelTone =
 		card.metric === "income"
-			? "text-emerald-700"
+			? "text-success"
 			: card.metric === "expense"
-				? "text-rose-700"
-				: "text-rose-800";
+				? "text-destructive"
+				: "text-destructive";
 	const tileTone =
 		card.metric === "net"
-			? "border-rose-200 bg-rose-50/60"
+			? "border-destructive/30 bg-destructive/10"
 			: "border-transparent bg-muted/40";
 
 	return (
@@ -188,7 +189,7 @@ const BalanceSummaryCard = ({ cards }: { cards: FinanceSummaryCardData[] }) => (
 	<Card className="rounded-3xl border border-border/70 bg-card/90 shadow-sm">
 		<CardHeader className="pb-2 sm:pb-3">
 			<div className="flex items-center justify-between gap-3">
-				<CardTitle className="text-sm font-semibold uppercase tracking-[0.14em] text-slate-800 sm:text-base">
+				<CardTitle className="text-sm font-semibold uppercase tracking-[0.14em] text-foreground sm:text-base">
 					Resumen de balance
 				</CardTitle>
 				<p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground sm:text-xs">
@@ -265,8 +266,8 @@ const MiniRows = ({
 								<p
 									className={
 										row.trend === "negative"
-											? "font-semibold text-rose-600"
-											: "font-semibold text-emerald-600"
+											? "font-semibold text-destructive"
+											: "font-semibold text-success"
 									}
 								>
 									{row.value}
@@ -280,7 +281,7 @@ const MiniRows = ({
 							<div
 								className={cn(
 									"h-full rounded-full",
-									row.trend === "negative" ? "bg-rose-400" : "bg-emerald-400",
+									row.trend === "negative" ? "bg-destructive" : "bg-success",
 								)}
 								style={{ width: `${Math.max(4, row.fill)}%` }}
 							/>
@@ -560,15 +561,27 @@ export function FinanceDashboardShell({
 	isCustomRange,
 	periodWheel,
 	onInsightAssetClick,
+	headerActions,
 }: FinanceDashboardShellProps) {
 	return (
 		<div className="space-y-4 pb-6">
-			<section className="rounded-3xl border-0 bg-linear-to-br from-slate-50 via-white to-emerald-50 p-5 shadow-sm">
-				<p className="v2-kicker">Finanzas</p>
-				<h1 className="mt-2 text-2xl font-semibold tracking-tight">Finanzas</h1>
-				<p className="mt-1 text-sm leading-6 text-muted-foreground">
-					Vista rapida de ingresos, costos y balance neto de la granja.
-				</p>
+			<section className="rounded-3xl border-0 bg-linear-to-br from-muted via-white to-success/10 p-5 shadow-sm">
+				<div className="flex items-start justify-between gap-3">
+					<div>
+						<p className="v2-kicker">Finanzas</p>
+						<h1 className="mt-2 text-2xl font-semibold tracking-tight">
+							Finanzas
+						</h1>
+						<p className="mt-1 text-sm leading-6 text-muted-foreground">
+							Vista rapida de ingresos, costos y balance neto de la granja.
+						</p>
+					</div>
+					{headerActions ? (
+						<div className="flex shrink-0 flex-wrap justify-end gap-2">
+							{headerActions}
+						</div>
+					) : null}
+				</div>
 			</section>
 
 			<section className="flex w-full flex-col items-center gap-2">

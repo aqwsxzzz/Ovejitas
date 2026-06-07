@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type {
 	ILivestockEvent,
 	ILivestockEventCategory,
@@ -112,8 +113,8 @@ export function UnitEventTimeline({
 							<span
 								className={`rounded-full px-2 py-0.5 ${
 									status === "logged"
-										? "bg-emerald-100 text-emerald-700"
-										: "bg-amber-100 text-amber-700"
+										? "bg-success/15 text-success"
+										: "bg-warning/15 text-warning"
 								}`}
 							>
 								{status === "logged" ? "Registrado" : "Planificado"}
@@ -133,23 +134,26 @@ export function UnitEventTimeline({
 						{onEditEvent || onDeleteEvent ? (
 							<div className="mt-3 flex items-center gap-2">
 								{onEditEvent && canEditEvent(event) ? (
-									<button
+									<Button
 										type="button"
+										variant="outline"
+										size="sm"
 										onClick={() => onEditEvent(event)}
-										className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 									>
 										{isEditing ? "Editando" : "Editar"}
-									</button>
+									</Button>
 								) : null}
 								{onDeleteEvent && canDeleteEvent(event) ? (
-									<button
+									<Button
 										type="button"
+										variant="ghost"
+										size="sm"
 										onClick={() => void onDeleteEvent(event)}
 										disabled={isDeleting}
-										className="rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
+										className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 									>
 										{isDeleting ? "Eliminando..." : "Eliminar"}
-									</button>
+									</Button>
 								) : null}
 							</div>
 						) : null}

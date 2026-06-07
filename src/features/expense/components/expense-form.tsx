@@ -83,14 +83,14 @@ export const ExpenseForm = ({
 				<div className="flex justify-end gap-2 pt-2">
 					<Button
 						type="button"
-						variant="neutral"
+						variant="outline"
 						onClick={onSuccess}
 					>
 						{t("form.actions.cancel")}
 					</Button>
 					<Button
 						type="submit"
-						variant="create"
+						variant="default"
 						disabled={isCreating || isUpdating}
 					>
 						{expense ? t("form.actions.save") : t("form.actions.create")}

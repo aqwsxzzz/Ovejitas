@@ -114,7 +114,7 @@ export function FlockIndividualsSection({
 	);
 
 	return (
-		<div className="rounded-lg border border-gray-200 bg-white p-6">
+		<div className="rounded-lg border border-border bg-white p-6">
 			{isCreatingIndividual ? (
 				<div>
 					<h3 className="mb-4 text-lg font-bold">Agregar individuo</h3>

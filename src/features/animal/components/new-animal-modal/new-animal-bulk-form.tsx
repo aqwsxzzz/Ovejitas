@@ -432,14 +432,14 @@ export const NewAnimalBulkForm = ({
 					<Button
 						type="submit"
 						disabled={isPending}
-						variant="create"
+						variant="default"
 					>
 						{t("createButton")}
 					</Button>
 					<Button
 						type="button"
 						onClick={closeDialog}
-						variant="neutral"
+						variant="outline"
 					>
 						{t("cancelButton")}
 					</Button>
