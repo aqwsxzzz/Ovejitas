@@ -15,12 +15,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-	V2AuthPageFrame,
-	v2AuthInputClassName,
-	v2AuthLabelClassName,
-	v2AuthSubmitClassName,
-} from "@/features/auth/components/v2-auth-page-frame";
+import { V2AuthPageFrame } from "@/features/auth/components/v2-auth-page-frame";
 import {
 	useAcceptInvitation,
 	useResolveInvitationToken,
@@ -160,7 +155,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 							name="name"
 							render={({ field }) => (
 								<FormItem className="space-y-1.5">
-									<FormLabel className={v2AuthLabelClassName}>
+									<FormLabel>
 										Nombre completo
 									</FormLabel>
 									<FormControl>
@@ -168,7 +163,6 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 											type="text"
 											autoComplete="name"
 											placeholder="Juan Perez"
-											className={v2AuthInputClassName}
 											{...field}
 										/>
 									</FormControl>
@@ -183,7 +177,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 						name="password"
 						render={({ field }) => (
 							<FormItem className="space-y-1.5">
-								<FormLabel className={v2AuthLabelClassName}>Contrasena</FormLabel>
+								<FormLabel>Contrasena</FormLabel>
 								<FormControl>
 									<Input
 										type="password"
@@ -191,7 +185,6 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 										placeholder={
 											isNew ? "Minimo 8 caracteres" : "Tu contrasena actual"
 										}
-										className={v2AuthInputClassName}
 										{...field}
 									/>
 								</FormControl>
@@ -207,7 +200,7 @@ export function InviteAcceptPage({ token }: InviteAcceptPageProps) {
 					<Button
 						type="submit"
 						disabled={isPending}
-						className={v2AuthSubmitClassName}
+						className="w-full"
 					>
 						{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
 						Unirse a la granja

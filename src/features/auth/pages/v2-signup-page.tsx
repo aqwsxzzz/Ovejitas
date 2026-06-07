@@ -14,12 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useSignUp } from "@/features/auth/api/auth-queries";
-import {
-	V2AuthPageFrame,
-	v2AuthInputClassName,
-	v2AuthLabelClassName,
-	v2AuthSubmitClassName,
-} from "@/features/auth/components/v2-auth-page-frame";
+import { V2AuthPageFrame } from "@/features/auth/components/v2-auth-page-frame";
 
 const signupSchema = z
 	.object({
@@ -74,7 +69,7 @@ export function V2SignupPage() {
 					Ya tienes una cuenta?{" "}
 					<Link
 						to="/v2/login"
-						className="font-semibold text-[#0b3445] underline-offset-4 hover:underline"
+						className="font-semibold text-primary underline-offset-4 hover:underline"
 					>
 						Inicia sesion en Ovejitas
 					</Link>
@@ -92,7 +87,7 @@ export function V2SignupPage() {
 						name="displayName"
 						render={({ field }) => (
 							<FormItem className="space-y-1">
-								<FormLabel className={v2AuthLabelClassName}>
+								<FormLabel>
 									Nombre completo
 								</FormLabel>
 								<FormControl>
@@ -100,7 +95,6 @@ export function V2SignupPage() {
 										type="text"
 										autoComplete="name"
 										placeholder="Juan Perez"
-										className={v2AuthInputClassName}
 										{...field}
 									/>
 								</FormControl>
@@ -114,7 +108,7 @@ export function V2SignupPage() {
 						name="email"
 						render={({ field }) => (
 							<FormItem className="space-y-1">
-								<FormLabel className={v2AuthLabelClassName}>
+								<FormLabel>
 									Correo electronico
 								</FormLabel>
 								<FormControl>
@@ -125,7 +119,6 @@ export function V2SignupPage() {
 										autoCorrect="off"
 										spellCheck={false}
 										placeholder="manager@farm.com"
-										className={v2AuthInputClassName}
 										{...field}
 									/>
 								</FormControl>
@@ -139,7 +132,7 @@ export function V2SignupPage() {
 						name="password"
 						render={({ field }) => (
 							<FormItem className="space-y-1">
-								<FormLabel className={v2AuthLabelClassName}>
+								<FormLabel>
 									Contrasena
 								</FormLabel>
 								<FormControl>
@@ -147,7 +140,6 @@ export function V2SignupPage() {
 										type="password"
 										autoComplete="new-password"
 										placeholder="Minimo 8 caracteres"
-										className={v2AuthInputClassName}
 										{...field}
 									/>
 								</FormControl>
@@ -161,7 +153,7 @@ export function V2SignupPage() {
 						name="confirmPassword"
 						render={({ field }) => (
 							<FormItem className="space-y-1">
-								<FormLabel className={v2AuthLabelClassName}>
+								<FormLabel>
 									Confirmar contrasena
 								</FormLabel>
 								<FormControl>
@@ -169,7 +161,6 @@ export function V2SignupPage() {
 										type="password"
 										autoComplete="new-password"
 										placeholder="Repite tu contrasena"
-										className={v2AuthInputClassName}
 										{...field}
 									/>
 								</FormControl>
@@ -181,7 +172,7 @@ export function V2SignupPage() {
 					<Button
 						type="submit"
 						disabled={isPending}
-						className={v2AuthSubmitClassName}
+						className="w-full"
 					>
 						{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
 						Crear cuenta
