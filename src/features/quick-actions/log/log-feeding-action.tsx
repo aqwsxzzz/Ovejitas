@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import {
 	useCreateMaterialConsumptionByFarmId,
+	useGetLivestockAssetById,
 	useListLivestockAssetsByFarmId,
 } from "@/features/livestock/api/livestock-queries";
 import { MaterialConsumptionForm } from "@/features/inventory/components/material-consumption-form";
@@ -26,7 +27,18 @@ export function LogFeedingAction({
 	onDone,
 }: LogFeedingActionProps) {
 	const [pickedMaterialId, setPickedMaterialId] = useState("");
-	const materialAssetId = contextAssetId ?? pickedMaterialId;
+
+	// Only honor the context asset when it is actually a material — otherwise the
+	// action was launched from a consumer (e.g. a flock) and we fall back to the
+	// material picker.
+	const contextAssetQuery = useGetLivestockAssetById({
+		farmId,
+		assetId: Number(contextAssetId),
+		enabled: !!farmId && !!contextAssetId,
+	});
+	const contextMaterialId =
+		contextAssetQuery.data?.kind === "material" ? contextAssetId : null;
+	const materialAssetId = contextMaterialId ?? pickedMaterialId;
 
 	const consumerAssetsQuery = useListLivestockAssetsByFarmId({
 		farmId,
@@ -51,7 +63,7 @@ export function LogFeedingAction({
 			title={title}
 			subtitle={subtitle}
 		>
-			{!contextAssetId ? (
+			{!contextMaterialId ? (
 				<LogAssetPicker
 					farmId={farmId}
 					value={pickedMaterialId}

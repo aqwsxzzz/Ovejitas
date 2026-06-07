@@ -99,7 +99,7 @@ export function LogCreateIndividualAction({
 					<div className="flex justify-end">
 						<Button
 							type="submit"
-							variant="create"
+							variant="default"
 							disabled={createIndividual.isPending}
 						>
 							{createIndividual.isPending ? "Guardando..." : "Crear individuo"}

@@ -84,7 +84,7 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 					<div className="flex gap-2">
 						<Button
 							type="button"
-							variant={mode === "aggregated" ? "create" : "neutral"}
+							variant={mode === "aggregated" ? "default" : "outline"}
 							className="flex-1"
 							onClick={() => setMode("aggregated")}
 						>
@@ -92,7 +92,7 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 						</Button>
 						<Button
 							type="button"
-							variant={mode === "individual" ? "create" : "neutral"}
+							variant={mode === "individual" ? "default" : "outline"}
 							className="flex-1"
 							onClick={() => setMode("individual")}
 						>
@@ -138,11 +138,11 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 						onChange={(event) => setDescription(event.target.value)}
 					/>
 				</div>
-				{error ? <p className="text-sm text-red-700">{error}</p> : null}
+				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				<div className="flex justify-end">
 					<Button
 						type="submit"
-						variant="create"
+						variant="default"
 						disabled={isSaving}
 					>
 						{isSaving ? "Guardando..." : "Crear lote"}

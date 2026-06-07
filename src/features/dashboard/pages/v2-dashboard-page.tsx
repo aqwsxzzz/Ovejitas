@@ -20,6 +20,7 @@ import type {
 } from "@/shared/types/v2-domain-types";
 
 import { DashboardEmptyState } from "../components/dashboard-empty-state";
+import { DashboardQuickActions } from "../components/dashboard-quick-actions";
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
 
 const MONTH_LABEL = new Date().toLocaleDateString("es-EC", {
@@ -457,7 +458,10 @@ export function V2DashboardPage() {
 			) : slices.length === 0 ? (
 				<DashboardEmptyState sourcePath={sourcePath} />
 			) : (
-				<UnitKpiSlider slices={slices} />
+				<>
+					<DashboardQuickActions sourcePath={sourcePath} />
+					<UnitKpiSlider slices={slices} />
+				</>
 			)}
 
 			<article className="v2-card p-4">

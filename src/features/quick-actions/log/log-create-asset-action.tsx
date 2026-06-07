@@ -86,11 +86,11 @@ export function LogCreateAssetAction({
 						onChange={(event) => setDescription(event.target.value)}
 					/>
 				</div>
-				{error ? <p className="text-sm text-red-700">{error}</p> : null}
+				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				<div className="flex justify-end">
 					<Button
 						type="submit"
-						variant="create"
+						variant="default"
 						disabled={createAsset.isPending}
 					>
 						{createAsset.isPending ? "Guardando..." : submitLabel}
