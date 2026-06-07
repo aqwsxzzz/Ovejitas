@@ -98,6 +98,14 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 			return;
 		}
 
+		if (props.kind === "location") {
+			navigate({
+				to: "/v2/location/$locationId",
+				params: { locationId: String(props.id) },
+			});
+			return;
+		}
+
 		navigate({
 			to: "/v2/production-units/flock/$unitId",
 			params: { unitId: String(props.id) },

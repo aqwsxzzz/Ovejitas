@@ -31,6 +31,7 @@ import { Route as V2MoreIndexRouteImport } from './routes/v2.more.index'
 import { Route as V2ProductionUnitsAssetKindRouteImport } from './routes/v2.production-units.$assetKind'
 import { Route as V2MoreEventCategoriesRouteImport } from './routes/v2.more.event-categories'
 import { Route as V2MoreAccesoRouteImport } from './routes/v2.more.acceso'
+import { Route as V2LocationLocationIdRouteImport } from './routes/v2.location.$locationId'
 import { Route as V2EquipmentEquipmentIdRouteImport } from './routes/v2.equipment.$equipmentId'
 import { Route as V2CropsCropIdRouteImport } from './routes/v2.crops.$cropId'
 import { Route as PublicLayoutSignupRouteImport } from './routes/_public/_layout/signup'
@@ -150,6 +151,11 @@ const V2MoreAccesoRoute = V2MoreAccesoRouteImport.update({
   path: '/acceso',
   getParentRoute: () => V2MoreRoute,
 } as any)
+const V2LocationLocationIdRoute = V2LocationLocationIdRouteImport.update({
+  id: '/location/$locationId',
+  path: '/location/$locationId',
+  getParentRoute: () => V2Route,
+} as any)
 const V2EquipmentEquipmentIdRoute = V2EquipmentEquipmentIdRouteImport.update({
   id: '/equipment/$equipmentId',
   path: '/equipment/$equipmentId',
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof PublicLayoutSignupRoute
   '/v2/crops/$cropId': typeof V2CropsCropIdRoute
   '/v2/equipment/$equipmentId': typeof V2EquipmentEquipmentIdRoute
+  '/v2/location/$locationId': typeof V2LocationLocationIdRoute
   '/v2/more/acceso': typeof V2MoreAccesoRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/signup': typeof PublicLayoutSignupRoute
   '/v2/crops/$cropId': typeof V2CropsCropIdRoute
   '/v2/equipment/$equipmentId': typeof V2EquipmentEquipmentIdRoute
+  '/v2/location/$locationId': typeof V2LocationLocationIdRoute
   '/v2/more/acceso': typeof V2MoreAccesoRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/_public/_layout/signup': typeof PublicLayoutSignupRoute
   '/v2/crops/$cropId': typeof V2CropsCropIdRoute
   '/v2/equipment/$equipmentId': typeof V2EquipmentEquipmentIdRoute
+  '/v2/location/$locationId': typeof V2LocationLocationIdRoute
   '/v2/more/acceso': typeof V2MoreAccesoRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/v2/crops/$cropId'
     | '/v2/equipment/$equipmentId'
+    | '/v2/location/$locationId'
     | '/v2/more/acceso'
     | '/v2/more/event-categories'
     | '/v2/production-units/$assetKind'
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/v2/crops/$cropId'
     | '/v2/equipment/$equipmentId'
+    | '/v2/location/$locationId'
     | '/v2/more/acceso'
     | '/v2/more/event-categories'
     | '/v2/production-units/$assetKind'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/_public/_layout/signup'
     | '/v2/crops/$cropId'
     | '/v2/equipment/$equipmentId'
+    | '/v2/location/$locationId'
     | '/v2/more/acceso'
     | '/v2/more/event-categories'
     | '/v2/production-units/$assetKind'
@@ -545,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2MoreAccesoRouteImport
       parentRoute: typeof V2MoreRoute
     }
+    '/v2/location/$locationId': {
+      id: '/v2/location/$locationId'
+      path: '/location/$locationId'
+      fullPath: '/v2/location/$locationId'
+      preLoaderRoute: typeof V2LocationLocationIdRouteImport
+      parentRoute: typeof V2Route
+    }
     '/v2/equipment/$equipmentId': {
       id: '/v2/equipment/$equipmentId'
       path: '/equipment/$equipmentId'
@@ -678,6 +697,7 @@ interface V2RouteChildren {
   V2IndexRoute: typeof V2IndexRoute
   V2CropsCropIdRoute: typeof V2CropsCropIdRoute
   V2EquipmentEquipmentIdRoute: typeof V2EquipmentEquipmentIdRoute
+  V2LocationLocationIdRoute: typeof V2LocationLocationIdRoute
 }
 
 const V2RouteChildren: V2RouteChildren = {
@@ -696,6 +716,7 @@ const V2RouteChildren: V2RouteChildren = {
   V2IndexRoute: V2IndexRoute,
   V2CropsCropIdRoute: V2CropsCropIdRoute,
   V2EquipmentEquipmentIdRoute: V2EquipmentEquipmentIdRoute,
+  V2LocationLocationIdRoute: V2LocationLocationIdRoute,
 }
 
 const V2RouteWithChildren = V2Route._addFileChildren(V2RouteChildren)
