@@ -25,8 +25,8 @@ const badgeVariants = cva(
 				info: "border-transparent bg-info text-white [a&]:hover:bg-info/90",
 				breeding:
 					"border-transparent bg-breeding text-white [a&]:hover:bg-breeding/90",
-				kind: "border-transparent bg-[#e7d7ae] text-[#6f5413]",
-				mode: "border-(--v2-border) bg-white text-(--v2-ink)",
+				kind: "border-transparent bg-(--v2-sand) text-(--v2-brown)",
+				mode: "border-(--v2-border) bg-(--v2-surface) text-(--v2-ink)",
 			},
 		},
 		defaultVariants: {
