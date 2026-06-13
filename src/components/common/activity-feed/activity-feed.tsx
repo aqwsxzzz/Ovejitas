@@ -1,4 +1,5 @@
 import { type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ActivityItem {
@@ -68,12 +69,13 @@ export function ActivityFeed({ items, emptyMessage = "No recent activity" }: Act
 									</p>
 								</div>
 								{item.action && (
-									<button
+									<Button
+										variant="link"
 										onClick={item.action.onClick}
-										className="text-small font-medium text-primary hover:text-primary/80 transition-colors flex-shrink-0"
+										className="text-small h-auto shrink-0 p-0 font-medium"
 									>
 										{item.action.label}
-									</button>
+									</Button>
 								)}
 							</div>
 							<p className="text-caption text-muted-foreground mt-2">

@@ -47,10 +47,7 @@ export const DeleteExpenseDialog = ({
 			onOpenChange={setOpen}
 		>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					className="border-destructive text-destructive"
-				>
+				<Button variant="destructive">
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
@@ -68,7 +65,7 @@ export const DeleteExpenseDialog = ({
 						{t("deleteDialog.cancel")}
 					</Button>
 					<Button
-						className="bg-destructive"
+						variant="destructive"
 						onClick={onDelete}
 						disabled={isPending}
 					>

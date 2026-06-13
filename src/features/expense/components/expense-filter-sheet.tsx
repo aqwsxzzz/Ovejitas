@@ -1,5 +1,6 @@
 import { DateSelector } from "@/components/common/DateSelector";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -161,9 +162,9 @@ export const ExpenseFilterSheet = ({
 
 				<div className="flex-1 overflow-y-auto space-y-6 py-2">
 					<div className="space-y-2">
-						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
 							{t("filters.typeLabel")}
-						</label>
+						</Label>
 						<Select
 							value={filters.type ?? "all"}
 							onValueChange={setType}
@@ -185,9 +186,9 @@ export const ExpenseFilterSheet = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
 							{t("filters.speciesLabel")}
-						</label>
+						</Label>
 						<Select
 							value={filters.speciesId ?? "all"}
 							onValueChange={setSpeciesId}
@@ -209,9 +210,9 @@ export const ExpenseFilterSheet = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
 							{t("filters.groupByLabel")}
-						</label>
+						</Label>
 						<Select
 							value={filters.groupBy ?? "all"}
 							onValueChange={setGroupBy}
@@ -234,9 +235,9 @@ export const ExpenseFilterSheet = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
 							{t("filters.periodLabel")}
-						</label>
+						</Label>
 						<Select
 							value={filters.period ?? "all"}
 							onValueChange={setPeriod}
@@ -259,9 +260,9 @@ export const ExpenseFilterSheet = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
 							{t("filters.fromLabel")}
-						</label>
+						</Label>
 						<DateSelector
 							date={toDateValue(filters.from)}
 							setDate={(date) => setDate("from", date)}
@@ -278,9 +279,9 @@ export const ExpenseFilterSheet = ({
 					</div>
 
 					<div className="space-y-2">
-						<label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+						<Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
 							{t("filters.toLabel")}
-						</label>
+						</Label>
 						<DateSelector
 							date={toDateValue(filters.to)}
 							setDate={(date) => setDate("to", date)}

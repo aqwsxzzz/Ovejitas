@@ -173,7 +173,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 	}
 
 	if (!hasValidAssetId) {
-		return <p className="text-sm text-red-700">Invalid material id.</p>;
+		return <p className="text-sm text-destructive">Invalid material id.</p>;
 	}
 
 	if (isLoadingAsset) {
@@ -183,7 +183,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 	if (!asset || asset.kind !== "material") {
 		return (
 			<div className="space-y-2">
-				<p className="text-sm text-red-700">Material asset not found.</p>
+				<p className="text-sm text-destructive">Material asset not found.</p>
 				<Link
 					to="/v2/inventory"
 					className="text-sm underline"
@@ -222,7 +222,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 					{balanceQuery.isLoading ? (
 						<p className="text-sm text-(--v2-ink-soft)">Loading balance...</p>
 					) : balanceQuery.error ? (
-						<p className="text-sm text-red-700">Failed to load balance.</p>
+						<p className="text-sm text-destructive">Failed to load balance.</p>
 					) : balanceRows.length ? (
 						<div className="space-y-2">
 							{balanceRows.map((row) => (
@@ -278,7 +278,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 						</p>
 					) : null}
 					{profitabilityQuery.error ? (
-						<p className="text-sm text-red-700">
+						<p className="text-sm text-destructive">
 							Failed to load financial snapshot.
 						</p>
 					) : null}
@@ -299,16 +299,16 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 								<span className="font-semibold">{total.currency}</span>
 							</div>
 							<div className="mt-3 grid gap-2 md:grid-cols-3">
-								<div className="rounded-lg bg-red-50 px-3 py-2">
-									<p className="text-xs uppercase tracking-[0.08em] text-red-700">
+								<div className="rounded-lg bg-destructive/10 px-3 py-2">
+									<p className="text-xs uppercase tracking-[0.08em] text-destructive">
 										Purchases
 									</p>
 									<p className="text-base font-semibold">
 										{toNumber(total.expense_total).toFixed(2)}
 									</p>
 								</div>
-								<div className="rounded-lg bg-emerald-50 px-3 py-2">
-									<p className="text-xs uppercase tracking-[0.08em] text-emerald-700">
+								<div className="rounded-lg bg-success/10 px-3 py-2">
+									<p className="text-xs uppercase tracking-[0.08em] text-success">
 										Sales
 									</p>
 									<p className="text-base font-semibold">
@@ -340,7 +340,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 						</p>
 					) : null}
 					{consumptionAggregateQuery.error ? (
-						<p className="text-sm text-red-700">
+						<p className="text-sm text-destructive">
 							Failed to load consumption aggregate report.
 						</p>
 					) : null}

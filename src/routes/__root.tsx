@@ -17,6 +17,7 @@ const PUBLIC_AUTH_PATHS = new Set([
 	"/signup",
 	"/v2/login",
 	"/v2/signup",
+	"/invite",
 ]);
 const LANDING_PATHS = new Set(["/", "/v2", "/v2/"]);
 

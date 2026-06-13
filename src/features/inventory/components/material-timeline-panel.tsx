@@ -95,7 +95,7 @@ export function MaterialTimelinePanel({
 					<p className="text-sm text-(--v2-ink-soft)">Loading movements...</p>
 				) : null}
 				{timelineQuery.error ? (
-					<p className="text-sm text-red-700">Failed to load movements.</p>
+					<p className="text-sm text-destructive">Failed to load movements.</p>
 				) : null}
 				{!timelineQuery.isLoading &&
 				!timelineQuery.error &&

@@ -39,7 +39,7 @@ export const DateSelector = ({ date, setDate }: DateSelectorProps) => {
 						</div>
 					</Button>
 				</PopoverTrigger>
-				<PopoverContent className="z-[60] w-auto p-0 bg-background border-gray-700">
+				<PopoverContent className="z-[60] w-auto p-0 bg-background border-border">
 					<Calendar
 						mode="single"
 						selected={date}
@@ -48,7 +48,7 @@ export const DateSelector = ({ date, setDate }: DateSelectorProps) => {
 							setIsOpen(false);
 						}}
 						autoFocus
-						className="bg-gray-900 text-muted-foreground"
+						className="bg-foreground text-muted-foreground"
 					/>
 				</PopoverContent>
 			</Popover>

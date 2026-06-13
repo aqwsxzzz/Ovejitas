@@ -29,10 +29,7 @@ export const EditAnimalModal = ({ animal, trigger }: EditAnimalModalProps) => {
 		>
 			<DialogTrigger asChild>
 				{trigger ?? (
-					<Button
-						variant="outline"
-						className="bg-primary text-primary-foreground"
-					>
+					<Button variant="outline">
 						<Pencil />
 					</Button>
 				)}

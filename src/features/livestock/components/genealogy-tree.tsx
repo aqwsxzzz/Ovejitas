@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 function formatIndividualLabel(individual: ILivestockIndividual): string {
@@ -29,7 +30,7 @@ function GenealogyCellComponent({
 	if (!individual) {
 		return (
 			<div
-				className="flex h-16 w-32 items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50"
+				className="flex h-16 w-32 items-center justify-center rounded-lg border-2 border-dashed border-input bg-muted"
 				aria-hidden="true"
 			/>
 		);
@@ -41,19 +42,20 @@ function GenealogyCellComponent({
 	const name = getIndividualName(individual);
 
 	return (
-		<button
+		<Button
+			variant="outline"
 			onClick={onClick}
-			className={`flex h-16 w-32 flex-col items-center justify-center rounded-lg border-2 px-2 py-1 text-center transition-colors ${
+			className={`flex h-16 w-32 flex-col items-center justify-center gap-0 rounded-lg border-2 px-2 py-1 text-center ${
 				isHighlighted
-					? "border-blue-500 bg-blue-50"
-					: "border-gray-300 bg-white hover:border-blue-300"
+					? "border-info bg-info/10"
+					: "border-input bg-white hover:border-info"
 			}`}
 		>
 			<div className="truncate text-sm font-semibold">{tag}</div>
-			<div className="truncate text-xs text-gray-600">
+			<div className="truncate text-xs text-muted-foreground">
 				{name ? name : sexSymbol}
 			</div>
-		</button>
+		</Button>
 	);
 }
 
@@ -120,7 +122,7 @@ export function GenealogyTree({
 	return (
 		<div className="space-y-6">
 			{inbreedingWarning && (
-				<div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+				<div className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-warning">
 					{inbreedingWarning}
 				</div>
 			)}
@@ -128,7 +130,7 @@ export function GenealogyTree({
 			{/* Grandparents */}
 			<div className="flex justify-between gap-2">
 				<div>
-					<div className="mb-2 text-xs font-semibold text-gray-600">
+					<div className="mb-2 text-xs font-semibold text-muted-foreground">
 						Abuelos (maternos)
 					</div>
 					<div className="flex gap-2">
@@ -154,7 +156,7 @@ export function GenealogyTree({
 				</div>
 
 				<div>
-					<div className="mb-2 text-xs font-semibold text-gray-600">
+					<div className="mb-2 text-xs font-semibold text-muted-foreground">
 						Abuelos (paternos)
 					</div>
 					<div className="flex gap-2">
@@ -183,7 +185,7 @@ export function GenealogyTree({
 			{/* Parents */}
 			<div className="flex justify-center gap-16">
 				<div>
-					<div className="mb-2 text-xs font-semibold text-gray-600">Madre</div>
+					<div className="mb-2 text-xs font-semibold text-muted-foreground">Madre</div>
 					{mother ? (
 						<GenealogyCellComponent
 							individual={mother}
@@ -196,7 +198,7 @@ export function GenealogyTree({
 				</div>
 
 				<div>
-					<div className="mb-2 text-xs font-semibold text-gray-600">Padre</div>
+					<div className="mb-2 text-xs font-semibold text-muted-foreground">Padre</div>
 					{father ? (
 						<GenealogyCellComponent
 							individual={father}
@@ -210,10 +212,10 @@ export function GenealogyTree({
 			</div>
 
 			{/* Subject */}
-			<div className="flex justify-center rounded-lg border-3 border-blue-600 bg-blue-50 p-4">
+			<div className="flex justify-center rounded-lg border-3 border-info bg-info/10 p-4">
 				<div className="text-center">
-					<div className="text-lg font-bold text-blue-900">{subjectLabel}</div>
-					<div className="text-sm text-blue-700">
+					<div className="text-lg font-bold text-info">{subjectLabel}</div>
+					<div className="text-sm text-info">
 						{(individual.extra?.sex as string | undefined) === "male"
 							? "♂ Macho"
 							: (individual.extra?.sex as string | undefined) === "female"
@@ -221,7 +223,7 @@ export function GenealogyTree({
 								: "– Desconocido"}
 					</div>
 					{individual.birth_date && (
-						<div className="text-xs text-blue-600">
+						<div className="text-xs text-info">
 							{new Date(individual.birth_date).toLocaleDateString()}
 						</div>
 					)}
@@ -230,7 +232,7 @@ export function GenealogyTree({
 
 			{/* No Parents Info */}
 			{!mother && !father && (
-				<div className="text-center text-sm text-gray-500">
+				<div className="text-center text-sm text-muted-foreground">
 					No hay informacion genealogica registrada
 				</div>
 			)}

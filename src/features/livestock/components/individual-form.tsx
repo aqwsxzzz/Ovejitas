@@ -1,8 +1,21 @@
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import type {
 	ILivestockIndividual,
 	IndividualSex,
 } from "@/features/livestock/types/livestock-types";
+
+/** Radix Select forbids empty-string item values; use a sentinel for "none". */
+const NONE = "__none__";
 
 interface IndividualFormProps {
 	/** Individual to edit, or undefined for create mode */
@@ -125,153 +138,162 @@ export function IndividualForm({
 			className="space-y-4"
 		>
 			{error && (
-				<div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+				<div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
 					{error}
 				</div>
 			)}
 
 			{/* Name */}
-			<div>
-				<label className="block text-sm font-medium text-gray-700">
-					Nombre
-				</label>
-				<input
-					type="text"
+			<div className="space-y-1">
+				<Label htmlFor="individual-name">Nombre</Label>
+				<Input
+					id="individual-name"
 					value={formData.name ?? ""}
 					onChange={(e) => handleChange("name", e.target.value || undefined)}
 					placeholder="Nombre opcional"
-					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				/>
 			</div>
 
 			{/* Tag (Required) */}
-			<div>
-				<label className="block text-sm font-medium text-gray-700">
-					Identificador <span className="text-red-600">*</span>
-				</label>
-				<input
-					type="text"
+			<div className="space-y-1">
+				<Label htmlFor="individual-tag">
+					Identificador <span className="text-destructive">*</span>
+				</Label>
+				<Input
+					id="individual-tag"
 					value={formData.tag}
 					onChange={(e) => handleChange("tag", e.target.value)}
 					placeholder="Ej: SH-001, CT-042"
-					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				/>
 			</div>
 
 			{/* Sex */}
-			<div>
-				<label className="block text-sm font-medium text-gray-700">Sexo</label>
-				<select
-					value={formData.sex ?? ""}
-					onChange={(e) => handleChange("sex", e.target.value || undefined)}
-					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+			<div className="space-y-1">
+				<Label htmlFor="individual-sex">Sexo</Label>
+				<Select
+					value={formData.sex ?? NONE}
+					onValueChange={(value) =>
+						handleChange("sex", value === NONE ? undefined : value)
+					}
 				>
-					<option value="">Desconocido</option>
-					<option value="male">Macho ♂</option>
-					<option value="female">Hembra ♀</option>
-				</select>
+					<SelectTrigger id="individual-sex">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value={NONE}>Desconocido</SelectItem>
+						<SelectItem value="male">Macho ♂</SelectItem>
+						<SelectItem value="female">Hembra ♀</SelectItem>
+					</SelectContent>
+				</Select>
 			</div>
 
 			{/* Birth Date */}
-			<div>
-				<label className="block text-sm font-medium text-gray-700">
-					Fecha de nacimiento
-				</label>
-				<input
+			<div className="space-y-1">
+				<Label htmlFor="individual-birth-date">Fecha de nacimiento</Label>
+				<Input
+					id="individual-birth-date"
 					type="date"
 					value={formData.birthDate ?? ""}
 					onChange={(e) =>
 						handleChange("birthDate", e.target.value || undefined)
 					}
-					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				/>
 			</div>
 
 			{/* Mother */}
-			<div>
-				<label className="block text-sm font-medium text-gray-700">Madre</label>
-				<select
-					value={formData.motherId ?? ""}
-					onChange={(e) =>
-						handleChange("motherId", e.target.value || undefined)
+			<div className="space-y-1">
+				<Label htmlFor="individual-mother">Madre</Label>
+				<Select
+					value={formData.motherId ?? NONE}
+					onValueChange={(value) =>
+						handleChange("motherId", value === NONE ? undefined : value)
 					}
-					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				>
-					<option value="">Sin madre</option>
-					{motherOptions.map((individual) => (
-						<option
-							key={individual.id}
-							value={individual.id}
-						>
-							{individual.name || individual.tag}
-						</option>
-					))}
-				</select>
+					<SelectTrigger id="individual-mother">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value={NONE}>Sin madre</SelectItem>
+						{motherOptions.map((option) => (
+							<SelectItem
+								key={option.id}
+								value={String(option.id)}
+							>
+								{option.name || option.tag}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</div>
 
 			{/* Father */}
-			<div>
-				<label className="block text-sm font-medium text-gray-700">Padre</label>
-				<select
-					value={formData.fatherId ?? ""}
-					onChange={(e) =>
-						handleChange("fatherId", e.target.value || undefined)
+			<div className="space-y-1">
+				<Label htmlFor="individual-father">Padre</Label>
+				<Select
+					value={formData.fatherId ?? NONE}
+					onValueChange={(value) =>
+						handleChange("fatherId", value === NONE ? undefined : value)
 					}
-					className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 				>
-					<option value="">Sin padre</option>
-					{fatherOptions.map((individual) => (
-						<option
-							key={individual.id}
-							value={individual.id}
-						>
-							{individual.name || individual.tag}
-						</option>
-					))}
-				</select>
+					<SelectTrigger id="individual-father">
+						<SelectValue />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value={NONE}>Sin padre</SelectItem>
+						{fatherOptions.map((option) => (
+							<SelectItem
+								key={option.id}
+								value={String(option.id)}
+							>
+								{option.name || option.tag}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</div>
 
 			{/* Status (only show in edit mode) */}
 			{isEditMode && (
-				<div>
-					<label className="block text-sm font-medium text-gray-700">
-						Estado
-					</label>
-					<select
+				<div className="space-y-1">
+					<Label htmlFor="individual-status">Estado</Label>
+					<Select
 						value={formData.status ?? "active"}
-						onChange={(e) =>
-							handleChange(
-								"status",
-								e.target.value as IndividualFormData["status"],
-							)
+						onValueChange={(value) =>
+							handleChange("status", value as IndividualFormData["status"])
 						}
-						className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 					>
-						<option value="active">Activo</option>
-						<option value="sold">Vendido</option>
-						<option value="deceased">Fallecido</option>
-					</select>
+						<SelectTrigger id="individual-status">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="active">Activo</SelectItem>
+							<SelectItem value="sold">Vendido</SelectItem>
+							<SelectItem value="deceased">Fallecido</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 			)}
 
 			{/* Submit & Cancel */}
 			<div className="flex gap-2 pt-2">
-				<button
+				<Button
 					type="submit"
+					variant="default"
 					disabled={isLoading}
-					className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+					className="flex-1"
 				>
 					{isLoading ? "Guardando..." : isEditMode ? "Actualizar" : "Crear"}
-				</button>
+				</Button>
 				{onCancel && (
-					<button
+					<Button
 						type="button"
+						variant="outline"
 						onClick={onCancel}
 						disabled={isLoading}
-						className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+						className="flex-1"
 					>
 						Cancelar
-					</button>
+					</Button>
 				)}
 			</div>
 		</form>

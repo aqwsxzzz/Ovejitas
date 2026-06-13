@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type {
 	IFlockListFilters,
 	IFlockStatus,
@@ -19,10 +20,11 @@ interface FlockFilterPanelProps {
 }
 
 const FilterOption = ({ label, selected, onClick }: FilterOptionProps) => (
-	<button
+	<Button
 		type="button"
+		variant="ghost"
 		onClick={onClick}
-		className="flex items-center gap-3 text-left text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+		className="h-auto justify-start gap-3 p-0 text-left text-sm font-medium text-foreground/80 hover:bg-transparent hover:text-foreground"
 	>
 		<span
 			className={cn(
@@ -31,7 +33,7 @@ const FilterOption = ({ label, selected, onClick }: FilterOptionProps) => (
 			)}
 		/>
 		<span>{label}</span>
-	</button>
+	</Button>
 );
 
 export const FlockFilterPanel = ({

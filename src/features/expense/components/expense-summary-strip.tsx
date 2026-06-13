@@ -30,7 +30,7 @@ export const ExpenseSummaryStrip = ({
 		net: 0,
 	};
 
-	const netClassName = totals.net >= 0 ? "text-emerald-600" : "text-rose-600";
+	const netClassName = totals.net >= 0 ? "text-success" : "text-destructive";
 
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-3 gap-3">

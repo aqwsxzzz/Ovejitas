@@ -301,7 +301,7 @@ export const FeedConsumptionPanel = ({ farmId }: FeedConsumptionPanelProps) => {
 								>
 									<DialogTrigger asChild>
 										<Button
-											variant="outline"
+											variant="destructive"
 											size="sm"
 											disabled={isDeleting}
 										>

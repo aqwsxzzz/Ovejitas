@@ -5,6 +5,7 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 import { Home, Beef, User, ReceiptText, Bird, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from "react";
@@ -162,15 +163,16 @@ export function BottomTabNav() {
 								const ChildIcon = child.icon;
 								const isActive = isPathActive(child.path);
 								return (
-									<button
+									<Button
 										key={child.id}
 										type="button"
+										variant="ghost"
 										onClick={() => {
 											setOpenGroup(null);
 											navigate({ to: child.path });
 										}}
 										className={cn(
-											"flex items-center gap-3 w-full px-4 py-3 transition-colors text-left",
+											"flex h-auto w-full items-center justify-start gap-3 rounded-none px-4 py-3 text-left",
 											"hover:bg-secondary/50",
 											isActive
 												? "text-primary font-semibold"
@@ -185,7 +187,7 @@ export function BottomTabNav() {
 											aria-hidden="true"
 										/>
 										<span className="text-sm">{child.label}</span>
-									</button>
+									</Button>
 								);
 							})}
 						</div>
@@ -235,13 +237,14 @@ export function BottomTabNav() {
 					const isActive = isGroupActive(tab);
 					const isOpen = openGroup === tab.id;
 					return (
-						<button
+						<Button
 							key={tab.id}
 							type="button"
+							variant="ghost"
 							onClick={() => setOpenGroup(isOpen ? null : tab.id)}
 							aria-expanded={isOpen}
 							className={cn(
-								"flex flex-col items-center justify-center gap-1 min-w-11 px-3 py-2 rounded-lg transition-colors",
+								"flex h-auto min-w-11 flex-col items-center justify-center gap-1 rounded-lg px-3 py-2",
 								"hover:bg-secondary/50",
 								isActive || isOpen
 									? "text-primary"
@@ -263,7 +266,7 @@ export function BottomTabNav() {
 							>
 								{tab.label}
 							</span>
-						</button>
+						</Button>
 					);
 				})}
 			</div>

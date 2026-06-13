@@ -66,12 +66,11 @@
   --font-sans: Inter, system-ui, -apple-system, sans-serif;
   --font-serif: Merriweather, Georgia, serif;
   --font-mono: 'Source Code Pro', 'Courier New', monospace;
-  /* Farm-themed spacing & borders */
-  --spacing-xs: 0.5rem; /* 8px - base unit */
-  --spacing-sm: 1rem; /* 16px - content margins */
-  --spacing-md: 1.5rem; /* 24px */
-  --spacing-lg: 2rem; /* 32px */
-  --spacing-xl: 3rem; /* 48px */
+  /* NOTE: Do not define named --spacing-* tokens (xs/sm/md/lg/xl) here.
+     In Tailwind v4 the --spacing-* namespace IS the named size scale, so
+     custom values hijack max-w-sm/md/lg, gap-md, etc. across the whole app
+     (e.g. max-w-md collapsing to 24px). The base --spacing unit stays default.
+     For semantic spacing tokens, use a non-colliding name (e.g. --space-md). */
   --radius: 0.75rem; /* 12px - default for cards */
   --shadow-2xs: 0px 1px 2px 0px hsl(40 15% 45% / 0.08);
   --shadow-xs: 0px 1px 2px 0px hsl(40 15% 45% / 0.08);
@@ -146,12 +145,7 @@
   --font-sans: Inter, system-ui, -apple-system, sans-serif;
   --font-serif: Merriweather, Georgia, serif;
   --font-mono: 'Source Code Pro', 'Courier New', monospace;
-  /* Farm-themed spacing & borders */
-  --spacing-xs: 0.5rem; /* 8px - base unit */
-  --spacing-sm: 1rem; /* 16px - content margins */
-  --spacing-md: 1.5rem; /* 24px */
-  --spacing-lg: 2rem; /* 32px */
-  --spacing-xl: 3rem; /* 48px */
+  /* Named --spacing-* tokens intentionally omitted — see :root note above. */
   --radius: 0.75rem; /* 12px - default for cards */
   --shadow-2xs: 0px 1px 2px 0px hsl(145 20% 5% / 0.20);
   --shadow-xs: 0px 1px 2px 0px hsl(145 20% 5% / 0.20);
@@ -201,12 +195,10 @@
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
 
-  /* Farm spacing system - 8px base grid */
-  --spacing-xs: var(--spacing-xs);
-  --spacing-sm: var(--spacing-sm);
-  --spacing-md: var(--spacing-md);
-  --spacing-lg: var(--spacing-lg);
-  --spacing-xl: var(--spacing-xl);
+  /* NOTE: Do not register named --spacing-* keys (xs/sm/md/lg/xl) in @theme.
+     They shadow Tailwind v4's named size scale (--container-*), so max-w-sm/md/lg
+     resolve to tiny spacing values and collapse layouts (e.g. the auth card).
+     Tailwind's default --spacing base unit and --container-* scale stay intact. */
 
   /* Farm border radius - 12px cards, 16px widgets */
   --radius-sm: 0.5rem; /* 8px - small elements */

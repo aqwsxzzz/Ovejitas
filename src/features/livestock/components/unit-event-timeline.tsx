@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import type {
 	ILivestockEvent,
 	ILivestockEventCategory,
@@ -92,7 +93,6 @@ export function UnitEventTimeline({
 				const status = getEventStatus(event);
 				const isDeleting = deletingEventId === event.id;
 				const isEditing = editingEventId === event.id;
-				const isActionOwned = isActionOwnedEvent(event);
 				return (
 					<article
 						key={event.id}
@@ -113,8 +113,8 @@ export function UnitEventTimeline({
 							<span
 								className={`rounded-full px-2 py-0.5 ${
 									status === "logged"
-										? "bg-emerald-100 text-emerald-700"
-										: "bg-amber-100 text-amber-700"
+										? "bg-success/15 text-success"
+										: "bg-warning/15 text-warning"
 								}`}
 							>
 								{status === "logged" ? "Registrado" : "Planificado"}
@@ -127,11 +127,6 @@ export function UnitEventTimeline({
 									Monto: ${Number(event.amount)} {event.currency ?? ""}
 								</span>
 							) : null}
-							{isActionOwned ? (
-								<span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
-									Gestionado por accion
-								</span>
-							) : null}
 						</div>
 						{event.notes ? (
 							<p className="mt-1 text-sm text-(--v2-ink-soft)">{event.notes}</p>
@@ -139,23 +134,26 @@ export function UnitEventTimeline({
 						{onEditEvent || onDeleteEvent ? (
 							<div className="mt-3 flex items-center gap-2">
 								{onEditEvent && canEditEvent(event) ? (
-									<button
+									<Button
 										type="button"
+										variant="outline"
+										size="sm"
 										onClick={() => onEditEvent(event)}
-										className="rounded-full border border-(--v2-border) px-3 py-1 text-xs font-semibold"
 									>
 										{isEditing ? "Editando" : "Editar"}
-									</button>
+									</Button>
 								) : null}
 								{onDeleteEvent && canDeleteEvent(event) ? (
-									<button
+									<Button
 										type="button"
+										variant="ghost"
+										size="sm"
 										onClick={() => void onDeleteEvent(event)}
 										disabled={isDeleting}
-										className="rounded-full border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 disabled:opacity-60"
+										className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 									>
 										{isDeleting ? "Eliminando..." : "Eliminar"}
-									</button>
+									</Button>
 								) : null}
 							</div>
 						) : null}

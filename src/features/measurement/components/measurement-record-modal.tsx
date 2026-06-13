@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -130,7 +138,7 @@ export const MeasurementRecordModal = ({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button className="">{t("modalButtonTrigger")}</Button>
+				<Button variant="default">{t("modalButtonTrigger")}</Button>
 			</DialogTrigger>
 			<DialogContent
 				aria-describedby={undefined}
@@ -142,7 +150,7 @@ export const MeasurementRecordModal = ({
 					</DialogTitle>
 				</DialogHeader>
 				{isLoading ? (
-					<div className="h-4 bg-gray-300 rounded animate-pulse w-5/6"></div>
+					<div className="h-4 bg-muted rounded animate-pulse w-5/6"></div>
 				) : measurementData.length === 0 ? (
 					t("missingData")
 				) : (
@@ -201,26 +209,33 @@ export const MeasurementRecordModal = ({
 						<div className="flex flex-col items-center gap-2">
 							<div className="flex flex-wrap items-center justify-center gap-2">
 								<div className="flex items-center gap-2">
-									<label className="text-caption whitespace-nowrap text-muted-foreground">
+									<Label className="text-caption whitespace-nowrap text-muted-foreground">
 										{t("perPage")}
-									</label>
-									<select
-										className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-										value={pageSize}
-										onChange={(event) => {
-											setPageSize(Number(event.target.value));
+									</Label>
+									<Select
+										value={String(pageSize)}
+										onValueChange={(value) => {
+											setPageSize(Number(value));
 											setPage(1);
 										}}
 									>
-										{pageSizeOptions.map((option) => (
-											<option
-												key={option}
-												value={option}
-											>
-												{option}
-											</option>
-										))}
-									</select>
+										<SelectTrigger
+											size="sm"
+											className="w-20"
+										>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{pageSizeOptions.map((option) => (
+												<SelectItem
+													key={option}
+													value={String(option)}
+												>
+													{option}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
 								</div>
 								<div className="flex items-center gap-2">
 									<Button

@@ -132,7 +132,7 @@ export const ProfitabilityReport = ({
 											<p className="text-xs font-medium text-muted-foreground">
 												Gastos
 											</p>
-											<p className="text-lg font-semibold text-red-600">
+											<p className="text-lg font-semibold text-destructive">
 												{formatCurrency(curr.expense_total, curr.currency)}
 											</p>
 										</div>
@@ -142,7 +142,7 @@ export const ProfitabilityReport = ({
 											</p>
 											<p
 												className={`text-lg font-semibold ${
-													curr.net >= 0 ? "text-green-600" : "text-red-600"
+													curr.net >= 0 ? "text-success" : "text-destructive"
 												}`}
 											>
 												{formatCurrency(curr.net, curr.currency)}
@@ -181,7 +181,7 @@ export const ProfitabilityReport = ({
 										</span>
 										<span
 											className={`text-right font-medium ${
-												net >= 0 ? "text-green-600" : "text-red-600"
+												net >= 0 ? "text-success" : "text-destructive"
 											}`}
 										>
 											{formatCurrency(net, row.currency)}

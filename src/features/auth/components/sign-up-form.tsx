@@ -63,7 +63,7 @@ export const SignUpForm = ({
 										{email}
 										<Link
 											to="/signup"
-											className="ml-2 text-blue-600 underline text-xs"
+											className="ml-2 text-info underline text-xs"
 										>
 											No soy yo?
 										</Link>{" "}

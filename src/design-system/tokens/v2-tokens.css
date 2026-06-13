@@ -1,4 +1,9 @@
-.v2-theme {
+/* v2 design tokens are defined on :root (global) — NOT scoped to .v2-theme — so
+   they resolve everywhere, including auth pages and Radix portals (Dialog/Sheet/
+   Popover content portals to document.body, outside any app wrapper). Scoping them
+   to .v2-theme previously left these surfaces with undefined --v2-* tokens.
+   The .v2-theme class (still applied on the shell) is now an inert page marker. */
+:root {
   --v2-ink: oklch(0.24 0.07 220);
   --v2-ink-soft: oklch(0.43 0.05 220);
   --v2-bg: oklch(0.98 0.01 95);
@@ -10,6 +15,67 @@
   --v2-gradient: radial-gradient(circle at 15% 15%, hsl(150 45% 92%) 0, hsl(66 55% 96%) 35%, hsl(0 0% 100%) 100%);
   --v2-font-display: Sora, Poppins, "Segoe UI", sans-serif;
   --v2-font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+
+  /* v2 extended palette — captured from ad-hoc hex usage so utilities reference
+     tokens instead of inline hex. Values preserved exactly; rationalize/scale
+     these into a smaller set (and add dark-mode overrides) during design pass. */
+  /* Surfaces & creams */
+  --v2-cream: #f5efe0;
+  --v2-cream-50: #fef9f3;
+  --v2-cream-100: #fffef9;
+  --v2-cream-200: #f9f5ea;
+  --v2-cream-300: #f8f3ed;
+  --v2-cream-400: #f7f5f2;
+  --v2-cream-500: #f2ede7;
+  --v2-paper: #f8f8f7;
+  --v2-overlay: #ffffffcc;
+  /* Mints & sages */
+  --v2-mint-50: #f5f8f6;
+  --v2-mint-100: #dff1e8;
+  --v2-mint-200: #ccead6;
+  --v2-sage-50: #ecf0e8;
+  /* Sand & gold */
+  --v2-sand: #e7d7ae;
+  --v2-gold-soft: #efd97b;
+  --v2-gold: #f5a000;
+  /* Light borders / cool grays */
+  --v2-border-cool: #bfc8c9;
+  --v2-border-mint: #d9e2dc;
+  --v2-border-sage: #d2ddd7;
+  --v2-border-sage-2: #c9d6d0;
+  --v2-ring-mint: #d6e7df;
+  --v2-gray-200: #d7d9dd;
+  --v2-gray-300: #cfd2d6;
+  /* Inks (warm near-black) */
+  --v2-charcoal: #1f211d;
+  --v2-charcoal-90: #1d1b18;
+  /* Slate / muted text */
+  --v2-slate: #6c798f;
+  --v2-slate-400: #7d9098;
+  --v2-slate-500: #5f7a84;
+  --v2-slate-600: #486675;
+  --v2-slate-700: #3f484a;
+  --v2-stone: #67695f;
+  /* Navy headings */
+  --v2-navy: #243246;
+  --v2-navy-700: #123240;
+  --v2-navy-800: #0b3445;
+  --v2-navy-900: #072e42;
+  --v2-teal-600: #335a69;
+  /* Teals & forest greens (brand) */
+  --v2-teal-700: #0d5c63;
+  --v2-teal-900: #004349;
+  --v2-emerald-600: #2f6f5a;
+  --v2-emerald-700: #0e6b49;
+  --v2-forest-600: #324c3e;
+  --v2-forest-700: #1f5f4a;
+  --v2-forest-800: #0f4b3a;
+  --v2-forest-900: #0d3f31;
+  /* Browns */
+  --v2-brown: #6f5413;
+  --v2-brown-900: #5c3100;
+  /* Danger */
+  --v2-danger: #b91c1c;
 }
 
 .v2-page {

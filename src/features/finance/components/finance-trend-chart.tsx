@@ -33,11 +33,11 @@ export const FinanceTrendChart = ({
 				<CardTitle className="text-lg">Tendencia de caja</CardTitle>
 				<div className="flex items-center gap-2 text-xs text-muted-foreground">
 					<span className="inline-flex items-center gap-1">
-						<span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+						<span className="h-2.5 w-2.5 rounded-full bg-success" />
 						Ingresos
 					</span>
 					<span className="inline-flex items-center gap-1">
-						<span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+						<span className="h-2.5 w-2.5 rounded-full bg-destructive" />
 						Gastos
 					</span>
 				</div>
@@ -75,20 +75,20 @@ export const FinanceTrendChart = ({
 									>
 										<span className="text-muted-foreground">{row.label}</span>
 										<div className="space-y-1.5">
-											<div className="h-2 overflow-hidden rounded-full bg-emerald-100">
+											<div className="h-2 overflow-hidden rounded-full bg-success/15">
 												<div
-													className="h-full rounded-full bg-emerald-500"
+													className="h-full rounded-full bg-success"
 													style={{ width: `${(row.income / maxValue) * 100}%` }}
 												/>
 											</div>
-											<div className="h-2 overflow-hidden rounded-full bg-red-100">
+											<div className="h-2 overflow-hidden rounded-full bg-destructive/15">
 												<div
-													className="h-full rounded-full bg-red-500"
+													className="h-full rounded-full bg-destructive"
 													style={{ width: `${(row.expense / maxValue) * 100}%` }}
 												/>
 											</div>
 										</div>
-										<span className={row.net >= 0 ? "text-emerald-700" : "text-red-700"}>
+										<span className={row.net >= 0 ? "text-success" : "text-destructive"}>
 											{formatCurrency(row.net, section.currency)}
 										</span>
 									</div>
