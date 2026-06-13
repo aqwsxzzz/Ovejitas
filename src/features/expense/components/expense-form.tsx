@@ -90,6 +90,7 @@ export const ExpenseForm = ({
 					</Button>
 					<Button
 						type="submit"
+						variant="default"
 						disabled={isCreating || isUpdating}
 					>
 						{expense ? t("form.actions.save") : t("form.actions.create")}

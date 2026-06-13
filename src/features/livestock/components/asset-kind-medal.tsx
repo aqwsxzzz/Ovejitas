@@ -18,27 +18,27 @@ const KIND_MEDAL_CONFIG: Record<
 	animal: {
 		icon: PawPrint,
 		label: "Animal",
-		className: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+		className: "bg-warning/10 text-warning ring-1 ring-warning/30",
 	},
 	crop: {
 		icon: Sprout,
 		label: "Cultivo",
-		className: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+		className: "bg-success/10 text-success ring-1 ring-success/30",
 	},
 	equipment: {
 		icon: Wrench,
 		label: "Equipo",
-		className: "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
+		className: "bg-muted text-foreground ring-1 ring-border",
 	},
 	material: {
 		icon: Package,
 		label: "Material",
-		className: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
+		className: "bg-warning/10 text-warning ring-1 ring-warning/30",
 	},
 	location: {
 		icon: MapPin,
 		label: "Ubicacion",
-		className: "bg-sky-50 text-sky-700 ring-1 ring-sky-200",
+		className: "bg-info/10 text-info ring-1 ring-info/30",
 	},
 };
 

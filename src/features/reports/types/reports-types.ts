@@ -54,6 +54,7 @@ export interface IAggregateRow {
 	measure: AggregateMeasure;
 	value: string; // decimal as string
 	asset_id?: number | null;
+	unit?: Unit | null;
 }
 
 export interface IAggregateMeta {

@@ -152,7 +152,7 @@ export const FeedLotPanel = ({ farmId }: FeedLotPanelProps) => {
 								{t("feedLots.newButton")}
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="max-h-[90vh] overflow-y-auto">
+						<DialogContent className="max-w-sm">
 							<DialogTitle>{t("feedLots.modal.title")}</DialogTitle>
 							<DialogDescription>
 								{t("feedLots.modal.description")}

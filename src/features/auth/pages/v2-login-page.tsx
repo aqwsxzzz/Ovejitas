@@ -22,12 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useLogin } from "@/features/auth/api/auth-queries";
-import {
-	V2AuthPageFrame,
-	v2AuthInputClassName,
-	v2AuthLabelClassName,
-	v2AuthSubmitClassName,
-} from "@/features/auth/components/v2-auth-page-frame";
+import { V2AuthPageFrame } from "@/features/auth/components/v2-auth-page-frame";
 
 const loginSchema = z.object({
 	email: z.string().email("Ingresa un correo electronico valido."),
@@ -66,14 +61,14 @@ export function V2LoginPage() {
 					No tienes una cuenta?{" "}
 					<Link
 						to="/v2/signup"
-						className="font-semibold text-[#0b3445] underline-offset-4 hover:underline"
+						className="font-semibold text-primary underline-offset-4 hover:underline"
 					>
 						Crear cuenta
 					</Link>
 				</p>
 			}
 			bottomSlot={
-				<div className="flex items-center justify-center gap-2 rounded-full border border-[rgba(27,54,48,0.1)] bg-white/80 px-4 py-2 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-[rgba(27,54,48,0.45)]">
+				<div className="text-muted-foreground flex items-center justify-center gap-2 text-xs font-medium uppercase tracking-[0.16em]">
 					<ShieldCheck className="h-3.5 w-3.5" />
 					Seguridad de nivel empresarial
 				</div>
@@ -88,10 +83,8 @@ export function V2LoginPage() {
 						control={form.control}
 						name="email"
 						render={({ field }) => (
-							<FormItem className="space-y-1.5">
-								<FormLabel className={v2AuthLabelClassName}>
-									Correo electronico
-								</FormLabel>
+							<FormItem>
+								<FormLabel>Correo electronico</FormLabel>
 								<FormControl>
 									<Input
 										type="email"
@@ -100,7 +93,6 @@ export function V2LoginPage() {
 										autoCorrect="off"
 										spellCheck={false}
 										placeholder="manager@farm.com"
-										className={v2AuthInputClassName}
 										{...field}
 									/>
 								</FormControl>
@@ -113,12 +105,10 @@ export function V2LoginPage() {
 						control={form.control}
 						name="password"
 						render={({ field }) => (
-							<FormItem className="space-y-1.5">
+							<FormItem>
 								<div className="flex items-center justify-between gap-3">
-									<FormLabel className={v2AuthLabelClassName}>
-										Contrasena
-									</FormLabel>
-									<span className="text-xs font-medium text-[rgba(27,54,48,0.58)]">
+									<FormLabel>Contrasena</FormLabel>
+									<span className="text-muted-foreground text-xs font-medium">
 										Recuperacion pronto
 									</span>
 								</div>
@@ -128,7 +118,7 @@ export function V2LoginPage() {
 											type={isPasswordVisible ? "text" : "password"}
 											autoComplete="current-password"
 											placeholder="Ingresa tu contrasena"
-											className={`${v2AuthInputClassName} pr-12`}
+											className="pr-10"
 											{...field}
 										/>
 									</FormControl>
@@ -137,7 +127,7 @@ export function V2LoginPage() {
 										variant="ghost"
 										size="icon"
 										onClick={() => setIsPasswordVisible((current) => !current)}
-										className="absolute inset-y-0 right-0 h-full w-12 rounded-none bg-transparent text-[rgba(27,54,48,0.65)] shadow-none hover:bg-transparent hover:text-(--v2-ink)"
+										className="text-muted-foreground absolute inset-y-0 right-0 h-full w-10 hover:bg-transparent"
 										aria-label={
 											isPasswordVisible
 												? "Ocultar contrasena"
@@ -159,7 +149,7 @@ export function V2LoginPage() {
 					<Button
 						type="submit"
 						disabled={isPending}
-						className={v2AuthSubmitClassName}
+						className="w-full"
 					>
 						{isPending ? <Loader className="h-4 w-4 animate-spin" /> : null}
 						Iniciar sesion

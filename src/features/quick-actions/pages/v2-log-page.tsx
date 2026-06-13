@@ -1,249 +1,105 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import type { FormEvent } from "react";
 
-import { useGetUserProfile } from "@/features/auth/api/auth-queries";
-import {
-	createFlockAcquisitionByAssetId,
-	createIndividual,
-	createLivestockAsset,
-} from "@/features/livestock/api/livestock-api";
-import { livestockQueryKeys } from "@/features/livestock/api/livestock-queries";
-import type {
-	IndividualSex,
-	LivestockAssetKind,
-	LivestockAssetMode,
-} from "@/features/livestock/types/livestock-types";
-
-function parseUnitIdFromPath(path?: string): string | null {
-	if (!path) return null;
-	const pathOnly = path.split("?")[0] ?? path;
-	const match = pathOnly.match(/\/v2\/production-units\/flock\/([^/]+)/);
-	return match?.[1] ? decodeURIComponent(match[1]) : null;
-}
-
-const QUICK_CREATE_ASSET_BY_ACTION_ID: Partial<
-	Record<
-		string,
-		{ kind: LivestockAssetKind; title: string; submitLabel: string }
-	>
-> = {
-	"nuevo-material": {
-		kind: "material",
-		title: "Crear material",
-		submitLabel: "Crear material",
-	},
-	"nuevo-cultivo": {
-		kind: "crop",
-		title: "Crear cultivo",
-		submitLabel: "Crear cultivo",
-	},
-	"nuevo-equipo": {
-		kind: "equipment",
-		title: "Crear equipo",
-		submitLabel: "Crear equipo",
-	},
-	"nueva-ubicacion": {
-		kind: "location",
-		title: "Crear ubicacion",
-		submitLabel: "Crear ubicacion",
-	},
-};
+import { LogActionCard } from "@/features/quick-actions/log/log-action-card";
+import { LogCreateAssetAction } from "@/features/quick-actions/log/log-create-asset-action";
+import { LogCreateIndividualAction } from "@/features/quick-actions/log/log-create-individual-action";
+import { LogCreateLotAction } from "@/features/quick-actions/log/log-create-lot-action";
+import { LogEventAction } from "@/features/quick-actions/log/log-event-action";
+import { LogFeedingAction } from "@/features/quick-actions/log/log-feeding-action";
+import { LogMortalityAction } from "@/features/quick-actions/log/log-mortality-action";
+import { resolveLogAction } from "@/features/quick-actions/log/log-action-config";
+import type { LogAction } from "@/features/quick-actions/log/log-action-config";
+import { useLogTargetAsset } from "@/features/quick-actions/log/use-log-target-asset";
 
 function resolveReturnPath(sourcePath?: string): string {
 	if (!sourcePath || sourcePath.startsWith("/v2/log")) {
 		return "/v2/dashboard";
 	}
-
 	return sourcePath;
 }
 
-function ActionCard(props: {
-	title: string;
-	subtitle: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<div className="v2-card p-5">
-			<p className="v2-kicker">{props.title}</p>
-			<p className="mt-1 text-sm text-(--v2-ink-soft)">{props.subtitle}</p>
-			<div className="mt-4 space-y-3">{props.children}</div>
-		</div>
-	);
+interface LogActionRendererProps {
+	action: LogAction;
+	farmId: string;
+	contextAssetId: string | null;
+	onDone: () => void;
+}
+
+function LogActionRenderer({
+	action,
+	farmId,
+	contextAssetId,
+	onDone,
+}: LogActionRendererProps) {
+	switch (action.kind) {
+		case "lot-create":
+			return (
+				<LogCreateLotAction
+					farmId={farmId}
+					onDone={onDone}
+				/>
+			);
+		case "individual-create":
+			return (
+				<LogCreateIndividualAction
+					farmId={farmId}
+					unitId={contextAssetId}
+					onDone={onDone}
+				/>
+			);
+		case "asset-create":
+			return (
+				<LogCreateAssetAction
+					farmId={farmId}
+					assetKind={action.assetKind}
+					title={action.title}
+					submitLabel={action.submitLabel}
+					onDone={onDone}
+				/>
+			);
+		case "event":
+			return (
+				<LogEventAction
+					farmId={farmId}
+					contextAssetId={contextAssetId}
+					eventType={action.eventType}
+					title={action.title}
+					subtitle={action.subtitle}
+					assetKinds={action.assetKinds}
+					onDone={onDone}
+				/>
+			);
+		case "feeding":
+			return (
+				<LogFeedingAction
+					farmId={farmId}
+					contextAssetId={contextAssetId}
+					title={action.title}
+					subtitle={action.subtitle}
+					onDone={onDone}
+				/>
+			);
+		case "mortality":
+			return (
+				<LogMortalityAction
+					farmId={farmId}
+					contextAssetId={contextAssetId}
+					title={action.title}
+					subtitle={action.subtitle}
+					onDone={onDone}
+				/>
+			);
+	}
 }
 
 export function V2LogPage() {
 	const search = useSearch({ from: "/v2/log" });
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
-	const { data: currentUser } = useGetUserProfile();
-	const farmId = currentUser?.lastVisitedFarmId ?? "";
-	const unitId = useMemo(
-		() => parseUnitIdFromPath(search.sourcePath),
-		[search.sourcePath],
-	);
-
-	const [isSaving, setIsSaving] = useState(false);
-	const [message, setMessage] = useState("");
-
-	const [lotName, setLotName] = useState("");
-	const [lotLocation, setLotLocation] = useState("");
-	const [lotInitialAmount, setLotInitialAmount] = useState("");
-	const [lotDescription, setLotDescription] = useState("");
-	const [lotMode, setLotMode] = useState<LivestockAssetMode>("aggregated");
-
-	const [individualName, setIndividualName] = useState("");
-	const [individualTag, setIndividualTag] = useState("");
-	const [individualSex, setIndividualSex] = useState<IndividualSex>("unknown");
-	const [assetName, setAssetName] = useState("");
-	const [assetLocation, setAssetLocation] = useState("");
-	const [assetDescription, setAssetDescription] = useState("");
+	const { farmId, contextAssetId } = useLogTargetAsset(search.sourcePath);
+	const action = resolveLogAction(search.actionId);
 
 	const goBack = () =>
-		navigate({
-			to: resolveReturnPath(search.sourcePath),
-			replace: true,
-		});
-
-	async function handleCreateLot(event: FormEvent) {
-		event.preventDefault();
-		if (!farmId || !lotName.trim()) return;
-		const parsedInitialAmount = Number(lotInitialAmount);
-		if (
-			lotMode === "aggregated" &&
-			(!lotInitialAmount.trim() ||
-				!Number.isFinite(parsedInitialAmount) ||
-				parsedInitialAmount <= 0 ||
-				!Number.isInteger(parsedInitialAmount))
-		) {
-			setMessage(
-				"Ingresa una cantidad inicial entera mayor que cero para el lote agrupado.",
-			);
-			return;
-		}
-		setIsSaving(true);
-		setMessage("");
-		try {
-			const createdAsset = await createLivestockAsset({
-				farmId,
-				data: {
-					name: lotName.trim(),
-					location: lotLocation.trim() || undefined,
-					description: lotDescription.trim() || undefined,
-					kind: "animal",
-					mode: lotMode,
-				},
-			});
-
-			if (lotMode === "aggregated") {
-				await createFlockAcquisitionByAssetId({
-					farmId,
-					assetId: String(createdAsset.id),
-					payload: {
-						occurred_at: new Date().toISOString(),
-						quantity: parsedInitialAmount,
-						amount: null,
-					},
-				});
-			}
-
-			await Promise.all([
-				queryClient.invalidateQueries({
-					queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
-				}),
-				queryClient.invalidateQueries({
-					queryKey: [...livestockQueryKeys.all, "eventsByAsset", farmId],
-				}),
-				queryClient.invalidateQueries({
-					queryKey: [
-						...livestockQueryKeys.all,
-						"eventsByAssetInfinite",
-						farmId,
-					],
-				}),
-			]);
-
-			setMessage("Lote creado.");
-			goBack();
-		} catch {
-			setMessage(
-				"No se pudo crear el lote. Revisa los datos e intenta de nuevo.",
-			);
-		} finally {
-			setIsSaving(false);
-		}
-	}
-
-	async function handleCreateIndividual(event: FormEvent) {
-		event.preventDefault();
-		if (!farmId || !unitId || !individualTag.trim()) return;
-		setIsSaving(true);
-		setMessage("");
-		try {
-			await createIndividual({
-				farmId,
-				assetId: unitId,
-				data: {
-					name: individualName.trim() || individualTag.trim(),
-					tag: individualTag.trim(),
-					extra: { sex: individualSex },
-				},
-			});
-			await queryClient.invalidateQueries({
-				queryKey: [
-					...livestockQueryKeys.all,
-					"individualsByAsset",
-					farmId,
-					unitId,
-				],
-			});
-			setMessage("Individual creado.");
-			goBack();
-		} finally {
-			setIsSaving(false);
-		}
-	}
-
-	async function handleCreateAsset(event: FormEvent) {
-		event.preventDefault();
-		const actionId = search.actionId;
-		const config = actionId
-			? QUICK_CREATE_ASSET_BY_ACTION_ID[actionId]
-			: undefined;
-		if (!farmId || !config || !assetName.trim()) return;
-
-		setIsSaving(true);
-		setMessage("");
-		try {
-			await createLivestockAsset({
-				farmId,
-				data: {
-					name: assetName.trim(),
-					location: assetLocation.trim() || undefined,
-					description: assetDescription.trim() || undefined,
-					kind: config.kind,
-					mode: "aggregated" as LivestockAssetMode,
-				},
-			});
-
-			await queryClient.invalidateQueries({
-				queryKey: [...livestockQueryKeys.all, "assetsByFarm", farmId],
-			});
-
-			setMessage(`${config.title} creado.`);
-			goBack();
-		} catch {
-			setMessage(`No se pudo crear el activo. Intenta de nuevo.`);
-		} finally {
-			setIsSaving(false);
-		}
-	}
-
-	const actionId = search.actionId;
-	const quickCreateAssetConfig = actionId
-		? QUICK_CREATE_ASSET_BY_ACTION_ID[actionId]
-		: undefined;
+		navigate({ to: resolveReturnPath(search.sourcePath), replace: true });
 
 	return (
 		<section className="space-y-4">
@@ -260,191 +116,31 @@ export function V2LogPage() {
 			</div>
 
 			{!farmId ? (
-				<ActionCard
+				<LogActionCard
 					title="Granja"
 					subtitle="Necesitas una granja activa para crear datos."
 				>
 					<p className="text-sm text-(--v2-ink-soft)">
 						Selecciona una granja y vuelve a intentarlo.
 					</p>
-				</ActionCard>
-			) : actionId === "nuevo-lote" ? (
-				<ActionCard
-					title="Crear lote"
-					subtitle="Este flujo solo crea registros nuevos."
-				>
-					<form
-						className="space-y-3"
-						onSubmit={handleCreateLot}
-					>
-						<div className="space-y-1">
-							<p className="text-xs font-medium text-(--v2-ink-soft)">
-								Modo de seguimiento
-							</p>
-							<div className="flex gap-2">
-								<button
-									type="button"
-									onClick={() => setLotMode("aggregated")}
-									className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-										lotMode === "aggregated"
-											? "border-(--v2-ink) bg-(--v2-ink) text-white"
-											: "border-(--v2-border) bg-white"
-									}`}
-								>
-									Agrupado
-								</button>
-								<button
-									type="button"
-									onClick={() => setLotMode("individual")}
-									className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-										lotMode === "individual"
-											? "border-(--v2-ink) bg-(--v2-ink) text-white"
-											: "border-(--v2-border) bg-white"
-									}`}
-								>
-									Individual
-								</button>
-							</div>
-							<p className="text-xs text-(--v2-ink-soft)">
-								{lotMode === "aggregated"
-									? "Seguimiento por conteo grupal"
-									: "Seguimiento por miembros individuales"}
-							</p>
-						</div>
-						<input
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Nombre del lote"
-							value={lotName}
-							onChange={(event) => setLotName(event.target.value)}
-						/>
-						<input
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Ubicacion"
-							value={lotLocation}
-							onChange={(event) => setLotLocation(event.target.value)}
-						/>
-						{lotMode === "aggregated" ? (
-							<>
-								<input
-									type="number"
-									min="0"
-									step="1"
-									className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-									placeholder="Cantidad inicial de animales"
-									value={lotInitialAmount}
-									onChange={(event) => setLotInitialAmount(event.target.value)}
-								/>
-							</>
-						) : null}
-						<textarea
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Descripcion (ej: 120 gallinas ponedoras, edad promedio 8 meses)"
-							rows={3}
-							value={lotDescription}
-							onChange={(event) => setLotDescription(event.target.value)}
-						/>
-						<button
-							disabled={isSaving}
-							className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white"
-						>
-							{isSaving ? "Guardando..." : "Crear lote"}
-						</button>
-					</form>
-				</ActionCard>
-			) : actionId === "nuevo-animal" ? (
-				<ActionCard
-					title="Crear individual"
-					subtitle="Solo creacion. Editar y eliminar se hace en la vista del lote."
-				>
-					{!unitId ? (
-						<p className="text-sm text-(--v2-ink-soft)">
-							Abre Acciones rapidas desde un lote para crear un individuo.
-						</p>
-					) : (
-						<form
-							className="space-y-3"
-							onSubmit={handleCreateIndividual}
-						>
-							<input
-								className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-								placeholder="Nombre"
-								value={individualName}
-								onChange={(event) => setIndividualName(event.target.value)}
-							/>
-							<input
-								className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-								placeholder="Identificador"
-								value={individualTag}
-								onChange={(event) => setIndividualTag(event.target.value)}
-							/>
-							<select
-								className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-								value={individualSex}
-								onChange={(event) =>
-									setIndividualSex(event.target.value as IndividualSex)
-								}
-							>
-								<option value="unknown">Desconocido</option>
-								<option value="female">Hembra</option>
-								<option value="male">Macho</option>
-							</select>
-							<button
-								disabled={isSaving}
-								className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white"
-							>
-								{isSaving ? "Guardando..." : "Crear individuo"}
-							</button>
-						</form>
-					)}
-				</ActionCard>
-			) : quickCreateAssetConfig ? (
-				<ActionCard
-					title={quickCreateAssetConfig.title}
-					subtitle="Este flujo crea un nuevo activo para el tipo seleccionado."
-				>
-					<form
-						className="space-y-3"
-						onSubmit={handleCreateAsset}
-					>
-						<input
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Nombre"
-							value={assetName}
-							onChange={(event) => setAssetName(event.target.value)}
-						/>
-						<input
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Ubicacion"
-							value={assetLocation}
-							onChange={(event) => setAssetLocation(event.target.value)}
-						/>
-						<textarea
-							className="w-full rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-							placeholder="Descripcion"
-							rows={3}
-							value={assetDescription}
-							onChange={(event) => setAssetDescription(event.target.value)}
-						/>
-						<button
-							disabled={isSaving}
-							className="rounded-full bg-(--v2-ink) px-4 py-2 text-sm font-semibold text-white"
-						>
-							{isSaving ? "Guardando..." : quickCreateAssetConfig.submitLabel}
-						</button>
-					</form>
-				</ActionCard>
-			) : (
-				<ActionCard
+				</LogActionCard>
+			) : !action ? (
+				<LogActionCard
 					title="Pendiente"
 					subtitle="Esta accion todavia no tiene formulario."
 				>
 					<p className="text-sm text-(--v2-ink-soft)">
-						Accion: {actionId ?? "sin accion"}
+						Accion: {search.actionId ?? "sin accion"}
 					</p>
-				</ActionCard>
+				</LogActionCard>
+			) : (
+				<LogActionRenderer
+					action={action}
+					farmId={farmId}
+					contextAssetId={contextAssetId}
+					onDone={goBack}
+				/>
 			)}
-
-			{message ? <p className="text-sm text-emerald-700">{message}</p> : null}
 		</section>
 	);
 }

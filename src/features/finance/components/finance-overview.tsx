@@ -188,15 +188,15 @@ export const FinanceOverview = ({ farmId, filters, assets }: FinanceOverviewProp
 							<CardContent className="space-y-3 text-sm">
 								<div>
 									<p className="text-muted-foreground">Ingresos</p>
-									<p className="text-xl font-semibold text-emerald-700">{formatCurrency(summary.income, summary.currency)}</p>
+									<p className="text-xl font-semibold text-success">{formatCurrency(summary.income, summary.currency)}</p>
 								</div>
 								<div>
 									<p className="text-muted-foreground">Gastos</p>
-									<p className="text-xl font-semibold text-red-700">{formatCurrency(summary.expense, summary.currency)}</p>
+									<p className="text-xl font-semibold text-destructive">{formatCurrency(summary.expense, summary.currency)}</p>
 								</div>
 								<div>
 									<p className="text-muted-foreground">Neto</p>
-									<p className={summary.net >= 0 ? "text-xl font-semibold text-emerald-700" : "text-xl font-semibold text-red-700"}>
+									<p className={summary.net >= 0 ? "text-xl font-semibold text-success" : "text-xl font-semibold text-destructive"}>
 										{formatCurrency(summary.net, summary.currency)}
 									</p>
 								</div>
@@ -236,7 +236,7 @@ export const FinanceOverview = ({ farmId, filters, assets }: FinanceOverviewProp
 										<p className="text-xs text-muted-foreground">{formatAssetKind(assetsById.get(row.asset_id)?.kind ?? "all")}</p>
 									</div>
 									<div className="text-right">
-										<p className={parseDecimal(row.net) >= 0 ? "font-semibold text-emerald-700" : "font-semibold text-red-700"}>
+										<p className={parseDecimal(row.net) >= 0 ? "font-semibold text-success" : "font-semibold text-destructive"}>
 											{formatCurrency(parseDecimal(row.net), row.currency)}
 										</p>
 										<p className="text-xs text-muted-foreground">{row.currency}</p>

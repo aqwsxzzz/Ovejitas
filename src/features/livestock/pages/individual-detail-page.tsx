@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	useGetIndividualById,
@@ -89,14 +90,14 @@ export function IndividualDetailPage({
 	if (isLoadingIndividual || isLoadingList) {
 		return (
 			<div className="flex justify-center py-8">
-				<div className="animate-spin text-gray-400">⏳</div>
+				<div className="animate-spin text-muted-foreground">⏳</div>
 			</div>
 		);
 	}
 
 	if (!individual) {
 		return (
-			<div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center text-red-700">
+			<div className="rounded-lg border border-destructive/30 bg-destructive/10 p-6 text-center text-destructive">
 				No se encontro el individuo
 			</div>
 		);
@@ -104,7 +105,8 @@ export function IndividualDetailPage({
 
 	return (
 		<div className="space-y-4">
-			<button
+			<Button
+				variant="link"
 				onClick={() =>
 					navigate({
 						to: `/v2/production-units/flock/$unitId`,
@@ -112,10 +114,10 @@ export function IndividualDetailPage({
 						search: { eventType: undefined },
 					})
 				}
-				className="text-sm text-blue-600 hover:underline"
+				className="h-auto p-0 text-sm text-info"
 			>
 				← Volver al lote
-			</button>
+			</Button>
 
 			<IndividualDetail
 				individual={individual}

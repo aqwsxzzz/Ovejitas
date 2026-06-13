@@ -1,34 +1,76 @@
 import type {
-	IFarmInvitationResponse,
-	IFarmInvitationPayload,
+	IAcceptInvitationPayload,
+	IInvitationCreatePayload,
+	IInvitationCreateResponse,
+	IInvitationListResponse,
+	IInvitationResolve,
+	InvitationStatus,
 } from "@/features/farm-invitations/types/farm-invitations-types";
-import type { IResponse } from "@/lib/axios";
+import type { ITokenPair } from "@/features/auth/types/auth-types";
 import { axiosHelper } from "@/lib/axios/axios-helper";
 
-export const sendFarmInvitation = ({
+export const createFarmInvitation = ({
+	farmId,
 	payload,
 }: {
-	payload: IFarmInvitationPayload;
+	farmId: string;
+	payload: IInvitationCreatePayload;
 }) =>
-	axiosHelper<IResponse<IFarmInvitationResponse>>({
+	axiosHelper<IInvitationCreateResponse>({
 		method: "post",
-		url: "/invitations",
+		url: `/api/v1/farms/${farmId}/invitations`,
 		data: payload,
 	});
 
-export const getFarmInvitationList = ({
+export const getFarmInvitations = ({
 	farmId,
-	page,
-	limit,
 	status,
+	page = 1,
+	pageSize = 20,
 }: {
 	farmId: string;
+	status?: InvitationStatus;
 	page?: number;
-	limit?: number;
-	status?: IFarmInvitationResponse["status"];
+	pageSize?: number;
 }) =>
-	axiosHelper<IResponse<IFarmInvitationResponse[]>>({
+	axiosHelper<IInvitationListResponse>({
 		method: "get",
-		url: "/invitations",
-		urlParams: { farmId, page, limit, status },
+		url: `/api/v1/farms/${farmId}/invitations`,
+		urlParams: {
+			...(status ? { status } : {}),
+			page,
+			page_size: pageSize,
+			sort: "-created_at",
+		},
+	});
+
+export const revokeFarmInvitation = ({
+	farmId,
+	invitationId,
+}: {
+	farmId: string;
+	invitationId: number;
+}) =>
+	axiosHelper<void>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/invitations/${invitationId}/revoke`,
+	});
+
+export const resolveInvitationToken = ({ token }: { token: string }) =>
+	axiosHelper<IInvitationResolve>({
+		method: "get",
+		url: `/api/v1/invitations/${token}`,
+	});
+
+export const acceptInvitation = ({
+	token,
+	payload,
+}: {
+	token: string;
+	payload: IAcceptInvitationPayload;
+}) =>
+	axiosHelper<ITokenPair>({
+		method: "post",
+		url: `/api/v1/invitations/${token}/accept`,
+		data: payload,
 	});

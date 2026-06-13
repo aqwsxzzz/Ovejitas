@@ -1,154 +1,117 @@
 import {
-	getFarmInvitationList,
-	sendFarmInvitation,
+	acceptInvitation,
+	createFarmInvitation,
+	getFarmInvitations,
+	resolveInvitationToken,
+	revokeFarmInvitation,
 } from "@/features/farm-invitations/api/farm-invitations-api";
 import type {
-	IFarmInvitationPayload,
-	IFarmInvitationResponse,
+	IAcceptInvitationPayload,
+	IInvitationCreatePayload,
+	IInvitationCreateResponse,
+	InvitationRole,
+	InvitationStatus,
 } from "@/features/farm-invitations/types/farm-invitations-types";
-import {
-	useInfiniteQuery,
-	useMutation,
-	useQuery,
-	useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-const DEFAULT_LIST_PAGE_SIZE = 20;
-const LEGACY_LIST_PAGE_SIZE = 100;
 
 export const farmInvitationsQueryKeys = {
 	all: ["farm-invitations"] as const,
-	invitationsList: (
-		farmId: string,
-		status?: IFarmInvitationResponse["status"],
-	) =>
+	list: (farmId: string, status?: InvitationStatus) =>
 		[
 			...farmInvitationsQueryKeys.all,
 			"list",
 			farmId,
 			...(status ? [status] : []),
 		] as const,
-	invitationsListPage: (farmId: string, limit: number) =>
-		[
-			...farmInvitationsQueryKeys.invitationsList(farmId),
-			"page",
-			limit,
-		] as const,
+	resolve: (token: string) =>
+		[...farmInvitationsQueryKeys.all, "resolve", token] as const,
 };
 
-export const useSendFarmInvitation = () => {
+export const useGetFarmInvitations = ({
+	farmId,
+	status,
+}: {
+	farmId: string;
+	status?: InvitationStatus;
+}) =>
+	useQuery({
+		queryKey: farmInvitationsQueryKeys.list(farmId, status),
+		queryFn: () => getFarmInvitations({ farmId, status }),
+		select: (data) => data.data,
+		enabled: !!farmId,
+		staleTime: 10_000,
+	});
+
+export const useCreateFarmInvitation = ({ farmId }: { farmId: string }) => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ payload }: { payload: IFarmInvitationPayload }) =>
-			sendFarmInvitation({ payload }),
+		mutationFn: (payload: IInvitationCreatePayload) =>
+			createFarmInvitation({ farmId, payload }),
 		onError: (error) => {
 			toast.error(error.message);
 		},
-		onSuccess: (_, { payload }) => {
-			toast.success("Invitation sent successfully");
+		onSuccess: () => {
 			void queryClient.invalidateQueries({
-				queryKey: farmInvitationsQueryKeys.invitationsList(payload.farmId),
+				queryKey: farmInvitationsQueryKeys.list(farmId),
 			});
 		},
 	});
 };
 
-export const useGetFarmInvitationsList = ({
-	farmId,
-	status,
-}: {
-	farmId: string;
-	status?: IFarmInvitationResponse["status"];
-}) =>
+export const useRevokeFarmInvitation = ({ farmId }: { farmId: string }) => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (invitationId: number) =>
+			revokeFarmInvitation({ farmId, invitationId }),
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			toast.success("Invitacion revocada");
+			void queryClient.invalidateQueries({
+				queryKey: farmInvitationsQueryKeys.list(farmId),
+			});
+		},
+	});
+};
+
+export const useRegenerateInvitation = ({ farmId }: { farmId: string }) => {
+	const queryClient = useQueryClient();
+
+	return useMutation<
+		IInvitationCreateResponse,
+		Error,
+		{ invitationId: number; email: string; role: InvitationRole }
+	>({
+		mutationFn: async ({ invitationId, email, role }) => {
+			await revokeFarmInvitation({ farmId, invitationId });
+			return createFarmInvitation({ farmId, payload: { email, role } });
+		},
+		onError: (error) => {
+			toast.error(error.message);
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: farmInvitationsQueryKeys.list(farmId),
+			});
+		},
+	});
+};
+
+export const useResolveInvitationToken = (token: string) =>
 	useQuery({
-		queryKey: farmInvitationsQueryKeys.invitationsList(farmId, status),
-		queryFn: () =>
-			getFarmInvitationList({
-				farmId,
-				page: 1,
-				limit: LEGACY_LIST_PAGE_SIZE,
-				status,
-			}),
-		select: (data) => data.data,
-		enabled: !!farmId,
-		staleTime: 10000, // 10 seconds
+		queryKey: farmInvitationsQueryKeys.resolve(token),
+		queryFn: () => resolveInvitationToken({ token }),
+		enabled: !!token,
+		retry: false,
+		staleTime: Infinity,
 	});
 
-export const useGetInfiniteFarmInvitationsList = ({
-	farmId,
-	limit = DEFAULT_LIST_PAGE_SIZE,
-}: {
-	farmId: string;
-	limit?: number;
-}) =>
-	useInfiniteQuery({
-		queryKey: farmInvitationsQueryKeys.invitationsListPage(farmId, limit),
-		queryFn: ({ pageParam }) =>
-			getFarmInvitationList({
-				farmId,
-				page: pageParam,
-				limit,
-			}),
-		initialPageParam: 1,
-		getNextPageParam: (lastPage) => {
-			const pagination = lastPage.meta?.pagination;
-			if (!pagination) {
-				return undefined;
-			}
-
-			return pagination.page < pagination.totalPages
-				? pagination.page + 1
-				: undefined;
-		},
-		select: (data) => {
-			const items = data.pages.flatMap((page) => page.data);
-			const latestPagination = data.pages.at(-1)?.meta?.pagination;
-
-			return {
-				items,
-				total: latestPagination?.total ?? items.length,
-				totalPages: latestPagination?.totalPages ?? 1,
-			};
-		},
-		enabled: !!farmId,
-		staleTime: 10000,
-	});
-
-export const useGetFarmInvitationsListPage = ({
-	farmId,
-	page,
-	limit,
-}: {
-	farmId: string;
-	page: number;
-	limit: number;
-}) =>
-	useQuery({
-		queryKey: [
-			...farmInvitationsQueryKeys.invitationsList(farmId),
-			"paged",
-			page,
-			limit,
-		],
-		queryFn: () =>
-			getFarmInvitationList({
-				farmId,
-				page,
-				limit,
-			}),
-		select: (data) => {
-			const pagination = data.meta?.pagination;
-
-			return {
-				items: data.data,
-				page: pagination?.page ?? page,
-				limit: pagination?.limit ?? limit,
-				total: pagination?.total ?? data.data.length,
-				totalPages: pagination?.totalPages ?? 1,
-			};
-		},
-		enabled: !!farmId,
-		staleTime: 10000,
+export const useAcceptInvitation = (token: string) =>
+	useMutation({
+		mutationFn: (payload: IAcceptInvitationPayload) =>
+			acceptInvitation({ token, payload }),
 	});

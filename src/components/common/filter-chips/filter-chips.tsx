@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export type FilterOption = {
 	label: string;
@@ -23,16 +24,11 @@ export const FilterChips = ({
 	return (
 		<div className={cn("flex gap-2 overflow-x-auto pb-2", className)}>
 			{options.map((option) => (
-				<button
+				<Button
 					key={option.value}
+					variant={selected === option.value ? "default" : "outline"}
 					onClick={() => onSelect(option.value)}
-					className={cn(
-						"flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap",
-						"border border-border",
-						selected === option.value
-							? "bg-primary text-primary-foreground shadow-sm"
-							: "bg-background text-foreground hover:bg-muted",
-					)}
+					className="gap-1 whitespace-nowrap"
 				>
 					{option.label}
 					{option.count !== undefined && (
@@ -48,7 +44,7 @@ export const FilterChips = ({
 							{option.count}
 						</Badge>
 					)}
-				</button>
+				</Button>
 			))}
 		</div>
 	);

@@ -209,6 +209,7 @@ export const createLivestockAsset = ({
 		kind?: LivestockAssetKind;
 		location?: string;
 		mode?: LivestockAssetMode;
+		produce_asset_id?: number | null;
 	};
 }) =>
 	axiosHelper<ILivestockAsset>({
@@ -230,6 +231,7 @@ export const updateLivestockAssetById = ({
 		kind: LivestockAssetKind | null;
 		location: string | null;
 		mode: LivestockAssetMode | null;
+		produce_asset_id: number | null;
 	}>;
 }) =>
 	axiosHelper<ILivestockAsset>({
@@ -734,6 +736,35 @@ export const createEventByAssetId = ({
 	axiosHelper<ILivestockEvent>({
 		method: "post",
 		url: `/api/v1/farms/${farmId}/assets/${assetId}/events`,
+		data,
+	});
+
+export interface IHarvestCreatePayload {
+	occurred_at?: string;
+	quantity: number;
+	unit: LivestockEventUnit;
+	category_id?: number | null;
+	notes?: string | null;
+}
+
+export interface IHarvestRead {
+	production_event_id: number;
+	inventory_event_id: number;
+	produce_balance: string;
+}
+
+export const createHarvestByAssetId = ({
+	farmId,
+	assetId,
+	data,
+}: {
+	farmId: string;
+	assetId: string;
+	data: IHarvestCreatePayload;
+}) =>
+	axiosHelper<IHarvestRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/harvests`,
 		data,
 	});
 

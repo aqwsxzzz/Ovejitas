@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
 
+import { Button } from "@/components/ui/button";
 import type {
 	UnitDashboardSlice,
 	UnitKpiCard,
@@ -94,8 +95,8 @@ function Sparkline({ data, full = false }: { data: number[]; full?: boolean }) {
 
 const STATUS_COLOR: Record<string, string> = {
 	ok: "bg-[color:var(--v2-primary)]",
-	low: "bg-amber-400",
-	critical: "bg-red-500",
+	low: "bg-warning",
+	critical: "bg-destructive",
 };
 
 function FillBar({ pct, status = "ok" }: { pct: number; status?: string }) {
@@ -175,9 +176,11 @@ function ProductionSlides({
 			</div>
 			<div className="mt-1.5 flex items-center gap-1">
 				{slides.map((slide, i) => (
-					<button
+					<Button
 						key={slide.unit}
 						type="button"
+						variant="ghost"
+						size="icon"
 						aria-label={slide.unit}
 						aria-pressed={i === activeIdx}
 						onClick={() => {
@@ -187,7 +190,7 @@ function ProductionSlides({
 							});
 							setActiveIdx(i);
 						}}
-						className={`h-1 rounded-full transition-all duration-200 ${
+						className={`h-1 rounded-full p-0 transition-all duration-200 hover:bg-transparent ${
 							i === activeIdx ? "w-4 bg-(--v2-ink)" : "w-1.5 bg-(--v2-border)"
 						}`}
 					/>
@@ -362,9 +365,11 @@ export function UnitKpiSlider({ slices }: UnitKpiSliderProps) {
 					aria-label="Carrusel de unidades"
 				>
 					{slices.map((slice, i) => (
-						<button
+						<Button
 							key={slice.unitId}
 							role="tab"
+							variant="ghost"
+							size="icon"
 							aria-selected={i === activeIndex}
 							aria-label={slice.unitName}
 							onClick={() => {
@@ -374,7 +379,7 @@ export function UnitKpiSlider({ slices }: UnitKpiSliderProps) {
 								});
 								setActiveIndex(i);
 							}}
-							className={`h-1.5 rounded-full transition-all duration-200 ${
+							className={`h-1.5 rounded-full p-0 transition-all duration-200 hover:bg-transparent ${
 								i === activeIndex
 									? "w-5 bg-[color:var(--v2-ink)]"
 									: "w-1.5 bg-[color:var(--v2-border)]"

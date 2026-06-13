@@ -238,7 +238,7 @@ export function MaterialConsumptionsPanel({
 					</p>
 				) : null}
 				{consumptionsQuery.error ? (
-					<p className="text-sm text-red-700">Failed to load consumptions.</p>
+					<p className="text-sm text-destructive">Failed to load consumptions.</p>
 				) : null}
 				{!consumptionsQuery.isLoading &&
 				!consumptionsQuery.error &&
@@ -246,7 +246,7 @@ export function MaterialConsumptionsPanel({
 					<p className="text-sm text-(--v2-ink-soft)">No consumptions yet.</p>
 				) : null}
 				{consumptionError ? (
-					<p className="text-sm text-red-700">{consumptionError}</p>
+					<p className="text-sm text-destructive">{consumptionError}</p>
 				) : null}
 				{(consumptionsQuery.data?.data ?? []).map((consumption) => (
 					<div
