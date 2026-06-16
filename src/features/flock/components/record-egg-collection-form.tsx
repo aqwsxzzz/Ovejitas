@@ -21,9 +21,18 @@ import { z } from "zod";
 
 const formSchema = z.object({
 	date: z.string().optional(),
-	totalEggs: z.coerce.number().int().min(0),
-	brokenEggs: z.coerce.number().int().min(0),
-	notes: z.string().max(500).optional(),
+	totalEggs: z.coerce
+		.number()
+		.int("Ingresa un número entero.")
+		.min(0, "No puede ser negativo."),
+	brokenEggs: z.coerce
+		.number()
+		.int("Ingresa un número entero.")
+		.min(0, "No puede ser negativo."),
+	notes: z
+		.string()
+		.max(500, "Las notas deben tener menos de 500 caracteres.")
+		.optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;

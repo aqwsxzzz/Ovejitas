@@ -20,7 +20,10 @@ export const expenseFormSchema = z
 			.string()
 			.min(1, i18next.t("expenses:form.validation.amountRequired")),
 		type: z.enum(financialTransactionTypes),
-		description: z.string().max(400).optional(),
+		description: z
+			.string()
+			.max(400, i18next.t("expenses:form.validation.descriptionMaxLength"))
+			.optional(),
 		speciesId: z
 			.string()
 			.min(1, i18next.t("expenses:form.validation.speciesRequired")),
