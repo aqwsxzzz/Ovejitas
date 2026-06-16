@@ -100,16 +100,18 @@ export function UnitEventTimeline({
 					>
 						<div className="flex items-center justify-between gap-2">
 							<p className="text-sm font-semibold leading-tight">
-								{categoryLabel(categories, event.category_id)}
+								{eventTypeLabel(event.type)}
 							</p>
 							<span className="text-xs text-(--v2-ink-soft)">
 								{formatEventDate(event.occurred_at)}
 							</span>
 						</div>
 						<div className="mt-1 flex items-center gap-2 text-xs text-(--v2-ink-soft)">
-							<span className="rounded-full border border-(--v2-border) px-2 py-0.5">
-								{eventTypeLabel(event.type)}
-							</span>
+							{event.category_id ? (
+								<span className="rounded-full border border-(--v2-border) px-2 py-0.5">
+									{categoryLabel(categories, event.category_id)}
+								</span>
+							) : null}
 							<span
 								className={`rounded-full px-2 py-0.5 ${
 									status === "logged"
