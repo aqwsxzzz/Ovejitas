@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import type { ComponentProps } from "react";
+import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { Package } from "lucide-react";
 
@@ -12,21 +11,15 @@ import {
 	useGetMaterialConsumptionAggregateReport,
 } from "@/features/reports/api/reports-queries";
 import {
-	useCreateMaterialConsumptionByFarmId,
-	useCreateMaterialPurchaseByFarmId,
-	useCreateMaterialSaleByAssetId,
 	useGetInventoryBalanceByAssetId,
 	useGetLivestockAssetById,
 	useListEventCategoriesByFarmId,
 	useListLivestockAssetsByFarmId,
 } from "@/features/livestock/api/livestock-queries";
-import { MaterialConsumptionForm } from "@/features/inventory/components/material-consumption-form";
-import { MaterialPurchaseForm } from "@/features/inventory/components/material-purchase-form";
-import { MaterialSaleForm } from "@/features/inventory/components/material-sale-form";
+import { MaterialMovementDialog } from "@/features/inventory/components/material-movement-dialog";
 import { MaterialTimelinePanel } from "@/features/inventory/components/material-timeline-panel";
 import { MaterialPurchasesPanel } from "@/features/inventory/components/material-purchases-panel";
 import { MaterialConsumptionsPanel } from "@/features/inventory/components/material-consumptions-panel";
-import { getMaterialActionErrorMessage } from "@/features/inventory/components/material-action-utils";
 import {
 	formatDate,
 	toNumber,
@@ -41,10 +34,6 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 	const hasValidAssetId = Number.isInteger(parsedAssetId);
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
-
-	const [purchaseError, setPurchaseError] = useState<string | null>(null);
-	const [consumptionError, setConsumptionError] = useState<string | null>(null);
-	const [saleError, setSaleError] = useState<string | null>(null);
 
 	const { data: asset, isLoading: isLoadingAsset } = useGetLivestockAssetById({
 		farmId,
@@ -100,10 +89,6 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 		enabled: !!farmId,
 	});
 
-	const createPurchaseMutation = useCreateMaterialPurchaseByFarmId();
-	const createConsumptionMutation = useCreateMaterialConsumptionByFarmId();
-	const createSaleMutation = useCreateMaterialSaleByAssetId();
-
 	const inventoryRows = useMemo(
 		() => inventorySummaryQuery.data?.data ?? [],
 		[inventorySummaryQuery.data?.data],
@@ -120,49 +105,6 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 		() => profitabilityQuery.data?.totals ?? [],
 		[profitabilityQuery.data?.totals],
 	);
-
-	const handlePurchaseSubmit: ComponentProps<
-		typeof MaterialPurchaseForm
-	>["onSubmit"] = async (payload) => {
-		setPurchaseError(null);
-		try {
-			await createPurchaseMutation.mutateAsync({ farmId, data: payload });
-		} catch (error) {
-			setPurchaseError(
-				getMaterialActionErrorMessage(error, "Failed to register purchase."),
-			);
-		}
-	};
-
-	const handleConsumptionSubmit: ComponentProps<
-		typeof MaterialConsumptionForm
-	>["onSubmit"] = async (payload) => {
-		setConsumptionError(null);
-		try {
-			await createConsumptionMutation.mutateAsync({ farmId, data: payload });
-		} catch (error) {
-			setConsumptionError(
-				getMaterialActionErrorMessage(error, "Failed to register consumption."),
-			);
-		}
-	};
-
-	const handleSaleSubmit: ComponentProps<
-		typeof MaterialSaleForm
-	>["onSubmit"] = async (payload) => {
-		setSaleError(null);
-		try {
-			await createSaleMutation.mutateAsync({
-				farmId,
-				assetId: materialId,
-				data: payload,
-			});
-		} catch (error) {
-			setSaleError(
-				getMaterialActionErrorMessage(error, "Failed to register sale."),
-			);
-		}
-	};
 
 	if (!farmId) {
 		return (
@@ -264,6 +206,18 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 							No inventory balance yet.
 						</p>
 					)}
+					<div className="pt-1">
+						<MaterialMovementDialog
+							farmId={farmId}
+							materialAssetId={asset.id}
+							consumerAssets={(consumerAssetsQuery.data?.data ?? []).map(
+								(item) => ({ id: item.id, name: item.name }),
+							)}
+							categoryOptions={(incomeCategoriesQuery.data ?? []).map(
+								(item) => ({ id: item.id, name: item.name }),
+							)}
+						/>
+					</div>
 				</CardContent>
 			</Card>
 
@@ -364,60 +318,6 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 					))}
 				</CardContent>
 			</Card>
-
-			<div className="grid gap-4 lg:grid-cols-3">
-				<Card>
-					<CardHeader>
-						<CardTitle>Register Purchase</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<MaterialPurchaseForm
-							materialAssetId={asset.id}
-							isSubmitting={createPurchaseMutation.isPending}
-							errorMessage={purchaseError}
-							onSubmit={handlePurchaseSubmit}
-						/>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader>
-						<CardTitle>Register Consumption</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<MaterialConsumptionForm
-							farmId={farmId}
-							materialAssetId={asset.id}
-							consumerAssets={(consumerAssetsQuery.data?.data ?? []).map(
-								(item) => ({
-									id: item.id,
-									name: item.name,
-								}),
-							)}
-							isSubmitting={createConsumptionMutation.isPending}
-							errorMessage={consumptionError}
-							onSubmit={handleConsumptionSubmit}
-						/>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader>
-						<CardTitle>Register Sale</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<MaterialSaleForm
-							categoryOptions={(incomeCategoriesQuery.data ?? []).map(
-								(item) => ({
-									id: item.id,
-									name: item.name,
-								}),
-							)}
-							isSubmitting={createSaleMutation.isPending}
-							errorMessage={saleError}
-							onSubmit={handleSaleSubmit}
-						/>
-					</CardContent>
-				</Card>
-			</div>
 
 			<MaterialTimelinePanel
 				farmId={farmId}
