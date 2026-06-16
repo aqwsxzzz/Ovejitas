@@ -14,28 +14,29 @@ export function ManualFeedingActionRow({
 	isSubmittingFeed,
 }: ManualFeedingActionRowProps) {
 	return (
-		<div className="mt-3 flex items-center gap-2 ">
-			<div className="flex w-full justify-between ">
-				<Button
-					type="button"
-					onClick={onSaveProfile}
-					variant="outline"
-				>
-					Guardar
-				</Button>
-				<Button
-					type="button"
-					onClick={onClearProfile}
-					variant="outline"
-				>
-					Limpiar
-				</Button>
-			</div>
+		<div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+			<Button
+				type="button"
+				onClick={onSaveProfile}
+				variant="outline"
+				className="w-full sm:w-auto"
+			>
+				Guardar
+			</Button>
+			<Button
+				type="button"
+				onClick={onClearProfile}
+				variant="outline"
+				className="w-full sm:w-auto"
+			>
+				Limpiar
+			</Button>
 			<Button
 				type="button"
 				variant="default"
 				onClick={onLogFeeding}
 				disabled={isSubmittingFeed}
+				className="w-full sm:ml-auto sm:w-auto"
 			>
 				{isSubmittingFeed ? "Registrando..." : "Registrar alimentacion"}
 			</Button>

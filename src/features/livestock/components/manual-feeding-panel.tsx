@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { ManualFeedingActionRow } from "@/features/livestock/components/manual-feeding/manual-feeding-action-row";
 import { ManualFeedingConfirmation } from "@/features/livestock/components/manual-feeding/manual-feeding-confirmation";
@@ -16,6 +16,7 @@ export function ManualFeedingPanel({
 	consumerAssetId,
 	consumerAssetName,
 }: ManualFeedingPanelProps) {
+	const [isExpanded, setIsExpanded] = useState(false);
 	const profileStorageId = `${farmId}:${consumerAssetId}`;
 	const { form, saveError, updateField, saveProfile, clearProfile } =
 		useManualFeedingProfile(farmId, profileStorageId);
@@ -76,48 +77,56 @@ export function ManualFeedingPanel({
 	}, [clearProfile, clearFeedState]);
 
 	return (
-		<div className="v2-card p-4 flex flex-col gap-8">
-			<ManualFeedingHeader todayFeedCount={todaysFeeds.count} />
-
-			<ManualFeedingFormSection
-				form={form}
-				materialOptions={materialOptions}
-				isLoadingMaterials={isLoadingMaterials}
-				onFieldChange={handleFieldChange}
+		<div className="v2-card flex flex-col gap-6 p-4">
+			<ManualFeedingHeader
+				todayFeedCount={todaysFeeds.count}
+				isExpanded={isExpanded}
+				onToggle={() => setIsExpanded((current) => !current)}
 			/>
 
-			<ManualFeedingActionRow
-				onSaveProfile={saveProfile}
-				onClearProfile={handleClearProfile}
-				onLogFeeding={handleLogFeedingClick}
-				isSubmittingFeed={isSubmittingFeed}
-			/>
+			{isExpanded ? (
+				<>
+					<ManualFeedingFormSection
+						form={form}
+						materialOptions={materialOptions}
+						isLoadingMaterials={isLoadingMaterials}
+						onFieldChange={handleFieldChange}
+					/>
 
-			<Separator />
+					<ManualFeedingActionRow
+						onSaveProfile={saveProfile}
+						onClearProfile={handleClearProfile}
+						onLogFeeding={handleLogFeedingClick}
+						isSubmittingFeed={isSubmittingFeed}
+					/>
 
-			<ManualFeedingConfirmation
-				isVisible={needsExtraFeedConfirmation}
-				message={feedConfirmationMessage}
-				isSubmittingFeed={isSubmittingFeed}
-				onConfirm={handleLogFeedingClick}
-				onCancel={clearFeedState}
-			/>
+					<Separator />
 
-			<ManualFeedingStats
-				selectedMaterialName={selectedMaterial?.name ?? null}
-				selectedMaterialOnHand={selectedMaterialOnHand}
-				unit={form.unit}
-				totalForSelectedMaterialAndUnit={
-					todaysFeeds.totalForSelectedMaterialAndUnit
-				}
-				lastFeedAtIso={lastFeedAtIso}
-			/>
+					<ManualFeedingConfirmation
+						isVisible={needsExtraFeedConfirmation}
+						message={feedConfirmationMessage}
+						isSubmittingFeed={isSubmittingFeed}
+						onConfirm={handleLogFeedingClick}
+						onCancel={clearFeedState}
+					/>
 
-			{saveError ? (
-				<p className="mt-2 text-sm text-destructive">{saveError}</p>
-			) : null}
-			{feedError ? (
-				<p className="mt-2 text-sm text-destructive">{feedError}</p>
+					<ManualFeedingStats
+						selectedMaterialName={selectedMaterial?.name ?? null}
+						selectedMaterialOnHand={selectedMaterialOnHand}
+						unit={form.unit}
+						totalForSelectedMaterialAndUnit={
+							todaysFeeds.totalForSelectedMaterialAndUnit
+						}
+						lastFeedAtIso={lastFeedAtIso}
+					/>
+
+					{saveError ? (
+						<p className="text-sm text-destructive">{saveError}</p>
+					) : null}
+					{feedError ? (
+						<p className="text-sm text-destructive">{feedError}</p>
+					) : null}
+				</>
 			) : null}
 		</div>
 	);

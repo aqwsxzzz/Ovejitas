@@ -75,14 +75,6 @@ export function FlockDetailPageContent({
 				/>
 			) : null}
 
-			{assetFlags.isAnimalAsset ? (
-				<ManualFeedingPanel
-					farmId={farmId}
-					consumerAssetId={asset.id}
-					consumerAssetName={asset.name}
-				/>
-			) : null}
-
 			<div className="grid gap-3 md:grid-cols-2">
 				{assetFlags.isAggregatedAnimal ? (
 					<FlockHeadcountAdjustmentCard
@@ -96,6 +88,14 @@ export function FlockDetailPageContent({
 					isMaterialAsset={assetFlags.isMaterialAsset}
 				/>
 			</div>
+
+			{assetFlags.isAnimalAsset ? (
+				<ManualFeedingPanel
+					farmId={farmId}
+					consumerAssetId={asset.id}
+					consumerAssetName={asset.name}
+				/>
+			) : null}
 
 			<FlockEventsSection
 				farmId={farmId}
