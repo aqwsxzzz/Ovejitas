@@ -12,6 +12,8 @@ import { LivestockAssetSearchBar } from "@/features/livestock/components/livesto
 import { LivestockUnitRow } from "@/features/livestock/components/livestock-unit-row";
 import { useLivestockAssetEdit } from "@/features/livestock/components/use-livestock-asset-edit";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { useListLivestockAssetsByFarmId } from "@/features/livestock/api/livestock-queries";
 import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
@@ -117,13 +119,22 @@ export function LivestockKindPage({
 			/>
 
 			{isLoading ? (
-				<p className="text-sm text-[color:var(--v2-ink-soft)]">
-					Cargando {activeKindMeta.title.toLowerCase()}...
-				</p>
+				<LoadingState
+					message={`Cargando ${activeKindMeta.title.toLowerCase()}...`}
+				/>
 			) : units.length === 0 ? (
-				<p className="text-sm text-[color:var(--v2-ink-soft)]">
-					No hay {activeKindMeta.title.toLowerCase()} reales que coincidan con "{query}".
-				</p>
+				<EmptyState
+					title={
+						query
+							? `Sin resultados para "${query}"`
+							: `Aun no hay ${activeKindMeta.title.toLowerCase()}`
+					}
+					description={
+						query
+							? "Prueba con otro nombre o ubicacion."
+							: `Crea tu primer registro para empezar a hacer seguimiento.`
+					}
+				/>
 			) : (
 				<div className="space-y-2">
 					{units.map((unit) => (

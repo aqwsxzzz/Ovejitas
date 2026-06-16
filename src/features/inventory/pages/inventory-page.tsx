@@ -2,7 +2,9 @@ import { useState } from "react";
 import { MapPin, Package } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common/empty-state";
 import { Input } from "@/components/ui/input";
+import { LoadingState } from "@/components/common/loading-state";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
@@ -330,11 +332,20 @@ export function InventoryPage() {
 			/>
 
 			{isLoading ? (
-				<p className="text-sm text-(--v2-ink-soft)">Cargando materiales...</p>
+				<LoadingState message="Cargando materiales..." />
 			) : materials.length === 0 ? (
-				<p className="text-sm text-(--v2-ink-soft)">
-					No hay materiales reales que coincidan con "{query}".
-				</p>
+				<EmptyState
+					title={
+						query
+							? `Sin resultados para "${query}"`
+							: "Aun no hay materiales"
+					}
+					description={
+						query
+							? "Prueba con otro nombre o ubicacion."
+							: "Crea tu primer material para empezar a controlar el stock."
+					}
+				/>
 			) : (
 				<div className="space-y-2">
 					{materials.map((material) => (

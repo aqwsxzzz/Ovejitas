@@ -19,8 +19,9 @@ import type {
 	UnitKpiSlide,
 } from "@/shared/types/v2-domain-types";
 
+import { LoadingState } from "@/components/common/loading-state";
+
 import { DashboardEmptyState } from "../components/dashboard-empty-state";
-import { DashboardQuickActions } from "../components/dashboard-quick-actions";
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
 
 const MONTH_LABEL = new Date().toLocaleDateString("es-EC", {
@@ -451,17 +452,12 @@ export function V2DashboardPage() {
 				</article>
 			) : isLoading ? (
 				<article className="v2-card p-4">
-					<p className="text-sm text-(--v2-ink-soft)">
-						Cargando unidades reales...
-					</p>
+					<LoadingState message="Cargando unidades..." />
 				</article>
 			) : slices.length === 0 ? (
 				<DashboardEmptyState sourcePath={sourcePath} />
 			) : (
-				<>
-					<DashboardQuickActions sourcePath={sourcePath} />
-					<UnitKpiSlider slices={slices} />
-				</>
+				<UnitKpiSlider slices={slices} />
 			)}
 
 			<article className="v2-card p-4">
