@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadingState } from "@/components/common/loading-state";
 import { Separator } from "@/components/ui/separator";
 import { CropHarvestForm } from "@/features/crops/components/crop-harvest-form";
 import { CropExpenseForm } from "@/features/crops/components/crop-expense-form";
@@ -30,7 +31,7 @@ export function CropDetailPage({ cropId }: CropDetailPageProps) {
 		return <p className="text-sm text-destructive">ID de cultivo no válido.</p>;
 	}
 	if (data.isLoadingAsset) {
-		return <p className="text-sm text-(--v2-ink-soft)">Cargando cultivo...</p>;
+		return <LoadingState message="Cargando cultivo..." />;
 	}
 	if (!data.asset || data.asset.kind !== "crop") {
 		return (

@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import {
 	Select,
 	SelectContent,
@@ -28,7 +30,12 @@ interface EquipmentTimelinePanelProps {
 
 type EventFilter = "all" | LivestockEventType;
 
-const EVENT_TYPE_FILTERS: EventFilter[] = ["all", "expense", "income", "observation"];
+const EVENT_TYPE_FILTERS: EventFilter[] = [
+	"all",
+	"expense",
+	"income",
+	"observation",
+];
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
 	all: "Todos",
@@ -44,7 +51,10 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 
 const PAGE_SIZE = 20;
 
-export function EquipmentTimelinePanel({ farmId, equipmentId }: EquipmentTimelinePanelProps) {
+export function EquipmentTimelinePanel({
+	farmId,
+	equipmentId,
+}: EquipmentTimelinePanelProps) {
 	const [isCreating, setIsCreating] = useState(false);
 	const [page, setPage] = useState(1);
 	const [typeFilter, setTypeFilter] = useState<EventFilter>("all");
@@ -101,7 +111,10 @@ export function EquipmentTimelinePanel({ farmId, equipmentId }: EquipmentTimelin
 							</SelectTrigger>
 							<SelectContent>
 								{EVENT_TYPE_FILTERS.map((type) => (
-									<SelectItem key={type} value={type}>
+									<SelectItem
+										key={type}
+										value={type}
+									>
 										{EVENT_TYPE_LABELS[type] ?? type}
 									</SelectItem>
 								))}
@@ -120,11 +133,19 @@ export function EquipmentTimelinePanel({ farmId, equipmentId }: EquipmentTimelin
 					{isCreating ? (
 						<>
 							<span className="hidden md:inline">Cerrar</span>
-							<span className="md:hidden" aria-hidden="true">×</span>
+							<span
+								className="md:hidden"
+								aria-hidden="true"
+							>
+								×
+							</span>
 						</>
 					) : (
 						<>
-							<Plus aria-hidden="true" className="h-3.5 w-3.5 md:hidden" />
+							<Plus
+								aria-hidden="true"
+								className="h-3.5 w-3.5 md:hidden"
+							/>
 							<span className="hidden md:inline">Nuevo evento</span>
 						</>
 					)}
@@ -143,20 +164,31 @@ export function EquipmentTimelinePanel({ farmId, equipmentId }: EquipmentTimelin
 			) : null}
 
 			{timelineQuery.isLoading ? (
-				<p className="text-sm text-(--v2-ink-soft)">Cargando eventos...</p>
+				<LoadingState message="Cargando eventos..." />
 			) : null}
 			{timelineQuery.error ? (
-				<p className="text-sm text-destructive">No se pudieron cargar los eventos.</p>
+				<p className="text-sm text-destructive">
+					No se pudieron cargar los eventos.
+				</p>
 			) : null}
-			{!timelineQuery.isLoading && !timelineQuery.error && events.length === 0 ? (
-				<p className="text-sm text-(--v2-ink-soft)">Sin eventos registrados.</p>
+			{!timelineQuery.isLoading &&
+			!timelineQuery.error &&
+			events.length === 0 ? (
+				<EmptyState title="Sin eventos registrados" />
 			) : null}
 
 			<div className="space-y-2">
 				{events.map((event) => (
-					<div key={event.id} className="rounded-lg border px-3 py-2 text-sm">
-						<p className="font-medium">{EVENT_TYPE_LABELS[event.type] ?? event.type}</p>
-						<p className="text-(--v2-ink-soft)">{formatDate(event.occurred_at)}</p>
+					<div
+						key={event.id}
+						className="rounded-lg border px-3 py-2 text-sm"
+					>
+						<p className="font-medium">
+							{EVENT_TYPE_LABELS[event.type] ?? event.type}
+						</p>
+						<p className="text-(--v2-ink-soft)">
+							{formatDate(event.occurred_at)}
+						</p>
 						{getPayloadSource(event.payload) ? (
 							<p className="text-xs text-(--v2-ink-soft)">
 								fuente: {getPayloadSource(event.payload)}

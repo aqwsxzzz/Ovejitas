@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Package } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadingState } from "@/components/common/loading-state";
 import { Separator } from "@/components/ui/separator";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -119,7 +120,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 	}
 
 	if (isLoadingAsset) {
-		return <p className="text-sm text-(--v2-ink-soft)">Loading material...</p>;
+		return <LoadingState message="Cargando material..." />;
 	}
 
 	if (!asset || asset.kind !== "material") {
