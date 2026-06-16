@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/features/finance/finance-utils";
 
@@ -47,7 +48,7 @@ export const FinanceTrendChart = ({
 			{blockedMessage ? (
 				<p className="text-sm text-muted-foreground">{blockedMessage}</p>
 			) : isPending ? (
-				<p className="text-sm text-muted-foreground">Cargando tendencia...</p>
+				<LoadingState message="Cargando tendencia..." />
 			) : errorMessage ? (
 				<p className="text-sm text-destructive">{errorMessage}</p>
 			) : sections.length === 0 ? (
@@ -84,11 +85,17 @@ export const FinanceTrendChart = ({
 											<div className="h-2 overflow-hidden rounded-full bg-destructive/15">
 												<div
 													className="h-full rounded-full bg-destructive"
-													style={{ width: `${(row.expense / maxValue) * 100}%` }}
+													style={{
+														width: `${(row.expense / maxValue) * 100}%`,
+													}}
 												/>
 											</div>
 										</div>
-										<span className={row.net >= 0 ? "text-success" : "text-destructive"}>
+										<span
+											className={
+												row.net >= 0 ? "text-success" : "text-destructive"
+											}
+										>
 											{formatCurrency(row.net, section.currency)}
 										</span>
 									</div>

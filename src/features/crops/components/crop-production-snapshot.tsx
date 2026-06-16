@@ -1,4 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { toNumber } from "@/features/inventory/components/material-detail-utils";
 import type { IAggregateRow } from "@/features/reports/types/reports-types";
 
@@ -19,18 +21,14 @@ export function CropProductionSnapshot({
 				<CardTitle>Produccion (este mes)</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-2">
-				{isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">Cargando produccion...</p>
-				) : null}
+				{isLoading ? <LoadingState message="Cargando produccion..." /> : null}
 				{isError ? (
 					<p className="text-sm text-destructive">
 						Error al cargar el reporte de produccion.
 					</p>
 				) : null}
 				{!isLoading && !isError && rows.length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">
-						Sin cosechas registradas aún.
-					</p>
+					<EmptyState title="Sin cosechas registradas aún" />
 				) : null}
 				<div className="space-y-2">
 					{rows.map((row) => (

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { EmptyState } from "@/components/common/empty-state";
 import { Link } from "@tanstack/react-router";
 import { Package } from "lucide-react";
 
@@ -163,7 +164,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 				<CardContent className="space-y-3">
 					<p className="text-sm font-medium">On-hand snapshot</p>
 					{balanceQuery.isLoading ? (
-						<p className="text-sm text-(--v2-ink-soft)">Loading balance...</p>
+						<LoadingState message="Cargando saldo..." />
 					) : balanceQuery.error ? (
 						<p className="text-sm text-destructive">Failed to load balance.</p>
 					) : balanceRows.length ? (
@@ -203,9 +204,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 							))}
 						</div>
 					) : (
-						<p className="text-sm text-(--v2-ink-soft)">
-							No inventory balance yet.
-						</p>
+						<EmptyState title="Sin saldo de inventario aún" />
 					)}
 					<div className="pt-1">
 						<MaterialMovementDialog

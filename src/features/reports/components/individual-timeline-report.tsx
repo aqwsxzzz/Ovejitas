@@ -1,4 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { Badge } from "@/components/ui/badge";
 import { useGetTimelineReport } from "@/features/reports/api/reports-queries";
 import type { EventType } from "@/features/reports/types/reports-types";
@@ -66,17 +68,19 @@ export const IndividualTimelineReport = ({
 						Ingresa un ID de individuo para ver el timeline.
 					</p>
 				) : isPending ? (
-					<p className="text-sm text-muted-foreground">Cargando...</p>
+					<LoadingState />
 				) : isError ? (
 					<p className="text-sm text-destructive">
 						{apiError?.message || "Error cargando timeline"}
 					</p>
 				) : !report?.data || report.data.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
-						{hasDateRangeFilter
-							? "No hay eventos en el rango de fechas seleccionado para este individuo."
-							: "No hay eventos para el individuo seleccionado."}
-					</p>
+					<EmptyState
+						title={
+							hasDateRangeFilter
+								? "No hay eventos en el rango de fechas seleccionado para este individuo."
+								: "No hay eventos para el individuo seleccionado."
+						}
+					/>
 				) : (
 					<div className="space-y-3">
 						{report.data.map((eventItem) => (

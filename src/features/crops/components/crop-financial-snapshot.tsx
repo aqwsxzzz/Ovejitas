@@ -1,4 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { toNumber } from "@/features/inventory/components/material-detail-utils";
 import type { IProfitabilityTotal } from "@/features/reports/types/reports-types";
 
@@ -20,9 +22,7 @@ export function CropFinancialSnapshot({
 			</CardHeader>
 			<CardContent className="space-y-2">
 				{isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">
-						Cargando resumen financiero...
-					</p>
+					<LoadingState message="Cargando resumen financiero..." />
 				) : null}
 				{isError ? (
 					<p className="text-sm text-destructive">
@@ -30,7 +30,7 @@ export function CropFinancialSnapshot({
 					</p>
 				) : null}
 				{!isLoading && !isError && totals.length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">Sin gastos aún.</p>
+					<EmptyState title="Sin gastos aún" />
 				) : null}
 				{totals.map((total) => (
 					<div

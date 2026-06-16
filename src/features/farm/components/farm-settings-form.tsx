@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { LoadingState } from "@/components/common/loading-state";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -91,9 +92,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 	};
 
 	if (isFarmLoading) {
-		return (
-			<p className="text-sm text-muted-foreground">Loading farm settings...</p>
-		);
+		return <LoadingState message="Cargando configuración..." />;
 	}
 
 	if (!farmData) {

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,7 +196,7 @@ export function MaterialPurchasesPanel({
 					</Button>
 				</div>
 				{purchasesQuery.isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">Loading purchases...</p>
+					<LoadingState message="Cargando compras..." />
 				) : null}
 				{purchasesQuery.error ? (
 					<p className="text-sm text-destructive">Failed to load purchases.</p>
@@ -202,7 +204,7 @@ export function MaterialPurchasesPanel({
 				{!purchasesQuery.isLoading &&
 				!purchasesQuery.error &&
 				(purchasesQuery.data?.data ?? []).length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">No purchases yet.</p>
+					<EmptyState title="Sin compras registradas" />
 				) : null}
 				{purchaseError ? (
 					<p className="text-sm text-destructive">{purchaseError}</p>

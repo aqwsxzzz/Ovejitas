@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGetProfitabilityReport } from "@/features/reports/api/reports-queries";
@@ -101,15 +103,13 @@ export const ProfitabilityReport = ({
 			</CardHeader>
 			<CardContent>
 				{isPending ? (
-					<p className="text-sm text-muted-foreground">Cargando...</p>
+					<LoadingState />
 				) : isError ? (
 					<p className="text-sm text-destructive">
 						{apiError?.message || "Error cargando reporte"}
 					</p>
 				) : !report?.data || report.data.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
-						No hay datos de rentabilidad
-					</p>
+					<EmptyState title="No hay datos de rentabilidad" />
 				) : (
 					<div className="space-y-6">
 						{/* Summary by currency */}
