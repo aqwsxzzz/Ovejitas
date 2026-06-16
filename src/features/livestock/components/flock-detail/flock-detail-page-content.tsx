@@ -63,7 +63,6 @@ export function FlockDetailPageContent({
 			{assetFlags.isMaterialAsset ? (
 				<FlockMaterialInventorySection
 					farmId={farmId}
-					unitId={unitId}
 					assetId={asset.id}
 				/>
 			) : null}
