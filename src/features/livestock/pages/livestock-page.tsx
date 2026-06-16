@@ -24,10 +24,7 @@ export function LivestockPage() {
 	return (
 		<section className="space-y-4">
 			<div className="v2-card p-5">
-				<h1 className="text-2xl font-semibold">Activos</h1>
-				<p className="mt-1 text-sm text-[color:var(--v2-ink-soft)]">
-					Elige el tipo de activo que quieres administrar.
-				</p>
+				<h1 className="text-2xl font-semibold text-center">Activos</h1>
 			</div>
 
 			<div className="space-y-2">
@@ -36,16 +33,11 @@ export function LivestockPage() {
 						key={option.kind}
 						to="/v2/production-units/$assetKind"
 						params={{ assetKind: option.kind }}
-						className="v2-card flex w-full items-center justify-between p-4 text-left transition hover:-translate-y-px"
+						className="v2-card flex w-full items-center justify-between px-4 py-2.5 text-left transition hover:-translate-y-px"
 					>
 						<div className="flex items-center gap-3">
 							<AssetKindMedal kind={option.kind} />
-							<div>
-								<p className="text-base font-semibold">{option.title}</p>
-								<p className="text-sm text-[color:var(--v2-ink-soft)]">
-									Ver y gestionar {option.pluralLabel}
-								</p>
-							</div>
+							<p className="text-base font-semibold">{option.title}</p>
 						</div>
 						<span
 							className="text-xl leading-none text-[color:var(--v2-ink-soft)]"

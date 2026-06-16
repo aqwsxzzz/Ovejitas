@@ -81,7 +81,7 @@ export function LivestockKindPage({
 		<section className="space-y-4">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-semibold">Activos</h1>
+					<h1 className="text-2xl font-semibold">{activeKindMeta.title}</h1>
 					<p className="text-sm text-[color:var(--v2-ink-soft)]">
 						{farmAssetsResponse?.meta.total ?? units.length} {activeKindMeta.pluralLabel}
 					</p>

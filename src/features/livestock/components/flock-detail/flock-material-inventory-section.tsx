@@ -61,7 +61,7 @@ export function FlockMaterialInventorySection({
 				</div>
 			)}
 
-			<div className="mt-3">
+			<div className="mt-3 flex justify-center">
 				<MaterialMovementDialog
 					farmId={farmId}
 					materialAssetId={assetId}
