@@ -25,7 +25,7 @@ const formSchema = z.object({
 		IMeasurement["measurementType"],
 		IMeasurement["measurementType"],
 	]),
-	value: z.string().min(1, "Please enter a value"),
+	value: z.string().min(1, "Ingresa un valor"),
 	unit: z.enum(["kg", "cm", "celsius"] as [
 		IMeasurement["unit"],
 		IMeasurement["unit"],
@@ -34,7 +34,7 @@ const formSchema = z.object({
 	measuredAt: z.date(),
 	notes: z
 		.string()
-		.max(200, "Notes must be less than 200 characters")
+		.max(200, "Las notas deben tener menos de 200 caracteres")
 		.optional(),
 });
 

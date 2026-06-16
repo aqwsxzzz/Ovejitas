@@ -420,7 +420,7 @@ export const useEditAnimalById = () => {
 			toast.error(error.message);
 		},
 		onSuccess: (response, { farmId, filters }) => {
-			toast.success("Animal edited successfully");
+			toast.success("Animal actualizado");
 			queryClient.setQueryData<IResponse<IAnimal[]>>(
 				animalQueryKeys.animalList(farmId, filters),
 				(oldData) => {

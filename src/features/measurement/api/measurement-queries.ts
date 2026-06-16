@@ -227,7 +227,7 @@ export const useDeleteMeasurementById = () => {
 			toast.error(error.message);
 		},
 		onSuccess: (_, { animalId, measurementId }) => {
-			toast.success("Measurement deleted successfully");
+			toast.success("Medición eliminada");
 			queryClient.setQueryData<IResponse<IMeasurement[]>>(
 				measurementQueryKeys.measurementListByAnimalId(animalId),
 				(oldData) => {

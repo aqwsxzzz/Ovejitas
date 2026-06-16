@@ -44,7 +44,7 @@ export const EggPricingPanel = ({ farmId }: EggPricingPanelProps) => {
 	const handleCreatePricing = async () => {
 		const parsedPrice = Number(pricePerEgg);
 		if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
-			toast.error("Price per egg must be greater than 0.");
+			toast.error("El precio por huevo debe ser mayor que 0.");
 			return;
 		}
 
@@ -54,12 +54,12 @@ export const EggPricingPanel = ({ farmId }: EggPricingPanelProps) => {
 				effectiveFrom,
 			});
 			setPricePerEgg("");
-			toast.success("Egg pricing updated.");
+			toast.success("Precio por huevo actualizado.");
 		} catch (error) {
 			toast.error(
 				error instanceof Error
 					? error.message
-					: "Failed to update egg pricing.",
+					: "No se pudo actualizar el precio por huevo.",
 			);
 		}
 	};

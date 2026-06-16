@@ -46,7 +46,7 @@ export const useSignUp = () => {
 		mutationFn: ({ payload }: { payload: ISignUpPayload }) =>
 			signup({ payload }),
 		onSuccess: () => {
-			toast.success("Account created successfully");
+			toast.success("Cuenta creada con éxito");
 			navigate({
 				to: "/v2/login",
 			});

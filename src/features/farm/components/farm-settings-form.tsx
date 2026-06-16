@@ -71,7 +71,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 	const handleSave = async () => {
 		if (!hasChanges) return;
 		if (!currentName.trim()) {
-			toast.error("Farm name is required.");
+			toast.error("El nombre de la granja es obligatorio.");
 			return;
 		}
 
@@ -81,12 +81,12 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 				payload: buildUpdatePayload({ ...draft, name: currentName.trim() }),
 			});
 			setDraft({});
-			toast.success("Farm settings updated.");
+			toast.success("Configuración de la granja actualizada.");
 		} catch (error) {
 			toast.error(
 				error instanceof Error
 					? error.message
-					: "Could not update farm settings.",
+					: "No se pudo actualizar la configuración de la granja.",
 			);
 		}
 	};
