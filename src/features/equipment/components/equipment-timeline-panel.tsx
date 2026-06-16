@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -167,9 +168,7 @@ export function EquipmentTimelinePanel({
 				<LoadingState message="Cargando eventos..." />
 			) : null}
 			{timelineQuery.error ? (
-				<p className="text-sm text-destructive">
-					No se pudieron cargar los eventos.
-				</p>
+				<ErrorState onRetry={() => void timelineQuery.refetch()} />
 			) : null}
 			{!timelineQuery.isLoading &&
 			!timelineQuery.error &&

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,9 +102,7 @@ export const CostPerUnitReport = ({
 				{isPending ? (
 					<LoadingState />
 				) : isError ? (
-					<p className="text-sm text-destructive">
-						{apiError?.message || "Error cargando reporte"}
-					</p>
+					<ErrorState description={apiError?.message} />
 				) : !report?.data || report.data.length === 0 ? (
 					<EmptyState title="No hay datos de costo por unidad" />
 				) : (

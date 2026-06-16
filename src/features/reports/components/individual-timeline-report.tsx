@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { Badge } from "@/components/ui/badge";
@@ -70,9 +71,7 @@ export const IndividualTimelineReport = ({
 				) : isPending ? (
 					<LoadingState />
 				) : isError ? (
-					<p className="text-sm text-destructive">
-						{apiError?.message || "Error cargando timeline"}
-					</p>
+					<ErrorState description={apiError?.message} />
 				) : !report?.data || report.data.length === 0 ? (
 					<EmptyState
 						title={

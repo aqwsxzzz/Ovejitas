@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 
@@ -199,7 +200,10 @@ export function MaterialPurchasesPanel({
 					<LoadingState message="Cargando compras..." />
 				) : null}
 				{purchasesQuery.error ? (
-					<p className="text-sm text-destructive">Failed to load purchases.</p>
+					<ErrorState
+						description="No se pudieron cargar las compras."
+						onRetry={() => void purchasesQuery.refetch()}
+					/>
 				) : null}
 				{!purchasesQuery.isLoading &&
 				!purchasesQuery.error &&

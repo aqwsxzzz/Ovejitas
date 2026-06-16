@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { Link } from "@tanstack/react-router";
 import { Package } from "lucide-react";
@@ -166,7 +167,10 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 					{balanceQuery.isLoading ? (
 						<LoadingState message="Cargando saldo..." />
 					) : balanceQuery.error ? (
-						<p className="text-sm text-destructive">Failed to load balance.</p>
+						<ErrorState
+							description="No se pudo cargar el saldo."
+							onRetry={() => void balanceQuery.refetch()}
+						/>
 					) : balanceRows.length ? (
 						<div className="space-y-2">
 							{balanceRows.map((row) => (
@@ -232,9 +236,10 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 						</p>
 					) : null}
 					{profitabilityQuery.error ? (
-						<p className="text-sm text-destructive">
-							Failed to load financial snapshot.
-						</p>
+						<ErrorState
+							description="No se pudo cargar el resumen financiero."
+							onRetry={() => void profitabilityQuery.refetch()}
+						/>
 					) : null}
 					{!profitabilityQuery.isLoading &&
 					!profitabilityQuery.error &&
@@ -294,9 +299,10 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 						</p>
 					) : null}
 					{consumptionAggregateQuery.error ? (
-						<p className="text-sm text-destructive">
-							Failed to load consumption aggregate report.
-						</p>
+						<ErrorState
+							description="No se pudo cargar el reporte de consumo."
+							onRetry={() => void consumptionAggregateQuery.refetch()}
+						/>
 					) : null}
 					{!consumptionAggregateQuery.isLoading &&
 					!consumptionAggregateQuery.error &&

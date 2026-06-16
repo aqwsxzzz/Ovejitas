@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { toNumber } from "@/features/inventory/components/material-detail-utils";
@@ -23,9 +24,7 @@ export function CropProductionSnapshot({
 			<CardContent className="space-y-2">
 				{isLoading ? <LoadingState message="Cargando produccion..." /> : null}
 				{isError ? (
-					<p className="text-sm text-destructive">
-						Error al cargar el reporte de produccion.
-					</p>
+					<ErrorState description="Error al cargar el reporte de produccion." />
 				) : null}
 				{!isLoading && !isError && rows.length === 0 ? (
 					<EmptyState title="Sin cosechas registradas aún" />

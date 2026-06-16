@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -343,7 +344,7 @@ export const FinanceOverview = ({
 					) : materialQuery.isPending ? (
 						<LoadingState message="Cargando consumo..." />
 					) : materialError ? (
-						<p className="text-sm text-destructive">{materialError}</p>
+						<ErrorState description={materialError} />
 					) : materialRows.length === 0 ? (
 						<EmptyState title="No hay consumo material para el rango actual" />
 					) : (

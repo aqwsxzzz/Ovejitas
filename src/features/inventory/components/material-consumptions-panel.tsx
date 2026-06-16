@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 
@@ -238,9 +239,10 @@ export function MaterialConsumptionsPanel({
 					<LoadingState message="Cargando consumos..." />
 				) : null}
 				{consumptionsQuery.error ? (
-					<p className="text-sm text-destructive">
-						Failed to load consumptions.
-					</p>
+					<ErrorState
+						description="No se pudieron cargar los consumos."
+						onRetry={() => void consumptionsQuery.refetch()}
+					/>
 				) : null}
 				{!consumptionsQuery.isLoading &&
 				!consumptionsQuery.error &&

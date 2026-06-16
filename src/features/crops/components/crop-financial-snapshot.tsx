@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { toNumber } from "@/features/inventory/components/material-detail-utils";
@@ -25,9 +26,7 @@ export function CropFinancialSnapshot({
 					<LoadingState message="Cargando resumen financiero..." />
 				) : null}
 				{isError ? (
-					<p className="text-sm text-destructive">
-						Error al cargar el resumen financiero.
-					</p>
+					<ErrorState description="Error al cargar el resumen financiero." />
 				) : null}
 				{!isLoading && !isError && totals.length === 0 ? (
 					<EmptyState title="Sin gastos aún" />

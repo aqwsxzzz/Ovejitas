@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 
@@ -97,7 +98,10 @@ export function MaterialTimelinePanel({
 					<LoadingState message="Cargando movimientos..." />
 				) : null}
 				{timelineQuery.error ? (
-					<p className="text-sm text-destructive">Failed to load movements.</p>
+					<ErrorState
+						description="No se pudieron cargar los movimientos."
+						onRetry={() => void timelineQuery.refetch()}
+					/>
 				) : null}
 				{!timelineQuery.isLoading &&
 				!timelineQuery.error &&

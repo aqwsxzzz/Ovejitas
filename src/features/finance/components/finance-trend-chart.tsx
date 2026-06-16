@@ -1,4 +1,6 @@
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/common/empty-state";
+import { ErrorState } from "@/components/common/error-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/features/finance/finance-utils";
@@ -50,11 +52,9 @@ export const FinanceTrendChart = ({
 			) : isPending ? (
 				<LoadingState message="Cargando tendencia..." />
 			) : errorMessage ? (
-				<p className="text-sm text-destructive">{errorMessage}</p>
+				<ErrorState description={errorMessage} />
 			) : sections.length === 0 ? (
-				<p className="text-sm text-muted-foreground">
-					No hay movimientos monetarios para el rango seleccionado.
-				</p>
+				<EmptyState title="No hay movimientos monetarios para el rango seleccionado" />
 			) : (
 				sections.map((section) => {
 					const maxValue = Math.max(

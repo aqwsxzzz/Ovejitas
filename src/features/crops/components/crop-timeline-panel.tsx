@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/common/empty-state";
@@ -103,7 +104,10 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 					<LoadingState message="Cargando eventos..." />
 				) : null}
 				{eventsQuery.error ? (
-					<p className="text-sm text-destructive">Error al cargar eventos.</p>
+					<ErrorState
+						description="No se pudieron cargar los eventos."
+						onRetry={() => void eventsQuery.refetch()}
+					/>
 				) : null}
 				{!eventsQuery.isLoading &&
 				!eventsQuery.error &&
