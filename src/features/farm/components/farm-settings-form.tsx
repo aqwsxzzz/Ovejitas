@@ -69,7 +69,8 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 	const hasChanges = Object.keys(draft).length > 0;
 
 	const coordinatesPreview = useMemo(() => {
-		if (currentLatitude == null || currentLongitude == null) return "Not set";
+		if (currentLatitude == null || currentLongitude == null)
+			return "Sin definir";
 		return `${currentLatitude.toFixed(6)}, ${currentLongitude.toFixed(6)}`;
 	}, [currentLatitude, currentLongitude]);
 
@@ -125,7 +126,9 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 
 	if (!farmData) {
 		return (
-			<p className="text-sm text-destructive">Farm data could not be loaded.</p>
+			<p className="text-sm text-destructive">
+				No se pudieron cargar los datos de la granja.
+			</p>
 		);
 	}
 
@@ -133,16 +136,16 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 		<div className="space-y-4">
 			{!isOwner ? (
 				<div className="rounded-md border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-warning">
-					Only farm owners can change these settings.
+					Solo los dueños de la granja pueden cambiar esta configuración.
 				</div>
 			) : null}
 			<Card>
 				<CardHeader>
-					<CardTitle>Farm Identity</CardTitle>
+					<CardTitle>Identidad de la granja</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					<div className="space-y-1">
-						<Label htmlFor="farm-name">Farm Name</Label>
+						<Label htmlFor="farm-name">Nombre de la granja</Label>
 						<Input
 							id="farm-name"
 							value={currentName}
@@ -155,7 +158,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 						/>
 					</div>
 					<div className="space-y-1">
-						<Label>Currency</Label>
+						<Label>Moneda</Label>
 						<Select
 							value={currentCurrency || undefined}
 							onValueChange={(value) =>
@@ -166,8 +169,8 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 								<SelectValue
 									placeholder={
 										isCurrenciesLoading
-											? "Loading currencies..."
-											: "Select currency"
+											? "Cargando monedas..."
+											: "Selecciona una moneda"
 									}
 								/>
 							</SelectTrigger>
@@ -188,7 +191,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Location</CardTitle>
+					<CardTitle>Ubicación</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					<FarmLocationPicker
@@ -199,7 +202,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 						}
 					/>
 					<p className="text-sm text-muted-foreground">
-						Selected coordinates: {coordinatesPreview}
+						Coordenadas seleccionadas: {coordinatesPreview}
 					</p>
 				</CardContent>
 			</Card>
@@ -209,14 +212,14 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 					onClick={() => void handleSave()}
 					disabled={!hasChanges || isSaving || !isOwner}
 				>
-					{isSaving ? "Saving..." : "Save Farm Settings"}
+					{isSaving ? "Guardando..." : "Guardar configuración"}
 				</Button>
 				<Button
 					variant="outline"
 					disabled={!hasChanges || isSaving}
 					onClick={() => setDraft({})}
 				>
-					Discard changes
+					Descartar cambios
 				</Button>
 			</div>
 		</div>

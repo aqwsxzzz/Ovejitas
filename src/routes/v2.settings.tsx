@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { useLogout } from "@/features/auth/api/auth-queries";
+import { useGetUserProfile, useLogout } from "@/features/auth/api/auth-queries";
+import { FarmSettingsForm } from "@/features/farm/components/farm-settings-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 
@@ -9,17 +10,27 @@ export const Route = createFileRoute("/v2/settings")({
 
 function SettingsPage() {
 	const { mutateAsync: logout } = useLogout();
+	const { data: currentUser } = useGetUserProfile();
+	const farmId = currentUser?.lastVisitedFarmId ?? "";
 
 	return (
 		<section className="flex flex-col gap-4">
 			<div className="v2-card p-5 md:p-6">
-				<p className="v2-kicker">Heredado de v1</p>
-				<h2 className="mt-2 text-xl font-semibold">Configuracion y cuenta</h2>
+				<h2 className="text-xl font-semibold">Configuracion y cuenta</h2>
 				<p className="mt-1 text-sm text-(--v2-ink-soft)">
-					Las capacidades actuales de cuenta/perfil siguen disponibles durante
-					la transicion.
+					Administra los datos de tu granja y tu sesion.
 				</p>
 			</div>
+
+			{farmId ? (
+				<FarmSettingsForm farmId={farmId} />
+			) : (
+				<div className="v2-card p-5">
+					<p className="text-sm text-(--v2-ink-soft)">
+						Selecciona una granja para administrar su configuracion.
+					</p>
+				</div>
+			)}
 
 			<div className="flex justify-end pt-2">
 				<Button
