@@ -32,7 +32,7 @@ export interface ILivestockAsset {
 	farm_id: number;
 	name: string;
 	kind: LivestockAssetKind;
-	mode: LivestockAssetMode;
+	mode: LivestockAssetMode | null;
 	location: string | null;
 	description: string | null;
 	produce_asset_id: number | null;

@@ -148,7 +148,8 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 						{asset.name}
 					</CardTitle>
 					<p className="text-sm text-(--v2-ink-soft)">
-						{asset.location ?? "No location"} · {asset.mode} mode
+						{asset.location ?? "No location"}
+						{asset.mode ? ` · ${asset.mode} mode` : ""}
 					</p>
 					{asset.produce_asset_id ? (
 						<p className="text-sm text-(--v2-ink-soft)">

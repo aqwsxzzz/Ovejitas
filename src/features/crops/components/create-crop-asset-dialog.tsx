@@ -92,7 +92,6 @@ export function CreateCropAssetDialog({
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
 					kind: "crop",
-					mode: "aggregated",
 					produce_asset_id:
 						produceAssetId !== "none" ? Number(produceAssetId) : undefined,
 				},

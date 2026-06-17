@@ -84,7 +84,7 @@ function mapAssetToSlice(
 		id: number;
 		name: string;
 		kind: string;
-		mode: "aggregated" | "individual";
+		mode: "aggregated" | "individual" | null;
 	},
 	context: {
 		aggregatedAnimalsByAssetId: Map<number, number>;

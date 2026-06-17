@@ -15,7 +15,7 @@ interface LivestockUnitRowProps {
 	kind: LivestockAssetKind;
 	location: string | null;
 	description: string | null;
-	mode: "aggregated" | "individual";
+	mode: "aggregated" | "individual" | null;
 	isEditing: boolean;
 	editName: string;
 	editLocation: string;
@@ -133,15 +133,17 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 					<div className="min-w-0">
 						<div className="flex flex-wrap items-center gap-2">
 							<p className="font-semibold leading-tight">{props.name}</p>
-							<span
-								className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-									props.mode === "individual"
-										? "bg-info/10 text-info"
-										: "bg-(--v2-surface) text-(--v2-ink-soft)"
-								}`}
-							>
-								{props.mode === "individual" ? "Individual" : "Agrupado"}
-							</span>
+							{props.mode ? (
+								<span
+									className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+										props.mode === "individual"
+											? "bg-info/10 text-info"
+											: "bg-(--v2-surface) text-(--v2-ink-soft)"
+									}`}
+								>
+									{props.mode === "individual" ? "Individual" : "Agrupado"}
+								</span>
+							) : null}
 						</div>
 						<div className="mt-1 flex items-center gap-1">
 							<MapPin className="h-4 w-4 flex-shrink-0 text-[color:var(--v2-ink-soft)]" />
