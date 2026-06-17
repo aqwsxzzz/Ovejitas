@@ -93,7 +93,7 @@ export function ManualFeedingFormSection({
 			</div>
 
 			<div className="space-y-1.5">
-				<Label htmlFor="manual-feeding-qty">Cantidad por registro</Label>
+				<Label htmlFor="manual-feeding-qty">Cantidad</Label>
 				<Input
 					id="manual-feeding-qty"
 					type="number"
@@ -102,38 +102,6 @@ export function ManualFeedingFormSection({
 					value={form.quantity}
 					onChange={(event) => {
 						onFieldChange("quantity", event.target.value);
-					}}
-				/>
-			</div>
-
-			<div className="space-y-1.5">
-				<Label htmlFor="manual-feeding-max-per-day">
-					Aviso: maximo por dia
-				</Label>
-				<Input
-					id="manual-feeding-max-per-day"
-					type="number"
-					min="1"
-					step="1"
-					value={form.maxFeedsPerDay}
-					onChange={(event) => {
-						onFieldChange("maxFeedsPerDay", event.target.value);
-					}}
-				/>
-			</div>
-
-			<div className="space-y-1.5">
-				<Label htmlFor="manual-feeding-min-hours">
-					Aviso: horas minimas entre tomas
-				</Label>
-				<Input
-					id="manual-feeding-min-hours"
-					type="number"
-					min="0"
-					step="0.25"
-					value={form.minHoursBetweenFeeds}
-					onChange={(event) => {
-						onFieldChange("minHoursBetweenFeeds", event.target.value);
 					}}
 				/>
 			</div>
