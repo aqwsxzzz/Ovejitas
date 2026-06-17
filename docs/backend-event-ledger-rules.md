@@ -1,14 +1,15 @@
 # Ovejitas BE Event Ledger Rules (FE/BE Working Agreement)
 
 Status: active FE/BE contract baseline.
-Date: 2026-06-03.
+Date: 2026-06-17.
 
 ## Context and source of truth
 
-- This file is aligned with the backend `events-and-actions.md` guidance shared from the API repository docs.
+- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (backend revision `366f9e5`, synced 2026-06-17 via `npm run docs:ledger`).
 - Local supporting references:
   - `backend-docs/domain-rebuild-plan.md`
   - `backend-docs/domain-notes.md`
+  - `backend-docs/api/pregnancies.yaml`, `backend-docs/api/reports.yaml`, `backend-docs/api/assets.yaml`
 
 ## Core model (what the backend is)
 
@@ -57,8 +58,18 @@ All action emission is atomic and rollback-safe.
 | 9 | Material purchase | `POST .../material-purchases` | `inventory`+ + `expense` |
 | 10 | Material consumption | `POST .../material-consumptions` | `inventory`− |
 | 11 | Material sale | `POST .../assets/{id}/sales` | `inventory`− + `income` |
+| 12 | Pregnancy check | `POST .../pregnancies` | `reproductive` |
 
 Every action-emitted event must carry `payload.source` (for example: `harvest`, `flock_acquisition`).
+
+### Pregnancy check constraints (action #12)
+
+- Records a pregnancy / ultrasound check on one `individual` and emits one paired `reproductive` event on that individual's timeline.
+- A not-pregnant check MUST omit `offspring_count` and `expected_due_at`.
+- Table-backed and editable: `PATCH .../pregnancies/{id}` reconciles the paired reproductive event; `individual_id` is immutable; clearing `is_pregnant` requires also clearing `offspring_count` and `expected_due_at`.
+- `DELETE .../pregnancies/{id}` hard-deletes the record and reverses its reproductive event.
+- Supports `idempotency_key`: replaying a key returns the original record with `200` (no duplicate event).
+- `PregnancyRead` exposes `reproductive_event_id` linking the record to its emitted ledger row.
 
 ### Harvest constraints (action #8)
 
@@ -70,7 +81,7 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 ## Linkage model
 
 - Individuals can link lifecycle events through FK fields (`acquisition_event_id`, `mortality_event_id`, `sale_event_id`, `birth_event_id`).
-- Table-backed actions (`material_purchase`, `material_consumption`) own a row and store FKs to emitted events.
+- Table-backed actions (`material_purchase`, `material_consumption`, `pregnancy`) own a row and store FKs to emitted events (e.g. `pregnancy.reproductive_event_id`); they support reconcile-on-edit and reverse-on-delete.
 - Table-less actions (`flock/*`, `harvest`, `material_sale`) are create-only and correlate by `payload.source` + `occurred_at` — no edit/reverse.
 - Harvest links a producer asset (`kind=animal` or `kind=crop`) to its produce asset via `asset.produce_asset_id`.
 
@@ -80,7 +91,7 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 - Manual `POST /events` cannot set `payload.source`.
 - `inventory` stays manually writable (for legitimate stock adjustments), but manual decrements must use the same lock and non-negative guard as actions.
 - `acquisition` and `mortality` are action-only (not in manual create union).
-- `production`, `observation`, standalone `expense`/`income`, and `reproductive` remain manual when no specific action endpoint governs them.
+- `production`, `observation`, standalone `expense`/`income`, and `reproductive` remain manual when no specific action endpoint governs them. Pregnancy/ultrasound-check `reproductive` events are now action-owned (action #12) and MUST be created/edited/deleted via `.../pregnancies`, not generic event writes.
 - Inventory mutations must use shared inventory helpers (`emit_increment`, `emit_decrement`, lock, non-negative assertion), never raw event writes.
 
 ## Implementation pattern for action services
@@ -153,6 +164,10 @@ Reports are always derived from event replay (never cached mutable counters):
 - **inventory-summary** (`GET .../reports/inventory-summary`): on-hand balance per (asset, unit) for material assets and aggregated animal flocks. `date_to` gives the balance as of that moment (defaults to now). `date_from` DOES NOT apply to a running balance and is always ignored by the backend.
 - **inventory balance** (`GET .../assets/{id}/events/balance`): current on-hand balance per (asset, unit) computed from `inventory` events since the most recent reset. Only meaningful for `kind=material` assets.
 - **individual timeline** (`GET .../reports/individuals/{id}/timeline`): paginated `EventRead` list for a single individual. Returns the full event history for that individual in `Page` envelope.
+- **sales-value** (`GET .../reports/sales-value`): realized weighted-average sale price per (asset, unit), derived from sale-action events only (manual income excluded). `value_per_unit = sale income ÷ quantity sold`. When an asset was sold in more than one unit in the window, income can't be split → `ambiguous: true` with null `unit`/`quantity_sold`/`value_per_unit`. Assets with no sales in the window do not appear. Pairs with `cost-per-unit` (the cost floor) to derive margin client-side.
+- **coop-productivity** (`GET .../reports/coop-productivity`): eggs laid vs expected per coop. `produced` is normalized to single eggs (`dozen` counts ×12); `expected = expected_eggs_per_head_per_day × current headcount × days`; `productivity_pct = produced ÷ expected × 100`. `date_from` and `date_to` are **required** (expected scales with days). A coop missing `expected_eggs_per_head_per_day` or with 0 headcount reports `missing_capacity: true` with null `expected`/`productivity_pct` — never divide-by-zero (mirrors `has_unvalued_consumption`). Headcount is event-derived (`HEAD` on-hand), not stored.
+- **upcoming-births** (`GET .../reports/upcoming-births`): one row per individual whose *latest* pregnancy check is pregnant with `expected_due_at` inside `[date_from, date_to]`. A later not-pregnant check suppresses the alert. `date_from` and `date_to` are **required**; `days_until_due` counts whole days from `date_from`. Depends on pregnancy checks (action #12) existing.
+- **PDF exports**: `GET .../reports/profitability/pdf` and `GET .../reports/cost-per-unit/pdf` return the respective report as a downloadable PDF.
 
 ## Priority roadmap (recommended)
 
@@ -189,6 +204,16 @@ Reports are always derived from event replay (never cached mutable counters):
 ---
 
 ## Contract change log
+
+### 2026-06-17
+
+- **Pregnancy check action shipped** (`POST/PATCH/DELETE .../pregnancies`): records a pregnancy/ultrasound check on one individual and emits a paired `reproductive` event. Table-backed with reconcile-on-edit and reverse-on-delete; `individual_id` immutable; not-pregnant checks omit `offspring_count`/`expected_due_at`; supports `idempotency_key`. FE must create/edit/delete these `reproductive` events via the pregnancy endpoints, not generic event writes.
+- **`sales-value` report shipped** (`GET .../reports/sales-value`): realized weighted-average sale price per (asset, unit) from sale-action events only; `ambiguous: true` when an asset sold across multiple units in the window. FE derives margin by pairing with `cost-per-unit`.
+- **`coop-productivity` report shipped** (`GET .../reports/coop-productivity`): eggs laid vs expected per coop. `date_from`/`date_to` required; `missing_capacity: true` when laying rate unset or headcount 0. Headcount is event-derived, not stored.
+- **`upcoming-births` report shipped** (`GET .../reports/upcoming-births`): individuals due within `[date_from, date_to]` based on latest pregnancy check; required date window. Depends on pregnancy checks.
+- **Asset gains `expected_eggs_per_head_per_day`**: new nullable, editable Decimal field on `AssetCreate`/`AssetUpdate`/`AssetRead` that configures a coop's expected laying rate (feeds `coop-productivity`). Headcount remains event-derived.
+- **Report PDF exports added**: `GET .../reports/profitability/pdf` and `GET .../reports/cost-per-unit/pdf` return downloadable PDFs.
+- **Not ledger-affecting**: `members` role-management endpoints (`PATCH`/`DELETE .../members/{id}`) changed but emit no events — outside this contract.
 
 ### 2026-06-03
 
