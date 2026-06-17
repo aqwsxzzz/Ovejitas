@@ -144,13 +144,18 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 									{props.mode === "individual" ? "Individual" : "Agrupado"}
 								</span>
 							) : null}
+							{props.location ? (
+								<span className="flex items-center gap-1 text-sm text-[color:var(--v2-ink-soft)]">
+									<MapPin className="h-4 w-4 flex-shrink-0" />
+									{props.location}
+								</span>
+							) : null}
 						</div>
-						<div className="mt-1 flex items-center gap-1">
-							<MapPin className="h-4 w-4 flex-shrink-0 text-[color:var(--v2-ink-soft)]" />
-							<p className="text-sm text-[color:var(--v2-ink-soft)]">
-								{props.location ?? "Sin ubicacion"}
+						{props.description ? (
+							<p className="mt-1 line-clamp-2 text-sm text-[color:var(--v2-ink-soft)]">
+								{props.description}
 							</p>
-						</div>
+						) : null}
 					</div>
 				</div>
 				{isConfirmingDelete ? null : (

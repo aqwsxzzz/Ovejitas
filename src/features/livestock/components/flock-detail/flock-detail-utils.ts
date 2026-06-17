@@ -11,7 +11,8 @@ export function parseNumeric(value: string | null): number {
 	return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function toModeLabel(asset: ILivestockAsset): string {
+export function toModeLabel(asset: ILivestockAsset): string | null {
+	if (asset.mode == null) return null;
 	return asset.mode === "aggregated" ? "Aggregate" : "Individual";
 }
 
