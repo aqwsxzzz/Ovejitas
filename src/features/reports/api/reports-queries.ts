@@ -9,6 +9,8 @@ import {
 	getProfitabilityReportPdf,
 	getCostPerUnitReportPdf,
 	getUpcomingBirthsReport,
+	getCoopProductivityReport,
+	getSalesValueReport,
 } from "@/features/reports/api/reports-api";
 import type {
 	IProfitabilityReportParams,
@@ -19,6 +21,8 @@ import type {
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
 	IUpcomingBirthsReportParams,
+	ICoopProductivityReportParams,
+	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
 
 export const reportsQueryKeys = {
@@ -141,6 +145,24 @@ export const reportsQueryKeys = {
 			"upcoming-births",
 			dateFrom,
 			dateTo,
+		] as const,
+	coopProductivity: (
+		farmId: string | number,
+		dateFrom: string,
+		dateTo: string,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"coop-productivity",
+			dateFrom,
+			dateTo,
+		] as const,
+	salesValue: (farmId: string | number, dateFrom?: string, dateTo?: string) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"sales-value",
+			dateFrom ?? null,
+			dateTo ?? null,
 		] as const,
 };
 
@@ -284,6 +306,41 @@ export const useGetUpcomingBirthsReport = (
 		queryFn: () => getUpcomingBirthsReport(params),
 		enabled:
 			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
+	});
+
+/**
+ * Get coop productivity (eggs laid vs expected, required date window)
+ */
+export const useGetCoopProductivityReport = (
+	params: ICoopProductivityReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.coopProductivity(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getCoopProductivityReport(params),
+		enabled:
+			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
+	});
+
+/**
+ * Get realized sale value per unit, per asset
+ */
+export const useGetSalesValueReport = (
+	params: ISalesValueReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.salesValue(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getSalesValueReport(params),
+		enabled: enabled && !!params.farmId,
 	});
 
 /**
