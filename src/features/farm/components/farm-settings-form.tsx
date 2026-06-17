@@ -15,7 +15,9 @@ import {
 import {
 	useGetFarmById,
 	useGetFarmCurrencies,
+	useGetV1FarmById,
 	useUpdateFarmById,
+	useUpdateV1FarmById,
 } from "@/features/farm/api/farm-queries";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { useGetFarmMembers } from "@/features/farm-members/api/farm-members-queries";
@@ -34,7 +36,6 @@ interface FarmDraft {
 
 const buildUpdatePayload = (draft: FarmDraft) => ({
 	...(draft.name !== undefined ? { name: draft.name } : {}),
-	...(draft.currency !== undefined ? { currency: draft.currency } : {}),
 	...(draft.latitude !== undefined ? { latitude: draft.latitude } : {}),
 	...(draft.longitude !== undefined ? { longitude: draft.longitude } : {}),
 });
@@ -42,6 +43,7 @@ const buildUpdatePayload = (draft: FarmDraft) => ({
 export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 	const [draft, setDraft] = useState<FarmDraft>({});
 	const { data: farmData, isLoading: isFarmLoading } = useGetFarmById(farmId);
+	const { data: v1Farm } = useGetV1FarmById(farmId);
 	const { data: currencyOptions = [], isLoading: isCurrenciesLoading } =
 		useGetFarmCurrencies();
 	const { data: currentUser } = useGetUserProfile();
@@ -49,6 +51,9 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 		farmId,
 	});
 	const updateFarmMutation = useUpdateFarmById();
+	const updateV1FarmMutation = useUpdateV1FarmById();
+	const isSaving =
+		updateFarmMutation.isPending || updateV1FarmMutation.isPending;
 
 	const isOwner = isMembersLoading
 		? true // optimistic while loading
@@ -58,7 +63,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 			);
 
 	const currentName = draft.name ?? farmData?.name ?? "";
-	const currentCurrency = draft.currency ?? farmData?.currency ?? "";
+	const currentCurrency = draft.currency ?? v1Farm?.default_currency ?? "";
 	const currentLatitude = draft.latitude ?? farmData?.latitude ?? null;
 	const currentLongitude = draft.longitude ?? farmData?.longitude ?? null;
 	const hasChanges = Object.keys(draft).length > 0;
@@ -76,10 +81,33 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 		}
 
 		try {
-			await updateFarmMutation.mutateAsync({
-				farmId,
-				payload: buildUpdatePayload({ ...draft, name: currentName.trim() }),
-			});
+			const tasks: Promise<unknown>[] = [];
+
+			// Name and location live on the legacy farm endpoint.
+			if (
+				draft.name !== undefined ||
+				draft.latitude !== undefined ||
+				draft.longitude !== undefined
+			) {
+				tasks.push(
+					updateFarmMutation.mutateAsync({
+						farmId,
+						payload: buildUpdatePayload({ ...draft, name: currentName.trim() }),
+					}),
+				);
+			}
+
+			// Currency is owned by the v1 farm record (the event ledger reads it).
+			if (draft.currency) {
+				tasks.push(
+					updateV1FarmMutation.mutateAsync({
+						farmId,
+						payload: { default_currency: draft.currency },
+					}),
+				);
+			}
+
+			await Promise.all(tasks);
 			setDraft({});
 			toast.success("Configuración de la granja actualizada.");
 		} catch (error) {
@@ -179,13 +207,13 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 			<div className="flex items-center gap-2">
 				<Button
 					onClick={() => void handleSave()}
-					disabled={!hasChanges || updateFarmMutation.isPending || !isOwner}
+					disabled={!hasChanges || isSaving || !isOwner}
 				>
-					{updateFarmMutation.isPending ? "Saving..." : "Save Farm Settings"}
+					{isSaving ? "Saving..." : "Save Farm Settings"}
 				</Button>
 				<Button
 					variant="outline"
-					disabled={!hasChanges || updateFarmMutation.isPending}
+					disabled={!hasChanges || isSaving}
 					onClick={() => setDraft({})}
 				>
 					Discard changes
