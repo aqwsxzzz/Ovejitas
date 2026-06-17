@@ -156,6 +156,15 @@ export interface ILivestockAssetListResponse {
 	meta: ILivestockPageMeta;
 }
 
+export interface IAssetKindCount {
+	kind: LivestockAssetKind;
+	count: number;
+}
+
+export interface IAssetSummary {
+	data: IAssetKindCount[];
+}
+
 export interface ILivestockIndividualListResponse {
 	data: ILivestockIndividual[];
 	meta: ILivestockPageMeta;

@@ -1,12 +1,17 @@
 import { Link } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
+import { useGetAssetSummaryByFarmId } from "@/features/livestock/api/livestock-queries";
 import { ASSET_KIND_OPTIONS } from "@/features/livestock/constants/asset-kind-options";
 import { AssetKindMedal } from "@/features/livestock/components/asset-kind-medal";
 
 export function LivestockPage() {
 	const { data: currentUser } = useGetUserProfile();
 	const farmId = currentUser?.lastVisitedFarmId ?? "";
+	const { data: assetSummary } = useGetAssetSummaryByFarmId({ farmId });
+	const countByKind = new Map(
+		assetSummary?.data.map((entry) => [entry.kind, entry.count]),
+	);
 
 	if (!farmId) {
 		return (
@@ -39,12 +44,17 @@ export function LivestockPage() {
 							<AssetKindMedal kind={option.kind} />
 							<p className="text-base font-semibold">{option.title}</p>
 						</div>
-						<span
-							className="text-xl leading-none text-[color:var(--v2-ink-soft)]"
-							aria-hidden="true"
-						>
-							›
-						</span>
+						<div className="flex items-center gap-2">
+							<span className="rounded-full bg-(--v2-surface) px-2.5 py-0.5 text-sm font-semibold text-(--v2-ink-soft)">
+								{countByKind.get(option.kind) ?? 0}
+							</span>
+							<span
+								className="text-xl leading-none text-[color:var(--v2-ink-soft)]"
+								aria-hidden="true"
+							>
+								›
+							</span>
+						</div>
 					</Link>
 				))}
 			</div>

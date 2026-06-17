@@ -3,6 +3,7 @@ import { EVENT_UNITS } from "@/shared/types/unit-types";
 import type {
 	ILivestockAsset,
 	ILivestockEvent,
+	IAssetSummary,
 	ILivestockAssetListResponse,
 	ILivestockEventCategoryListResponse,
 	ILivestockEventListResponse,
@@ -196,6 +197,12 @@ export const getLivestockAssetById = ({
 	axiosHelper<ILivestockAsset>({
 		method: "get",
 		url: `/api/v1/farms/${farmId}/assets/${assetId}`,
+	});
+
+export const getAssetSummaryByFarmId = ({ farmId }: { farmId: string }) =>
+	axiosHelper<IAssetSummary>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/assets/summary`,
 	});
 
 export const createLivestockAsset = ({
