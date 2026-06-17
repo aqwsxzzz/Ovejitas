@@ -657,7 +657,6 @@ export type LivestockEventCreatePayload =
 			type: "expense" | "income";
 			occurred_at: string;
 			amount: number;
-			currency?: string;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
@@ -680,7 +679,6 @@ export type LivestockEventCreatePayload =
 			occurred_at: string;
 			quantity: number;
 			amount?: number;
-			currency?: string;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
