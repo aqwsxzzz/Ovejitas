@@ -8,6 +8,7 @@ import {
 	getMaterialConsumptionAggregateReport,
 	getProfitabilityReportPdf,
 	getCostPerUnitReportPdf,
+	getUpcomingBirthsReport,
 } from "@/features/reports/api/reports-api";
 import type {
 	IProfitabilityReportParams,
@@ -17,6 +18,7 @@ import type {
 	IInventorySummaryReportParams,
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
+	IUpcomingBirthsReportParams,
 } from "@/features/reports/types/reports-types";
 
 export const reportsQueryKeys = {
@@ -132,6 +134,13 @@ export const reportsQueryKeys = {
 			reason ?? null,
 			dateFrom ?? null,
 			dateTo ?? null,
+		] as const,
+	upcomingBirths: (farmId: string | number, dateFrom: string, dateTo: string) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"upcoming-births",
+			dateFrom,
+			dateTo,
 		] as const,
 };
 
@@ -257,6 +266,24 @@ export const useGetMaterialConsumptionAggregateReport = (
 		),
 		queryFn: () => getMaterialConsumptionAggregateReport(params),
 		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Get upcoming births (individuals due within a required date window)
+ */
+export const useGetUpcomingBirthsReport = (
+	params: IUpcomingBirthsReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.upcomingBirths(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getUpcomingBirthsReport(params),
+		enabled:
+			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
 	});
 
 /**

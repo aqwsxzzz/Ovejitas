@@ -153,6 +153,20 @@ export interface IInventorySummaryReport {
 	data: IInventorySummaryRow[];
 }
 
+// Upcoming Births Report
+export interface IUpcomingBirthRow {
+	individual_id: number;
+	individual_tag: string;
+	asset_id: number;
+	expected_due_at: string; // ISO datetime
+	offspring_count: number | null;
+	days_until_due: number;
+}
+
+export interface IUpcomingBirthsReport {
+	data: IUpcomingBirthRow[];
+}
+
 // Query Parameters
 export interface IProfitabilityReportParams {
 	farmId: string | number;
@@ -217,4 +231,10 @@ export interface IReportPdfParams {
 	date_to?: string;
 	asset_id?: number;
 	unit?: Unit;
+}
+
+export interface IUpcomingBirthsReportParams {
+	farmId: string | number;
+	date_from: string; // required — defines the alert window
+	date_to: string; // required
 }

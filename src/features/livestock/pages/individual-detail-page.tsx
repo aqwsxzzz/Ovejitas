@@ -9,6 +9,7 @@ import {
 	useDeleteIndividual,
 } from "@/features/livestock/api/livestock-queries";
 import { IndividualDetail } from "../components/individual-detail";
+import { PregnancyCheckForm } from "@/features/pregnancy/components/pregnancy-check-form";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 interface IndividualDetailPageProps {
@@ -126,6 +127,11 @@ export function IndividualDetailPage({
 				onDelete={handleDelete}
 				isLoading={isMutating}
 				startEditing={startEditing}
+			/>
+
+			<PregnancyCheckForm
+				farmId={farmId}
+				individualId={individual.id}
 			/>
 		</div>
 	);

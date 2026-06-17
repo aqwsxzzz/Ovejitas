@@ -23,6 +23,7 @@ import { LoadingState } from "@/components/common/loading-state";
 
 import { DashboardEmptyState } from "../components/dashboard-empty-state";
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
+import { UpcomingBirthsCard } from "../components/upcoming-births-card";
 
 const MONTH_LABEL = new Date().toLocaleDateString("es-EC", {
 	month: "long",
@@ -460,13 +461,7 @@ export function V2DashboardPage() {
 				<UnitKpiSlider slices={slices} />
 			)}
 
-			<article className="v2-card p-4">
-				<p className="v2-kicker mb-3">Alertas urgentes</p>
-				<p className="text-sm text-(--v2-ink-soft)">
-					Las alertas se mostraran cuando el backend de reportes este disponible
-					para este modulo.
-				</p>
-			</article>
+			{farmId ? <UpcomingBirthsCard farmId={farmId} /> : null}
 
 			<article className="v2-card p-4">
 				<p className="v2-kicker mb-3">Tareas de hoy</p>
