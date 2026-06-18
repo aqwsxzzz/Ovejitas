@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { LoadingState } from "@/components/common/loading-state";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,15 +13,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import {
-	useGetFarmById,
-	useGetFarmCurrencies,
 	useGetV1FarmById,
-	useUpdateFarmById,
 	useUpdateV1FarmById,
 } from "@/features/farm/api/farm-queries";
+import { CURRENCY_OPTIONS } from "@/features/farm/constants/currency-options";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
-import { useGetFarmMembers } from "@/features/farm-members/api/farm-members-queries";
-import { FarmLocationPicker } from "@/features/farm/components/farm-location-picker";
 
 interface FarmSettingsFormProps {
 	farmId: string;
@@ -29,50 +25,20 @@ interface FarmSettingsFormProps {
 
 interface FarmDraft {
 	name?: string;
-	currency?: string | null;
-	latitude?: number | null;
-	longitude?: number | null;
+	currency?: string;
 }
-
-const buildUpdatePayload = (draft: FarmDraft) => ({
-	...(draft.name !== undefined ? { name: draft.name } : {}),
-	...(draft.latitude !== undefined ? { latitude: draft.latitude } : {}),
-	...(draft.longitude !== undefined ? { longitude: draft.longitude } : {}),
-});
 
 export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 	const [draft, setDraft] = useState<FarmDraft>({});
-	const { data: farmData, isLoading: isFarmLoading } = useGetFarmById(farmId);
-	const { data: v1Farm } = useGetV1FarmById(farmId);
-	const { data: currencyOptions = [], isLoading: isCurrenciesLoading } =
-		useGetFarmCurrencies();
+	const { data: farm, isLoading: isFarmLoading } = useGetV1FarmById(farmId);
 	const { data: currentUser } = useGetUserProfile();
-	const { data: farmMembers, isLoading: isMembersLoading } = useGetFarmMembers({
-		farmId,
-	});
-	const updateFarmMutation = useUpdateFarmById();
-	const updateV1FarmMutation = useUpdateV1FarmById();
-	const isSaving =
-		updateFarmMutation.isPending || updateV1FarmMutation.isPending;
+	const updateFarmMutation = useUpdateV1FarmById();
 
-	const isOwner = isMembersLoading
-		? true // optimistic while loading
-		: (farmMembers ?? []).some(
-				(member) =>
-					member.userId === currentUser?.id && member.role === "owner",
-			);
+	const isOwner = currentUser?.role === "owner";
 
-	const currentName = draft.name ?? farmData?.name ?? "";
-	const currentCurrency = draft.currency ?? v1Farm?.default_currency ?? "";
-	const currentLatitude = draft.latitude ?? farmData?.latitude ?? null;
-	const currentLongitude = draft.longitude ?? farmData?.longitude ?? null;
+	const currentName = draft.name ?? farm?.name ?? "";
+	const currentCurrency = draft.currency ?? farm?.default_currency ?? "";
 	const hasChanges = Object.keys(draft).length > 0;
-
-	const coordinatesPreview = useMemo(() => {
-		if (currentLatitude == null || currentLongitude == null)
-			return "Sin definir";
-		return `${currentLatitude.toFixed(6)}, ${currentLongitude.toFixed(6)}`;
-	}, [currentLatitude, currentLongitude]);
 
 	const handleSave = async () => {
 		if (!hasChanges) return;
@@ -82,33 +48,13 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 		}
 
 		try {
-			const tasks: Promise<unknown>[] = [];
-
-			// Name and location live on the legacy farm endpoint.
-			if (
-				draft.name !== undefined ||
-				draft.latitude !== undefined ||
-				draft.longitude !== undefined
-			) {
-				tasks.push(
-					updateFarmMutation.mutateAsync({
-						farmId,
-						payload: buildUpdatePayload({ ...draft, name: currentName.trim() }),
-					}),
-				);
-			}
-
-			// Currency is owned by the v1 farm record (the event ledger reads it).
-			if (draft.currency) {
-				tasks.push(
-					updateV1FarmMutation.mutateAsync({
-						farmId,
-						payload: { default_currency: draft.currency },
-					}),
-				);
-			}
-
-			await Promise.all(tasks);
+			await updateFarmMutation.mutateAsync({
+				farmId,
+				payload: {
+					...(draft.name !== undefined ? { name: currentName.trim() } : {}),
+					...(draft.currency ? { default_currency: draft.currency } : {}),
+				},
+			});
 			setDraft({});
 			toast.success("Configuración de la granja actualizada.");
 		} catch (error) {
@@ -124,7 +70,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 		return <LoadingState message="Cargando configuración..." />;
 	}
 
-	if (!farmData) {
+	if (!farm) {
 		return (
 			<p className="text-sm text-destructive">
 				No se pudieron cargar los datos de la granja.
@@ -149,6 +95,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 						<Input
 							id="farm-name"
 							value={currentName}
+							disabled={!isOwner}
 							onChange={(event) =>
 								setDraft((previous) => ({
 									...previous,
@@ -161,21 +108,16 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 						<Label>Moneda</Label>
 						<Select
 							value={currentCurrency || undefined}
+							disabled={!isOwner}
 							onValueChange={(value) =>
 								setDraft((previous) => ({ ...previous, currency: value }))
 							}
 						>
 							<SelectTrigger>
-								<SelectValue
-									placeholder={
-										isCurrenciesLoading
-											? "Cargando monedas..."
-											: "Selecciona una moneda"
-									}
-								/>
+								<SelectValue placeholder="Selecciona una moneda" />
 							</SelectTrigger>
 							<SelectContent>
-								{currencyOptions.map((currency) => (
+								{CURRENCY_OPTIONS.map((currency) => (
 									<SelectItem
 										key={currency.code}
 										value={currency.code}
@@ -189,34 +131,16 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 				</CardContent>
 			</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Ubicación</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3">
-					<FarmLocationPicker
-						latitude={currentLatitude}
-						longitude={currentLongitude}
-						onChange={({ latitude, longitude }) =>
-							setDraft((previous) => ({ ...previous, latitude, longitude }))
-						}
-					/>
-					<p className="text-sm text-muted-foreground">
-						Coordenadas seleccionadas: {coordinatesPreview}
-					</p>
-				</CardContent>
-			</Card>
-
 			<div className="flex items-center gap-2">
 				<Button
 					onClick={() => void handleSave()}
-					disabled={!hasChanges || isSaving || !isOwner}
+					disabled={!hasChanges || updateFarmMutation.isPending || !isOwner}
 				>
-					{isSaving ? "Guardando..." : "Guardar configuración"}
+					{updateFarmMutation.isPending ? "Guardando..." : "Guardar configuración"}
 				</Button>
 				<Button
 					variant="outline"
-					disabled={!hasChanges || isSaving}
+					disabled={!hasChanges || updateFarmMutation.isPending}
 					onClick={() => setDraft({})}
 				>
 					Descartar cambios
