@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { LoadingState } from "@/components/common/loading-state";
 
 export function FlockSelectFarmState() {
 	return (
@@ -18,7 +19,7 @@ export function FlockLoadingAssetState() {
 	return (
 		<section className="space-y-4">
 			<div className="v2-card p-5">
-				<p className="text-sm text-(--v2-ink-soft)">Cargando activo...</p>
+				<LoadingState message="Cargando activo..." />
 			</div>
 		</section>
 	);

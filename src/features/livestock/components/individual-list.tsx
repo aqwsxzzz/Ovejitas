@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LoadingState } from "@/components/common/loading-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { IndividualForm } from "@/features/livestock/components/individual-form";
@@ -126,7 +127,7 @@ export function IndividualList({
 
 			{/* List */}
 			{isLoading ? (
-				<div className="py-8 text-center text-muted-foreground">Cargando...</div>
+				<LoadingState />
 			) : individuals.length === 0 ? (
 				<div className="rounded-lg border border-dashed border-input bg-muted py-8 text-center text-muted-foreground">
 					{searchQuery.trim()

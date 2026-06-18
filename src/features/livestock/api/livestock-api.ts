@@ -3,6 +3,7 @@ import { EVENT_UNITS } from "@/shared/types/unit-types";
 import type {
 	ILivestockAsset,
 	ILivestockEvent,
+	IAssetSummary,
 	ILivestockAssetListResponse,
 	ILivestockEventCategoryListResponse,
 	ILivestockEventListResponse,
@@ -198,6 +199,12 @@ export const getLivestockAssetById = ({
 		url: `/api/v1/farms/${farmId}/assets/${assetId}`,
 	});
 
+export const getAssetSummaryByFarmId = ({ farmId }: { farmId: string }) =>
+	axiosHelper<IAssetSummary>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/assets/summary`,
+	});
+
 export const createLivestockAsset = ({
 	farmId,
 	data,
@@ -210,6 +217,7 @@ export const createLivestockAsset = ({
 		location?: string;
 		mode?: LivestockAssetMode;
 		produce_asset_id?: number | null;
+		expected_eggs_per_head_per_day?: number | string | null;
 	};
 }) =>
 	axiosHelper<ILivestockAsset>({
@@ -232,6 +240,7 @@ export const updateLivestockAssetById = ({
 		location: string | null;
 		mode: LivestockAssetMode | null;
 		produce_asset_id: number | null;
+		expected_eggs_per_head_per_day: number | string | null;
 	}>;
 }) =>
 	axiosHelper<ILivestockAsset>({
@@ -650,7 +659,6 @@ export type LivestockEventCreatePayload =
 			type: "expense" | "income";
 			occurred_at: string;
 			amount: number;
-			currency?: string;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
@@ -673,7 +681,6 @@ export type LivestockEventCreatePayload =
 			occurred_at: string;
 			quantity: number;
 			amount?: number;
-			currency?: string;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;

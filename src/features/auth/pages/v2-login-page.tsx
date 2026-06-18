@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useLogin } from "@/features/auth/api/auth-queries";
 import { V2AuthPageFrame } from "@/features/auth/components/v2-auth-page-frame";
+import { Route } from "@/routes/v2.login";
 
 const loginSchema = z.object({
 	email: z.string().email("Ingresa un correo electronico valido."),
@@ -35,11 +36,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function V2LoginPage() {
 	const { mutateAsync: login, isPending } = useLogin();
+	const { email } = Route.useSearch();
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 	const form = useForm<LoginFormValues>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
-			email: "",
+			email: email ?? "",
 			password: "",
 		},
 	});

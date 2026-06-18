@@ -44,7 +44,9 @@ export function FlockHeaderCard({ asset }: FlockHeaderCardProps) {
 					)}
 					<div className="flex items-center gap-2">
 						<Badge variant="kind">{toKindLabel(asset)}</Badge>
-						<Badge variant="mode">{toModeLabel(asset)}</Badge>
+						{toModeLabel(asset) ? (
+							<Badge variant="mode">{toModeLabel(asset)}</Badge>
+						) : null}
 					</div>
 				</div>
 				<div className="flex items-center gap-2">

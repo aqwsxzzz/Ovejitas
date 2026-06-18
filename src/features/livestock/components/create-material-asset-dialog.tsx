@@ -71,7 +71,6 @@ export function CreateMaterialAssetDialog({
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
 					kind: "material",
-					mode: "aggregated",
 				},
 			});
 

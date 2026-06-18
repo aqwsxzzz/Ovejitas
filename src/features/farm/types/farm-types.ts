@@ -1,22 +1,13 @@
-export interface IFarm {
-	id: string;
+/** v1 farm record — owns the `default_currency` the event ledger reads. */
+export interface IV1Farm {
+	id: number;
 	name: string;
-	latitude: number | null;
-	longitude: number | null;
-	currency: string | null;
-	// Legacy fallback used by existing UI paths.
-	currencyCode?: string;
+	default_currency: string;
+	created_at: string;
+	updated_at: string;
 }
 
-export interface IFarmCurrencyOption {
-	code: string;
-	name: string;
-	symbol: string;
-}
-
-export interface IUpdateFarmPayload {
+export interface IV1FarmUpdatePayload {
 	name?: string;
-	latitude?: number | null;
-	longitude?: number | null;
-	currency?: string | null;
+	default_currency?: string;
 }

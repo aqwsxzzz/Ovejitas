@@ -13,6 +13,13 @@ import type { LivestockAssetMode } from "@/features/livestock/types/livestock-ty
 
 import { LogActionCard } from "./log-action-card";
 
+const MODE_HINTS: Record<LivestockAssetMode, string> = {
+	aggregated:
+		"Agrupado: para animales que no se identifican uno a uno (ej. gallinas). Se hace seguimiento por la cantidad total del lote.",
+	individual:
+		"Individual: para animales con identificacion propia / tag (ej. vacas, caballos, ovejas). Cada animal se registra por separado.",
+};
+
 interface LogCreateLotActionProps {
 	farmId: string;
 	onDone: () => void;
@@ -99,6 +106,7 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 							Individual
 						</Button>
 					</div>
+					<p className="text-xs text-(--v2-ink-soft)">{MODE_HINTS[mode]}</p>
 				</div>
 				<div className="space-y-1.5">
 					<Label htmlFor="lot-name">Nombre del lote</Label>

@@ -3,9 +3,9 @@
 Use this file as the ready context payload when running the prompt in `.github/prompts/ledger-rules-sync.prompt.md`.
 
 ## Context
-- Date: 2026-05-22
+- Date: 2026-06-17
 - Frontend repo: Ovejitas
-- Backend source revision: 723337f
+- Backend source revision: 366f9e5
 - Sync command used: npm run docs:ledger
 - Primary source files in `backend-docs/`: `domain-model.md`, `domain-notes.md`, `domain-rebuild-plan.md`, `events-and-actions.md`, `prd_granjas.md`, `production-deployment.md`
 - Additional source files in `temp_repo/docs/`: [fill if needed]

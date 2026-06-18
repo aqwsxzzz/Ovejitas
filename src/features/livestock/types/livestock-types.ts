@@ -32,10 +32,11 @@ export interface ILivestockAsset {
 	farm_id: number;
 	name: string;
 	kind: LivestockAssetKind;
-	mode: LivestockAssetMode;
+	mode: LivestockAssetMode | null;
 	location: string | null;
 	description: string | null;
 	produce_asset_id: number | null;
+	expected_eggs_per_head_per_day: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -154,6 +155,15 @@ export interface ILivestockPageMeta {
 export interface ILivestockAssetListResponse {
 	data: ILivestockAsset[];
 	meta: ILivestockPageMeta;
+}
+
+export interface IAssetKindCount {
+	kind: LivestockAssetKind;
+	count: number;
+}
+
+export interface IAssetSummary {
+	data: IAssetKindCount[];
 }
 
 export interface ILivestockIndividualListResponse {

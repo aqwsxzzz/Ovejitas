@@ -71,7 +71,6 @@ export function CreateEquipmentAssetDialog({
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
 					kind: "equipment",
-					mode: "aggregated",
 				},
 			});
 

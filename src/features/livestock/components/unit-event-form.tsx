@@ -51,7 +51,7 @@ interface UnitEventFormProps {
 	categories: ILivestockEventCategory[];
 	individuals: ILivestockIndividual[];
 	assetKind: LivestockAssetKind;
-	assetMode: LivestockAssetMode;
+	assetMode: LivestockAssetMode | null;
 	onSubmit: (data: UnitEventFormData) => Promise<void>;
 	onCancel: () => void;
 	isSubmitting: boolean;

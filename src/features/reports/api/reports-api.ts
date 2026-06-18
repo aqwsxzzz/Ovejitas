@@ -14,6 +14,12 @@ import type {
 	IMaterialConsumptionAggregateReport,
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
+	IUpcomingBirthsReport,
+	IUpcomingBirthsReportParams,
+	ICoopProductivityReport,
+	ICoopProductivityReportParams,
+	ISalesValueReport,
+	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
 
 /**
@@ -161,6 +167,60 @@ export const getMaterialConsumptionAggregateReport = ({
 			material_asset_id,
 			consumer_asset_id,
 			reason,
+			date_from,
+			date_to,
+		},
+	});
+
+/**
+ * Individuals due to give birth within a window
+ * GET /api/v1/farms/{farm_id}/reports/upcoming-births
+ */
+export const getUpcomingBirthsReport = ({
+	farmId,
+	date_from,
+	date_to,
+}: IUpcomingBirthsReportParams) =>
+	axiosHelper<IUpcomingBirthsReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/upcoming-births`,
+		urlParams: {
+			date_from,
+			date_to,
+		},
+	});
+
+/**
+ * Eggs laid vs expected laying, per coop
+ * GET /api/v1/farms/{farm_id}/reports/coop-productivity
+ */
+export const getCoopProductivityReport = ({
+	farmId,
+	date_from,
+	date_to,
+}: ICoopProductivityReportParams) =>
+	axiosHelper<ICoopProductivityReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/coop-productivity`,
+		urlParams: {
+			date_from,
+			date_to,
+		},
+	});
+
+/**
+ * Realized average sale price per unit, per asset
+ * GET /api/v1/farms/{farm_id}/reports/sales-value
+ */
+export const getSalesValueReport = ({
+	farmId,
+	date_from,
+	date_to,
+}: ISalesValueReportParams) =>
+	axiosHelper<ISalesValueReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/sales-value`,
+		urlParams: {
 			date_from,
 			date_to,
 		},

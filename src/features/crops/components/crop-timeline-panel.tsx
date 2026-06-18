@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
 import { Label } from "@/components/ui/label";
+import { LoadingState } from "@/components/common/loading-state";
 import {
 	Select,
 	SelectContent,
@@ -98,17 +101,18 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 				</div>
 
 				{eventsQuery.isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">Cargando eventos...</p>
+					<LoadingState message="Cargando eventos..." />
 				) : null}
 				{eventsQuery.error ? (
-					<p className="text-sm text-destructive">Error al cargar eventos.</p>
+					<ErrorState
+						description="No se pudieron cargar los eventos."
+						onRetry={() => void eventsQuery.refetch()}
+					/>
 				) : null}
 				{!eventsQuery.isLoading &&
 				!eventsQuery.error &&
 				(eventsQuery.data?.data ?? []).length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">
-						No hay eventos registrados.
-					</p>
+					<EmptyState title="No hay eventos registrados" />
 				) : null}
 
 				<div className="space-y-2">
@@ -118,7 +122,9 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 							className="rounded-lg border px-3 py-2 text-sm"
 						>
 							<div className="flex items-center justify-between gap-2">
-								<span className="font-medium">{EVENT_TYPE_LABELS[event.type] ?? event.type}</span>
+								<span className="font-medium">
+									{EVENT_TYPE_LABELS[event.type] ?? event.type}
+								</span>
 								<span className="text-xs text-(--v2-ink-soft)">
 									{formatDate(event.occurred_at)}
 								</span>

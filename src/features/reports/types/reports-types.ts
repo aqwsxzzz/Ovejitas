@@ -153,6 +153,50 @@ export interface IInventorySummaryReport {
 	data: IInventorySummaryRow[];
 }
 
+// Upcoming Births Report
+export interface IUpcomingBirthRow {
+	individual_id: number;
+	individual_tag: string;
+	asset_id: number;
+	expected_due_at: string; // ISO datetime
+	offspring_count: number | null;
+	days_until_due: number;
+}
+
+export interface IUpcomingBirthsReport {
+	data: IUpcomingBirthRow[];
+}
+
+// Coop Productivity Report
+export interface ICoopProductivityRow {
+	asset_id: number;
+	asset_name: string;
+	produced: string; // eggs laid, normalized to single eggs
+	expected: string | null;
+	productivity_pct: string | null;
+	missing_capacity: boolean;
+}
+
+export interface ICoopProductivityReport {
+	data: ICoopProductivityRow[];
+}
+
+// Sales Value Report
+export interface ISalesValueRow {
+	asset_id: number;
+	asset_name: string;
+	currency: string;
+	income_total: string;
+	unit: Unit | null;
+	quantity_sold: string | null;
+	value_per_unit: string | null;
+	ambiguous: boolean;
+}
+
+export interface ISalesValueReport {
+	data: ISalesValueRow[];
+}
+
 // Query Parameters
 export interface IProfitabilityReportParams {
 	farmId: string | number;
@@ -217,4 +261,22 @@ export interface IReportPdfParams {
 	date_to?: string;
 	asset_id?: number;
 	unit?: Unit;
+}
+
+export interface IUpcomingBirthsReportParams {
+	farmId: string | number;
+	date_from: string; // required — defines the alert window
+	date_to: string; // required
+}
+
+export interface ICoopProductivityReportParams {
+	farmId: string | number;
+	date_from: string; // required — expected laying scales with days
+	date_to: string; // required
+}
+
+export interface ISalesValueReportParams {
+	farmId: string | number;
+	date_from?: string;
+	date_to?: string;
 }

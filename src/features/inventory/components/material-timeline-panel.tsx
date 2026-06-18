@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -92,15 +95,18 @@ export function MaterialTimelinePanel({
 					</div>
 				</div>
 				{timelineQuery.isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">Loading movements...</p>
+					<LoadingState message="Cargando movimientos..." />
 				) : null}
 				{timelineQuery.error ? (
-					<p className="text-sm text-destructive">Failed to load movements.</p>
+					<ErrorState
+						description="No se pudieron cargar los movimientos."
+						onRetry={() => void timelineQuery.refetch()}
+					/>
 				) : null}
 				{!timelineQuery.isLoading &&
 				!timelineQuery.error &&
 				(timelineQuery.data?.data ?? []).length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">No movements yet.</p>
+					<EmptyState title="Sin movimientos aún" />
 				) : null}
 				<div className="space-y-2">
 					{(timelineQuery.data?.data ?? []).map((event) => (

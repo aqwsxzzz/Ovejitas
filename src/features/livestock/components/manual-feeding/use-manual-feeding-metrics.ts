@@ -23,11 +23,7 @@ export function useManualFeedingMetrics({
 	selectedUnit,
 	hasSelectedMaterial,
 }: UseManualFeedingMetricsArgs) {
-	const [optimisticMaterialFeedAdds, setOptimisticMaterialFeedAdds] = useState<
-		Record<number, number>
-	>({});
-	const [optimisticLastFeedAtByMaterial, setOptimisticLastFeedAtByMaterial] =
-		useState<Record<number, string>>({});
+	const [optimisticFeedCount, setOptimisticFeedCount] = useState(0);
 
 	const { data: materialAssetsResponse, isLoading: isLoadingMaterials } =
 		useListLivestockAssetsByFarmId({
@@ -91,90 +87,37 @@ export function useManualFeedingMetrics({
 
 	const todaysFeeds = useMemo<TodaysFeedMetrics>(() => {
 		const rows = todaysFeedingResponse?.data ?? [];
-		if (!hasSelectedMaterial) {
-			return {
-				count: rows.length,
-				countForSelectedMaterial: 0,
-				totalForSelectedMaterialAndUnit: 0,
-				latestFeedAtForSelectedMaterial: null,
-			};
-		}
-
-		const materialRows = rows.filter(
-			(row) => row.material_asset_id === selectedMaterialAssetId,
-		);
-		const totalForSelectedMaterialAndUnit = materialRows.reduce((sum, row) => {
-			if (row.unit !== selectedUnit) return sum;
-			const consumed = Number(row.quantity);
-			return Number.isFinite(consumed) ? sum + consumed : sum;
-		}, 0);
-		const latestFeedAtForSelectedMaterial = materialRows
-			.map((row) => row.occurred_at)
-			.reduce<string | null>((latest, current) => {
-				if (!latest) return current;
-				return new Date(current).getTime() > new Date(latest).getTime()
-					? current
-					: latest;
-			}, null);
+		const totalForSelectedMaterialAndUnit = hasSelectedMaterial
+			? rows.reduce((sum, row) => {
+					if (
+						row.material_asset_id !== selectedMaterialAssetId ||
+						row.unit !== selectedUnit
+					) {
+						return sum;
+					}
+					const consumed = Number(row.quantity);
+					return Number.isFinite(consumed) ? sum + consumed : sum;
+				}, 0)
+			: 0;
 
 		return {
-			count: rows.length,
-			countForSelectedMaterial: materialRows.length,
+			count: rows.length + optimisticFeedCount,
 			totalForSelectedMaterialAndUnit,
-			latestFeedAtForSelectedMaterial,
 		};
 	}, [
 		todaysFeedingResponse?.data,
 		hasSelectedMaterial,
 		selectedMaterialAssetId,
 		selectedUnit,
+		optimisticFeedCount,
 	]);
 
 	useEffect(() => {
-		setOptimisticMaterialFeedAdds({});
-		setOptimisticLastFeedAtByMaterial({});
+		setOptimisticFeedCount(0);
 	}, [todaysFeedingResponse?.data]);
 
-	const effectiveCountForSelectedMaterial = useMemo(() => {
-		if (!hasSelectedMaterial) return 0;
-		return (
-			todaysFeeds.countForSelectedMaterial +
-			(optimisticMaterialFeedAdds[selectedMaterialAssetId] ?? 0)
-		);
-	}, [
-		hasSelectedMaterial,
-		todaysFeeds.countForSelectedMaterial,
-		optimisticMaterialFeedAdds,
-		selectedMaterialAssetId,
-	]);
-
-	const effectiveLatestFeedAtForSelectedMaterial = useMemo(() => {
-		if (!hasSelectedMaterial) return null;
-		const serverLatest = todaysFeeds.latestFeedAtForSelectedMaterial;
-		const optimisticLatest =
-			optimisticLastFeedAtByMaterial[selectedMaterialAssetId] ?? null;
-		if (!serverLatest) return optimisticLatest;
-		if (!optimisticLatest) return serverLatest;
-		return new Date(optimisticLatest).getTime() >
-			new Date(serverLatest).getTime()
-			? optimisticLatest
-			: serverLatest;
-	}, [
-		hasSelectedMaterial,
-		todaysFeeds.latestFeedAtForSelectedMaterial,
-		optimisticLastFeedAtByMaterial,
-		selectedMaterialAssetId,
-	]);
-
-	function applyOptimisticFeed(materialAssetId: number, occurredAtIso: string) {
-		setOptimisticMaterialFeedAdds((current) => ({
-			...current,
-			[materialAssetId]: (current[materialAssetId] ?? 0) + 1,
-		}));
-		setOptimisticLastFeedAtByMaterial((current) => ({
-			...current,
-			[materialAssetId]: occurredAtIso,
-		}));
+	function applyOptimisticFeed() {
+		setOptimisticFeedCount((current) => current + 1);
 	}
 
 	return {
@@ -183,8 +126,6 @@ export function useManualFeedingMetrics({
 		selectedMaterial,
 		selectedMaterialOnHand,
 		todaysFeeds,
-		effectiveCountForSelectedMaterial,
-		effectiveLatestFeedAtForSelectedMaterial,
 		applyOptimisticFeed,
 	};
 }

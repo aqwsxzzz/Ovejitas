@@ -47,11 +47,11 @@ export function AssetKindMedal({ kind }: AssetKindMedalProps) {
 
 	return (
 		<div
-			className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${className}`}
+			className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${className}`}
 			aria-label={label}
 			title={label}
 		>
-			<Icon className="h-5 w-5" />
+			<Icon className="h-4 w-4" />
 		</div>
 	);
 }

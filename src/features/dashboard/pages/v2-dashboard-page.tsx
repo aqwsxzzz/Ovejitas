@@ -19,9 +19,11 @@ import type {
 	UnitKpiSlide,
 } from "@/shared/types/v2-domain-types";
 
+import { LoadingState } from "@/components/common/loading-state";
+
 import { DashboardEmptyState } from "../components/dashboard-empty-state";
-import { DashboardQuickActions } from "../components/dashboard-quick-actions";
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
+import { UpcomingBirthsCard } from "../components/upcoming-births-card";
 
 const MONTH_LABEL = new Date().toLocaleDateString("es-EC", {
 	month: "long",
@@ -83,7 +85,7 @@ function mapAssetToSlice(
 		id: number;
 		name: string;
 		kind: string;
-		mode: "aggregated" | "individual";
+		mode: "aggregated" | "individual" | null;
 	},
 	context: {
 		aggregatedAnimalsByAssetId: Map<number, number>;
@@ -451,26 +453,15 @@ export function V2DashboardPage() {
 				</article>
 			) : isLoading ? (
 				<article className="v2-card p-4">
-					<p className="text-sm text-(--v2-ink-soft)">
-						Cargando unidades reales...
-					</p>
+					<LoadingState message="Cargando unidades..." />
 				</article>
 			) : slices.length === 0 ? (
 				<DashboardEmptyState sourcePath={sourcePath} />
 			) : (
-				<>
-					<DashboardQuickActions sourcePath={sourcePath} />
-					<UnitKpiSlider slices={slices} />
-				</>
+				<UnitKpiSlider slices={slices} />
 			)}
 
-			<article className="v2-card p-4">
-				<p className="v2-kicker mb-3">Alertas urgentes</p>
-				<p className="text-sm text-(--v2-ink-soft)">
-					Las alertas se mostraran cuando el backend de reportes este disponible
-					para este modulo.
-				</p>
-			</article>
+			{farmId ? <UpcomingBirthsCard farmId={farmId} /> : null}
 
 			<article className="v2-card p-4">
 				<p className="v2-kicker mb-3">Tareas de hoy</p>

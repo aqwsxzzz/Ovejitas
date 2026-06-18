@@ -43,7 +43,6 @@ export function LogCreateAssetAction({
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
 					kind: assetKind,
-					mode: "aggregated",
 				},
 			});
 			onDone();

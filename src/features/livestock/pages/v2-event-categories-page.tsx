@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,7 +152,7 @@ export function V2EventCategoriesPage() {
 
 			{isLoading ? (
 				<div className="v2-card p-4">
-					<p className="text-sm text-(--v2-ink-soft)">Cargando categorias...</p>
+					<LoadingState message="Cargando categorias..." />
 				</div>
 			) : groupedCategories.length === 0 ? (
 				<div className="v2-card p-4">

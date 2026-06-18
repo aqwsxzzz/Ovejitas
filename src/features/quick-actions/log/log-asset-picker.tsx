@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,7 +70,10 @@ export function LogAssetPicker({
 				</SelectContent>
 			</Select>
 			{assetsQuery.isLoading ? (
-				<p className="text-xs text-(--v2-ink-soft)">Cargando activos...</p>
+				<LoadingState
+					message="Cargando activos..."
+					size="sm"
+				/>
 			) : assets.length === 0 ? (
 				<p className="text-xs text-(--v2-ink-soft)">
 					No se encontraron activos para registrar aqui.

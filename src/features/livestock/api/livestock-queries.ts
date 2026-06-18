@@ -19,6 +19,7 @@ import {
 	updateMaterialConsumptionById,
 	deleteMaterialConsumptionById,
 	createMaterialSaleByAssetId,
+	getAssetSummaryByFarmId,
 	getLivestockAssetById,
 	listLivestockAssetsByFarmId,
 	listIndividualsByAssetId,
@@ -205,6 +206,8 @@ export const livestockQueryKeys = {
 		] as const,
 	assetById: (farmId: string, assetId: number) =>
 		[...livestockQueryKeys.all, "assetById", farmId, assetId] as const,
+	assetSummary: (farmId: string) =>
+		[...livestockQueryKeys.all, "assetSummary", farmId] as const,
 	individualsByAsset: (
 		farmId: string,
 		assetId: string,
@@ -394,6 +397,19 @@ export const useListLivestockAssetsByFarmId = ({
 	useQuery({
 		queryKey: livestockQueryKeys.assetsByFarm(farmId, filters),
 		queryFn: () => listLivestockAssetsByFarmId({ farmId, filters }),
+		enabled: enabled && !!farmId,
+	});
+
+export const useGetAssetSummaryByFarmId = ({
+	farmId,
+	enabled = true,
+}: {
+	farmId: string;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.assetSummary(farmId),
+		queryFn: () => getAssetSummaryByFarmId({ farmId }),
 		enabled: enabled && !!farmId,
 	});
 

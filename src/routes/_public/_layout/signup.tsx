@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_public/_layout/signup")({
 	// },
 	validateSearch: z.object({
 		token: z.string().optional(),
-		email: z.string().email().optional(),
+		email: z.string().email("Correo electronico invalido.").optional(),
 	}),
 	component: RouteComponent,
 });

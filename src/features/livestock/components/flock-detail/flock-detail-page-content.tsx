@@ -4,6 +4,7 @@ import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { useGetLivestockAssetById } from "@/features/livestock/api/livestock-queries";
 import { ManualFeedingPanel } from "@/features/livestock/components/manual-feeding-panel";
 
+import { CoopLayingRateCard } from "./coop-laying-rate-card";
 import type { FlockDetailPageProps } from "./flock-detail-types";
 import { FlockEventsSection } from "./flock-events-section";
 import { FlockHeaderCard } from "./flock-header-card";
@@ -63,7 +64,6 @@ export function FlockDetailPageContent({
 			{assetFlags.isMaterialAsset ? (
 				<FlockMaterialInventorySection
 					farmId={farmId}
-					unitId={unitId}
 					assetId={asset.id}
 				/>
 			) : null}
@@ -72,14 +72,6 @@ export function FlockDetailPageContent({
 				<FlockProductionOverviewSection
 					farmId={farmId}
 					assetId={parsedAssetId}
-				/>
-			) : null}
-
-			{assetFlags.isAnimalAsset ? (
-				<ManualFeedingPanel
-					farmId={farmId}
-					consumerAssetId={asset.id}
-					consumerAssetName={asset.name}
 				/>
 			) : null}
 
@@ -96,6 +88,21 @@ export function FlockDetailPageContent({
 					isMaterialAsset={assetFlags.isMaterialAsset}
 				/>
 			</div>
+
+		{assetFlags.isAnimalAsset ? (
+				<ManualFeedingPanel
+					farmId={farmId}
+					consumerAssetId={asset.id}
+					consumerAssetName={asset.name}
+				/>
+			) : null}
+
+			{assetFlags.isAggregatedAnimal ? (
+				<CoopLayingRateCard
+					farmId={farmId}
+					asset={asset}
+				/>
+			) : null}
 
 			<FlockEventsSection
 				farmId={farmId}
