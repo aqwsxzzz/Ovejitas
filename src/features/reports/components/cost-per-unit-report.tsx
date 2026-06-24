@@ -5,6 +5,8 @@ import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGetCostPerUnitReport } from "@/features/reports/api/reports-queries";
+import { getCostPerUnitReportPdf } from "@/features/reports/api/reports-api";
+import { ReportPdfButton } from "@/features/reports/components/report-pdf-button";
 import type { Unit } from "@/features/reports/types/reports-types";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
@@ -95,8 +97,20 @@ export const CostPerUnitReport = ({
 
 	return (
 		<Card className="v2-card">
-			<CardHeader>
+			<CardHeader className="flex flex-row items-center justify-between gap-2">
 				<CardTitle className="text-lg">Costo por unidad</CardTitle>
+				<ReportPdfButton
+					filename="costo-por-unidad.pdf"
+					fetchPdf={() =>
+						getCostPerUnitReportPdf({
+							farmId,
+							unit,
+							date_from: dateFrom,
+							date_to: dateTo,
+							asset_id: assetId,
+						}).then((response) => response.data)
+					}
+				/>
 			</CardHeader>
 			<CardContent>
 				{isPending ? (
