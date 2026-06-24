@@ -10,7 +10,8 @@ import { ApiRequestError } from "@/lib/axios/axios-helper";
 interface IndividualTimelineReportProps {
 	farmId: string | number;
 	individualId?: number;
-	eventType: EventType;
+	/** Optional event-type filter; omit to show all event types. */
+	eventType?: EventType;
 	dateFrom?: string;
 	dateTo?: string;
 }
