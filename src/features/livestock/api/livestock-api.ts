@@ -4,6 +4,8 @@ import type {
 	ILivestockAsset,
 	ILivestockEvent,
 	IAssetSummary,
+	IBirthCreatePayload,
+	IBirthRead,
 	ILivestockAssetListResponse,
 	ILivestockEventCategoryListResponse,
 	ILivestockEventListResponse,
@@ -320,6 +322,24 @@ export const createIndividual = ({
 	axiosHelper<ILivestockIndividual>({
 		method: "post",
 		url: `/api/v1/farms/${farmId}/assets/${assetId}/individuals`,
+		data,
+	});
+
+/** Record a birth on a mother individual (emits reproductive + N offspring) */
+export const createBirthByMotherId = ({
+	farmId,
+	assetId,
+	motherId,
+	data,
+}: {
+	farmId: string;
+	assetId: string;
+	motherId: number;
+	data: IBirthCreatePayload;
+}) =>
+	axiosHelper<IBirthRead>({
+		method: "post",
+		url: `/api/v1/farms/${farmId}/assets/${assetId}/individuals/${motherId}/births`,
 		data,
 	});
 

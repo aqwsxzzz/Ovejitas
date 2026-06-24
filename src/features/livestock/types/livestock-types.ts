@@ -157,6 +157,28 @@ export interface ILivestockAssetListResponse {
 	meta: ILivestockPageMeta;
 }
 
+export interface IOffspringCreate {
+	tag: string;
+	name?: string | null;
+	birth_date?: string | null;
+	extra?: Record<string, unknown>;
+}
+
+export interface IBirthCreatePayload {
+	occurred_at?: string;
+	father_id?: number | null;
+	category_id?: number | null;
+	notes?: string | null;
+	outcome?: string | null;
+	offspring: IOffspringCreate[];
+}
+
+export interface IBirthRead {
+	reproductive_event_id: number;
+	mother_id: number;
+	offspring: ILivestockIndividual[];
+}
+
 export interface IAssetKindCount {
 	kind: LivestockAssetKind;
 	count: number;

@@ -31,6 +31,7 @@ import {
 	updateEventByAssetId,
 	deleteEventByAssetId,
 	createIndividual,
+	createBirthByMotherId,
 	updateIndividual,
 	deleteIndividual,
 	createEventCategoryByFarmId,
@@ -1254,6 +1255,37 @@ export const useCreateIndividual = () => {
 					assetId,
 				],
 			});
+		},
+	});
+};
+
+export const useCreateBirthByMotherId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			motherId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			motherId: number;
+			data: Parameters<typeof createBirthByMotherId>[0]["data"];
+		}) => createBirthByMotherId({ farmId, assetId, motherId, data }),
+		onSuccess: (_birth, { farmId, assetId }) => {
+			// Offspring become new individuals; the mother gains a reproductive
+			// event on its timeline (a ledger-replayed report).
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"individualsByAsset",
+					farmId,
+					assetId,
+				],
+			});
+			void queryClient.invalidateQueries({ queryKey: reportsQueryKeys.all });
 		},
 	});
 };
