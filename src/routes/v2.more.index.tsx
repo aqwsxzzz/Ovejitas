@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
+	Baby,
 	Bell,
 	CalendarDays,
 	ChevronRight,
@@ -30,6 +31,12 @@ const extraViews: MoreSectionItem[] = [
 		title: "Categorias de eventos",
 		description: "Configura hitos de produccion",
 		icon: CalendarDays,
+	},
+	{
+		to: "/v2/more/pregnancies",
+		title: "Registros de preñez",
+		description: "Controles de preñez y partos estimados",
+		icon: Baby,
 	},
 	{
 		to: "/v2/production-units",

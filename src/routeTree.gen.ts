@@ -29,6 +29,7 @@ import { Route as PublicLayoutRouteImport } from './routes/_public/_layout'
 import { Route as V2ProductionUnitsIndexRouteImport } from './routes/v2.production-units.index'
 import { Route as V2MoreIndexRouteImport } from './routes/v2.more.index'
 import { Route as V2ProductionUnitsAssetKindRouteImport } from './routes/v2.production-units.$assetKind'
+import { Route as V2MorePregnanciesRouteImport } from './routes/v2.more.pregnancies'
 import { Route as V2MoreEventCategoriesRouteImport } from './routes/v2.more.event-categories'
 import { Route as V2MoreAccesoRouteImport } from './routes/v2.more.acceso'
 import { Route as V2LocationLocationIdRouteImport } from './routes/v2.location.$locationId'
@@ -141,6 +142,11 @@ const V2ProductionUnitsAssetKindRoute =
     path: '/$assetKind',
     getParentRoute: () => V2ProductionUnitsRoute,
   } as any)
+const V2MorePregnanciesRoute = V2MorePregnanciesRouteImport.update({
+  id: '/pregnancies',
+  path: '/pregnancies',
+  getParentRoute: () => V2MoreRoute,
+} as any)
 const V2MoreEventCategoriesRoute = V2MoreEventCategoriesRouteImport.update({
   id: '/event-categories',
   path: '/event-categories',
@@ -225,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/v2/location/$locationId': typeof V2LocationLocationIdRoute
   '/v2/more/acceso': typeof V2MoreAccesoRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
+  '/v2/more/pregnancies': typeof V2MorePregnanciesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
   '/v2/production-units/': typeof V2ProductionUnitsIndexRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByTo {
   '/v2/location/$locationId': typeof V2LocationLocationIdRoute
   '/v2/more/acceso': typeof V2MoreAccesoRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
+  '/v2/more/pregnancies': typeof V2MorePregnanciesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more': typeof V2MoreIndexRoute
   '/v2/production-units': typeof V2ProductionUnitsIndexRoute
@@ -288,6 +296,7 @@ export interface FileRoutesById {
   '/v2/location/$locationId': typeof V2LocationLocationIdRoute
   '/v2/more/acceso': typeof V2MoreAccesoRoute
   '/v2/more/event-categories': typeof V2MoreEventCategoriesRoute
+  '/v2/more/pregnancies': typeof V2MorePregnanciesRoute
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
   '/v2/production-units/': typeof V2ProductionUnitsIndexRoute
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/v2/location/$locationId'
     | '/v2/more/acceso'
     | '/v2/more/event-categories'
+    | '/v2/more/pregnancies'
     | '/v2/production-units/$assetKind'
     | '/v2/more/'
     | '/v2/production-units/'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/v2/location/$locationId'
     | '/v2/more/acceso'
     | '/v2/more/event-categories'
+    | '/v2/more/pregnancies'
     | '/v2/production-units/$assetKind'
     | '/v2/more'
     | '/v2/production-units'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/v2/location/$locationId'
     | '/v2/more/acceso'
     | '/v2/more/event-categories'
+    | '/v2/more/pregnancies'
     | '/v2/production-units/$assetKind'
     | '/v2/more/'
     | '/v2/production-units/'
@@ -543,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2ProductionUnitsAssetKindRouteImport
       parentRoute: typeof V2ProductionUnitsRoute
     }
+    '/v2/more/pregnancies': {
+      id: '/v2/more/pregnancies'
+      path: '/pregnancies'
+      fullPath: '/v2/more/pregnancies'
+      preLoaderRoute: typeof V2MorePregnanciesRouteImport
+      parentRoute: typeof V2MoreRoute
+    }
     '/v2/more/event-categories': {
       id: '/v2/more/event-categories'
       path: '/event-categories'
@@ -638,12 +657,14 @@ const V2InventoryRouteWithChildren = V2InventoryRoute._addFileChildren(
 interface V2MoreRouteChildren {
   V2MoreAccesoRoute: typeof V2MoreAccesoRoute
   V2MoreEventCategoriesRoute: typeof V2MoreEventCategoriesRoute
+  V2MorePregnanciesRoute: typeof V2MorePregnanciesRoute
   V2MoreIndexRoute: typeof V2MoreIndexRoute
 }
 
 const V2MoreRouteChildren: V2MoreRouteChildren = {
   V2MoreAccesoRoute: V2MoreAccesoRoute,
   V2MoreEventCategoriesRoute: V2MoreEventCategoriesRoute,
+  V2MorePregnanciesRoute: V2MorePregnanciesRoute,
   V2MoreIndexRoute: V2MoreIndexRoute,
 }
 

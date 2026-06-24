@@ -23,3 +23,21 @@ export interface IPregnancyCreatePayload {
 	notes?: string | null;
 	idempotency_key?: string | null;
 }
+
+export interface IPregnancyUpdatePayload {
+	occurred_at?: string;
+	is_pregnant?: boolean;
+	offspring_count?: number | null;
+	expected_due_at?: string | null;
+	notes?: string | null;
+}
+
+export interface IPregnancyListResponse {
+	data: IPregnancyRead[];
+	meta: {
+		page: number;
+		page_size: number;
+		total: number;
+		has_next: boolean;
+	};
+}
