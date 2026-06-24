@@ -3,6 +3,7 @@ import { useQueries } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
+import { useGetV1FarmById } from "@/features/farm/api/farm-queries";
 import {
 	getProductionReport,
 	listIndividualsByAssetId,
@@ -36,11 +37,17 @@ function parseNumeric(value: string | null | undefined): number {
 	return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function formatMoneyCompact(value: number): string {
-	if (Math.abs(value) >= 1000) {
-		return `$${(value / 1000).toFixed(1)}k`;
+function formatMoneyCompact(value: number, currency: string): string {
+	try {
+		return new Intl.NumberFormat(undefined, {
+			style: "currency",
+			currency,
+			notation: "compact",
+			maximumFractionDigits: 1,
+		}).format(value);
+	} catch {
+		return `${value.toFixed(2)} ${currency}`;
 	}
-	return `$${value.toFixed(2)}`;
 }
 
 type StockItem = { unit: string; onHand: number };
@@ -94,6 +101,7 @@ function mapAssetToSlice(
 		inventoryByAssetId: Map<number, StockItem[]>;
 		individualCountByAssetId: Map<number, number>;
 		categoryNameById: Map<number, string>;
+		currency: string;
 	},
 ): UnitDashboardSlice {
 	const netValue = context.netByAssetId.get(asset.id) ?? 0;
@@ -150,7 +158,7 @@ function mapAssetToSlice(
 			},
 			{
 				label: "Neto",
-				value: formatMoneyCompact(netValue),
+				value: formatMoneyCompact(netValue, context.currency),
 				sub: "Mes actual",
 			},
 			{
@@ -192,6 +200,9 @@ export function V2DashboardPage() {
 		});
 
 	const assets = farmAssetsResponse?.data ?? [];
+
+	const { data: farm } = useGetV1FarmById(farmId);
+	const currency = farm?.default_currency ?? "USD";
 
 	const { data: profitabilityReport } = useGetProfitabilityReport({
 		farmId,
@@ -425,6 +436,7 @@ export function V2DashboardPage() {
 					inventoryByAssetId,
 					individualCountByAssetId,
 					categoryNameById,
+					currency,
 				}),
 			),
 		[
@@ -435,6 +447,7 @@ export function V2DashboardPage() {
 			inventoryByAssetId,
 			individualCountByAssetId,
 			categoryNameById,
+			currency,
 		],
 	);
 
