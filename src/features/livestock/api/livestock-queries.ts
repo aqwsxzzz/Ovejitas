@@ -1336,6 +1336,8 @@ export const useUpdateIndividual = () => {
 					individualId,
 				),
 			});
+			// Sold/deceased transitions emit income/mortality ledger events.
+			void queryClient.invalidateQueries({ queryKey: reportsQueryKeys.all });
 		},
 	});
 };

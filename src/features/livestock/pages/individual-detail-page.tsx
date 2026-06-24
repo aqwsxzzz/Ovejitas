@@ -9,6 +9,7 @@ import {
 	useDeleteIndividual,
 } from "@/features/livestock/api/livestock-queries";
 import { IndividualDetail } from "../components/individual-detail";
+import { IndividualLifecycleActions } from "@/features/livestock/components/individual-lifecycle-actions";
 import { RecordBirthForm } from "@/features/livestock/components/record-birth-form";
 import { IndividualTimelineReport } from "@/features/reports/components/individual-timeline-report";
 import { PregnancyCheckForm } from "@/features/pregnancy/components/pregnancy-check-form";
@@ -135,6 +136,14 @@ export function IndividualDetailPage({
 				farmId={farmId}
 				individualId={individual.id}
 			/>
+
+			{individual.status === "active" ? (
+				<IndividualLifecycleActions
+					farmId={farmId}
+					assetId={assetId}
+					individualId={individualId}
+				/>
+			) : null}
 
 			{individual.status === "active" ? (
 				<RecordBirthForm

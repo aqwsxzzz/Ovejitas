@@ -360,6 +360,13 @@ export const updateIndividual = ({
 		mother_id: number | null;
 		father_id: number | null;
 		extra: Record<string, unknown> | null;
+		// Deceased transition — emits a mortality event.
+		died_at: string | null;
+		cause: string | null;
+		// Sold transition — emits an income event (sale_amount required).
+		sale_amount: number | string | null;
+		sold_at: string | null;
+		buyer: string | null;
 	}>;
 }) =>
 	axiosHelper<ILivestockIndividual>({
