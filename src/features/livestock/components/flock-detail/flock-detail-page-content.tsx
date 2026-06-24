@@ -5,6 +5,7 @@ import { useGetLivestockAssetById } from "@/features/livestock/api/livestock-que
 import { ManualFeedingPanel } from "@/features/livestock/components/manual-feeding-panel";
 
 import { CoopLayingRateCard } from "./coop-laying-rate-card";
+import { CoopProductivityCard } from "./coop-productivity-card";
 import type { FlockDetailPageProps } from "./flock-detail-types";
 import { FlockEventsSection } from "./flock-events-section";
 import { FlockHeaderCard } from "./flock-header-card";
@@ -98,10 +99,16 @@ export function FlockDetailPageContent({
 			) : null}
 
 			{assetFlags.isAggregatedAnimal ? (
-				<CoopLayingRateCard
-					farmId={farmId}
-					asset={asset}
-				/>
+				<div className="grid gap-3 md:grid-cols-2">
+					<CoopLayingRateCard
+						farmId={farmId}
+						asset={asset}
+					/>
+					<CoopProductivityCard
+						farmId={farmId}
+						assetId={asset.id}
+					/>
+				</div>
 			) : null}
 
 			<FlockEventsSection
