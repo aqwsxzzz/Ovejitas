@@ -167,18 +167,27 @@ export interface IUpcomingBirthsReport {
 	data: IUpcomingBirthRow[];
 }
 
-// Coop Productivity Report
-export interface ICoopProductivityRow {
+// Production Productivity Report (produced vs expected per asset × product)
+export type ProductionProductivityBasis =
+	| "per_head_continuous"
+	| "per_event"
+	| "total";
+
+export interface IProductionProductivityRow {
 	asset_id: number;
 	asset_name: string;
-	produced: string; // eggs laid, normalized to single eggs
+	category_id: number;
+	product_name: string;
+	unit: Unit | null;
+	produced: string; // converted into the product's unit
 	expected: string | null;
 	productivity_pct: string | null;
+	basis: ProductionProductivityBasis | null;
 	missing_capacity: boolean;
 }
 
-export interface ICoopProductivityReport {
-	data: ICoopProductivityRow[];
+export interface IProductionProductivityReport {
+	data: IProductionProductivityRow[];
 }
 
 // Sales Value Report
@@ -269,9 +278,9 @@ export interface IUpcomingBirthsReportParams {
 	date_to: string; // required
 }
 
-export interface ICoopProductivityReportParams {
+export interface IProductionProductivityReportParams {
 	farmId: string | number;
-	date_from: string; // required — expected laying scales with days
+	date_from: string; // required — expected scales with the window
 	date_to: string; // required
 }
 

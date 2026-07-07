@@ -988,6 +988,9 @@ export const useCreateEventByAssetId = () => {
 				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
 			});
 			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
+			void queryClient.invalidateQueries({
 				queryKey: [
 					...livestockQueryKeys.all,
 					"aggregatedHeadcount",
@@ -1038,6 +1041,11 @@ export const useCreateFlockAcquisitionByAssetId = () => {
 					assetId,
 				],
 			});
+			// per_head_continuous "expected" output scales with headcount, which
+			// this mutation changes — refresh the production-productivity report.
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
 		},
 	});
 };
@@ -1080,6 +1088,11 @@ export const useCreateFlockSaleByAssetId = () => {
 					farmId,
 					assetId,
 				],
+			});
+			// per_head_continuous "expected" output scales with headcount, which
+			// this mutation changes — refresh the production-productivity report.
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
 			});
 		},
 	});
@@ -1124,6 +1137,11 @@ export const useCreateFlockMortalityByAssetId = () => {
 					assetId,
 				],
 			});
+			// per_head_continuous "expected" output scales with headcount, which
+			// this mutation changes — refresh the production-productivity report.
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
 		},
 	});
 };
@@ -1163,6 +1181,9 @@ export const useUpdateEventByAssetId = () => {
 				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
 			});
 			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
+			void queryClient.invalidateQueries({
 				queryKey: [
 					...livestockQueryKeys.all,
 					"aggregatedHeadcount",
@@ -1188,6 +1209,9 @@ export const useDeleteEventByAssetId = () => {
 			eventId: number;
 		}) => deleteEventByAssetId({ farmId, assetId, eventId }),
 		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
 			// Invalidate all event queries for this asset (respects individual filter preferences)
 			void queryClient.invalidateQueries({
 				queryKey: [

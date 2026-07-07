@@ -9,7 +9,7 @@ import {
 	getProfitabilityReportPdf,
 	getCostPerUnitReportPdf,
 	getUpcomingBirthsReport,
-	getCoopProductivityReport,
+	getProductionProductivityReport,
 	getSalesValueReport,
 } from "@/features/reports/api/reports-api";
 import type {
@@ -21,7 +21,7 @@ import type {
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
 	IUpcomingBirthsReportParams,
-	ICoopProductivityReportParams,
+	IProductionProductivityReportParams,
 	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
 
@@ -146,14 +146,14 @@ export const reportsQueryKeys = {
 			dateFrom,
 			dateTo,
 		] as const,
-	coopProductivity: (
+	productionProductivity: (
 		farmId: string | number,
 		dateFrom: string,
 		dateTo: string,
 	) =>
 		[
 			...reportsQueryKeys.farm(farmId),
-			"coop-productivity",
+			"production-productivity",
 			dateFrom,
 			dateTo,
 		] as const,
@@ -309,19 +309,20 @@ export const useGetUpcomingBirthsReport = (
 	});
 
 /**
- * Get coop productivity (eggs laid vs expected, required date window)
+ * Get production productivity (produced vs expected per asset × product,
+ * required date window)
  */
-export const useGetCoopProductivityReport = (
-	params: ICoopProductivityReportParams,
+export const useGetProductionProductivityReport = (
+	params: IProductionProductivityReportParams,
 	enabled = true,
 ) =>
 	useQuery({
-		queryKey: reportsQueryKeys.coopProductivity(
+		queryKey: reportsQueryKeys.productionProductivity(
 			params.farmId,
 			params.date_from,
 			params.date_to,
 		),
-		queryFn: () => getCoopProductivityReport(params),
+		queryFn: () => getProductionProductivityReport(params),
 		enabled:
 			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
 	});

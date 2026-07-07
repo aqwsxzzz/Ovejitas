@@ -1,15 +1,15 @@
 # Ovejitas BE Event Ledger Rules (FE/BE Working Agreement)
 
 Status: active FE/BE contract baseline.
-Date: 2026-06-17.
+Date: 2026-07-02.
 
 ## Context and source of truth
 
-- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (backend revision `366f9e5`, synced 2026-06-17 via `npm run docs:ledger`).
+- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (synced 2026-07-02 from `backend-docs/api/*.yaml`; source revision not specified for this sync).
 - Local supporting references:
   - `backend-docs/domain-rebuild-plan.md`
   - `backend-docs/domain-notes.md`
-  - `backend-docs/api/pregnancies.yaml`, `backend-docs/api/reports.yaml`, `backend-docs/api/assets.yaml`
+  - `backend-docs/api/production-targets.yaml`, `backend-docs/api/reports.yaml`, `backend-docs/api/assets.yaml`, `backend-docs/api/pregnancies.yaml`
 
 ## Core model (what the backend is)
 
@@ -76,6 +76,7 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 - Source asset MUST be `kind=animal` or `kind=crop`.
 - Source asset MUST have `produce_asset_id` set, linking it to a material asset that receives the stock.
 - `unit` in the request MUST match the produce asset's existing stock unit.
+- `HarvestCreate` requires a production `category_id` (the product category recorded on the emitted `production` event).
 - `HarvestRead` returns `{ production_event_id, inventory_event_id, produce_balance }`.
 
 ## Linkage model
@@ -93,6 +94,7 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 - `acquisition` and `mortality` are action-only (not in manual create union).
 - `production`, `observation`, standalone `expense`/`income`, and `reproductive` remain manual when no specific action endpoint governs them. Pregnancy/ultrasound-check `reproductive` events are now action-owned (action #12) and MUST be created/edited/deleted via `.../pregnancies`, not generic event writes.
 - Inventory mutations must use shared inventory helpers (`emit_increment`, `emit_decrement`, lock, non-negative assertion), never raw event writes.
+- Generic event create bodies accept an optional `idempotency_key`; `EventRead` exposes it. FE SHOULD send a stable key on manual event creates to make retries safe against duplicates.
 
 ## Implementation pattern for action services
 
@@ -150,6 +152,17 @@ Do not force one universal action abstraction if it introduces behavior flags an
 - Preserve transactional atomicity for every action that emits events.
 - Ensure reconcile/reverse logic exists before shipping an action as editable/deletable.
 
+## Production targets (configuration, not ledger events)
+
+Production targets are a farm-scoped **configuration** resource that declares the expected output of an (asset × product), feeding the `production-productivity` report. They are NOT events and emit NO ledger rows — treat them like `event_category` config, not like actions.
+
+- Endpoints: `GET/POST .../production-targets`, `GET/PATCH/DELETE .../production-targets/{target_id}`.
+- A target binds `asset_id` + `category_id` (the product; a production-type category) to an `expected_rate`, with a `basis` (`per_head_continuous` | `per_event` | `total`) and optional `period` (`day` | `year` | null).
+- **Effective-dated**: `asset_id`, `category_id`, `basis`, `period`, and `effective_from` are set once at create. A **changed rate is a new effective-dated target, not an edit** — the report replays the target applicable to each moment.
+- `PATCH` may only adjust `expected_rate`, close `effective_to`, or set `archived_at`; it MUST NOT re-point the asset/category/basis. `DELETE` removes a target row.
+- This generic model supersedes the removed egg-specific `expected_eggs_per_head_per_day` asset field: eggs are now just a target on the "eggs" production category, exactly like milk, wool, etc.
+- FE gating: whether an asset shows expected-rate/productivity UI is derived from whether it has applicable production targets (and/or logged production in a category) — never from a per-product boolean or an animal-type guess.
+
 ## Reports contract (for FE assumptions)
 
 Reports are always derived from event replay (never cached mutable counters):
@@ -165,7 +178,7 @@ Reports are always derived from event replay (never cached mutable counters):
 - **inventory balance** (`GET .../assets/{id}/events/balance`): current on-hand balance per (asset, unit) computed from `inventory` events since the most recent reset. Only meaningful for `kind=material` assets.
 - **individual timeline** (`GET .../reports/individuals/{id}/timeline`): paginated `EventRead` list for a single individual. Returns the full event history for that individual in `Page` envelope.
 - **sales-value** (`GET .../reports/sales-value`): realized weighted-average sale price per (asset, unit), derived from sale-action events only (manual income excluded). `value_per_unit = sale income ÷ quantity sold`. When an asset was sold in more than one unit in the window, income can't be split → `ambiguous: true` with null `unit`/`quantity_sold`/`value_per_unit`. Assets with no sales in the window do not appear. Pairs with `cost-per-unit` (the cost floor) to derive margin client-side.
-- **coop-productivity** (`GET .../reports/coop-productivity`): eggs laid vs expected per coop. `produced` is normalized to single eggs (`dozen` counts ×12); `expected = expected_eggs_per_head_per_day × current headcount × days`; `productivity_pct = produced ÷ expected × 100`. `date_from` and `date_to` are **required** (expected scales with days). A coop missing `expected_eggs_per_head_per_day` or with 0 headcount reports `missing_capacity: true` with null `expected`/`productivity_pct` — never divide-by-zero (mirrors `has_unvalued_consumption`). Headcount is event-derived (`HEAD` on-hand), not stored.
+- **production-productivity** (`GET .../reports/production-productivity`): produced vs expected output per (asset, product), where a product is a production `event_category`. One row per (asset, product) that either produced in the window or has an applicable production target. `produced` is converted into the product's unit; `expected` comes from the asset's applicable production target, scaled by the target's `basis` (`per_head_continuous` uses time-weighted animal-days; `per_event`; `total`). `productivity_pct = produced ÷ expected × 100`. `date_from` and `date_to` are **required**. A pair with no applicable target reports `missing_capacity: true` with null `expected`/`productivity_pct` (mirrors `has_unvalued_consumption`) — never divide-by-zero. Row: `{ asset_id, asset_name, category_id, product_name, unit, produced, expected, productivity_pct, basis, missing_capacity }`. Supersedes the removed egg-only `coop-productivity` report; see the Production targets section. Headcount for `per_head_continuous` remains event-derived, not stored.
 - **upcoming-births** (`GET .../reports/upcoming-births`): one row per individual whose *latest* pregnancy check is pregnant with `expected_due_at` inside `[date_from, date_to]`. A later not-pregnant check suppresses the alert. `date_from` and `date_to` are **required**; `days_until_due` counts whole days from `date_from`. Depends on pregnancy checks (action #12) existing.
 - **PDF exports**: `GET .../reports/profitability/pdf` and `GET .../reports/cost-per-unit/pdf` return the respective report as a downloadable PDF.
 
@@ -204,6 +217,14 @@ Reports are always derived from event replay (never cached mutable counters):
 ---
 
 ## Contract change log
+
+### 2026-07-02
+
+- **Production targets resource shipped** (`GET/POST/PATCH/DELETE .../production-targets`): generic per-(asset, product) expected-output configuration with `basis` (`per_head_continuous` | `per_event` | `total`), optional `period` (`day`|`year`), and effective-dating (`effective_from`/`effective_to`, `archived_at`). A rate change is a new effective-dated target, not an edit; `PATCH` only adjusts `expected_rate`/`effective_to`/`archived_at`. Config only — emits no ledger events.
+- **`production-productivity` report shipped, replaces `coop-productivity`** (`GET .../reports/production-productivity`): produced vs expected per (asset, product=production category), `expected` from the applicable target scaled by `basis`, `missing_capacity: true` when no applicable target. `date_from`/`date_to` required. Row now carries `category_id`, `product_name`, `basis`. FE must migrate off `coop-productivity` (removed).
+- **`expected_eggs_per_head_per_day` removed from the asset** (`AssetCreate`/`AssetUpdate`/`AssetRead`): the egg-specific laying-rate field no longer exists; expected laying rate is now a production target on the eggs category. FE must drop this field and configure rates via `production-targets`.
+- **Generic event idempotency**: event create bodies accept optional `idempotency_key` and `EventRead` exposes it (previously called out only for pregnancy checks). FE should send a stable key on manual creates for safe retries.
+- **Harvest takes a production `category_id`**: `HarvestCreate` now requires the product category recorded on the emitted `production` event.
 
 ### 2026-06-17
 

@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useGetCoopProductivityReport } from "@/features/reports/api/reports-queries";
+import { useGetProductionProductivityReport } from "@/features/reports/api/reports-queries";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
-interface CoopProductivityReportProps {
+interface ProductionProductivityReportProps {
 	farmId: string | number;
 	dateFrom: string;
 	dateTo: string;
@@ -15,16 +15,17 @@ const formatPct = (value: string | null): string => {
 	return Number.isFinite(parsed) ? `${parsed.toFixed(1)}%` : "—";
 };
 
-export const CoopProductivityReport = ({
+export const ProductionProductivityReport = ({
 	farmId,
 	dateFrom,
 	dateTo,
-}: CoopProductivityReportProps) => {
-	const { data, isPending, isError, error } = useGetCoopProductivityReport({
-		farmId,
-		date_from: dateFrom,
-		date_to: dateTo,
-	});
+}: ProductionProductivityReportProps) => {
+	const { data, isPending, isError, error } =
+		useGetProductionProductivityReport({
+			farmId,
+			date_from: dateFrom,
+			date_to: dateTo,
+		});
 
 	const apiError = error instanceof ApiRequestError ? error : null;
 	const rows = data?.data ?? [];
@@ -32,7 +33,7 @@ export const CoopProductivityReport = ({
 	return (
 		<Card className="v2-card">
 			<CardHeader>
-				<CardTitle className="text-lg">Productividad de gallineros</CardTitle>
+				<CardTitle className="text-lg">Productividad de producción</CardTitle>
 			</CardHeader>
 			<CardContent>
 				{isPending ? (
@@ -47,23 +48,25 @@ export const CoopProductivityReport = ({
 					</p>
 				) : (
 					<div className="rounded-lg border overflow-hidden">
-						<div className="grid grid-cols-4 border-b bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
-							<span>Gallinero</span>
+						<div className="grid grid-cols-5 border-b bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
+							<span>Activo</span>
+							<span>Producto</span>
 							<span className="text-right">Producido</span>
 							<span className="text-right">Esperado</span>
 							<span className="text-right">Productividad</span>
 						</div>
 						{rows.map((row) => (
 							<div
-								key={row.asset_id}
-								className="grid grid-cols-4 items-center border-b px-4 py-3 text-sm last:border-b-0"
+								key={`${row.asset_id}-${row.category_id}`}
+								className="grid grid-cols-5 items-center border-b px-4 py-3 text-sm last:border-b-0"
 							>
 								<span className="font-medium">{row.asset_name}</span>
+								<span>{row.product_name}</span>
 								<span className="text-right">{row.produced}</span>
 								<span className="text-right">{row.expected ?? "—"}</span>
 								<span className="text-right">
 									{row.missing_capacity ? (
-										<Badge variant="outline">Sin capacidad</Badge>
+										<Badge variant="outline">Sin meta</Badge>
 									) : (
 										<span className="font-medium">
 											{formatPct(row.productivity_pct)}

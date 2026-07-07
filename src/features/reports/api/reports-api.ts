@@ -16,8 +16,8 @@ import type {
 	IReportPdfParams,
 	IUpcomingBirthsReport,
 	IUpcomingBirthsReportParams,
-	ICoopProductivityReport,
-	ICoopProductivityReportParams,
+	IProductionProductivityReport,
+	IProductionProductivityReportParams,
 	ISalesValueReport,
 	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
@@ -191,17 +191,17 @@ export const getUpcomingBirthsReport = ({
 	});
 
 /**
- * Eggs laid vs expected laying, per coop
- * GET /api/v1/farms/{farm_id}/reports/coop-productivity
+ * Produced vs expected output, per asset and product
+ * GET /api/v1/farms/{farm_id}/reports/production-productivity
  */
-export const getCoopProductivityReport = ({
+export const getProductionProductivityReport = ({
 	farmId,
 	date_from,
 	date_to,
-}: ICoopProductivityReportParams) =>
-	axiosHelper<ICoopProductivityReport>({
+}: IProductionProductivityReportParams) =>
+	axiosHelper<IProductionProductivityReport>({
 		method: "get",
-		url: `/api/v1/farms/${farmId}/reports/coop-productivity`,
+		url: `/api/v1/farms/${farmId}/reports/production-productivity`,
 		urlParams: {
 			date_from,
 			date_to,

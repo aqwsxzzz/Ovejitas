@@ -36,7 +36,6 @@ export interface ILivestockAsset {
 	location: string | null;
 	description: string | null;
 	produce_asset_id: number | null;
-	expected_eggs_per_head_per_day: string | null;
 	created_at: string;
 	updated_at: string;
 }
