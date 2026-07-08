@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useGetProfitabilityReport } from "@/features/reports/api/reports-queries";
 import { getProfitabilityReportPdf } from "@/features/reports/api/reports-api";
 import { ReportPdfButton } from "@/features/reports/components/report-pdf-button";
+import { formatCurrency } from "@/features/reports/utils/reports-format";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 interface ProfitabilityReportProps {
@@ -19,19 +20,6 @@ interface ProfitabilityReportProps {
 const parseDecimal = (value: string | null | undefined): number => {
 	if (!value) return 0;
 	return parseFloat(value);
-};
-
-const formatCurrency = (value: number, currency: string): string => {
-	try {
-		return new Intl.NumberFormat(undefined, {
-			style: "currency",
-			currency,
-			minimumFractionDigits: 2,
-			maximumFractionDigits: 2,
-		}).format(value);
-	} catch {
-		return `${value.toFixed(2)} ${currency}`;
-	}
 };
 
 export const ProfitabilityReport = ({

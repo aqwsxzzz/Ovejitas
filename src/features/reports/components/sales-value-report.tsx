@@ -1,6 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGetSalesValueReport } from "@/features/reports/api/reports-queries";
+import {
+	formatCurrency,
+	formatProductionQuantity,
+} from "@/features/reports/utils/reports-format";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 interface SalesValueReportProps {
@@ -8,20 +12,6 @@ interface SalesValueReportProps {
 	dateFrom?: string;
 	dateTo?: string;
 }
-
-const formatMoney = (value: string | null, currency: string): string => {
-	if (value == null) return "—";
-	const parsed = parseFloat(value);
-	if (!Number.isFinite(parsed)) return "—";
-	try {
-		return new Intl.NumberFormat(undefined, {
-			style: "currency",
-			currency,
-		}).format(parsed);
-	} catch {
-		return `${parsed.toFixed(2)} ${currency}`;
-	}
-};
 
 export const SalesValueReport = ({
 	farmId,
@@ -68,19 +58,19 @@ export const SalesValueReport = ({
 							>
 								<span className="font-medium">{row.asset_name}</span>
 								<span className="text-right">
-									{formatMoney(row.income_total, row.currency)}
+									{formatCurrency(row.income_total, row.currency)}
 								</span>
 								<span className="text-right">
 									{row.ambiguous ? (
 										<Badge variant="outline">Unidades mixtas</Badge>
 									) : (
-										`${row.quantity_sold ?? "—"} ${row.unit ?? ""}`
+										formatProductionQuantity(row.quantity_sold, row.unit)
 									)}
 								</span>
 								<span className="text-right font-medium">
 									{row.ambiguous
 										? "—"
-										: formatMoney(row.value_per_unit, row.currency)}
+										: formatCurrency(row.value_per_unit, row.currency)}
 								</span>
 							</div>
 						))}

@@ -8,6 +8,10 @@ import { useGetCostPerUnitReport } from "@/features/reports/api/reports-queries"
 import { getCostPerUnitReportPdf } from "@/features/reports/api/reports-api";
 import { ReportPdfButton } from "@/features/reports/components/report-pdf-button";
 import type { Unit } from "@/features/reports/types/reports-types";
+import {
+	formatCurrency,
+	formatProductionQuantity,
+} from "@/features/reports/utils/reports-format";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 interface CostPerUnitReportProps {
@@ -21,19 +25,6 @@ interface CostPerUnitReportProps {
 const parseDecimal = (value: string | null | undefined): number => {
 	if (!value) return 0;
 	return parseFloat(value);
-};
-
-const formatCurrency = (value: number, currency: string): string => {
-	try {
-		return new Intl.NumberFormat(undefined, {
-			style: "currency",
-			currency,
-			minimumFractionDigits: 2,
-			maximumFractionDigits: 2,
-		}).format(value);
-	} catch {
-		return `${value.toFixed(2)} ${currency}`;
-	}
 };
 
 export const CostPerUnitReport = ({
@@ -135,7 +126,8 @@ export const CostPerUnitReport = ({
 											{formatCurrency(item.expense_total, item.currency)}
 										</p>
 										<p className="text-xs text-muted-foreground mt-3">
-											Cantidad: {item.quantity.toFixed(2)} {report.unit}
+											Cantidad:{" "}
+											{formatProductionQuantity(item.quantity, report.unit)}
 										</p>
 										<p className="text-sm font-medium mt-2">
 											Costo/u:{" "}
@@ -161,7 +153,7 @@ export const CostPerUnitReport = ({
 								>
 									<span className="font-medium">{row.asset_name}</span>
 									<span className="text-right">
-										{parseDecimal(row.quantity).toFixed(2)} {report.unit}
+										{formatProductionQuantity(row.quantity, report.unit)}
 									</span>
 									<span className="text-right">
 										{formatCurrency(
