@@ -13,7 +13,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useListEventsByAssetId } from "@/features/livestock/api/livestock-queries";
-import type { LivestockEventType } from "@/features/livestock/types/livestock-types";
+import {
+	getEventTypeLabel,
+	type LivestockEventType,
+} from "@/features/livestock/types/livestock-types";
 import { MaterialPaginationControls } from "@/features/inventory/components/material-pagination-controls";
 import {
 	formatDate,
@@ -87,7 +90,7 @@ export function MaterialTimelinePanel({
 										key={type}
 										value={type}
 									>
-										{type}
+										{getEventTypeLabel(type)}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -114,7 +117,7 @@ export function MaterialTimelinePanel({
 							key={event.id}
 							className="rounded-lg border px-3 py-2 text-sm"
 						>
-							<p className="font-medium">{event.type}</p>
+							<p className="font-medium">{getEventTypeLabel(event.type)}</p>
 							<p className="text-(--v2-ink-soft)">
 								{formatDate(event.occurred_at)}
 							</p>

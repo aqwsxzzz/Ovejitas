@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import type {
-	ILivestockEvent,
-	ILivestockEventCategory,
+import {
+	getEventTypeLabel,
+	type ILivestockEvent,
+	type ILivestockEventCategory,
 } from "@/features/livestock/types/livestock-types";
+import { formatProductionQuantity } from "@/features/reports/utils/reports-format";
 
 interface UnitEventTimelineProps {
 	events: ILivestockEvent[];
@@ -23,27 +25,6 @@ function canDeleteEvent(event: ILivestockEvent): boolean {
 
 function isActionOwnedEvent(event: ILivestockEvent): boolean {
 	return typeof event.payload.source === "string";
-}
-
-function eventTypeLabel(type: ILivestockEvent["type"]): string {
-	switch (type) {
-		case "production":
-			return "Produccion";
-		case "income":
-			return "Ingreso";
-		case "expense":
-			return "Gasto";
-		case "observation":
-			return "Observacion";
-		case "reproductive":
-			return "Reproductivo";
-		case "acquisition":
-			return "Adquisicion";
-		case "mortality":
-			return "Mortalidad";
-		default:
-			return type;
-	}
 }
 
 function categoryLabel(
@@ -100,7 +81,7 @@ export function UnitEventTimeline({
 					>
 						<div className="flex items-center justify-between gap-2">
 							<p className="text-sm font-semibold leading-tight">
-								{eventTypeLabel(event.type)}
+								{getEventTypeLabel(event.type)}
 							</p>
 							<span className="text-xs text-(--v2-ink-soft)">
 								{formatEventDate(event.occurred_at)}
@@ -122,7 +103,10 @@ export function UnitEventTimeline({
 								{status === "logged" ? "Registrado" : "Planificado"}
 							</span>
 							{event.quantity != null ? (
-								<span>Cantidad: {Number(event.quantity)}</span>
+								<span>
+									Cantidad:{" "}
+									{formatProductionQuantity(event.quantity, event.unit)}
+								</span>
 							) : null}
 							{event.amount != null ? (
 								<span>

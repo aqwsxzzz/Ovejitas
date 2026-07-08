@@ -9,31 +9,11 @@ import {
 	updateEventCategoryById,
 } from "@/features/livestock/api/livestock-api";
 import { useListEventCategoriesByFarmId } from "@/features/livestock/api/livestock-queries";
-import type {
-	ILivestockEventCategory,
-	LivestockEventType,
+import {
+	EVENT_TYPE_LABELS,
+	type ILivestockEventCategory,
+	type LivestockEventType,
 } from "@/features/livestock/types/livestock-types";
-
-function eventTypeLabelEs(type: LivestockEventType): string {
-	switch (type) {
-		case "production":
-			return "Produccion";
-		case "expense":
-			return "Gasto";
-		case "income":
-			return "Ingreso";
-		case "observation":
-			return "Observacion";
-		case "reproductive":
-			return "Reproductivo";
-		case "acquisition":
-			return "Adquisicion";
-		case "mortality":
-			return "Mortalidad";
-		default:
-			return type;
-	}
-}
 
 export function V2EventCategoriesPage() {
 	const { data: currentUser } = useGetUserProfile();
@@ -167,7 +147,7 @@ export function V2EventCategoriesPage() {
 							key={type}
 							className="v2-card p-4"
 						>
-							<p className="v2-kicker">{eventTypeLabelEs(type)}</p>
+							<p className="v2-kicker">{EVENT_TYPE_LABELS[type]}</p>
 							<div className="mt-3 space-y-2">
 								{typeCategories.map((category) => {
 									const isEditing = editingCategoryId === category.id;

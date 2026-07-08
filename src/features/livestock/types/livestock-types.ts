@@ -23,6 +23,27 @@ export type LivestockEventType =
 	| "mortality"
 	| "inventory";
 
+/** Canonical Spanish labels for event types (single source app-wide). */
+export const EVENT_TYPE_LABELS: Record<LivestockEventType, string> = {
+	production: "Producción",
+	expense: "Gasto",
+	income: "Ingreso",
+	observation: "Observación",
+	reproductive: "Reproductivo",
+	acquisition: "Adquisición",
+	mortality: "Mortalidad",
+	inventory: "Inventario",
+};
+
+/**
+ * Spanish label for an event type. Maps the "all" filter sentinel to "Todos"
+ * and falls back to the raw value for anything unrecognized.
+ */
+export function getEventTypeLabel(type: string): string {
+	if (type === "all") return "Todos";
+	return EVENT_TYPE_LABELS[type as LivestockEventType] ?? type;
+}
+
 export type InventoryAdjustment = "increment" | "decrement" | "reset";
 
 export type LivestockEventStatus = "logged" | "planned";
