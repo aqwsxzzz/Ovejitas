@@ -9,6 +9,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useGetProductionProductivityReport } from "@/features/reports/api/reports-queries";
+import {
+	formatProductionQuantity,
+	formatProductivityPct,
+} from "@/features/reports/utils/reports-format";
 
 interface ProductionProductivityCardProps {
 	farmId: string;
@@ -23,13 +27,8 @@ const PERIOD_OPTIONS = [
 	{ value: "1", label: "Último día" },
 	{ value: "7", label: "Última semana" },
 	{ value: "30", label: "Últimos 30 días" },
+	{ value: "365", label: "Último año" },
 ] as const;
-
-const formatPct = (value: string | null): string => {
-	if (value == null) return "—";
-	const parsed = parseFloat(value);
-	return Number.isFinite(parsed) ? `${parsed.toFixed(1)}%` : "—";
-};
 
 export function ProductionProductivityCard({
 	farmId,
@@ -94,9 +93,11 @@ export function ProductionProductivityCard({
 							) : (
 								<span className="text-sm text-(--v2-ink-soft)">
 									<span className="text-base font-semibold text-foreground">
-										{formatPct(row.productivity_pct)}
+										{formatProductivityPct(row.productivity_pct)}
 									</span>{" "}
-									· {row.produced} producidos / {row.expected ?? "—"} esperados
+									· {formatProductionQuantity(row.produced, row.unit)}{" "}
+									producidos /{" "}
+									{formatProductionQuantity(row.expected, row.unit)} esperados
 								</span>
 							)}
 						</div>

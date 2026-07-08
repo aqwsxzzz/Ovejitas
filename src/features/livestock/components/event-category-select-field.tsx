@@ -44,6 +44,8 @@ interface EventCategorySelectFieldProps {
 	disabled?: boolean;
 	/** When absent, the inline-create row is hidden. */
 	onCreateEventCategory?: (input: CreateEventCategoryInput) => Promise<number>;
+	/** Notified when the inline-create row opens or closes. */
+	onCreatingChange?: (isCreating: boolean) => void;
 }
 
 export function EventCategorySelectField({
@@ -58,6 +60,7 @@ export function EventCategorySelectField({
 	helperText,
 	disabled = false,
 	onCreateEventCategory,
+	onCreatingChange,
 }: EventCategorySelectFieldProps) {
 	const [isCreating, setIsCreating] = useState(false);
 	const [newName, setNewName] = useState("");
@@ -70,12 +73,17 @@ export function EventCategorySelectField({
 	);
 	const selectValue = isCreating ? NEW_OPTION_VALUE : value || undefined;
 
+	const setCreating = (next: boolean) => {
+		setIsCreating(next);
+		onCreatingChange?.(next);
+	};
+
 	const handleValueChange = (next: string) => {
 		if (next === NEW_OPTION_VALUE) {
-			setIsCreating(true);
+			setCreating(true);
 			return;
 		}
-		setIsCreating(false);
+		setCreating(false);
 		onChange(next === NONE_OPTION_VALUE ? "" : next);
 	};
 
@@ -95,7 +103,7 @@ export function EventCategorySelectField({
 			});
 			onChange(String(createdId));
 			setNewName("");
-			setIsCreating(false);
+			setCreating(false);
 		} finally {
 			setIsSubmitting(false);
 		}

@@ -1,6 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGetProductionProductivityReport } from "@/features/reports/api/reports-queries";
+import {
+	formatProductionQuantity,
+	formatProductivityPct,
+} from "@/features/reports/utils/reports-format";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 interface ProductionProductivityReportProps {
@@ -8,12 +12,6 @@ interface ProductionProductivityReportProps {
 	dateFrom: string;
 	dateTo: string;
 }
-
-const formatPct = (value: string | null): string => {
-	if (value == null) return "—";
-	const parsed = parseFloat(value);
-	return Number.isFinite(parsed) ? `${parsed.toFixed(1)}%` : "—";
-};
 
 export const ProductionProductivityReport = ({
 	farmId,
@@ -62,14 +60,18 @@ export const ProductionProductivityReport = ({
 							>
 								<span className="font-medium">{row.asset_name}</span>
 								<span>{row.product_name}</span>
-								<span className="text-right">{row.produced}</span>
-								<span className="text-right">{row.expected ?? "—"}</span>
+								<span className="text-right">
+									{formatProductionQuantity(row.produced, row.unit)}
+								</span>
+								<span className="text-right">
+									{formatProductionQuantity(row.expected, row.unit)}
+								</span>
 								<span className="text-right">
 									{row.missing_capacity ? (
 										<Badge variant="outline">Sin meta</Badge>
 									) : (
 										<span className="font-medium">
-											{formatPct(row.productivity_pct)}
+											{formatProductivityPct(row.productivity_pct)}
 										</span>
 									)}
 								</span>

@@ -22,7 +22,10 @@ import type {
 	LivestockEventType,
 	LivestockEventUnit,
 } from "@/features/livestock/types/livestock-types";
-import { EVENT_UNITS_BY_DIMENSION } from "@/shared/types/unit-types";
+import {
+	EVENT_UNIT_LABELS,
+	EVENT_UNITS_BY_DIMENSION,
+} from "@/shared/types/unit-types";
 
 import {
 	EventCategorySelectField,
@@ -120,6 +123,7 @@ export function UnitEventForm({
 		"increment" | "decrement" | "reset" | ""
 	>(initialValues?.adjustment ?? "");
 	const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
+	const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 	const [error, setError] = useState<string>("");
 	const isEditMode = Boolean(initialValues);
 	const canSelectIndividual = assetMode === "individual";
@@ -144,6 +148,11 @@ export function UnitEventForm({
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
 		setError("");
+
+		if (isCreatingCategory) {
+			setError("Termina de crear la categoria antes de guardar el evento.");
+			return;
+		}
 
 		if (type === "inventory" && !canUseInventory) {
 			setError(
@@ -270,6 +279,7 @@ export function UnitEventForm({
 				allowNone={type !== "production"}
 				newOptionLabel="Nueva categoria"
 				onCreateEventCategory={onCreateEventCategory}
+				onCreatingChange={setIsCreatingCategory}
 				helperText={
 					type === "production"
 						? "Usa la categoria como nombre del producto (ej: huevos, leche, lana)."
@@ -354,7 +364,7 @@ export function UnitEventForm({
 										key={unitValue}
 										value={unitValue}
 									>
-										{unitValue}
+										{EVENT_UNIT_LABELS[unitValue]}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -365,7 +375,7 @@ export function UnitEventForm({
 										key={unitValue}
 										value={unitValue}
 									>
-										{unitValue}
+										{EVENT_UNIT_LABELS[unitValue]}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -376,7 +386,7 @@ export function UnitEventForm({
 										key={unitValue}
 										value={unitValue}
 									>
-										{unitValue}
+										{EVENT_UNIT_LABELS[unitValue]}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -462,7 +472,7 @@ export function UnitEventForm({
 				<Button
 					type="submit"
 					variant="default"
-					disabled={isSubmitting}
+					disabled={isSubmitting || isCreatingCategory}
 				>
 					{isSubmitting
 						? "Guardando..."
