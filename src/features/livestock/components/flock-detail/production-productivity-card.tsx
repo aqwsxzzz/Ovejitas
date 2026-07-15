@@ -10,12 +10,57 @@ import {
 	formatProductionQuantity,
 	formatProductivityPct,
 } from "@/features/reports/utils/reports-format";
+import type { IProductionProductivityRow } from "@/features/reports/types/reports-types";
 
 interface ProductionProductivityCardProps {
 	farmId: string;
 	assetId: number;
 	/** Initial window size in days for the productivity calculation. */
 	windowDays?: number;
+}
+
+// Bar fill is capped at 100% even when output beats the target, so a lot at
+// 120% still reads as "full" rather than overflowing its track.
+function ProductivityRow({ row }: { row: IProductionProductivityRow }): React.ReactElement {
+	const fill = Math.min(
+		100,
+		Math.max(0, Number.parseFloat(row.productivity_pct ?? "") || 0),
+	);
+
+	return (
+		<div className="space-y-1.5">
+			<div className="flex items-baseline justify-between gap-2">
+				<span className="min-w-0 truncate font-medium">{row.product_name}</span>
+				<span className="shrink-0 text-base font-semibold tabular-nums">
+					{formatProductivityPct(row.productivity_pct)}
+				</span>
+			</div>
+
+			{row.missing_capacity ? (
+				<p className="text-sm text-(--v2-ink-soft)">
+					Define la meta para calcular la productividad.
+				</p>
+			) : (
+				<>
+					<div className="h-1.5 overflow-hidden rounded-full bg-muted">
+						<div
+							className="h-full rounded-full bg-success"
+							style={{ width: `${Math.max(2, fill)}%` }}
+						/>
+					</div>
+					<p className="text-xs text-(--v2-ink-soft)">
+						<span className="whitespace-nowrap tabular-nums">
+							{formatProductionQuantity(row.produced, row.unit)} producidos
+						</span>{" "}
+						/{" "}
+						<span className="whitespace-nowrap tabular-nums">
+							{formatProductionQuantity(row.expected, row.unit)} esperados
+						</span>
+					</p>
+				</>
+			)}
+		</div>
+	);
 }
 
 // Expected output is time-weighted, so a shorter window scales it down
@@ -49,31 +94,15 @@ export function ProductionProductivityCard({
 				<CardTitle className="text-base">Productividad</CardTitle>
 				<PeriodSelect value={selectedDays} onValueChange={setSelectedDays} />
 			</CardHeader>
-			<CardContent className="space-y-2">
+			<CardContent className="space-y-4">
 				{isPending ? (
 					<p className="text-sm text-(--v2-ink-soft)">Cargando...</p>
 				) : (
 					rows.map((row) => (
-						<div
+						<ProductivityRow
 							key={`${row.category_id}-${row.unit ?? ""}`}
-							className="flex items-baseline justify-between gap-3"
-						>
-							<span className="font-medium">{row.product_name}</span>
-							{row.missing_capacity ? (
-								<span className="text-sm text-(--v2-ink-soft)">
-									Define la meta para calcular la productividad.
-								</span>
-							) : (
-								<span className="text-sm text-(--v2-ink-soft)">
-									<span className="text-base font-semibold text-foreground">
-										{formatProductivityPct(row.productivity_pct)}
-									</span>{" "}
-									· {formatProductionQuantity(row.produced, row.unit)}{" "}
-									producidos /{" "}
-									{formatProductionQuantity(row.expected, row.unit)} esperados
-								</span>
-							)}
-						</div>
+							row={row}
+						/>
 					))
 				)}
 			</CardContent>
