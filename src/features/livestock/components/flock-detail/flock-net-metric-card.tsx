@@ -4,6 +4,10 @@ import {
 	MetricBreakdownCard,
 	type MetricBreakdownRow,
 } from "@/components/common/metric-breakdown-card";
+import {
+	PeriodSelect,
+	useReportPeriod,
+} from "@/features/reports/components/report-period-select";
 import { useGetProfitabilityFullReport } from "@/features/reports/api/reports-queries";
 import { formatCurrency } from "@/features/reports/utils/reports-format";
 
@@ -18,19 +22,13 @@ export function FlockNetMetricCard({
 	assetId,
 	isMaterialAsset,
 }: FlockNetMetricCardProps) {
-	const monthRange = useMemo(() => {
-		const now = new Date();
-		const start = new Date(now.getFullYear(), now.getMonth(), 1)
-			.toISOString()
-			.slice(0, 10);
-		const end = now.toISOString().slice(0, 10);
-		return { start, end };
-	}, []);
+	const { selectedDays, setSelectedDays, date_from, date_to } =
+		useReportPeriod(30);
 
 	const { data: report, isPending } = useGetProfitabilityFullReport({
 		farmId,
-		date_from: monthRange.start,
-		date_to: monthRange.end,
+		date_from: date_from.slice(0, 10),
+		date_to: date_to.slice(0, 10),
 		asset_id: assetId,
 	});
 
@@ -64,8 +62,11 @@ export function FlockNetMetricCard({
 	}, [row, isMaterialAsset]);
 
 	const footnotes = useMemo(() => {
-		if (!row) return ["Sin movimientos financieros este mes."];
+		if (!row) return ["Sin movimientos financieros en el periodo."];
 		const notes: string[] = [];
+		if (!isMaterialAsset) {
+			notes.push("Neto incluye el alimento consumido.");
+		}
 		if (row.has_unvalued_consumption) {
 			notes.push(
 				"Alimento sin costo registrado: el neto puede estar sobrestimado.",
@@ -75,13 +76,16 @@ export function FlockNetMetricCard({
 			notes.push("Excluye montos en otra moneda.");
 		}
 		return notes;
-	}, [row]);
+	}, [row, isMaterialAsset]);
 
 	return (
 		<MetricBreakdownCard
-			label={isMaterialAsset ? "Valor neto · mes" : "Neto real · mes"}
+			label={isMaterialAsset ? "Valor neto" : "Neto real"}
 			value={row ? formatCurrency(row.net_incl_materials, row.currency) : "—"}
 			isLoading={isPending}
+			action={
+				<PeriodSelect value={selectedDays} onValueChange={setSelectedDays} />
+			}
 			breakdown={breakdown}
 			footnotes={footnotes}
 		/>

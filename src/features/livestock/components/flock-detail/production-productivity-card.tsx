@@ -1,13 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+	PeriodSelect,
+	useReportPeriod,
+} from "@/features/reports/components/report-period-select";
 import { useGetProductionProductivityReport } from "@/features/reports/api/reports-queries";
 import {
 	formatProductionQuantity,
@@ -23,26 +20,13 @@ interface ProductionProductivityCardProps {
 
 // Expected output is time-weighted, so a shorter window scales it down
 // proportionally — the report accepts any date range, not just 30 days.
-const PERIOD_OPTIONS = [
-	{ value: "1", label: "Último día" },
-	{ value: "7", label: "Última semana" },
-	{ value: "30", label: "Últimos 30 días" },
-	{ value: "365", label: "Último año" },
-] as const;
-
 export function ProductionProductivityCard({
 	farmId,
 	assetId,
 	windowDays = 30,
 }: ProductionProductivityCardProps) {
-	const [selectedDays, setSelectedDays] = useState(String(windowDays));
-
-	const { date_from, date_to } = useMemo(() => {
-		const now = new Date();
-		const from = new Date(now);
-		from.setDate(from.getDate() - Number(selectedDays));
-		return { date_from: from.toISOString(), date_to: now.toISOString() };
-	}, [selectedDays]);
+	const { selectedDays, setSelectedDays, date_from, date_to } =
+		useReportPeriod(windowDays);
 
 	const { data, isPending } = useGetProductionProductivityReport({
 		farmId,
@@ -63,18 +47,7 @@ export function ProductionProductivityCard({
 		<Card>
 			<CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
 				<CardTitle className="text-base">Productividad</CardTitle>
-				<Select value={selectedDays} onValueChange={setSelectedDays}>
-					<SelectTrigger className="h-8 w-auto gap-1 text-xs">
-						<SelectValue />
-					</SelectTrigger>
-					<SelectContent>
-						{PERIOD_OPTIONS.map((option) => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				<PeriodSelect value={selectedDays} onValueChange={setSelectedDays} />
 			</CardHeader>
 			<CardContent className="space-y-2">
 				{isPending ? (

@@ -650,6 +650,9 @@ export function FinanceDashboardShell({
 							value="profitability"
 							className="space-y-4"
 						>
+							<p className="text-xs text-(--v2-ink-soft)">
+								Neto operativo, sin el alimento consumido.
+							</p>
 							<div className="space-y-2">
 								<div className="flex items-center justify-between gap-2">
 									<p className="text-sm font-medium">Activos mas rentables</p>
