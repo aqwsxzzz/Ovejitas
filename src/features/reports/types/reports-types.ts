@@ -29,6 +29,44 @@ export interface IProfitabilityReport {
 	totals: IProfitabilityTotal[];
 }
 
+/**
+ * Profitability Full — income minus TOTAL cost (direct expense + consumed feed).
+ * `net_incl_materials` is the all-in bottom line; `net` (income − direct expense)
+ * is retained from R1 for backward compatibility.
+ *
+ * Rows are in the farm's DEFAULT currency only. Income/expense booked in another
+ * currency is EXCLUDED from the row and flagged via `has_other_currency` — surface
+ * that flag or the number understates reality.
+ */
+export interface IProfitabilityFullRow {
+	asset_id: number;
+	asset_name: string;
+	currency: string;
+	income_total: string;
+	direct_expense_total: string;
+	consumed_material_cost: string;
+	total_cost: string;
+	net: string;
+	net_incl_materials: string;
+	has_unvalued_consumption: boolean;
+	has_other_currency: boolean;
+}
+
+export interface IProfitabilityFullTotal {
+	currency: string;
+	income_total: string;
+	direct_expense_total: string;
+	consumed_material_cost: string;
+	total_cost: string;
+	net: string;
+	net_incl_materials: string;
+}
+
+export interface IProfitabilityFullReport {
+	data: IProfitabilityFullRow[];
+	totals: IProfitabilityFullTotal[];
+}
+
 // Production Report
 export type ProductionBucket = "day" | "week" | "month";
 export type EventType =
@@ -84,27 +122,22 @@ export interface IMaterialConsumptionAggregateReport {
 	group_by: MaterialConsumptionGroupBy;
 }
 
-// Cost Per Unit Report
+// Cost Per Unit Report (R3)
 export interface ICostPerUnitRow {
 	asset_id: number;
 	asset_name: string;
 	currency: string;
-	quantity: string;
-	expense_total: string;
-	cost_per_unit: string;
-}
-
-export interface ICostPerUnitTotal {
-	currency: string;
-	quantity: string;
-	expense_total: string;
-	cost_per_unit: string;
+	production_quantity: string;
+	direct_expense_total: string;
+	consumed_material_cost: string;
+	total_cost: string;
+	cost_per_unit: string | null;
+	has_unvalued_consumption: boolean;
 }
 
 export interface ICostPerUnitReport {
 	data: ICostPerUnitRow[];
 	unit: Unit;
-	totals: ICostPerUnitTotal[];
 }
 
 // Timeline Report
@@ -213,6 +246,8 @@ export interface IProfitabilityReportParams {
 	date_to?: string;
 	asset_id?: number;
 }
+
+export type IProfitabilityFullReportParams = IProfitabilityReportParams;
 
 export interface IAggregateReportParams {
 	farmId: string | number;
