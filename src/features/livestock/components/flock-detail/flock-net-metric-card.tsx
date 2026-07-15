@@ -1,9 +1,11 @@
 import { useMemo } from "react";
 
-import { useGetProfitabilityReport } from "@/features/livestock/api/livestock-queries";
-
-import { formatMoney, parseNumeric } from "./flock-detail-utils";
-import { FlockMetricCard } from "./flock-metric-card";
+import {
+	MetricBreakdownCard,
+	type MetricBreakdownRow,
+} from "@/components/common/metric-breakdown-card";
+import { useGetProfitabilityFullReport } from "@/features/reports/api/reports-queries";
+import { formatCurrency } from "@/features/reports/utils/reports-format";
 
 interface FlockNetMetricCardProps {
 	farmId: string;
@@ -25,33 +27,63 @@ export function FlockNetMetricCard({
 		return { start, end };
 	}, []);
 
-	const { data: profitabilityReport } = useGetProfitabilityReport({
+	const { data: report, isPending } = useGetProfitabilityFullReport({
 		farmId,
-		filters: {
-			assetId,
-			dateFrom: monthRange.start,
-			dateTo: monthRange.end,
-		},
-		enabled: !!farmId,
+		date_from: monthRange.start,
+		date_to: monthRange.end,
+		asset_id: assetId,
 	});
 
-	const netMonth = useMemo(() => {
-		const assetRow = profitabilityReport?.data.find(
-			(row) => row.asset_id === assetId,
-		);
-		if (!assetRow) return 0;
-		return parseNumeric(assetRow.net);
-	}, [profitabilityReport, assetId]);
+	const row = useMemo(
+		() => report?.data.find((item) => item.asset_id === assetId) ?? null,
+		[report, assetId],
+	);
+
+	const breakdown = useMemo<MetricBreakdownRow[]>(() => {
+		if (!row) return [];
+		const rows: MetricBreakdownRow[] = [
+			{
+				label: "Ingresos",
+				value: formatCurrency(row.income_total, row.currency),
+				tone: "positive",
+			},
+			{
+				label: "Gasto directo",
+				value: formatCurrency(row.direct_expense_total, row.currency),
+				tone: "negative",
+			},
+		];
+		if (!isMaterialAsset) {
+			rows.push({
+				label: "Alimento",
+				value: formatCurrency(row.consumed_material_cost, row.currency),
+				tone: "negative",
+			});
+		}
+		return rows;
+	}, [row, isMaterialAsset]);
+
+	const footnotes = useMemo(() => {
+		if (!row) return ["Sin movimientos financieros este mes."];
+		const notes: string[] = [];
+		if (row.has_unvalued_consumption) {
+			notes.push(
+				"Alimento sin costo registrado: el neto puede estar sobrestimado.",
+			);
+		}
+		if (row.has_other_currency) {
+			notes.push("Excluye montos en otra moneda.");
+		}
+		return notes;
+	}, [row]);
 
 	return (
-		<FlockMetricCard
-			label={isMaterialAsset ? "Valor neto · mes" : "Neto · mes"}
-			value={formatMoney(netMonth)}
-			note={
-				isMaterialAsset
-					? "Calculado con movimientos financieros del activo"
-					: "Calculado con eventos de ingreso y gasto del mes"
-			}
+		<MetricBreakdownCard
+			label={isMaterialAsset ? "Valor neto · mes" : "Neto real · mes"}
+			value={row ? formatCurrency(row.net_incl_materials, row.currency) : "—"}
+			isLoading={isPending}
+			breakdown={breakdown}
+			footnotes={footnotes}
 		/>
 	);
 }

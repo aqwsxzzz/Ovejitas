@@ -2,12 +2,13 @@ import { useCallback, useState } from "react";
 
 import { ManualFeedingActionRow } from "@/features/livestock/components/manual-feeding/manual-feeding-action-row";
 import { ManualFeedingFormSection } from "@/features/livestock/components/manual-feeding/manual-feeding-form-section";
-import { ManualFeedingHeader } from "@/features/livestock/components/manual-feeding/manual-feeding-header";
+import { ManualFeedingToggle } from "@/features/livestock/components/manual-feeding/manual-feeding-toggle";
 import { ManualFeedingStats } from "@/features/livestock/components/manual-feeding/manual-feeding-stats";
 import type { ManualFeedingPanelProps } from "@/features/livestock/components/manual-feeding/types";
 import { useManualFeedingForm } from "@/features/livestock/components/manual-feeding/use-manual-feeding-form";
 import { useManualFeedingMetrics } from "@/features/livestock/components/manual-feeding/use-manual-feeding-metrics";
 import { useManualFeedingSubmit } from "@/features/livestock/components/manual-feeding/use-manual-feeding-submit";
+import { SectionCard } from "@/components/common/section-card";
 import { Separator } from "@/components/ui/separator";
 
 export function ManualFeedingPanel({
@@ -50,15 +51,19 @@ export function ManualFeedingPanel({
 	}, [handleLogFeedingNow]);
 
 	return (
-		<div className="v2-card flex flex-col gap-6 p-4">
-			<ManualFeedingHeader
-				todayFeedCount={todaysFeeds.count}
-				isExpanded={isExpanded}
-				onToggle={() => setIsExpanded((current) => !current)}
-			/>
-
+		<SectionCard
+			title="Alimentacion manual"
+			description="Registra el alimento en el momento que lo das."
+			action={
+				<ManualFeedingToggle
+					todayFeedCount={todaysFeeds.count}
+					isExpanded={isExpanded}
+					onToggle={() => setIsExpanded((current) => !current)}
+				/>
+			}
+		>
 			{isExpanded ? (
-				<>
+				<div className="flex flex-col gap-6">
 					<ManualFeedingFormSection
 						form={form}
 						materialOptions={materialOptions}
@@ -86,8 +91,8 @@ export function ManualFeedingPanel({
 					{feedError ? (
 						<p className="text-sm text-destructive">{feedError}</p>
 					) : null}
-				</>
+				</div>
 			) : null}
-		</div>
+		</SectionCard>
 	);
 }

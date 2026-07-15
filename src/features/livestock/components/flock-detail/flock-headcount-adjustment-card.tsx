@@ -1,5 +1,3 @@
-import { Loader2 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +8,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { MetricBreakdownCard } from "@/components/common/metric-breakdown-card";
 
 import { useFlockHeadcountAdjustment } from "./use-flock-headcount-adjustment";
 
@@ -25,34 +24,23 @@ export function FlockHeadcountAdjustmentCard({
 	const adjustment = useFlockHeadcountAdjustment({ farmId, unitId });
 
 	return (
-		<div className="v2-card flex-1 p-3">
-			<div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-				<div className="min-w-0">
-					<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
-						Existencia actual
-					</p>
-					<p className="mt-0.5 text-2xl font-semibold leading-none">
-						{adjustment.isAggregatedHeadcountPending ? (
-							<Loader2 className="h-6 w-6 animate-spin" />
-						) : (
-							String(adjustment.aggregatedActiveCount)
-						)}
-					</p>
-				</div>
-				{!adjustment.isAdjustingHeadcount ? (
-					<div className="flex h-full items-center border-l border-(--v2-border) pl-3">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={adjustment.openHeadcountAdjustment}
-						>
-							Ajustar
-						</Button>
-					</div>
-				) : null}
-			</div>
-
+		<MetricBreakdownCard
+			label="Existencia actual"
+			value={String(adjustment.aggregatedActiveCount)}
+			isLoading={adjustment.isAggregatedHeadcountPending}
+			action={
+				!adjustment.isAdjustingHeadcount ? (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={adjustment.openHeadcountAdjustment}
+					>
+						Ajustar
+					</Button>
+				) : undefined
+			}
+		>
 			{adjustment.isAdjustingHeadcount ? (
 				<div className="mt-2 rounded-xl border border-(--v2-border) bg-white p-2">
 					<div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
@@ -179,6 +167,6 @@ export function FlockHeadcountAdjustmentCard({
 					</div>
 				</div>
 			) : null}
-		</div>
+		</MetricBreakdownCard>
 	);
 }
