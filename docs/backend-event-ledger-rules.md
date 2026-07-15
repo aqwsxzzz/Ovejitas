@@ -1,15 +1,16 @@
 # Ovejitas BE Event Ledger Rules (FE/BE Working Agreement)
 
 Status: active FE/BE contract baseline.
-Date: 2026-07-02.
+Date: 2026-07-14.
 
 ## Context and source of truth
 
-- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (synced 2026-07-02 from `backend-docs/api/*.yaml`; source revision not specified for this sync).
+- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (synced 2026-07-14 from `backend-docs/api/*.yaml`; source revision not specified for this sync).
+- Where `backend-docs/events-and-actions.md` and `backend-docs/api/*.yaml` disagree, **the yaml specs win** — the prose doc currently lags (it still says "the 11 actions" and omits the pregnancy-check action, which `pregnancies.yaml` defines).
 - Local supporting references:
   - `backend-docs/domain-rebuild-plan.md`
   - `backend-docs/domain-notes.md`
-  - `backend-docs/api/production-targets.yaml`, `backend-docs/api/reports.yaml`, `backend-docs/api/assets.yaml`, `backend-docs/api/pregnancies.yaml`
+  - `backend-docs/api/production-targets.yaml`, `backend-docs/api/reports.yaml`, `backend-docs/api/assets.yaml`, `backend-docs/api/pregnancies.yaml`, `backend-docs/api/material-consumptions.yaml`, `backend-docs/api/material-purchases.yaml`, `backend-docs/api/material-sales.yaml`
 
 ## Core model (what the backend is)
 
@@ -78,6 +79,33 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 - `unit` in the request MUST match the produce asset's existing stock unit.
 - `HarvestCreate` requires a production `category_id` (the product category recorded on the emitted `production` event).
 - `HarvestRead` returns `{ production_event_id, inventory_event_id, produce_balance }`.
+
+### Material purchase constraints (action #9)
+
+- Atomically emits `inventory`+ **and** an `expense` event for `amount` paid. **This is the only moment feed cost enters the ledger.**
+- Purchases establish the material's **average cost basis**, which is what values feed consumption in the `cost-per-unit` report. Stock added by a bare manual `inventory` event has **no cost basis** and will flag `has_unvalued_consumption`.
+- `unit` MUST match how the material is already tracked; any unit is allowed for a material with no inventory history.
+- Table-backed and editable: `material_asset_id` is immutable. `PATCH` reconciles the inventory event (`quantity`/`unit`/`occurred_at`) and the expense event (`amount`/`occurred_at`). An edit driving stock negative is rejected `409`.
+- `DELETE` hard-deletes and reverses **both** the stock increment and the expense; rejected `409` if reversal would drive stock negative.
+- Supports `idempotency_key` (replay returns the original record with `200`).
+
+### Material consumption constraints (action #10)
+
+- Emits **`inventory`− only — NO `expense` event.** Consuming feed is money-neutral in the ledger by design: the money was already booked at purchase. FE MUST NOT expect a consumption to move any asset's profitability `net`.
+- `reason` is required: `feeding` | `waste` | `spoilage`.
+  - `reason=feeding` **requires** `consumer_asset_id` (the asset being fed).
+  - `reason=waste` / `spoilage` **MUST omit** `consumer_asset_id` (422 otherwise).
+- `unit` MUST match a unit the material already holds stock in.
+- Rejected `409 insufficient_stock` if the decrement would drive stock negative. FE MUST surface this as "register a purchase first", never retry or silently clamp.
+- Feed cost is attributed to the consumer **only as a derived report figure** (`cost-per-unit.consumed_material_cost`, valued at the material's average purchase cost) — never as a ledger event on the consumer.
+- Table-backed and editable: `material_asset_id` is immutable. `PATCH` on `quantity`/`unit`/`occurred_at` reconciles the paired inventory event and re-checks stock. `DELETE` hard-deletes and reverses the stock effect.
+- Supports `idempotency_key` (replay returns the original record with `200`).
+
+### Material sale constraints (action #11)
+
+- Decrements the material asset's inventory and books a paired `income` event for `amount` in the farm's default currency.
+- `unit` MUST match a unit the asset already holds stock in; rejected `409` if it would drive stock below zero.
+- Create-only (table-less): `MaterialSaleRead` returns `{ inventory_event_id, income_event_id, on_hand }`. No edit/reverse path.
 
 ## Linkage model
 
@@ -167,13 +195,24 @@ Production targets are a farm-scoped **configuration** resource that declares th
 
 Reports are always derived from event replay (never cached mutable counters):
 
-- **profitability** (`GET .../reports/profitability`): income − expense per asset per currency. Events with null amount/currency excluded. Different currencies never silently summed.
+- **profitability** (`GET .../reports/profitability`): income − expense per asset per currency. Events with null amount/currency excluded. Different currencies never silently summed. **Scope limit:** `net` counts only `expense`/`income` events booked **on that asset**. Consumed-material (feed) cost is NOT an expense event on the consumer, so it is structurally excluded from `net`. FE MUST NOT present this `net` as an all-in economic result — use `profitability-full` for that. FE MUST NOT synthesize an all-in net by subtracting `cost-per-unit` figures client-side.
+- **profitability-full** (`GET .../reports/profitability-full`): the **all-in bottom line** per asset — `net_incl_materials = income − (direct expense + consumed feed)`. Feed is valued on the **same basis as `cost-per-unit` (R3), so the two can never disagree**. This is the report to use for "what did this animal actually earn me".
+  - **Row:** `{ asset_id, asset_name, currency, income_total, direct_expense_total, consumed_material_cost, total_cost, net, net_incl_materials, has_unvalued_consumption, has_other_currency }`, where `total_cost = direct_expense_total + consumed_material_cost`. Envelope is `{ data, totals }` — note this **does** carry `totals`, unlike `cost-per-unit`, which does not.
+  - `net` (income − direct expense) is retained unchanged for backward compatibility with R1.
+  - **Single-currency by design:** one row per asset in the **farm's default currency**. Income/expense booked in *another* currency is **excluded from the row** and flagged `has_other_currency: true`. FE MUST surface that flag — otherwise the number silently understates reality.
+  - `has_unvalued_consumption: true` means consumed feed had no purchase cost basis, so cost is understated and `net_incl_materials` is **over**stated. FE MUST surface this.
+  - `date_from`/`date_to` bound income and direct expense; feed is valued over the **full** purchase history (not bounded), same as R3.
+  - PDF export: `GET .../reports/profitability-full/pdf`.
 - **aggregate** (`GET .../reports/aggregate`): generic per-type time buckets.
   - `group_by=asset` is ONLY valid for `production`, `mortality`, `acquisition`. Passing it for `observation`, `inventory`, `expense`, `income`, or `reproductive` returns 422.
   - For `inventory` type, pass `adjustment=reset|increment|decrement` to isolate one flow direction; omitting it returns the net flow.
   - `AggregateRow` shape: `{ bucket, group, group_label, measure, value, asset_id, unit }`. `unit` is present for production/observation rows.
 - **material-consumption-aggregate** (`GET .../reports/material-consumption-aggregate`): dedicated endpoint for material consumption totals. Supports `group_by=material|consumer|both`. Do NOT use the generic `aggregate` endpoint for consumption reporting.
-- **cost-per-unit** (`GET .../reports/cost-per-unit`): direct expenses + average-cost-valued feed consumption ÷ production quantity, per producer asset. Feed cost is not bounded by `date_from` (full purchase history used for average cost). `has_unvalued_consumption: true` flags rows where feed has no purchase history to value it — FE should surface this warning.
+- **cost-per-unit** (`GET .../reports/cost-per-unit`): direct expenses + average-cost-valued feed consumption ÷ production quantity, per producer asset. Requires `unit` (what counts as one produced unit) — the report is scoped to **one** production unit per call. Feed is attributed via `material_consumption` with `reason=feeding` and `consumer_asset_id` = the producer. Feed cost is not bounded by `date_from` (full purchase history used for average cost); `date_from`/`date_to` bound production and direct expenses.
+  - **Response shape (authoritative):** `CostPerUnitReport = { data, unit }`. There is **NO `totals` array** — FE MUST aggregate per-currency summaries from `data` itself.
+  - **Row:** `{ asset_id, asset_name, currency, production_quantity, direct_expense_total, consumed_material_cost, total_cost, cost_per_unit, has_unvalued_consumption }`, where `total_cost = direct_expense_total + consumed_material_cost`.
+  - `cost_per_unit` is **nullable**: a producer that made nothing in the window still appears with `cost_per_unit: null`. FE MUST render this as "—", never as 0.
+  - `has_unvalued_consumption: true` flags rows whose feed has no purchase history to value it — FE MUST surface this warning, as the row's cost is understated.
 - **inventory-summary** (`GET .../reports/inventory-summary`): on-hand balance per (asset, unit) for material assets and aggregated animal flocks. `date_to` gives the balance as of that moment (defaults to now). `date_from` DOES NOT apply to a running balance and is always ignored by the backend.
 - **inventory balance** (`GET .../assets/{id}/events/balance`): current on-hand balance per (asset, unit) computed from `inventory` events since the most recent reset. Only meaningful for `kind=material` assets.
 - **individual timeline** (`GET .../reports/individuals/{id}/timeline`): paginated `EventRead` list for a single individual. Returns the full event history for that individual in `Page` envelope.
@@ -217,6 +256,25 @@ Reports are always derived from event replay (never cached mutable counters):
 ---
 
 ## Contract change log
+
+### 2026-07-14
+
+**Contract changes:**
+
+- **`profitability-full` report shipped** (`GET .../reports/profitability-full`, + `/pdf`): the all-in bottom line per asset — `net_incl_materials = income − (direct expense + consumed feed)`. Feed is valued on the **same basis as `cost-per-unit` (R3)**, so the two reports can never disagree, and direct expense is never double-counted. **Closes the gap** logged earlier this day (FE previously had no way to net feed cost against income, and was explicitly forbidden from stitching R1+R3 client-side).
+  - Envelope `{ data, totals }` — it **does** carry `totals`, unlike `cost-per-unit`, which does not. Do not confuse the two shapes.
+  - **Single-currency by design:** one row per asset in the farm's **default currency**; income/expense in another currency is **excluded** and flagged `has_other_currency`. FE MUST surface that flag.
+  - R1 `profitability` is **unchanged**, and `net` (income − direct expense) is retained on the new row for backward compatibility.
+- **`production-productivity` daily-goal fix** (behavior only, **contract shape identical**): the current day now counts as a **full** day when scaling a `per_head_continuous` target, instead of accruing hour-by-hour. A target of "1 egg/hen" with 1,000 hens now reads as 1,000 eggs for today, rather than a figure that crept upward through the day. **No FE change required** — `ProductionProductivityRow` is byte-identical; existing consumers simply start receiving correct `expected` values.
+
+**Clarifications** (no backend behavior changed; contract detail that was always true in `backend-docs/api/*.yaml` but missing from this file):
+
+- **`cost-per-unit` response shape pinned down.** `CostPerUnitReport` is `{ data, unit }` — it has **no `totals` array**, and rows carry `production_quantity` / `direct_expense_total` / `consumed_material_cost` / `total_cost` / nullable `cost_per_unit` / `has_unvalued_consumption`. The FE type had drifted to a stale shape (`quantity`, `expense_total`, plus a phantom `totals[]`), which silently hid feed cost from the UI. Recorded here so the drift cannot recur.
+- **Material consumption emits `inventory`− ONLY — never an `expense`.** Feeding is money-neutral in the ledger; cost enters at purchase and is attributed to the consumer only as a derived report figure. FE must not expect a feeding to move any asset's profitability `net`. Also documented: `reason` enum, `consumer_asset_id` required for `feeding` / forbidden for `waste`|`spoilage`, `409 insufficient_stock`, unit-match rule, immutable `material_asset_id`, reconcile-on-edit / reverse-on-delete, idempotency.
+- **Material purchase is the sole cost-basis entry point.** It emits `inventory`+ **and** `expense`, and establishes the average cost that values feed consumption. Stock added via a bare manual `inventory` event has no cost basis → `has_unvalued_consumption`. Documented reconcile/reverse and `409` guards.
+- **Material sale constraints documented**: unit-match, `409` on negative stock, create-only, `MaterialSaleRead = { inventory_event_id, income_event_id, on_hand }`.
+- **`profitability.net` scope limit made explicit**: R1's `net` counts only expense/income events on the asset, so consumed feed is structurally excluded. FE must not synthesize an all-in net client-side — use `profitability-full` instead.
+- **Source precedence noted**: `backend-docs/events-and-actions.md` lags the yaml specs (still says "the 11 actions", omits the pregnancy-check action). The `api/*.yaml` specs are authoritative.
 
 ### 2026-07-02
 
