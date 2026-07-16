@@ -117,7 +117,7 @@ export function FlockEventsSection({
 			</div>
 
 			{actions.isCreatingEvent ? (
-				<div className="mb-4 rounded-xl border border-(--v2-border) bg-white p-3">
+				<div className="mb-4 rounded-xl border border-(--v2-border) bg-(--v2-surface) p-3">
 					<UnitEventForm
 						categories={data.eventCategories}
 						individuals={data.allIndividuals}

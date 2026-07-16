@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Input } from "@/components/ui/input";
+import { SearchBar } from "@/components/common/search-bar";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
@@ -15,35 +15,9 @@ const SEX_SYMBOL: Record<string, string> = {
 	unknown: "–",
 };
 
-interface SpeciesSearchBarProps {
-	value: string;
-	onChange: (value: string) => void;
-}
-
-function SpeciesSearchBar({ value, onChange }: SpeciesSearchBarProps) {
-	return (
-		<div className="v2-card flex items-center gap-2 px-3 py-2.5">
-			<span
-				className="text-base"
-				aria-hidden="true"
-			>
-				🔍
-			</span>
-			<Input
-				type="search"
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				placeholder="Buscar por nombre o tag..."
-				className="h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
-				aria-label="Buscar individuos por nombre o tag"
-			/>
-		</div>
-	);
-}
-
 function SpeciesAnimalRow({ animal }: { animal: ILivestockIndividual }) {
 	return (
-		<div className="rounded-xl border border-[color:var(--v2-border)] bg-white p-3">
+		<div className="rounded-xl border border-(--v2-border) bg-(--v2-surface) p-3">
 			<div className="flex items-start justify-between gap-3">
 				<div className="min-w-0">
 					<p className="font-medium leading-tight">
@@ -170,9 +144,11 @@ export function LivestockSpeciesPage({
 				</div>
 			) : (
 				<>
-					<SpeciesSearchBar
+					<SearchBar
 						value={query}
 						onChange={setQuery}
+						placeholder="Buscar por nombre o tag..."
+						ariaLabel="Buscar individuos por nombre o tag"
 					/>
 
 					<div className="space-y-2">

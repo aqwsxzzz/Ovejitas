@@ -137,7 +137,7 @@ export function IndividualDetail({
 				</DialogContent>
 			</Dialog>
 			{/* Header */}
-			<div className="rounded-lg border border-border bg-white p-6">
+			<div className="rounded-lg border border-border bg-(--v2-surface) p-6">
 				<div className="flex items-start justify-between gap-4">
 					<div>
 						<h1 className="text-3xl font-bold">{individualLabel}</h1>
@@ -210,7 +210,7 @@ export function IndividualDetail({
 			</div>
 
 			{/* Genealogy Section */}
-			<div className="rounded-lg border border-border bg-white p-6">
+			<div className="rounded-lg border border-border bg-(--v2-surface) p-6">
 				<h2 className="mb-4 text-xl font-bold">Genealogia</h2>
 
 				{isEditingGenealogy ? (
@@ -240,7 +240,7 @@ export function IndividualDetail({
 
 			{/* Extra metadata (if any) */}
 			{Object.keys(individual.extra).length > 0 && (
-				<div className="rounded-lg border border-border bg-white p-6">
+				<div className="rounded-lg border border-border bg-(--v2-surface) p-6">
 					<h2 className="mb-4 text-xl font-bold">Metadatos</h2>
 					<div className="space-y-2">
 						{Object.entries(individual.extra).map(([key, value]) => (

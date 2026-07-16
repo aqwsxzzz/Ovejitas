@@ -565,7 +565,7 @@ export function FinanceDashboardShell({
 }: FinanceDashboardShellProps) {
 	return (
 		<div className="space-y-4 pb-6">
-			<section className="rounded-3xl border-0 bg-linear-to-br from-muted via-white to-success/10 p-5 shadow-sm">
+			<section className="v2-card p-5 md:p-6">
 				<div className="flex items-start justify-between gap-3">
 					<div>
 						<p className="v2-kicker">Finanzas</p>

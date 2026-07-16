@@ -98,7 +98,7 @@ export function EquipmentTimelinePanel({
 								setPage(1);
 							}}
 						>
-							<SelectTrigger className="h-7 rounded-full border-(--v2-border) bg-white px-3 text-xs font-medium">
+							<SelectTrigger className="h-7 rounded-full border-(--v2-border) px-3 text-xs font-medium">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -145,7 +145,7 @@ export function EquipmentTimelinePanel({
 			</div>
 
 			{isCreating ? (
-				<div className="mb-4 rounded-xl border border-(--v2-border) bg-white p-3">
+				<div className="mb-4 rounded-xl border border-(--v2-border) bg-(--v2-surface) p-3">
 					<EquipmentEventForm
 						categories={categoriesQuery.data ?? []}
 						isSubmitting={actions.isSubmitting}

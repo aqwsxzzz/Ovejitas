@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/common/empty-state";
 import { Input } from "@/components/ui/input";
 import { LoadingState } from "@/components/common/loading-state";
+import { SearchBar } from "@/components/common/search-bar";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
@@ -13,32 +14,6 @@ import {
 	useListLivestockAssetsByFarmId,
 	useUpdateLivestockAssetById,
 } from "@/features/livestock/api/livestock-queries";
-
-interface SearchBarProps {
-	value: string;
-	onChange: (value: string) => void;
-}
-
-function SearchBar({ value, onChange }: SearchBarProps) {
-	return (
-		<div className="flex items-center gap-2 rounded-xl border border-dashed border-(--v2-border) bg-white px-3 py-2.5">
-			<span
-				className="text-base"
-				aria-hidden="true"
-			>
-				🔍
-			</span>
-			<Input
-				type="search"
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				placeholder="Buscar material por nombre o ubicacion..."
-				className="h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
-				aria-label="Buscar materiales"
-			/>
-		</div>
-	);
-}
 
 function MaterialAssetRow(props: {
 	id: number;
@@ -324,6 +299,8 @@ export function InventoryPage() {
 			<SearchBar
 				value={query}
 				onChange={setQuery}
+				placeholder="Buscar material por nombre o ubicacion..."
+				ariaLabel="Buscar materiales"
 			/>
 
 			{isLoading ? (

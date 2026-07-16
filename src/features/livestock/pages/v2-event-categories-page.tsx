@@ -157,7 +157,7 @@ export function V2EventCategoriesPage() {
 									return (
 										<div
 											key={category.id}
-											className="rounded-lg border border-(--v2-border) bg-white p-3"
+											className="rounded-lg border border-(--v2-border) bg-(--v2-surface) p-3"
 										>
 											{isEditing ? (
 												<div className="space-y-2">
@@ -201,7 +201,7 @@ export function V2EventCategoriesPage() {
 											) : (
 												<div className="flex items-center gap-2">
 													<span
-														className="h-3 w-3 rounded-full border border-black/10"
+														className="h-3 w-3 rounded-full border border-(--v2-border)"
 														style={{
 															backgroundColor: category.color ?? "#8a8677",
 														}}

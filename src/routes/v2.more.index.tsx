@@ -90,7 +90,7 @@ function MorePage() {
 					<Link
 						key={view.to}
 						to={view.to}
-						className="group block rounded-3xl border border-black/5 bg-(--v2-paper) px-4 py-4 shadow-xs transition hover:-translate-y-px hover:shadow-sm"
+						className="group block rounded-3xl border border-(--v2-border) bg-(--v2-paper) px-4 py-4 shadow-xs transition hover:-translate-y-px hover:shadow-sm"
 					>
 						<div className="flex items-center gap-3">
 							<div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-(--v2-mint-100) text-(--v2-emerald-600)">
@@ -110,7 +110,7 @@ function MorePage() {
 										{view.badge}
 									</span>
 								) : null}
-								<ChevronRight className="h-4 w-4 text-black/25 transition group-hover:translate-x-0.5" />
+								<ChevronRight className="h-4 w-4 text-(--v2-ink-soft) transition group-hover:translate-x-0.5" />
 							</div>
 						</div>
 					</Link>

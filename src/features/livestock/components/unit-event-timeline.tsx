@@ -77,7 +77,7 @@ export function UnitEventTimeline({
 				return (
 					<article
 						key={event.id}
-						className="rounded-xl border border-(--v2-border) bg-white px-3 py-2"
+						className="rounded-xl border border-(--v2-border) bg-(--v2-surface) px-3 py-2"
 					>
 						<div className="flex items-center justify-between gap-2">
 							<p className="text-sm font-semibold leading-tight">
