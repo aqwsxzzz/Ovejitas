@@ -3,14 +3,19 @@ import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { Badge } from "@/components/ui/badge";
+import { useFarmCurrencyMap } from "@/features/currency/api/currency-queries";
+import { getCurrencyCode } from "@/features/currency/currency-utils";
+import { getEventTypeLabel } from "@/features/livestock/types/livestock-types";
 import { useGetTimelineReport } from "@/features/reports/api/reports-queries";
 import type { EventType } from "@/features/reports/types/reports-types";
+import { formatProductionQuantity } from "@/features/reports/utils/reports-format";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 interface IndividualTimelineReportProps {
 	farmId: string | number;
 	individualId?: number;
-	eventType: EventType;
+	/** Optional event-type filter; omit to show all event types. */
+	eventType?: EventType;
 	dateFrom?: string;
 	dateTo?: string;
 }
@@ -37,6 +42,9 @@ export const IndividualTimelineReport = ({
 	dateTo,
 }: IndividualTimelineReportProps) => {
 	const hasDateRangeFilter = !!dateFrom || !!dateTo;
+	const { data: currencyCodeById } = useFarmCurrencyMap({
+		farmId: String(farmId),
+	});
 
 	const {
 		data: report,
@@ -96,7 +104,9 @@ export const IndividualTimelineReport = ({
 											Evento #{eventItem.id}
 										</p>
 									</div>
-									<Badge variant="outline">{eventItem.type}</Badge>
+									<Badge variant="outline">
+									{getEventTypeLabel(eventItem.type)}
+								</Badge>
 								</div>
 								<div className="mt-2 text-sm text-muted-foreground">
 									{eventItem.notes || "Sin notas"}
@@ -104,12 +114,19 @@ export const IndividualTimelineReport = ({
 								<div className="mt-2 flex flex-wrap gap-2 text-xs">
 									{eventItem.quantity && eventItem.unit && (
 										<Badge variant="secondary">
-											{eventItem.quantity} {eventItem.unit}
+											{formatProductionQuantity(
+												eventItem.quantity,
+												eventItem.unit,
+											)}
 										</Badge>
 									)}
-									{eventItem.amount && eventItem.currency && (
+									{eventItem.amount != null && (
 										<Badge variant="secondary">
-											{eventItem.amount} {eventItem.currency}
+											{eventItem.amount}{" "}
+											{getCurrencyCode(
+												currencyCodeById,
+												eventItem.currency_id,
+											)}
 										</Badge>
 									)}
 								</div>

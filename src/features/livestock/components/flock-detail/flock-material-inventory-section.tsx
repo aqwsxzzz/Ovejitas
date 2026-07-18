@@ -50,7 +50,7 @@ export function FlockMaterialInventorySection({
 					{material.inventoryRows.map((row) => (
 						<div
 							key={`${row.asset_id}-${row.unit}`}
-							className="flex items-center justify-between rounded-lg border border-(--v2-border) bg-white px-3 py-2"
+							className="flex items-center justify-between rounded-lg border border-(--v2-border) bg-(--v2-surface) px-3 py-2"
 						>
 							<span className="text-sm font-medium">{row.unit}</span>
 							<span className="text-sm font-semibold">

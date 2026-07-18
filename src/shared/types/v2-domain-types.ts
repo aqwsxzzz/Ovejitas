@@ -206,27 +206,3 @@ export interface LivestockGroup {
 	attentionItems: LivestockIndividual[];
 	healthyItems: LivestockIndividual[];
 }
-
-export interface FlockRecentEvent {
-	id: string;
-	dateLabel: string;
-	title: string;
-	detail?: string;
-}
-
-export interface FlockDetailSnapshot {
-	unitId: string;
-	unitName: string;
-	breedLabel: string;
-	headCount: number;
-	capacity: number;
-	location?: string;
-	eggsLast7Days: number;
-	layRate: number;
-	dailyEggSeries: number[];
-	todayEggCount: number;
-	lossesLabel: string;
-	netMonth: number;
-	financeNote: string;
-	recentEvents: FlockRecentEvent[];
-}

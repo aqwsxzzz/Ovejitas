@@ -11,6 +11,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
+import { useFarmCurrencyMap } from "@/features/currency/api/currency-queries";
+
 import { UnitEventForm } from "../unit-event-form";
 import { UnitEventTimeline } from "../unit-event-timeline";
 import { isLivestockEventType } from "./flock-detail-types";
@@ -39,6 +41,7 @@ export function FlockEventsSection({
 }: FlockEventsSectionProps) {
 	const data = useFlockEventsData({ farmId, unitId, asset, eventTypeFilter });
 	const actions = useFlockEventActions({ farmId, unitId, asset });
+	const { data: currencyCodeById } = useFarmCurrencyMap({ farmId });
 	const isMaterialAsset = asset.kind === "material";
 
 	return (
@@ -117,8 +120,9 @@ export function FlockEventsSection({
 			</div>
 
 			{actions.isCreatingEvent ? (
-				<div className="mb-4 rounded-xl border border-(--v2-border) bg-white p-3">
+				<div className="mb-4 rounded-xl border border-(--v2-border) bg-(--v2-surface) p-3">
 					<UnitEventForm
+						farmId={farmId}
 						categories={data.eventCategories}
 						individuals={data.allIndividuals}
 						assetKind={asset.kind}
@@ -145,6 +149,7 @@ export function FlockEventsSection({
 				<UnitEventTimeline
 					events={data.visibleTimelineEvents}
 					categories={data.eventCategories}
+					currencyCodeById={currencyCodeById}
 					onEditEvent={
 						isMaterialAsset ? undefined : actions.handleStartEditEvent
 					}

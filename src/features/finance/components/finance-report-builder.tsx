@@ -7,7 +7,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { CoopProductivityReport } from "@/features/reports/components/coop-productivity-report";
+import { ProductionProductivityReport } from "@/features/reports/components/production-productivity-report";
 import { CostPerUnitReport } from "@/features/reports/components/cost-per-unit-report";
 import { ProductionReport } from "@/features/reports/components/production-report";
 import { ProfitabilityReport } from "@/features/reports/components/profitability-report";
@@ -25,7 +25,7 @@ const REPORT_OPTIONS: Array<{ value: FinanceReportType; label: string }> = [
 	{ value: "income-trend", label: "Ingresos por periodo" },
 	{ value: "expense-trend", label: "Gastos por periodo" },
 	{ value: "cost-per-unit", label: "Costo por unidad" },
-	{ value: "coop-productivity", label: "Productividad de gallineros" },
+	{ value: "production-productivity", label: "Productividad de producción" },
 	{ value: "sales-value", label: "Valor de venta por unidad" },
 ];
 
@@ -116,8 +116,8 @@ export const FinanceReportBuilder = ({
 					assetId={filters.assetId}
 				/>
 			)}
-			{reportType === "coop-productivity" && dateFrom && dateTo && (
-				<CoopProductivityReport
+			{reportType === "production-productivity" && dateFrom && dateTo && (
+				<ProductionProductivityReport
 					farmId={farmId}
 					dateFrom={dateFrom}
 					dateTo={dateTo}

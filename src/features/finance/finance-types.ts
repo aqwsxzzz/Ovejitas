@@ -14,7 +14,7 @@ export type FinanceReportType =
 	| "income-trend"
 	| "expense-trend"
 	| "cost-per-unit"
-	| "coop-productivity"
+	| "production-productivity"
 	| "sales-value";
 
 export interface FinanceFilters {

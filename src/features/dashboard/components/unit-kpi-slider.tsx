@@ -286,7 +286,7 @@ function UnitCard({ slice }: { slice: UnitDashboardSlice }) {
 						openDetail();
 					}
 				}}
-				className="flex cursor-pointer items-center gap-2 border-b border-(--v2-border) px-4 py-3 transition hover:bg-black/2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--v2-ink) focus-visible:ring-inset"
+				className="flex cursor-pointer items-center gap-2 border-b border-(--v2-border) px-4 py-3 transition hover:bg-(--v2-surface-raised) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--v2-ink) focus-visible:ring-inset"
 			>
 				<span
 					className="text-lg"

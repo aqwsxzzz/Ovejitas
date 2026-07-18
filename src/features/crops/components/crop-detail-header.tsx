@@ -34,8 +34,8 @@ export function CropDetailHeader({ asset, produceName }: CropDetailHeaderProps) 
 				</div>
 				<div className="flex items-center gap-2">
 					<h1
-						className="text-3xl font-bold leading-tight md:text-[2.35rem]"
-						style={{ color: "#006847", fontFamily: "var(--v2-font-display)" }}
+						className="text-3xl font-bold leading-tight text-(--v2-emerald-700) md:text-[2.35rem]"
+						style={{ fontFamily: "var(--v2-font-display)" }}
 					>
 						{asset.name}
 					</h1>

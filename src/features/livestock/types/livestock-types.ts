@@ -23,6 +23,27 @@ export type LivestockEventType =
 	| "mortality"
 	| "inventory";
 
+/** Canonical Spanish labels for event types (single source app-wide). */
+export const EVENT_TYPE_LABELS: Record<LivestockEventType, string> = {
+	production: "Producción",
+	expense: "Gasto",
+	income: "Ingreso",
+	observation: "Observación",
+	reproductive: "Reproductivo",
+	acquisition: "Adquisición",
+	mortality: "Mortalidad",
+	inventory: "Inventario",
+};
+
+/**
+ * Spanish label for an event type. Maps the "all" filter sentinel to "Todos"
+ * and falls back to the raw value for anything unrecognized.
+ */
+export function getEventTypeLabel(type: string): string {
+	if (type === "all") return "Todos";
+	return EVENT_TYPE_LABELS[type as LivestockEventType] ?? type;
+}
+
 export type InventoryAdjustment = "increment" | "decrement" | "reset";
 
 export type LivestockEventStatus = "logged" | "planned";
@@ -36,7 +57,6 @@ export interface ILivestockAsset {
 	location: string | null;
 	description: string | null;
 	produce_asset_id: number | null;
-	expected_eggs_per_head_per_day: string | null;
 	created_at: string;
 	updated_at: string;
 }
@@ -78,7 +98,7 @@ export interface ILivestockEvent {
 	quantity: string | null;
 	unit: LivestockEventUnit | null;
 	amount: string | null;
-	currency: string | null;
+	currency_id: number | null;
 	notes: string | null;
 	adjustment: InventoryAdjustment | null;
 	payload: Record<string, unknown>;
@@ -110,7 +130,7 @@ export interface IMaterialPurchaseRead {
 	quantity: string;
 	unit: LivestockEventUnit;
 	amount: string;
-	currency: string;
+	currency_id: number;
 	supplier: string | null;
 	notes: string | null;
 	meta: Record<string, unknown>;
@@ -155,6 +175,28 @@ export interface ILivestockPageMeta {
 export interface ILivestockAssetListResponse {
 	data: ILivestockAsset[];
 	meta: ILivestockPageMeta;
+}
+
+export interface IOffspringCreate {
+	tag: string;
+	name?: string | null;
+	birth_date?: string | null;
+	extra?: Record<string, unknown>;
+}
+
+export interface IBirthCreatePayload {
+	occurred_at?: string;
+	father_id?: number | null;
+	category_id?: number | null;
+	notes?: string | null;
+	outcome?: string | null;
+	offspring: IOffspringCreate[];
+}
+
+export interface IBirthRead {
+	reproductive_event_id: number;
+	mother_id: number;
+	offspring: ILivestockIndividual[];
 }
 
 export interface IAssetKindCount {

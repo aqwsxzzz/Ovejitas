@@ -16,7 +16,10 @@ import {
 	useListEventsByAssetId,
 	useListEventCategoriesByFarmId,
 } from "@/features/livestock/api/livestock-queries";
-import type { LivestockEventType } from "@/features/livestock/types/livestock-types";
+import {
+	getEventTypeLabel,
+	type LivestockEventType,
+} from "@/features/livestock/types/livestock-types";
 import {
 	formatDate,
 	getPayloadSource,
@@ -37,18 +40,6 @@ const EVENT_TYPE_FILTERS: EventFilter[] = [
 	"income",
 	"observation",
 ];
-
-const EVENT_TYPE_LABELS: Record<string, string> = {
-	all: "Todos",
-	expense: "Gasto",
-	income: "Ingreso",
-	observation: "Observación",
-	production: "Producción",
-	acquisition: "Adquisición",
-	mortality: "Mortalidad",
-	inventory: "Inventario",
-	reproductive: "Reproductivo",
-};
 
 const PAGE_SIZE = 20;
 
@@ -107,7 +98,7 @@ export function EquipmentTimelinePanel({
 								setPage(1);
 							}}
 						>
-							<SelectTrigger className="h-7 rounded-full border-(--v2-border) bg-white px-3 text-xs font-medium">
+							<SelectTrigger className="h-7 rounded-full border-(--v2-border) px-3 text-xs font-medium">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -116,7 +107,7 @@ export function EquipmentTimelinePanel({
 										key={type}
 										value={type}
 									>
-										{EVENT_TYPE_LABELS[type] ?? type}
+										{getEventTypeLabel(type)}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -154,8 +145,9 @@ export function EquipmentTimelinePanel({
 			</div>
 
 			{isCreating ? (
-				<div className="mb-4 rounded-xl border border-(--v2-border) bg-white p-3">
+				<div className="mb-4 rounded-xl border border-(--v2-border) bg-(--v2-surface) p-3">
 					<EquipmentEventForm
+						farmId={farmId}
 						categories={categoriesQuery.data ?? []}
 						isSubmitting={actions.isSubmitting}
 						errorMessage={actions.error}
@@ -183,7 +175,7 @@ export function EquipmentTimelinePanel({
 						className="rounded-lg border px-3 py-2 text-sm"
 					>
 						<p className="font-medium">
-							{EVENT_TYPE_LABELS[event.type] ?? event.type}
+							{getEventTypeLabel(event.type)}
 						</p>
 						<p className="text-(--v2-ink-soft)">
 							{formatDate(event.occurred_at)}

@@ -15,7 +15,7 @@ export function ManualFeedingStats({
 }: ManualFeedingStatsProps) {
 	return (
 		<div className="mt-3 grid gap-2 md:grid-cols-2">
-			<div className="rounded-lg border border-(--v2-border) bg-white px-3 py-2 text-sm">
+			<div className="rounded-lg border border-(--v2-border) bg-(--v2-surface) px-3 py-2 text-sm">
 				<p className="text-xs uppercase tracking-[0.08em] text-(--v2-ink-soft)">
 					Stock actual del material
 				</p>
@@ -29,7 +29,7 @@ export function ManualFeedingStats({
 						: "Selecciona un material"}
 				</p>
 			</div>
-			<div className="rounded-lg border border-(--v2-border) bg-white px-3 py-2 text-sm">
+			<div className="rounded-lg border border-(--v2-border) bg-(--v2-surface) px-3 py-2 text-sm">
 				<p className="text-xs uppercase tracking-[0.08em] text-(--v2-ink-soft)">
 					Consumo hoy (material/unidad seleccionados)
 				</p>

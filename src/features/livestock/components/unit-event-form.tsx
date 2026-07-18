@@ -13,6 +13,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
 import type {
 	ILivestockIndividual,
 	ILivestockEventCategory,
@@ -22,7 +24,15 @@ import type {
 	LivestockEventType,
 	LivestockEventUnit,
 } from "@/features/livestock/types/livestock-types";
-import { EVENT_UNITS_BY_DIMENSION } from "@/shared/types/unit-types";
+import {
+	EVENT_UNIT_LABELS,
+	EVENT_UNITS_BY_DIMENSION,
+} from "@/shared/types/unit-types";
+
+import {
+	EventCategorySelectField,
+	type CreateEventCategoryInput,
+} from "./event-category-select-field";
 
 export interface UnitEventFormData {
 	type: LivestockEventType;
@@ -33,21 +43,16 @@ export interface UnitEventFormData {
 	quantity?: number;
 	unit?: LivestockEventUnit;
 	amount?: number;
+	currencyId?: number;
 	adjustment?: "increment" | "decrement" | "reset";
 	notes?: string;
 }
 
-interface CreateEventCategoryInput {
-	type: LivestockEventType;
-	name: string;
-	color?: string;
-}
-
-const NEW_CATEGORY_OPTION_VALUE = "__new__";
 /** Radix Select forbids empty-string item values; use a sentinel for "none". */
 const NONE = "__none__";
 
 interface UnitEventFormProps {
+	farmId: string;
 	categories: ILivestockEventCategory[];
 	individuals: ILivestockIndividual[];
 	assetKind: LivestockAssetKind;
@@ -76,6 +81,7 @@ function supportsFinancialAmount(type: LivestockEventType): boolean {
 }
 
 export function UnitEventForm({
+	farmId,
 	categories,
 	individuals,
 	assetKind,
@@ -118,14 +124,17 @@ export function UnitEventForm({
 	const [amount, setAmount] = useState<string>(
 		initialValues?.amount != null ? String(initialValues.amount) : "",
 	);
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
+	const [currencyId, setCurrencyId] = useState<number | undefined>(
+		initialValues?.currencyId,
+	);
+	const selectedCurrencyId = currencyId ?? defaultCurrencyId;
 	const [adjustment, setAdjustment] = useState<
 		"increment" | "decrement" | "reset" | ""
 	>(initialValues?.adjustment ?? "");
 	const [notes, setNotes] = useState<string>(initialValues?.notes ?? "");
+	const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 	const [error, setError] = useState<string>("");
-	const [newCategoryName, setNewCategoryName] = useState<string>("");
-	const [newCategoryColor, setNewCategoryColor] = useState<string>("#f2df77");
-	const [isCreatingCategory, setIsCreatingCategory] = useState<boolean>(false);
 	const isEditMode = Boolean(initialValues);
 	const canSelectIndividual = assetMode === "individual";
 	const canUseReproductive = assetKind === "animal";
@@ -138,9 +147,6 @@ export function UnitEventForm({
 	);
 
 	const currentCategoryId = useMemo(() => {
-		if (categoryId === NEW_CATEGORY_OPTION_VALUE) {
-			return NEW_CATEGORY_OPTION_VALUE;
-		}
 		if (
 			availableCategories.some((category) => category.id === Number(categoryId))
 		) {
@@ -149,38 +155,14 @@ export function UnitEventForm({
 		return "";
 	}, [availableCategories, categoryId]);
 
-	const isCreatingNewCategory = currentCategoryId === NEW_CATEGORY_OPTION_VALUE;
-
-	const handleCreateCategory = async () => {
-		setError("");
-
-		if (!onCreateEventCategory) {
-			setError("No se pudo crear la categoria desde esta vista.");
-			return;
-		}
-
-		if (!newCategoryName.trim()) {
-			setError("Escribe un nombre para la nueva categoria.");
-			return;
-		}
-
-		setIsCreatingCategory(true);
-		try {
-			const createdCategoryId = await onCreateEventCategory({
-				type,
-				name: newCategoryName.trim(),
-				color: newCategoryColor,
-			});
-			setCategoryId(String(createdCategoryId));
-			setNewCategoryName("");
-		} finally {
-			setIsCreatingCategory(false);
-		}
-	};
-
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
 		setError("");
+
+		if (isCreatingCategory) {
+			setError("Termina de crear la categoria antes de guardar el evento.");
+			return;
+		}
 
 		if (type === "inventory" && !canUseInventory) {
 			setError(
@@ -209,18 +191,10 @@ export function UnitEventForm({
 			return;
 		}
 
-		if (
-			type === "production" &&
-			(!currentCategoryId || currentCategoryId === NEW_CATEGORY_OPTION_VALUE)
-		) {
+		if (type === "production" && !currentCategoryId) {
 			setError(
 				"Categoria es requerida para eventos de produccion. Crea o selecciona una para nombrar el producto.",
 			);
-			return;
-		}
-
-		if (currentCategoryId === NEW_CATEGORY_OPTION_VALUE) {
-			setError("Completa la creacion de la nueva categoria antes de guardar.");
 			return;
 		}
 
@@ -255,6 +229,8 @@ export function UnitEventForm({
 			quantity: quantity ? Number(quantity) : undefined,
 			unit,
 			amount: allowsFinancialAmount && amount ? Number(amount) : undefined,
+			currencyId:
+				allowsFinancialAmount && amount ? selectedCurrencyId : undefined,
 			adjustment:
 				type === "inventory" && adjustment
 					? (adjustment as "increment" | "decrement" | "reset")
@@ -303,84 +279,25 @@ export function UnitEventForm({
 				</Select>
 			</div>
 
-			<div className="space-y-1">
-				<Label>
-					Categoria {type === "production" ? "(requerida)" : "(opcional)"}
-				</Label>
-				<Select
-					value={currentCategoryId || undefined}
-					onValueChange={(value) =>
-						setCategoryId(value === NONE ? "" : value)
-					}
-				>
-					<SelectTrigger className="w-full">
-						<SelectValue
-							placeholder={
-								type === "production"
-									? "Selecciona categoria"
-									: "Sin categoria"
-							}
-						/>
-					</SelectTrigger>
-					<SelectContent>
-						{type !== "production" ? (
-							<SelectItem value={NONE}>Sin categoria</SelectItem>
-						) : null}
-						{availableCategories.map((category) => (
-							<SelectItem
-								key={category.id}
-								value={String(category.id)}
-							>
-								{category.name}
-							</SelectItem>
-						))}
-						<SelectItem value={NEW_CATEGORY_OPTION_VALUE}>
-							Nueva categoria
-						</SelectItem>
-					</SelectContent>
-				</Select>
-				{type === "production" ? (
-					<p className="text-xs text-muted-foreground">
-						Usa la categoria como nombre del producto (ej: huevos, leche, lana).
-					</p>
-				) : null}
-			</div>
-
-			{isCreatingNewCategory ? (
-				<div className="grid gap-2 rounded-lg border bg-muted/40 p-2">
-					<div className="space-y-1">
-						<Label htmlFor="new-category-name">Nombre de categoria</Label>
-						<Input
-							id="new-category-name"
-							type="text"
-							value={newCategoryName}
-							onChange={(event) => setNewCategoryName(event.target.value)}
-							placeholder="Ej: Huevos"
-						/>
-					</div>
-					<div className="space-y-1">
-						<Label htmlFor="new-category-color">Color</Label>
-						<Input
-							id="new-category-color"
-							type="color"
-							value={newCategoryColor}
-							onChange={(event) => setNewCategoryColor(event.target.value)}
-							className="h-10 px-1 py-1"
-						/>
-					</div>
-					<div className="flex justify-end">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={() => void handleCreateCategory()}
-							disabled={isCreatingCategory || isSubmitting}
-						>
-							{isCreatingCategory ? "Creando..." : "Crear categoria"}
-						</Button>
-					</div>
-				</div>
-			) : null}
+			<EventCategorySelectField
+				type={type}
+				categories={categories}
+				value={currentCategoryId}
+				onChange={setCategoryId}
+				label={`Categoria ${type === "production" ? "(requerida)" : "(opcional)"}`}
+				placeholder={
+					type === "production" ? "Selecciona categoria" : "Sin categoria"
+				}
+				allowNone={type !== "production"}
+				newOptionLabel="Nueva categoria"
+				onCreateEventCategory={onCreateEventCategory}
+				onCreatingChange={setIsCreatingCategory}
+				helperText={
+					type === "production"
+						? "Usa la categoria como nombre del producto (ej: huevos, leche, lana)."
+						: undefined
+				}
+			/>
 
 			{canSelectIndividual ? (
 				<div className="space-y-1">
@@ -459,7 +376,7 @@ export function UnitEventForm({
 										key={unitValue}
 										value={unitValue}
 									>
-										{unitValue}
+										{EVENT_UNIT_LABELS[unitValue]}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -470,7 +387,7 @@ export function UnitEventForm({
 										key={unitValue}
 										value={unitValue}
 									>
-										{unitValue}
+										{EVENT_UNIT_LABELS[unitValue]}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -481,7 +398,7 @@ export function UnitEventForm({
 										key={unitValue}
 										value={unitValue}
 									>
-										{unitValue}
+										{EVENT_UNIT_LABELS[unitValue]}
 									</SelectItem>
 								))}
 							</SelectGroup>
@@ -529,6 +446,13 @@ export function UnitEventForm({
 							onChange={(event) => setAmount(event.target.value)}
 						/>
 					</div>
+					<CurrencySelectField
+						farmId={farmId}
+						value={selectedCurrencyId}
+						onChange={setCurrencyId}
+						label={isEditMode ? "Moneda (no editable)" : "Moneda"}
+						disabled={isEditMode}
+					/>
 				</div>
 			) : null}
 
@@ -567,7 +491,7 @@ export function UnitEventForm({
 				<Button
 					type="submit"
 					variant="default"
-					disabled={isSubmitting}
+					disabled={isSubmitting || isCreatingCategory}
 				>
 					{isSubmitting
 						? "Guardando..."

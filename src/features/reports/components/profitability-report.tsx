@@ -5,6 +5,9 @@ import { LoadingState } from "@/components/common/loading-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGetProfitabilityReport } from "@/features/reports/api/reports-queries";
+import { getProfitabilityReportPdf } from "@/features/reports/api/reports-api";
+import { ReportPdfButton } from "@/features/reports/components/report-pdf-button";
+import { formatCurrency } from "@/features/reports/utils/reports-format";
 import { ApiRequestError } from "@/lib/axios/axios-helper";
 
 interface ProfitabilityReportProps {
@@ -17,19 +20,6 @@ interface ProfitabilityReportProps {
 const parseDecimal = (value: string | null | undefined): number => {
 	if (!value) return 0;
 	return parseFloat(value);
-};
-
-const formatCurrency = (value: number, currency: string): string => {
-	try {
-		return new Intl.NumberFormat(undefined, {
-			style: "currency",
-			currency,
-			minimumFractionDigits: 2,
-			maximumFractionDigits: 2,
-		}).format(value);
-	} catch {
-		return `${value.toFixed(2)} ${currency}`;
-	}
 };
 
 export const ProfitabilityReport = ({
@@ -99,8 +89,19 @@ export const ProfitabilityReport = ({
 
 	return (
 		<Card className="v2-card">
-			<CardHeader>
+			<CardHeader className="flex flex-row items-center justify-between gap-2">
 				<CardTitle className="text-lg">Rentabilidad por Activo</CardTitle>
+				<ReportPdfButton
+					filename="rentabilidad.pdf"
+					fetchPdf={() =>
+						getProfitabilityReportPdf({
+							farmId,
+							date_from: dateFrom,
+							date_to: dateTo,
+							asset_id: assetId,
+						}).then((response) => response.data)
+					}
+				/>
 			</CardHeader>
 			<CardContent>
 				{isPending ? (

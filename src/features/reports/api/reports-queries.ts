@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
 	getProfitabilityReport,
+	getProfitabilityFullReport,
 	getAggregateReport,
 	getCostPerUnitReport,
 	getTimelineReport,
@@ -9,11 +10,12 @@ import {
 	getProfitabilityReportPdf,
 	getCostPerUnitReportPdf,
 	getUpcomingBirthsReport,
-	getCoopProductivityReport,
+	getProductionProductivityReport,
 	getSalesValueReport,
 } from "@/features/reports/api/reports-api";
 import type {
 	IProfitabilityReportParams,
+	IProfitabilityFullReportParams,
 	IAggregateReportParams,
 	ICostPerUnitReportParams,
 	ITimelineReportParams,
@@ -21,7 +23,7 @@ import type {
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
 	IUpcomingBirthsReportParams,
-	ICoopProductivityReportParams,
+	IProductionProductivityReportParams,
 	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
 
@@ -65,6 +67,19 @@ export const reportsQueryKeys = {
 		[
 			...reportsQueryKeys.farm(farmId),
 			"profitability",
+			dateFrom ?? null,
+			dateTo ?? null,
+			assetId ?? null,
+		] as const,
+	profitabilityFull: (
+		farmId: string | number,
+		dateFrom?: string,
+		dateTo?: string,
+		assetId?: number,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"profitability-full",
 			dateFrom ?? null,
 			dateTo ?? null,
 			assetId ?? null,
@@ -146,14 +161,14 @@ export const reportsQueryKeys = {
 			dateFrom,
 			dateTo,
 		] as const,
-	coopProductivity: (
+	productionProductivity: (
 		farmId: string | number,
 		dateFrom: string,
 		dateTo: string,
 	) =>
 		[
 			...reportsQueryKeys.farm(farmId),
-			"coop-productivity",
+			"production-productivity",
 			dateFrom,
 			dateTo,
 		] as const,
@@ -205,6 +220,25 @@ export const useGetAggregateReport = (
 			params.group_by,
 		),
 		queryFn: () => getAggregateReport(params),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Get profitability-full report — income minus direct expense AND consumed feed.
+ * Use this for the all-in bottom line; plain `useGetProfitabilityReport` excludes feed.
+ */
+export const useGetProfitabilityFullReport = (
+	params: IProfitabilityFullReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.profitabilityFull(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+			params.asset_id,
+		),
+		queryFn: () => getProfitabilityFullReport(params),
 		enabled: enabled && !!params.farmId,
 	});
 
@@ -309,19 +343,20 @@ export const useGetUpcomingBirthsReport = (
 	});
 
 /**
- * Get coop productivity (eggs laid vs expected, required date window)
+ * Get production productivity (produced vs expected per asset × product,
+ * required date window)
  */
-export const useGetCoopProductivityReport = (
-	params: ICoopProductivityReportParams,
+export const useGetProductionProductivityReport = (
+	params: IProductionProductivityReportParams,
 	enabled = true,
 ) =>
 	useQuery({
-		queryKey: reportsQueryKeys.coopProductivity(
+		queryKey: reportsQueryKeys.productionProductivity(
 			params.farmId,
 			params.date_from,
 			params.date_to,
 		),
-		queryFn: () => getCoopProductivityReport(params),
+		queryFn: () => getProductionProductivityReport(params),
 		enabled:
 			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
 	});

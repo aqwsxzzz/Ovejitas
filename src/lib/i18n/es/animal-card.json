@@ -1,9 +1,0 @@
-{
-    "tagText": "Etiqueta #",
-    "statusOptions": {
-        "alive": "Vivo",
-        "deceased": "Fallecido",
-        "sold": "Vendido",
-        "unknown": "Desconocido"
-    }
-}

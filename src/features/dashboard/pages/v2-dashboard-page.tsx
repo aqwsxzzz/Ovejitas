@@ -36,11 +36,17 @@ function parseNumeric(value: string | null | undefined): number {
 	return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function formatMoneyCompact(value: number): string {
-	if (Math.abs(value) >= 1000) {
-		return `$${(value / 1000).toFixed(1)}k`;
+function formatMoneyCompact(value: number, currency: string): string {
+	try {
+		return new Intl.NumberFormat(undefined, {
+			style: "currency",
+			currency,
+			notation: "compact",
+			maximumFractionDigits: 1,
+		}).format(value);
+	} catch {
+		return `${value.toFixed(2)} ${currency}`;
 	}
-	return `$${value.toFixed(2)}`;
 }
 
 type StockItem = { unit: string; onHand: number };
@@ -69,6 +75,30 @@ function buildInventoryKpi(
 	};
 }
 
+type AssetNet = { currency: string; net: number };
+
+/**
+ * Net KPI per currency — one swipeable slide per currency the asset has events
+ * in. Currencies are never summed; a single currency renders as one value.
+ */
+function buildNetKpi(entries: AssetNet[] | undefined): Omit<UnitKpiCard, "label"> {
+	if (!entries || entries.length === 0) {
+		return { value: "Sin dato", sub: "Sin movimientos" };
+	}
+	if (entries.length === 1) {
+		const entry = entries[0]!;
+		return {
+			value: formatMoneyCompact(entry.net, entry.currency),
+			sub: "Mes actual",
+		};
+	}
+	const slides: UnitKpiSlide[] = entries.map((entry) => ({
+		unit: entry.currency,
+		value: formatMoneyCompact(entry.net, entry.currency),
+	}));
+	return { value: slides[0]!.value, slides, sub: "Mes actual" };
+}
+
 interface ProductionUnitData {
 	/** Human-readable label for the slide (e.g. "kg" or "kg · 3") */
 	label: string;
@@ -90,13 +120,12 @@ function mapAssetToSlice(
 	context: {
 		aggregatedAnimalsByAssetId: Map<number, number>;
 		productionByAssetAndUnit: Map<number, Map<string, ProductionUnitData>>;
-		netByAssetId: Map<number, number>;
+		netByAssetId: Map<number, AssetNet[]>;
 		inventoryByAssetId: Map<number, StockItem[]>;
 		individualCountByAssetId: Map<number, number>;
 		categoryNameById: Map<number, string>;
 	},
 ): UnitDashboardSlice {
-	const netValue = context.netByAssetId.get(asset.id) ?? 0;
 	const inventoryItems = context.inventoryByAssetId.get(asset.id);
 
 	const animalsValue =
@@ -150,8 +179,7 @@ function mapAssetToSlice(
 			},
 			{
 				label: "Neto",
-				value: formatMoneyCompact(netValue),
-				sub: "Mes actual",
+				...buildNetKpi(context.netByAssetId.get(asset.id)),
 			},
 			{
 				label: "Alimento",
@@ -287,9 +315,11 @@ export function V2DashboardPage() {
 	});
 
 	const netByAssetId = useMemo(() => {
-		const byAssetId = new Map<number, number>();
+		const byAssetId = new Map<number, AssetNet[]>();
 		for (const row of profitabilityReport?.data ?? []) {
-			byAssetId.set(row.asset_id, parseNumeric(row.net));
+			const list = byAssetId.get(row.asset_id) ?? [];
+			list.push({ currency: row.currency, net: parseNumeric(row.net) });
+			byAssetId.set(row.asset_id, list);
 		}
 		return byAssetId;
 	}, [profitabilityReport]);

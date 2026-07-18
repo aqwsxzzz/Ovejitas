@@ -16,6 +16,7 @@ import {
 	useGetV1FarmById,
 	useUpdateV1FarmById,
 } from "@/features/farm/api/farm-queries";
+import { CurrencyManagementSection } from "@/features/currency/components/currency-management-section";
 import { CURRENCY_OPTIONS } from "@/features/farm/constants/currency-options";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 
@@ -105,7 +106,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 						/>
 					</div>
 					<div className="space-y-1">
-						<Label>Moneda</Label>
+						<Label>Moneda predeterminada</Label>
 						<Select
 							value={currentCurrency || undefined}
 							disabled={!isOwner}
@@ -130,6 +131,11 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 					</div>
 				</CardContent>
 			</Card>
+
+			<CurrencyManagementSection
+				farmId={farmId}
+				disabled={!isOwner}
+			/>
 
 			<div className="flex items-center gap-2">
 				<Button

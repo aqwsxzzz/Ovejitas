@@ -78,6 +78,94 @@
   --v2-danger: #b91c1c;
 }
 
+/* Dark override — mirrors the Chrome auto-dark look the shadcn .dark block
+   targets. Light surfaces (bg/creams/mints/paper) collapse to near-black
+   elevated surfaces; ink/navy/slate/charcoal text lightens to off-white;
+   brand teals/forests/emeralds brighten so they stay legible on dark. */
+.dark {
+  /* Structural */
+  --v2-ink: oklch(0.95 0.005 220);
+  --v2-ink-soft: oklch(0.72 0.015 220);
+  --v2-bg: oklch(0.15 0.006 155);
+  --v2-surface: oklch(0.205 0.008 155);
+  --v2-surface-raised: oklch(0.245 0.010 155);
+  --v2-primary: oklch(0.65 0.15 152);
+  --v2-accent: oklch(0.74 0.15 62);
+  --v2-border: oklch(0.28 0.008 155);
+  --v2-shadow: 0 8px 28px -16px hsl(150 40% 3% / 0.6);
+  /* Preserve the light gradient's hue spread (green 150 → olive 66 → red ~6)
+     but darkened — so a green tint and a warm-red tint bleed through the black,
+     matching Chrome's inverted gradient instead of collapsing to flat black. */
+  --v2-gradient: radial-gradient(circle at 15% 15%, hsl(150 42% 14%) 0%, hsl(70 22% 10%) 42%, hsl(6 40% 10%) 100%);
+
+  /* Surfaces & creams → dark elevated */
+  --v2-cream: oklch(0.205 0.008 155);
+  --v2-cream-50: oklch(0.190 0.007 155);
+  --v2-cream-100: oklch(0.185 0.006 155);
+  --v2-cream-200: oklch(0.210 0.008 155);
+  --v2-cream-300: oklch(0.215 0.008 155);
+  --v2-cream-400: oklch(0.220 0.008 155);
+  --v2-cream-500: oklch(0.225 0.008 155);
+  --v2-paper: oklch(0.200 0.007 155);
+  --v2-overlay: hsl(150 12% 7% / 0.85);
+
+  /* Mints & sages → dark green-tinted surfaces */
+  --v2-mint-50: oklch(0.210 0.012 155);
+  --v2-mint-100: oklch(0.240 0.020 155);
+  --v2-mint-200: oklch(0.270 0.025 155);
+  --v2-sage-50: oklch(0.230 0.015 150);
+
+  /* Sand & gold */
+  --v2-sand: oklch(0.30 0.03 75);
+  --v2-gold-soft: oklch(0.80 0.12 85);
+  --v2-gold: oklch(0.75 0.15 70);
+
+  /* Borders / cool grays → dark */
+  --v2-border-cool: oklch(0.30 0.008 220);
+  --v2-border-mint: oklch(0.30 0.012 155);
+  --v2-border-sage: oklch(0.30 0.012 150);
+  --v2-border-sage-2: oklch(0.32 0.012 150);
+  --v2-ring-mint: oklch(0.35 0.020 155);
+  --v2-gray-200: oklch(0.30 0.005 220);
+  --v2-gray-300: oklch(0.33 0.005 220);
+
+  /* Inks (warm near-black text) → off-white */
+  --v2-charcoal: oklch(0.94 0.004 90);
+  --v2-charcoal-90: oklch(0.92 0.004 90);
+
+  /* Slate / muted text → light muted */
+  --v2-slate: oklch(0.72 0.020 250);
+  --v2-slate-400: oklch(0.70 0.020 220);
+  --v2-slate-500: oklch(0.72 0.025 220);
+  --v2-slate-600: oklch(0.74 0.030 230);
+  --v2-slate-700: oklch(0.80 0.010 220);
+  --v2-stone: oklch(0.74 0.010 90);
+
+  /* Navy headings → light */
+  --v2-navy: oklch(0.90 0.020 250);
+  --v2-navy-700: oklch(0.85 0.040 220);
+  --v2-navy-800: oklch(0.86 0.050 220);
+  --v2-navy-900: oklch(0.88 0.050 225);
+  --v2-teal-600: oklch(0.75 0.060 200);
+
+  /* Teals & forest greens (brand) → brightened */
+  --v2-teal-700: oklch(0.72 0.090 195);
+  --v2-teal-900: oklch(0.70 0.090 195);
+  --v2-emerald-600: oklch(0.72 0.110 160);
+  --v2-emerald-700: oklch(0.70 0.120 160);
+  --v2-forest-600: oklch(0.74 0.080 155);
+  --v2-forest-700: oklch(0.72 0.100 155);
+  --v2-forest-800: oklch(0.70 0.110 155);
+  --v2-forest-900: oklch(0.68 0.110 155);
+
+  /* Browns → light warm */
+  --v2-brown: oklch(0.76 0.060 75);
+  --v2-brown-900: oklch(0.72 0.070 60);
+
+  /* Danger */
+  --v2-danger: oklch(0.64 0.20 25);
+}
+
 .v2-page {
   min-height: 100dvh;
   background: var(--v2-gradient);

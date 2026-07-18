@@ -8,12 +8,12 @@ import { CreateMaterialAssetDialog } from "@/features/livestock/components/creat
 import { CreateCropAssetDialog } from "@/features/crops/components/create-crop-asset-dialog";
 import { CreateEquipmentAssetDialog } from "@/features/equipment/components/create-equipment-asset-dialog";
 import { CreateLocationAssetDialog } from "@/features/location/components/create-location-asset-dialog";
-import { LivestockAssetSearchBar } from "@/features/livestock/components/livestock-asset-search-bar";
 import { LivestockUnitRow } from "@/features/livestock/components/livestock-unit-row";
 import { useLivestockAssetEdit } from "@/features/livestock/components/use-livestock-asset-edit";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
+import { SearchBar } from "@/components/common/search-bar";
 import { useListLivestockAssetsByFarmId } from "@/features/livestock/api/livestock-queries";
 import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
@@ -111,7 +111,7 @@ export function LivestockKindPage({
 				) : null}
 			</div>
 
-			<LivestockAssetSearchBar
+			<SearchBar
 				value={query}
 				onChange={setQuery}
 				placeholder={`Buscar ${activeKindMeta.title.toLowerCase()} por nombre o ubicacion...`}

@@ -89,6 +89,7 @@ export function CropDetailPage({ cropId }: CropDetailPageProps) {
 					</CardHeader>
 					<CardContent>
 						<CropExpenseForm
+							farmId={data.farmId}
 							categories={data.categories.map((cat) => ({
 								id: cat.id,
 								name: cat.name,
