@@ -6,6 +6,7 @@ import {
 	useCreateFlockSaleByAssetId,
 	useGetAggregatedHeadcountByAssetId,
 } from "@/features/livestock/api/livestock-queries";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
 
 import {
 	isBackdatedDraft,
@@ -41,6 +42,10 @@ export interface UseFlockHeadcountAdjustmentResult {
 	todayValue: string;
 	headcountDeltaPreview: number | null;
 	pendingKind: FlockMovementKind | null;
+	/** Farm scope for the currency picker. */
+	farmId: string;
+	/** Sticky/default currency to preselect when the draft has none. */
+	defaultCurrencyId: number | undefined;
 	openHeadcountAdjustment: () => void;
 	closeHeadcountAdjustment: () => void;
 	handleApplyHeadcountAdjustment: () => Promise<void>;
@@ -64,6 +69,7 @@ export function useFlockHeadcountAdjustment({
 	const createFlockAcquisitionMutation = useCreateFlockAcquisitionByAssetId();
 	const createFlockSaleMutation = useCreateFlockSaleByAssetId();
 	const createFlockMortalityMutation = useCreateFlockMortalityByAssetId();
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
 
 	const aggregatedActiveCount = aggregatedHeadcount?.net ?? 0;
 	const todayValue = toDateInputValue(new Date());
@@ -96,7 +102,11 @@ export function useFlockHeadcountAdjustment({
 	}, []);
 
 	const submitMovement = useCallback(
-		async (movement: FlockMovement, occurredAt: string) => {
+		async (
+			movement: FlockMovement,
+			occurredAt: string,
+			currencyId: number | undefined,
+		) => {
 			const target = { farmId, assetId: unitId };
 			switch (movement.kind) {
 				case "acquisition":
@@ -106,6 +116,7 @@ export function useFlockHeadcountAdjustment({
 							occurred_at: occurredAt,
 							quantity: movement.quantity,
 							amount: movement.amount,
+							currency_id: movement.amount != null ? currencyId : undefined,
 						},
 					});
 					return;
@@ -116,6 +127,7 @@ export function useFlockHeadcountAdjustment({
 							occurred_at: occurredAt,
 							quantity: movement.quantity,
 							amount: movement.amount,
+							currency_id: currencyId,
 						},
 					});
 					return;
@@ -163,7 +175,11 @@ export function useFlockHeadcountAdjustment({
 		if (result.status === "noop") return closeHeadcountAdjustment();
 
 		setHeadcountError("");
-		await submitMovement(result.movement, occurredAt.toISOString());
+		await submitMovement(
+			result.movement,
+			occurredAt.toISOString(),
+			drafts.currencyId ?? defaultCurrencyId,
+		);
 		closeHeadcountAdjustment();
 	}, [
 		drafts,
@@ -171,6 +187,7 @@ export function useFlockHeadcountAdjustment({
 		aggregatedActiveCount,
 		submitMovement,
 		closeHeadcountAdjustment,
+		defaultCurrencyId,
 	]);
 
 	return {
@@ -184,6 +201,8 @@ export function useFlockHeadcountAdjustment({
 		todayValue,
 		headcountDeltaPreview,
 		pendingKind,
+		farmId,
+		defaultCurrencyId,
 		openHeadcountAdjustment,
 		closeHeadcountAdjustment,
 		handleApplyHeadcountAdjustment,

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
 import { useUpdateIndividual } from "@/features/livestock/api/livestock-queries";
 
 interface IndividualLifecycleActionsProps {
@@ -24,6 +26,9 @@ export function IndividualLifecycleActions({
 		new Date().toISOString().slice(0, 16),
 	);
 	const [saleAmount, setSaleAmount] = useState("");
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
+	const [currencyId, setCurrencyId] = useState<number | undefined>(undefined);
+	const selectedCurrencyId = currencyId ?? defaultCurrencyId;
 	const [buyer, setBuyer] = useState("");
 	const [cause, setCause] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -52,6 +57,7 @@ export function IndividualLifecycleActions({
 			data: {
 				status: "sold",
 				sale_amount: amount,
+				currency_id: selectedCurrencyId ?? null,
 				buyer: buyer.trim() || null,
 				sold_at: occurredAt ? new Date(occurredAt).toISOString() : null,
 			},
@@ -133,6 +139,11 @@ export function IndividualLifecycleActions({
 										onChange={(event) => setBuyer(event.target.value)}
 									/>
 								</div>
+								<CurrencySelectField
+									farmId={farmId}
+									value={selectedCurrencyId}
+									onChange={setCurrencyId}
+								/>
 							</div>
 						) : (
 							<div className="space-y-1.5">

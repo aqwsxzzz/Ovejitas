@@ -12,6 +12,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useFarmCurrencyMap } from "@/features/currency/api/currency-queries";
+import { getCurrencyCode } from "@/features/currency/currency-utils";
 import { useListEventsByAssetId } from "@/features/livestock/api/livestock-queries";
 import {
 	getEventTypeLabel,
@@ -43,6 +45,7 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 	const [typeFilter, setTypeFilter] = useState<"all" | LivestockEventType>(
 		"all",
 	);
+	const { data: currencyCodeById } = useFarmCurrencyMap({ farmId });
 
 	const eventsQuery = useListEventsByAssetId({
 		farmId,
@@ -126,9 +129,10 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 									{event.quantity} {event.unit}
 								</p>
 							) : null}
-							{event.amount && event.currency ? (
+							{event.amount != null ? (
 								<p className="mt-0.5 text-(--v2-ink-soft)">
-									{event.amount} {event.currency}
+									{event.amount}{" "}
+									{getCurrencyCode(currencyCodeById, event.currency_id)}
 								</p>
 							) : null}
 							{event.notes ? (

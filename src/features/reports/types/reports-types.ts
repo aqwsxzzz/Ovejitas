@@ -32,16 +32,16 @@ export interface IProfitabilityReport {
 /**
  * Profitability Full — income minus TOTAL cost (direct expense + consumed feed).
  * `net_incl_materials` is the all-in bottom line; `net` (income − direct expense)
- * is retained from R1 for backward compatibility.
+ * is retained from R1.
  *
- * Rows are in the farm's DEFAULT currency only. Income/expense booked in another
- * currency is EXCLUDED from the row and flagged via `has_other_currency` — surface
- * that flag or the number understates reality.
+ * One row per (asset, currency) — feed is valued in the currency of the purchases
+ * backing it, never converted or summed across currencies. `currency` is null for
+ * an asset whose only activity is genuinely unpriced feed (`has_unvalued_consumption`).
  */
 export interface IProfitabilityFullRow {
 	asset_id: number;
 	asset_name: string;
-	currency: string;
+	currency: string | null;
 	income_total: string;
 	direct_expense_total: string;
 	consumed_material_cost: string;
@@ -49,7 +49,6 @@ export interface IProfitabilityFullRow {
 	net: string;
 	net_incl_materials: string;
 	has_unvalued_consumption: boolean;
-	has_other_currency: boolean;
 }
 
 export interface IProfitabilityFullTotal {
@@ -126,7 +125,7 @@ export interface IMaterialConsumptionAggregateReport {
 export interface ICostPerUnitRow {
 	asset_id: number;
 	asset_name: string;
-	currency: string;
+	currency: string | null;
 	production_quantity: string;
 	direct_expense_total: string;
 	consumed_material_cost: string;
@@ -152,7 +151,7 @@ export interface IEventRead {
 	quantity: string | null;
 	unit: Unit | null;
 	amount: string | null;
-	currency: string | null;
+	currency_id: number | null;
 	adjustment: InventoryAdjustment | null;
 	notes: string | null;
 	payload: Record<string, unknown>;

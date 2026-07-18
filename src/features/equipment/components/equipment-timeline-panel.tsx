@@ -147,6 +147,7 @@ export function EquipmentTimelinePanel({
 			{isCreating ? (
 				<div className="mb-4 rounded-xl border border-(--v2-border) bg-(--v2-surface) p-3">
 					<EquipmentEventForm
+						farmId={farmId}
 						categories={categoriesQuery.data ?? []}
 						isSubmitting={actions.isSubmitting}
 						errorMessage={actions.error}

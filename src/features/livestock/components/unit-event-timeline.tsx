@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { getCurrencyCode } from "@/features/currency/currency-utils";
 import {
 	getEventTypeLabel,
 	type ILivestockEvent,
@@ -9,6 +10,7 @@ import { formatProductionQuantity } from "@/features/reports/utils/reports-forma
 interface UnitEventTimelineProps {
 	events: ILivestockEvent[];
 	categories: ILivestockEventCategory[];
+	currencyCodeById?: Map<number, string>;
 	onEditEvent?: (event: ILivestockEvent) => void;
 	onDeleteEvent?: (event: ILivestockEvent) => Promise<void>;
 	deletingEventId?: number | null;
@@ -55,6 +57,7 @@ function getEventStatus(event: ILivestockEvent): "logged" | "planned" {
 export function UnitEventTimeline({
 	events,
 	categories,
+	currencyCodeById,
 	onEditEvent,
 	onDeleteEvent,
 	deletingEventId,
@@ -110,7 +113,8 @@ export function UnitEventTimeline({
 							) : null}
 							{event.amount != null ? (
 								<span>
-									Monto: ${Number(event.amount)} {event.currency ?? ""}
+									Monto: ${Number(event.amount)}{" "}
+									{getCurrencyCode(currencyCodeById, event.currency_id)}
 								</span>
 							) : null}
 						</div>

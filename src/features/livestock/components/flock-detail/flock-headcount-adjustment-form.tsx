@@ -98,6 +98,9 @@ export function FlockHeadcountAdjustmentForm({
 				pendingKind={adjustment.pendingKind}
 				amount={drafts.amount}
 				onAmountChange={(amount) => patchDrafts({ amount })}
+				farmId={adjustment.farmId}
+				currencyId={drafts.currencyId ?? adjustment.defaultCurrencyId}
+				onCurrencyChange={(currencyId) => patchDrafts({ currencyId })}
 			/>
 
 			{adjustment.headcountError ? (

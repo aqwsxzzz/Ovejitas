@@ -14,6 +14,8 @@ export interface FlockHeadcountDrafts {
 	/** Movement quantity — used for backdated entries. */
 	quantity: string;
 	amount: string;
+	/** Currency for the paired expense/income; unset until picked (uses default). */
+	currencyId?: number;
 	decreaseMode: FlockDecreaseKind;
 	movementType: FlockMovementKind;
 }

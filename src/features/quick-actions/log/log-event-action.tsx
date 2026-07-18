@@ -92,6 +92,7 @@ export function LogEventAction({
 
 			{assetId && assetQuery.data ? (
 				<UnitEventForm
+					farmId={farmId}
 					categories={categoriesQuery.data ?? []}
 					individuals={individualsQuery.data?.data ?? []}
 					assetKind={assetQuery.data.kind}

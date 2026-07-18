@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
 
 import type { FlockMovementKind } from "./flock-headcount-movement";
 
@@ -7,6 +8,9 @@ interface FlockHeadcountAmountFieldProps {
 	pendingKind: FlockMovementKind | null;
 	amount: string;
 	onAmountChange: (value: string) => void;
+	farmId: string;
+	currencyId: number | undefined;
+	onCurrencyChange: (currencyId: number) => void;
 }
 
 /** Money field for the movement the drafts currently resolve to; mortality has none. */
@@ -14,6 +18,9 @@ export function FlockHeadcountAmountField({
 	pendingKind,
 	amount,
 	onAmountChange,
+	farmId,
+	currencyId,
+	onCurrencyChange,
 }: FlockHeadcountAmountFieldProps) {
 	if (pendingKind == null || pendingKind === "mortality") return null;
 
@@ -38,6 +45,11 @@ export function FlockHeadcountAmountField({
 					placeholder={isSale ? "Ej: 250.00" : "Ej: 125.50"}
 				/>
 			</div>
+			<CurrencySelectField
+				farmId={farmId}
+				value={currencyId}
+				onChange={onCurrencyChange}
+			/>
 		</div>
 	);
 }

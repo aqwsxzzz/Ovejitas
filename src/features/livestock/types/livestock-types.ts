@@ -98,7 +98,7 @@ export interface ILivestockEvent {
 	quantity: string | null;
 	unit: LivestockEventUnit | null;
 	amount: string | null;
-	currency: string | null;
+	currency_id: number | null;
 	notes: string | null;
 	adjustment: InventoryAdjustment | null;
 	payload: Record<string, unknown>;
@@ -130,7 +130,7 @@ export interface IMaterialPurchaseRead {
 	quantity: string;
 	unit: LivestockEventUnit;
 	amount: string;
-	currency: string;
+	currency_id: number;
 	supplier: string | null;
 	notes: string | null;
 	meta: Record<string, unknown>;

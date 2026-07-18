@@ -13,6 +13,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
 import type {
 	ILivestockIndividual,
 	ILivestockEventCategory,
@@ -41,6 +43,7 @@ export interface UnitEventFormData {
 	quantity?: number;
 	unit?: LivestockEventUnit;
 	amount?: number;
+	currencyId?: number;
 	adjustment?: "increment" | "decrement" | "reset";
 	notes?: string;
 }
@@ -49,6 +52,7 @@ export interface UnitEventFormData {
 const NONE = "__none__";
 
 interface UnitEventFormProps {
+	farmId: string;
 	categories: ILivestockEventCategory[];
 	individuals: ILivestockIndividual[];
 	assetKind: LivestockAssetKind;
@@ -77,6 +81,7 @@ function supportsFinancialAmount(type: LivestockEventType): boolean {
 }
 
 export function UnitEventForm({
+	farmId,
 	categories,
 	individuals,
 	assetKind,
@@ -119,6 +124,11 @@ export function UnitEventForm({
 	const [amount, setAmount] = useState<string>(
 		initialValues?.amount != null ? String(initialValues.amount) : "",
 	);
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
+	const [currencyId, setCurrencyId] = useState<number | undefined>(
+		initialValues?.currencyId,
+	);
+	const selectedCurrencyId = currencyId ?? defaultCurrencyId;
 	const [adjustment, setAdjustment] = useState<
 		"increment" | "decrement" | "reset" | ""
 	>(initialValues?.adjustment ?? "");
@@ -219,6 +229,8 @@ export function UnitEventForm({
 			quantity: quantity ? Number(quantity) : undefined,
 			unit,
 			amount: allowsFinancialAmount && amount ? Number(amount) : undefined,
+			currencyId:
+				allowsFinancialAmount && amount ? selectedCurrencyId : undefined,
 			adjustment:
 				type === "inventory" && adjustment
 					? (adjustment as "increment" | "decrement" | "reset")
@@ -434,6 +446,13 @@ export function UnitEventForm({
 							onChange={(event) => setAmount(event.target.value)}
 						/>
 					</div>
+					<CurrencySelectField
+						farmId={farmId}
+						value={selectedCurrencyId}
+						onChange={setCurrencyId}
+						label={isEditMode ? "Moneda (no editable)" : "Moneda"}
+						disabled={isEditMode}
+					/>
 				</div>
 			) : null}
 

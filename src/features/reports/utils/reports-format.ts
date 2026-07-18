@@ -36,13 +36,22 @@ export const formatProductionQuantity = (
 	return unit ? `${formatted} ${EVENT_UNIT_LABELS[unit]}` : formatted;
 };
 
-/** Format a monetary value in its currency, or "—" when unavailable. */
+/**
+ * Format a monetary value in its currency, or "—" when unavailable. A null
+ * currency (e.g. unpriced feed with no ledger currency) renders as a plain number.
+ */
 export const formatCurrency = (
 	value: string | number | null,
-	currency: string,
+	currency: string | null,
 ): string => {
 	const parsed = toNumber(value);
 	if (!Number.isFinite(parsed)) return "—";
+	if (!currency) {
+		return new Intl.NumberFormat(undefined, {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		}).format(parsed);
+	}
 	try {
 		return new Intl.NumberFormat(undefined, {
 			style: "currency",

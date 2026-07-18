@@ -1,15 +1,14 @@
 import { useMemo } from "react";
+import { Loader2 } from "lucide-react";
 
-import {
-	MetricBreakdownCard,
-	type MetricBreakdownRow,
-} from "@/components/common/metric-breakdown-card";
 import {
 	PeriodSelect,
 	useReportPeriod,
 } from "@/features/reports/components/report-period-select";
 import { useGetProfitabilityFullReport } from "@/features/reports/api/reports-queries";
-import { formatCurrency } from "@/features/reports/utils/reports-format";
+
+import { CurrencyNetBlock } from "./currency-net-block";
+import { buildCurrencyNetEntries } from "./flock-net-entries";
 
 interface FlockNetMetricCardProps {
 	farmId: string;
@@ -17,6 +16,11 @@ interface FlockNetMetricCardProps {
 	isMaterialAsset: boolean;
 }
 
+/**
+ * Per-currency net for an asset. Each currency with activity gets its own block —
+ * income, direct expense, feed, and feed-inclusive net, all in that currency.
+ * Currencies are never summed together.
+ */
 export function FlockNetMetricCard({
 	farmId,
 	assetId,
@@ -27,67 +31,52 @@ export function FlockNetMetricCard({
 
 	const { data: report, isPending } = useGetProfitabilityFullReport({
 		farmId,
+		asset_id: assetId,
 		date_from: date_from.slice(0, 10),
 		date_to: date_to.slice(0, 10),
-		asset_id: assetId,
 	});
 
-	const row = useMemo(
-		() => report?.data.find((item) => item.asset_id === assetId) ?? null,
+	const entries = useMemo(
+		() =>
+			buildCurrencyNetEntries(
+				(report?.data ?? []).filter((row) => row.asset_id === assetId),
+			),
 		[report, assetId],
 	);
 
-	const breakdown = useMemo<MetricBreakdownRow[]>(() => {
-		if (!row) return [];
-		const rows: MetricBreakdownRow[] = [
-			{
-				label: "Ingresos",
-				value: formatCurrency(row.income_total, row.currency),
-				tone: "positive",
-			},
-			{
-				label: "Gasto directo",
-				value: formatCurrency(row.direct_expense_total, row.currency),
-				tone: "negative",
-			},
-		];
-		if (!isMaterialAsset) {
-			rows.push({
-				label: "Alimento",
-				value: formatCurrency(row.consumed_material_cost, row.currency),
-				tone: "negative",
-			});
-		}
-		return rows;
-	}, [row, isMaterialAsset]);
-
-	const footnotes = useMemo(() => {
-		if (!row) return ["Sin movimientos financieros en el periodo."];
-		const notes: string[] = [];
-		if (!isMaterialAsset) {
-			notes.push("Neto incluye el alimento consumido.");
-		}
-		if (row.has_unvalued_consumption) {
-			notes.push(
-				"Alimento sin costo registrado: el neto puede estar sobrestimado.",
-			);
-		}
-		if (row.has_other_currency) {
-			notes.push("Excluye montos en otra moneda.");
-		}
-		return notes;
-	}, [row, isMaterialAsset]);
-
 	return (
-		<MetricBreakdownCard
-			label={isMaterialAsset ? "Valor neto" : "Neto real"}
-			value={row ? formatCurrency(row.net_incl_materials, row.currency) : "—"}
-			isLoading={isPending}
-			action={
-				<PeriodSelect value={selectedDays} onValueChange={setSelectedDays} />
-			}
-			breakdown={breakdown}
-			footnotes={footnotes}
-		/>
+		<div className="v2-card flex-1 p-3">
+			<div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+				<p className="text-[10px] uppercase tracking-[0.08em] text-(--v2-ink-soft)">
+					{isMaterialAsset ? "Valor neto" : "Neto real"}
+				</p>
+				<div className="ml-auto shrink-0">
+					<PeriodSelect value={selectedDays} onValueChange={setSelectedDays} />
+				</div>
+			</div>
+
+			{isPending ? (
+				<Loader2 className="mt-3 h-6 w-6 animate-spin" />
+			) : entries.length === 0 ? (
+				<p className="mt-3 text-sm text-(--v2-ink-soft)">
+					Sin movimientos financieros en el periodo.
+				</p>
+			) : (
+				<div className="mt-3 space-y-2">
+					{entries.map((entry) => (
+						<CurrencyNetBlock
+							key={entry.currency ?? "sin-moneda"}
+							entry={entry}
+						/>
+					))}
+				</div>
+			)}
+
+			{!isMaterialAsset ? (
+				<p className="mt-2 text-xs text-(--v2-ink-soft)">
+					El neto incluye el alimento consumido, valuado en la moneda de compra.
+				</p>
+			) : null}
+		</div>
 	);
 }

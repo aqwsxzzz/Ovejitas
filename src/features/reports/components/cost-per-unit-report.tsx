@@ -52,20 +52,21 @@ export const CostPerUnitReport = ({
 
 		const grouped = report.data.reduce(
 			(acc, row) => {
-				if (!acc[row.currency]) {
-					acc[row.currency] = {
+				const key = row.currency ?? "__none__";
+				if (!acc[key]) {
+					acc[key] = {
 						currency: row.currency,
 						quantity: 0,
 						total_cost: 0,
 					};
 				}
-				acc[row.currency].quantity += parseDecimal(row.production_quantity);
-				acc[row.currency].total_cost += parseDecimal(row.total_cost);
+				acc[key].quantity += parseDecimal(row.production_quantity);
+				acc[key].total_cost += parseDecimal(row.total_cost);
 				return acc;
 			},
 			{} as Record<
 				string,
-				{ currency: string; quantity: number; total_cost: number }
+				{ currency: string | null; quantity: number; total_cost: number }
 			>,
 		);
 
@@ -112,11 +113,11 @@ export const CostPerUnitReport = ({
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								{summary.map((item) => (
 									<div
-										key={item.currency}
+										key={item.currency ?? "sin-moneda"}
 										className="rounded-lg border p-4"
 									>
 										<p className="text-xs font-medium text-muted-foreground">
-											Costo total ({item.currency})
+											Costo total ({item.currency ?? "Sin moneda"})
 										</p>
 										<p className="text-lg font-semibold mt-2">
 											{formatCurrency(item.total_cost, item.currency)}

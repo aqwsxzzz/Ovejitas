@@ -96,12 +96,14 @@ export interface IFlockAcquisitionCreatePayload {
 	occurred_at?: string;
 	quantity: number;
 	amount?: number | null;
+	currency_id?: number | null;
 }
 
 export interface IFlockSaleCreatePayload {
 	occurred_at?: string;
 	quantity: number;
 	amount: number;
+	currency_id?: number | null;
 	buyer?: string | null;
 }
 
@@ -117,6 +119,7 @@ export interface IMaterialPurchaseCreatePayload {
 	quantity: number;
 	unit: LivestockEventUnit;
 	amount: number;
+	currency_id?: number | null;
 	supplier?: string | null;
 	notes?: string | null;
 	meta?: Record<string, unknown>;
@@ -162,6 +165,7 @@ export interface IMaterialSaleCreatePayload {
 	quantity: number;
 	unit: LivestockEventUnit;
 	amount: number;
+	currency_id?: number | null;
 	buyer?: string | null;
 	category_id?: number | null;
 	notes?: string | null;
@@ -363,6 +367,7 @@ export const updateIndividual = ({
 		cause: string | null;
 		// Sold transition — emits an income event (sale_amount required).
 		sale_amount: number | string | null;
+		currency_id: number | null;
 		sold_at: string | null;
 		buyer: string | null;
 	}>;
@@ -684,6 +689,7 @@ export type LivestockEventCreatePayload =
 			type: "expense" | "income";
 			occurred_at: string;
 			amount: number;
+			currency_id?: number;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;
@@ -706,6 +712,7 @@ export type LivestockEventCreatePayload =
 			occurred_at: string;
 			quantity: number;
 			amount?: number;
+			currency_id?: number;
 			category_id?: number;
 			individual_id?: number;
 			notes?: string;

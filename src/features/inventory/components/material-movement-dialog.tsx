@@ -173,6 +173,7 @@ export function MaterialMovementDialog({
 				{step === "increase" ? (
 					<div className="space-y-3">
 						<MaterialPurchaseForm
+							farmId={farmId}
 							materialAssetId={materialAssetId}
 							isSubmitting={purchaseMutation.isPending}
 							errorMessage={error}
@@ -199,6 +200,7 @@ export function MaterialMovementDialog({
 				{step === "sale" ? (
 					<div className="space-y-3">
 						<MaterialSaleForm
+							farmId={farmId}
 							categoryOptions={categoryOptions}
 							isSubmitting={saleMutation.isPending}
 							errorMessage={error}

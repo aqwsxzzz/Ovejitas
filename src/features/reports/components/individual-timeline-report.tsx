@@ -3,6 +3,8 @@ import { ErrorState } from "@/components/common/error-state";
 import { EmptyState } from "@/components/common/empty-state";
 import { LoadingState } from "@/components/common/loading-state";
 import { Badge } from "@/components/ui/badge";
+import { useFarmCurrencyMap } from "@/features/currency/api/currency-queries";
+import { getCurrencyCode } from "@/features/currency/currency-utils";
 import { getEventTypeLabel } from "@/features/livestock/types/livestock-types";
 import { useGetTimelineReport } from "@/features/reports/api/reports-queries";
 import type { EventType } from "@/features/reports/types/reports-types";
@@ -40,6 +42,9 @@ export const IndividualTimelineReport = ({
 	dateTo,
 }: IndividualTimelineReportProps) => {
 	const hasDateRangeFilter = !!dateFrom || !!dateTo;
+	const { data: currencyCodeById } = useFarmCurrencyMap({
+		farmId: String(farmId),
+	});
 
 	const {
 		data: report,
@@ -115,9 +120,13 @@ export const IndividualTimelineReport = ({
 											)}
 										</Badge>
 									)}
-									{eventItem.amount && eventItem.currency && (
+									{eventItem.amount != null && (
 										<Badge variant="secondary">
-											{eventItem.amount} {eventItem.currency}
+											{eventItem.amount}{" "}
+											{getCurrencyCode(
+												currencyCodeById,
+												eventItem.currency_id,
+											)}
 										</Badge>
 									)}
 								</div>
