@@ -1,5 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ProductionTargetForm } from "./production-target-form";
@@ -25,12 +27,18 @@ export function ProductionTargetCard({
 		createCategory,
 		isMutating,
 	} = useAssetProductionTargets(farmId, assetId);
+	const [isAddingTarget, setIsAddingTarget] = useState(false);
 
 	// Only offer products that don't already have an active target here.
 	const availableCategories = useMemo(() => {
 		const taken = new Set(targets.map((target) => target.category_id));
 		return categories.filter((category) => !taken.has(category.id));
 	}, [categories, targets]);
+
+	// With no targets yet the form is the whole point of the card, so it stays
+	// open. Once one exists it collapses behind the button until asked for.
+	const isFormOpen = targets.length === 0 || isAddingTarget;
+	const canAddTarget = availableCategories.length > 0;
 
 	return (
 		<Card>
@@ -60,12 +68,33 @@ export function ProductionTargetCard({
 						lote.
 					</p>
 				)}
-				<ProductionTargetForm
-					categories={availableCategories}
-					disabled={isMutating}
-					onAdd={addTarget}
-					onCreateCategory={createCategory}
-				/>
+				{isFormOpen ? (
+					<ProductionTargetForm
+						categories={availableCategories}
+						disabled={isMutating}
+						onAdd={(input) => {
+							addTarget(input);
+							setIsAddingTarget(false);
+						}}
+						onCreateCategory={createCategory}
+						onCancel={
+							isAddingTarget ? () => setIsAddingTarget(false) : undefined
+						}
+					/>
+				) : (
+					canAddTarget && (
+						<Button
+							type="button"
+							variant="outline"
+							className="w-full"
+							disabled={isMutating}
+							onClick={() => setIsAddingTarget(true)}
+						>
+							<Plus aria-hidden="true" className="h-4 w-4" />
+							Agregar otra meta
+						</Button>
+					)
+				)}
 			</CardContent>
 		</Card>
 	);

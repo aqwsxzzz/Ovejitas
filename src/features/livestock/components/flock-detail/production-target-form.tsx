@@ -28,6 +28,8 @@ interface ProductionTargetFormProps {
 	disabled: boolean;
 	onAdd: (input: AddTargetInput) => void;
 	onCreateCategory: (input: CreateEventCategoryInput) => Promise<number>;
+	/** When provided, the form can be dismissed instead of staying open. */
+	onCancel?: () => void;
 }
 
 export function ProductionTargetForm({
@@ -35,6 +37,7 @@ export function ProductionTargetForm({
 	disabled,
 	onAdd,
 	onCreateCategory,
+	onCancel,
 }: ProductionTargetFormProps) {
 	const [categoryId, setCategoryId] = useState("");
 	const [basis, setBasis] = useState<ProductionTargetBasis>(
@@ -116,12 +119,23 @@ export function ProductionTargetForm({
 					onChange={(event) => setRate(event.target.value)}
 				/>
 			</div>
-			<div className="sm:col-span-2">
+			<div className="flex gap-2 sm:col-span-2">
+				{onCancel && (
+					<Button
+						type="button"
+						variant="outline"
+						onClick={onCancel}
+						disabled={disabled}
+						className="flex-1"
+					>
+						Cancelar
+					</Button>
+				)}
 				<Button
 					type="button"
 					onClick={handleAdd}
 					disabled={disabled}
-					className="w-full"
+					className="flex-1"
 				>
 					Agregar meta
 				</Button>
