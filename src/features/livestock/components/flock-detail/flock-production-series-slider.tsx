@@ -22,11 +22,11 @@ function Bars({ data, labels }: { data: number[]; labels?: string[] }) {
 				});
 
 	return (
-		<div className="mt-3 rounded-xl border border-white/45 bg-(--v2-gray-300) p-3">
+		<div className="mt-3 rounded-xl border border-(--v2-border) bg-(--v2-surface-raised) p-3">
 			<div className="relative h-28">
-				<div className="pointer-events-none absolute inset-x-0 top-4 border-t border-white/40" />
-				<div className="pointer-events-none absolute inset-x-0 top-14 border-t border-white/40" />
-				<div className="pointer-events-none absolute inset-x-0 top-24 border-t border-white/40" />
+				<div className="pointer-events-none absolute inset-x-0 top-4 border-t border-(--v2-border)" />
+				<div className="pointer-events-none absolute inset-x-0 top-14 border-t border-(--v2-border)" />
+				<div className="pointer-events-none absolute inset-x-0 top-24 border-t border-(--v2-border)" />
 				<div className="pointer-events-none absolute right-0 top-0 flex h-24 w-8 flex-col justify-between text-right text-[9px] font-medium text-(--v2-slate)">
 					<span>{max}</span>
 					<span>{mid}</span>
@@ -155,7 +155,7 @@ export function FlockProductionSeriesSlider({
 							setActiveIndex(index);
 						}}
 						className={`size-2 rounded-full p-0 hover:bg-transparent ${
-							index === activeIndex ? "bg-(--v2-ink)" : "bg-black/30"
+							index === activeIndex ? "bg-(--v2-ink)" : "bg-(--v2-ink-soft)"
 						}`}
 					/>
 				))}

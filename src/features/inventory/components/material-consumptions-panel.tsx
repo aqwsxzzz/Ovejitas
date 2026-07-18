@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -233,17 +236,18 @@ export function MaterialConsumptionsPanel({
 					</Select>
 				</div>
 				{consumptionsQuery.isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">
-						Loading consumptions...
-					</p>
+					<LoadingState message="Cargando consumos..." />
 				) : null}
 				{consumptionsQuery.error ? (
-					<p className="text-sm text-destructive">Failed to load consumptions.</p>
+					<ErrorState
+						description="No se pudieron cargar los consumos."
+						onRetry={() => void consumptionsQuery.refetch()}
+					/>
 				) : null}
 				{!consumptionsQuery.isLoading &&
 				!consumptionsQuery.error &&
 				(consumptionsQuery.data?.data ?? []).length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">No consumptions yet.</p>
+					<EmptyState title="Sin consumos registrados" />
 				) : null}
 				{consumptionError ? (
 					<p className="text-sm text-destructive">{consumptionError}</p>

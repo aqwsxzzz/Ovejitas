@@ -9,6 +9,10 @@ import {
 	useDeleteIndividual,
 } from "@/features/livestock/api/livestock-queries";
 import { IndividualDetail } from "../components/individual-detail";
+import { IndividualLifecycleActions } from "@/features/livestock/components/individual-lifecycle-actions";
+import { RecordBirthForm } from "@/features/livestock/components/record-birth-form";
+import { IndividualTimelineReport } from "@/features/reports/components/individual-timeline-report";
+import { PregnancyCheckForm } from "@/features/pregnancy/components/pregnancy-check-form";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 
 interface IndividualDetailPageProps {
@@ -126,6 +130,35 @@ export function IndividualDetailPage({
 				onDelete={handleDelete}
 				isLoading={isMutating}
 				startEditing={startEditing}
+			/>
+
+			<PregnancyCheckForm
+				farmId={farmId}
+				individualId={individual.id}
+			/>
+
+			{individual.status === "active" ? (
+				<IndividualLifecycleActions
+					farmId={farmId}
+					assetId={assetId}
+					individualId={individualId}
+				/>
+			) : null}
+
+			{individual.status === "active" ? (
+				<RecordBirthForm
+					farmId={farmId}
+					assetId={assetId}
+					motherId={individual.id}
+					candidateParents={allIndividuals.filter(
+						(candidate) => candidate.id !== individual.id,
+					)}
+				/>
+			) : null}
+
+			<IndividualTimelineReport
+				farmId={farmId}
+				individualId={individual.id}
 			/>
 		</div>
 	);

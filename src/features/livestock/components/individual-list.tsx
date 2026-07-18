@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { SearchBar } from "@/components/common/search-bar";
 import { IndividualForm } from "@/features/livestock/components/individual-form";
 import type { IndividualFormData } from "@/features/livestock/components/individual-form";
 import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
@@ -112,29 +114,26 @@ export function IndividualList({
 				)}
 			</div>
 
-			{/* Search */}
-			<div className="flex items-center gap-2 rounded-lg border border-input bg-white px-3 py-2">
-				<span className="text-muted-foreground">🔍</span>
-				<Input
-					type="search"
-					placeholder="Buscar por nombre o identificador..."
-					value={searchQuery}
-					onChange={(event) => onSearchQueryChange(event.target.value)}
-					className="h-auto flex-1 border-0 bg-transparent p-0 shadow-none focus-visible:ring-0"
-				/>
-			</div>
+			<SearchBar
+				value={searchQuery}
+				onChange={onSearchQueryChange}
+				placeholder="Buscar por nombre o identificador..."
+				ariaLabel="Buscar individuos por nombre o identificador"
+			/>
 
 			{/* List */}
 			{isLoading ? (
-				<div className="py-8 text-center text-muted-foreground">Cargando...</div>
+				<LoadingState />
 			) : individuals.length === 0 ? (
-				<div className="rounded-lg border border-dashed border-input bg-muted py-8 text-center text-muted-foreground">
-					{searchQuery.trim()
-						? "No hay individuos que coincidan con tu busqueda"
-						: "Aun no hay individuos"}
-				</div>
+				<EmptyState
+					title={
+						searchQuery.trim()
+							? "No hay individuos que coincidan con tu busqueda"
+							: "Aun no hay individuos"
+					}
+				/>
 			) : (
-				<div className="divide-y divide-border rounded-lg border border-border bg-white">
+				<div className="divide-y divide-border rounded-lg border border-border bg-(--v2-surface)">
 					{individuals.map((individual) => {
 						const isEditing = editingIndividualId === individual.id;
 						const isConfirmingDelete =

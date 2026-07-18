@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,31 +9,11 @@ import {
 	updateEventCategoryById,
 } from "@/features/livestock/api/livestock-api";
 import { useListEventCategoriesByFarmId } from "@/features/livestock/api/livestock-queries";
-import type {
-	ILivestockEventCategory,
-	LivestockEventType,
+import {
+	EVENT_TYPE_LABELS,
+	type ILivestockEventCategory,
+	type LivestockEventType,
 } from "@/features/livestock/types/livestock-types";
-
-function eventTypeLabelEs(type: LivestockEventType): string {
-	switch (type) {
-		case "production":
-			return "Produccion";
-		case "expense":
-			return "Gasto";
-		case "income":
-			return "Ingreso";
-		case "observation":
-			return "Observacion";
-		case "reproductive":
-			return "Reproductivo";
-		case "acquisition":
-			return "Adquisicion";
-		case "mortality":
-			return "Mortalidad";
-		default:
-			return type;
-	}
-}
 
 export function V2EventCategoriesPage() {
 	const { data: currentUser } = useGetUserProfile();
@@ -151,7 +132,7 @@ export function V2EventCategoriesPage() {
 
 			{isLoading ? (
 				<div className="v2-card p-4">
-					<p className="text-sm text-(--v2-ink-soft)">Cargando categorias...</p>
+					<LoadingState message="Cargando categorias..." />
 				</div>
 			) : groupedCategories.length === 0 ? (
 				<div className="v2-card p-4">
@@ -166,7 +147,7 @@ export function V2EventCategoriesPage() {
 							key={type}
 							className="v2-card p-4"
 						>
-							<p className="v2-kicker">{eventTypeLabelEs(type)}</p>
+							<p className="v2-kicker">{EVENT_TYPE_LABELS[type]}</p>
 							<div className="mt-3 space-y-2">
 								{typeCategories.map((category) => {
 									const isEditing = editingCategoryId === category.id;
@@ -176,7 +157,7 @@ export function V2EventCategoriesPage() {
 									return (
 										<div
 											key={category.id}
-											className="rounded-lg border border-(--v2-border) bg-white p-3"
+											className="rounded-lg border border-(--v2-border) bg-(--v2-surface) p-3"
 										>
 											{isEditing ? (
 												<div className="space-y-2">
@@ -220,7 +201,7 @@ export function V2EventCategoriesPage() {
 											) : (
 												<div className="flex items-center gap-2">
 													<span
-														className="h-3 w-3 rounded-full border border-black/10"
+														className="h-3 w-3 rounded-full border border-(--v2-border)"
 														style={{
 															backgroundColor: category.color ?? "#8a8677",
 														}}

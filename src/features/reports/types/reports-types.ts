@@ -29,6 +29,43 @@ export interface IProfitabilityReport {
 	totals: IProfitabilityTotal[];
 }
 
+/**
+ * Profitability Full — income minus TOTAL cost (direct expense + consumed feed).
+ * `net_incl_materials` is the all-in bottom line; `net` (income − direct expense)
+ * is retained from R1.
+ *
+ * One row per (asset, currency) — feed is valued in the currency of the purchases
+ * backing it, never converted or summed across currencies. `currency` is null for
+ * an asset whose only activity is genuinely unpriced feed (`has_unvalued_consumption`).
+ */
+export interface IProfitabilityFullRow {
+	asset_id: number;
+	asset_name: string;
+	currency: string | null;
+	income_total: string;
+	direct_expense_total: string;
+	consumed_material_cost: string;
+	total_cost: string;
+	net: string;
+	net_incl_materials: string;
+	has_unvalued_consumption: boolean;
+}
+
+export interface IProfitabilityFullTotal {
+	currency: string;
+	income_total: string;
+	direct_expense_total: string;
+	consumed_material_cost: string;
+	total_cost: string;
+	net: string;
+	net_incl_materials: string;
+}
+
+export interface IProfitabilityFullReport {
+	data: IProfitabilityFullRow[];
+	totals: IProfitabilityFullTotal[];
+}
+
 // Production Report
 export type ProductionBucket = "day" | "week" | "month";
 export type EventType =
@@ -84,27 +121,22 @@ export interface IMaterialConsumptionAggregateReport {
 	group_by: MaterialConsumptionGroupBy;
 }
 
-// Cost Per Unit Report
+// Cost Per Unit Report (R3)
 export interface ICostPerUnitRow {
 	asset_id: number;
 	asset_name: string;
-	currency: string;
-	quantity: string;
-	expense_total: string;
-	cost_per_unit: string;
-}
-
-export interface ICostPerUnitTotal {
-	currency: string;
-	quantity: string;
-	expense_total: string;
-	cost_per_unit: string;
+	currency: string | null;
+	production_quantity: string;
+	direct_expense_total: string;
+	consumed_material_cost: string;
+	total_cost: string;
+	cost_per_unit: string | null;
+	has_unvalued_consumption: boolean;
 }
 
 export interface ICostPerUnitReport {
 	data: ICostPerUnitRow[];
 	unit: Unit;
-	totals: ICostPerUnitTotal[];
 }
 
 // Timeline Report
@@ -119,7 +151,7 @@ export interface IEventRead {
 	quantity: string | null;
 	unit: Unit | null;
 	amount: string | null;
-	currency: string | null;
+	currency_id: number | null;
 	adjustment: InventoryAdjustment | null;
 	notes: string | null;
 	payload: Record<string, unknown>;
@@ -153,6 +185,59 @@ export interface IInventorySummaryReport {
 	data: IInventorySummaryRow[];
 }
 
+// Upcoming Births Report
+export interface IUpcomingBirthRow {
+	individual_id: number;
+	individual_tag: string;
+	asset_id: number;
+	expected_due_at: string; // ISO datetime
+	offspring_count: number | null;
+	days_until_due: number;
+}
+
+export interface IUpcomingBirthsReport {
+	data: IUpcomingBirthRow[];
+}
+
+// Production Productivity Report (produced vs expected per asset × product)
+export type ProductionProductivityBasis =
+	| "per_head_continuous"
+	| "per_event"
+	| "total";
+
+export interface IProductionProductivityRow {
+	asset_id: number;
+	asset_name: string;
+	category_id: number;
+	product_name: string;
+	unit: Unit | null;
+	produced: string; // converted into the product's unit
+	expected: string | null;
+	productivity_pct: string | null;
+	basis: ProductionProductivityBasis | null;
+	missing_capacity: boolean;
+}
+
+export interface IProductionProductivityReport {
+	data: IProductionProductivityRow[];
+}
+
+// Sales Value Report
+export interface ISalesValueRow {
+	asset_id: number;
+	asset_name: string;
+	currency: string;
+	income_total: string;
+	unit: Unit | null;
+	quantity_sold: string | null;
+	value_per_unit: string | null;
+	ambiguous: boolean;
+}
+
+export interface ISalesValueReport {
+	data: ISalesValueRow[];
+}
+
 // Query Parameters
 export interface IProfitabilityReportParams {
 	farmId: string | number;
@@ -160,6 +245,8 @@ export interface IProfitabilityReportParams {
 	date_to?: string;
 	asset_id?: number;
 }
+
+export type IProfitabilityFullReportParams = IProfitabilityReportParams;
 
 export interface IAggregateReportParams {
 	farmId: string | number;
@@ -217,4 +304,22 @@ export interface IReportPdfParams {
 	date_to?: string;
 	asset_id?: number;
 	unit?: Unit;
+}
+
+export interface IUpcomingBirthsReportParams {
+	farmId: string | number;
+	date_from: string; // required — defines the alert window
+	date_to: string; // required
+}
+
+export interface IProductionProductivityReportParams {
+	farmId: string | number;
+	date_from: string; // required — expected scales with the window
+	date_to: string; // required
+}
+
+export interface ISalesValueReportParams {
+	farmId: string | number;
+	date_from?: string;
+	date_to?: string;
 }

@@ -48,7 +48,7 @@ function GenealogyCellComponent({
 			className={`flex h-16 w-32 flex-col items-center justify-center gap-0 rounded-lg border-2 px-2 py-1 text-center ${
 				isHighlighted
 					? "border-info bg-info/10"
-					: "border-input bg-white hover:border-info"
+					: "border-input hover:border-info"
 			}`}
 		>
 			<div className="truncate text-sm font-semibold">{tag}</div>

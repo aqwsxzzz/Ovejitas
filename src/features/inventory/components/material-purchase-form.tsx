@@ -12,11 +12,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
 import { EVENT_UNITS } from "@/shared/types/unit-types";
 import type { LivestockEventUnit } from "@/features/livestock/types/livestock-types";
 import type { IMaterialPurchaseCreatePayload } from "@/features/livestock/api/livestock-api";
 
 interface MaterialPurchaseFormProps {
+	farmId: string;
 	materialAssetId: number;
 	isSubmitting: boolean;
 	errorMessage: string | null;
@@ -24,6 +27,7 @@ interface MaterialPurchaseFormProps {
 }
 
 export function MaterialPurchaseForm({
+	farmId,
 	materialAssetId,
 	isSubmitting,
 	errorMessage,
@@ -35,6 +39,9 @@ export function MaterialPurchaseForm({
 	const [quantity, setQuantity] = useState("");
 	const [unit, setUnit] = useState<LivestockEventUnit>("kg");
 	const [amount, setAmount] = useState("");
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
+	const [currencyId, setCurrencyId] = useState<number | undefined>(undefined);
+	const selectedCurrencyId = currencyId ?? defaultCurrencyId;
 	const [supplier, setSupplier] = useState("");
 	const [notes, setNotes] = useState("");
 	const [localError, setLocalError] = useState<string | null>(null);
@@ -65,6 +72,7 @@ export function MaterialPurchaseForm({
 			quantity: parsedQuantity,
 			unit,
 			amount: parsedAmount,
+			currency_id: selectedCurrencyId,
 			supplier: supplier.trim() || null,
 			notes: notes.trim() || null,
 			idempotency_key: crypto.randomUUID(),
@@ -134,6 +142,11 @@ export function MaterialPurchaseForm({
 						placeholder="250"
 					/>
 				</div>
+				<CurrencySelectField
+					farmId={farmId}
+					value={selectedCurrencyId}
+					onChange={setCurrencyId}
+				/>
 			</div>
 
 			<div className="grid gap-3 md:grid-cols-2">

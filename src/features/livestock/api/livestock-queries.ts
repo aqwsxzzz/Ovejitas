@@ -19,6 +19,7 @@ import {
 	updateMaterialConsumptionById,
 	deleteMaterialConsumptionById,
 	createMaterialSaleByAssetId,
+	getAssetSummaryByFarmId,
 	getLivestockAssetById,
 	listLivestockAssetsByFarmId,
 	listIndividualsByAssetId,
@@ -30,6 +31,7 @@ import {
 	updateEventByAssetId,
 	deleteEventByAssetId,
 	createIndividual,
+	createBirthByMotherId,
 	updateIndividual,
 	deleteIndividual,
 	createEventCategoryByFarmId,
@@ -205,6 +207,8 @@ export const livestockQueryKeys = {
 		] as const,
 	assetById: (farmId: string, assetId: number) =>
 		[...livestockQueryKeys.all, "assetById", farmId, assetId] as const,
+	assetSummary: (farmId: string) =>
+		[...livestockQueryKeys.all, "assetSummary", farmId] as const,
 	individualsByAsset: (
 		farmId: string,
 		assetId: string,
@@ -394,6 +398,19 @@ export const useListLivestockAssetsByFarmId = ({
 	useQuery({
 		queryKey: livestockQueryKeys.assetsByFarm(farmId, filters),
 		queryFn: () => listLivestockAssetsByFarmId({ farmId, filters }),
+		enabled: enabled && !!farmId,
+	});
+
+export const useGetAssetSummaryByFarmId = ({
+	farmId,
+	enabled = true,
+}: {
+	farmId: string;
+	enabled?: boolean;
+}) =>
+	useQuery({
+		queryKey: livestockQueryKeys.assetSummary(farmId),
+		queryFn: () => getAssetSummaryByFarmId({ farmId }),
 		enabled: enabled && !!farmId,
 	});
 
@@ -971,6 +988,9 @@ export const useCreateEventByAssetId = () => {
 				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
 			});
 			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
+			void queryClient.invalidateQueries({
 				queryKey: [
 					...livestockQueryKeys.all,
 					"aggregatedHeadcount",
@@ -1021,6 +1041,11 @@ export const useCreateFlockAcquisitionByAssetId = () => {
 					assetId,
 				],
 			});
+			// per_head_continuous "expected" output scales with headcount, which
+			// this mutation changes — refresh the production-productivity report.
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
 		},
 	});
 };
@@ -1063,6 +1088,11 @@ export const useCreateFlockSaleByAssetId = () => {
 					farmId,
 					assetId,
 				],
+			});
+			// per_head_continuous "expected" output scales with headcount, which
+			// this mutation changes — refresh the production-productivity report.
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
 			});
 		},
 	});
@@ -1107,6 +1137,11 @@ export const useCreateFlockMortalityByAssetId = () => {
 					assetId,
 				],
 			});
+			// per_head_continuous "expected" output scales with headcount, which
+			// this mutation changes — refresh the production-productivity report.
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
 		},
 	});
 };
@@ -1146,6 +1181,9 @@ export const useUpdateEventByAssetId = () => {
 				queryKey: [...livestockQueryKeys.all, "productionReport", farmId],
 			});
 			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
+			void queryClient.invalidateQueries({
 				queryKey: [
 					...livestockQueryKeys.all,
 					"aggregatedHeadcount",
@@ -1171,6 +1209,9 @@ export const useDeleteEventByAssetId = () => {
 			eventId: number;
 		}) => deleteEventByAssetId({ farmId, assetId, eventId }),
 		onSuccess: (_, { farmId, assetId }) => {
+			void queryClient.invalidateQueries({
+				queryKey: reportsQueryKeys.farm(farmId),
+			});
 			// Invalidate all event queries for this asset (respects individual filter preferences)
 			void queryClient.invalidateQueries({
 				queryKey: [
@@ -1242,6 +1283,37 @@ export const useCreateIndividual = () => {
 	});
 };
 
+export const useCreateBirthByMotherId = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			farmId,
+			assetId,
+			motherId,
+			data,
+		}: {
+			farmId: string;
+			assetId: string;
+			motherId: number;
+			data: Parameters<typeof createBirthByMotherId>[0]["data"];
+		}) => createBirthByMotherId({ farmId, assetId, motherId, data }),
+		onSuccess: (_birth, { farmId, assetId }) => {
+			// Offspring become new individuals; the mother gains a reproductive
+			// event on its timeline (a ledger-replayed report).
+			void queryClient.invalidateQueries({
+				queryKey: [
+					...livestockQueryKeys.all,
+					"individualsByAsset",
+					farmId,
+					assetId,
+				],
+			});
+			void queryClient.invalidateQueries({ queryKey: reportsQueryKeys.all });
+		},
+	});
+};
+
 export const useUpdateIndividual = () => {
 	const queryClient = useQueryClient();
 
@@ -1288,6 +1360,8 @@ export const useUpdateIndividual = () => {
 					individualId,
 				),
 			});
+			// Sold/deceased transitions emit income/mortality ledger events.
+			void queryClient.invalidateQueries({ queryKey: reportsQueryKeys.all });
 		},
 	});
 };

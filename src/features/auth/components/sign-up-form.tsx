@@ -16,7 +16,7 @@ import { Loader } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const formSchema = z.object({
-	email: z.string().email(),
+	email: z.string().email("Ingresa un correo electronico valido."),
 	displayName: z.string().min(2, "El nombre debe tener al menos 2 caracteres."),
 	password: z
 		.string()

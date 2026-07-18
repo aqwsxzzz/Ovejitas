@@ -2,6 +2,8 @@ import { axiosHelper } from "@/lib/axios/axios-helper";
 import { axiosInstance } from "@/lib/axios";
 import type {
 	IProfitabilityReport,
+	IProfitabilityFullReport,
+	IProfitabilityFullReportParams,
 	IAggregateReport,
 	ICostPerUnitReport,
 	ITimelineReport,
@@ -14,6 +16,12 @@ import type {
 	IMaterialConsumptionAggregateReport,
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
+	IUpcomingBirthsReport,
+	IUpcomingBirthsReportParams,
+	IProductionProductivityReport,
+	IProductionProductivityReportParams,
+	ISalesValueReport,
+	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
 
 /**
@@ -29,6 +37,26 @@ export const getProfitabilityReport = ({
 	axiosHelper<IProfitabilityReport>({
 		method: "get",
 		url: `/api/v1/farms/${farmId}/reports/profitability`,
+		urlParams: {
+			date_from,
+			date_to,
+			asset_id,
+		},
+	});
+
+/**
+ * Income minus TOTAL cost (direct expense + consumed feed) per asset
+ * GET /api/v1/farms/{farm_id}/reports/profitability-full
+ */
+export const getProfitabilityFullReport = ({
+	farmId,
+	date_from,
+	date_to,
+	asset_id,
+}: IProfitabilityFullReportParams) =>
+	axiosHelper<IProfitabilityFullReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/profitability-full`,
 		urlParams: {
 			date_from,
 			date_to,
@@ -167,6 +195,60 @@ export const getMaterialConsumptionAggregateReport = ({
 	});
 
 /**
+ * Individuals due to give birth within a window
+ * GET /api/v1/farms/{farm_id}/reports/upcoming-births
+ */
+export const getUpcomingBirthsReport = ({
+	farmId,
+	date_from,
+	date_to,
+}: IUpcomingBirthsReportParams) =>
+	axiosHelper<IUpcomingBirthsReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/upcoming-births`,
+		urlParams: {
+			date_from,
+			date_to,
+		},
+	});
+
+/**
+ * Produced vs expected output, per asset and product
+ * GET /api/v1/farms/{farm_id}/reports/production-productivity
+ */
+export const getProductionProductivityReport = ({
+	farmId,
+	date_from,
+	date_to,
+}: IProductionProductivityReportParams) =>
+	axiosHelper<IProductionProductivityReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/production-productivity`,
+		urlParams: {
+			date_from,
+			date_to,
+		},
+	});
+
+/**
+ * Realized average sale price per unit, per asset
+ * GET /api/v1/farms/{farm_id}/reports/sales-value
+ */
+export const getSalesValueReport = ({
+	farmId,
+	date_from,
+	date_to,
+}: ISalesValueReportParams) =>
+	axiosHelper<ISalesValueReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/sales-value`,
+		urlParams: {
+			date_from,
+			date_to,
+		},
+	});
+
+/**
  * R1 PDF — Profitability report download
  * GET /api/v1/farms/{farm_id}/reports/profitability/pdf
  */
@@ -184,6 +266,28 @@ export const getProfitabilityReportPdf = ({
 		},
 		responseType: "blob",
 	});
+
+/**
+ * PDF — Profitability-full report download
+ * GET /api/v1/farms/{farm_id}/reports/profitability-full/pdf
+ */
+export const getProfitabilityFullReportPdf = ({
+	farmId,
+	date_from,
+	date_to,
+	asset_id,
+}: IReportPdfParams) =>
+	axiosInstance.get<Blob>(
+		`/api/v1/farms/${farmId}/reports/profitability-full/pdf`,
+		{
+			params: {
+				date_from,
+				date_to,
+				asset_id,
+			},
+			responseType: "blob",
+		},
+	);
 
 /**
  * R3 PDF — Cost per unit report download

@@ -24,6 +24,7 @@ export function toCreateEventPayload(data: UnitEventFormData) {
 			type: data.type,
 			occurred_at: data.occurredAt,
 			amount: data.amount ?? 0,
+			currency_id: data.currencyId,
 			category_id: data.categoryId,
 			individual_id: data.individualId,
 			notes: data.notes,
@@ -122,6 +123,7 @@ export function toEventFormInitialValues(editingEvent: ILivestockEvent) {
 		unit: editingEvent.unit ?? undefined,
 		amount:
 			editingEvent.amount != null ? Number(editingEvent.amount) : undefined,
+		currencyId: editingEvent.currency_id ?? undefined,
 		adjustment: editingEvent.adjustment ?? undefined,
 		notes: editingEvent.notes ?? undefined,
 	};

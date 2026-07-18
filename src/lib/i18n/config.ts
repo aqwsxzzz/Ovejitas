@@ -5,56 +5,12 @@ import loginEN from "./en/login.json";
 import loginES from "./es/login.json";
 import signupEN from "./en/signup.json";
 import signupES from "./es/signup.json";
-import animalProfileHealthCardEN from "./en/animal-profile-health-card.json";
-import animalProfileHealthCardES from "./es/animal-profile-health-card.json";
-import animalProfilePageEN from "./en/animal-profile-page.json";
-import animalProfilePageES from "./es/animal-profile-page.json";
-import healthCardIndividualInfoEN from "./en/health-card-individual-info.json";
-import healthCardIndividualInfoES from "./es/health-card-individual-info.json";
-import animalProfileBasicCardEN from "./en/animal-profile-basic-card.json";
-import animalProfileBasicCardES from "./es/animal-profile-basic-card.json";
 import dropdownMenuHeaderEN from "./en/dropdown-menu-header.json";
 import dropdownMenuHeaderES from "./es/dropdown-menu-header.json";
-import farmInviteModalEN from "./en/farm-invite-modal.json";
-import farmInviteModalES from "./es/farm-invite-modal.json";
-import deleteAnimalModalEN from "./en/delete-animal-modal.json";
-import deleteAnimalModalES from "./es/delete-animal-modal.json";
-import editAnimalFormEN from "./en/edit-animal-form.json";
-import editAnimalFormES from "./es/edit-animal-form.json";
-import editAnimalModalEN from "./en/edit-animal-modal.json";
-import editAnimalModalES from "./es/edit-animal-modal.json";
-import newAnimalBulkFormEN from "./en/new-animal-bulk-form.json";
-import newAnimalBulkFormES from "./es/new-animal-bulk-form.json";
-import newAnimalFormEN from "./en/new-animal-form.json";
-import newAnimalFormES from "./es/new-animal-form.json";
-import newAnimalModalEN from "./en/new-animal-modal.json";
-import newAnimalModalES from "./es/new-animal-modal.json";
-import animalCardEN from "./en/animal-card.json";
-import animalCardES from "./es/animal-card.json";
-import breedSelectEN from "./en/breed-select.json";
-import breedSelectES from "./es/breed-select.json";
-import addNewMeasurementFormEN from "./en/add-new-measurement-form.json";
-import addNewMeasurementFormES from "./es/add-new-measurement-form.json";
-import addNewMeasurementModalEN from "./en/add-new-measurement-modal.json";
-import addNewMeasurementModalES from "./es/add-new-measurement-modal.json";
-import deleteMeasurementModalEN from "./en/delete-measurement-modal.json";
-import deleteMeasurementModalES from "./es/delete-measurement-modal.json";
-import measurementTypeSelectEN from "./en/measurement-type-select.json";
-import measurementTypeSelectES from "./es/measurement-type-select.json";
-import measurementRecordModalEN from "./en/measurement-record-modal.json";
-import measurementRecordModalES from "./es/measurement-record-modal.json";
-import specieSelectEN from "./en/specie-select.json";
-import specieSelectES from "./es/specie-select.json";
 import sheetMenuEN from "./en/sheet-menu.json";
 import sheetMenuES from "./es/sheet-menu.json";
-import speciesIndexEN from "./en/species-index.json";
-import speciesIndexES from "./es/species-index.json";
 import farmMembersEN from "./en/farm-members.json";
 import farmMembersES from "./es/farm-members.json";
-import parentsByGenderSelectEN from "./en/parents-by-gender-select.json";
-import parentsByGenderSelectES from "./es/parents-by-gender-select.json";
-import animalsCountBySpeciesCardEN from "./en/animals-count-by-species-card.json";
-import animalsCountBySpeciesCardES from "./es/animals-count-by-species-card.json";
 import animalsEN from "./en/animals.json";
 import animalsES from "./es/animals.json";
 import dashboardEN from "./en/dashboard.json";
@@ -69,12 +25,6 @@ import expensesEN from "./en/expenses.json";
 import expensesES from "./es/expenses.json";
 import flocksEN from "./en/flocks.json";
 import flocksES from "./es/flocks.json";
-import feedTypesEN from "./en/feed-types.json";
-import feedTypesES from "./es/feed-types.json";
-import feedLotsEN from "./en/feed-lots.json";
-import feedLotsES from "./es/feed-lots.json";
-import feedConsumptionsEN from "./en/feed-consumptions.json";
-import feedConsumptionsES from "./es/feed-consumptions.json";
 import inventoryEN from "./en/inventory.json";
 import inventoryES from "./es/inventory.json";
 
@@ -89,31 +39,9 @@ i18next
 			en: {
 				login: loginEN,
 				signup: signupEN,
-				animalProfileHealthCard: animalProfileHealthCardEN,
-				animalProfilePage: animalProfilePageEN,
-				healthCardIndividualInfo: healthCardIndividualInfoEN,
-				animalProfileBasicCard: animalProfileBasicCardEN,
 				dropdownMenuHeader: dropdownMenuHeaderEN,
-				deleteAnimalModal: deleteAnimalModalEN,
-				editAnimalForm: editAnimalFormEN,
-				editAnimalModal: editAnimalModalEN,
-				newAnimalBulkForm: newAnimalBulkFormEN,
-				newAnimalForm: newAnimalFormEN,
-				newAnimalModal: newAnimalModalEN,
-				animalCard: animalCardEN,
-				breedSelect: breedSelectEN,
-				addNewMeasurementForm: addNewMeasurementFormEN,
-				addNewMeasurementModal: addNewMeasurementModalEN,
-				deleteMeasurementModal: deleteMeasurementModalEN,
-				measurementTypeSelect: measurementTypeSelectEN,
-				measurementRecordModal: measurementRecordModalEN,
-				specieSelect: specieSelectEN,
 				sheetMenu: sheetMenuEN,
-				speciesIndex: speciesIndexEN,
 				farmMembers: farmMembersEN,
-				farmInviteModal: farmInviteModalEN,
-				parentsByGenderSelect: parentsByGenderSelectEN,
-				animalsCountBySpeciesCard: animalsCountBySpeciesCardEN,
 				animals: animalsEN,
 				dashboard: dashboardEN,
 				tasks: tasksEN,
@@ -121,39 +49,14 @@ i18next
 				bottomTabNav: bottomTabNavEN,
 				expenses: expensesEN,
 				flocks: flocksEN,
-				feedTypes: feedTypesEN,
-				feedLots: feedLotsEN,
-				feedConsumptions: feedConsumptionsEN,
 				inventory: inventoryEN,
 			},
 			es: {
 				login: loginES,
 				signup: signupES,
-				animalProfileHealthCard: animalProfileHealthCardES,
-				animalProfilePage: animalProfilePageES,
-				healthCardIndividualInfo: healthCardIndividualInfoES,
-				animalProfileBasicCard: animalProfileBasicCardES,
 				dropdownMenuHeader: dropdownMenuHeaderES,
-				deleteAnimalModal: deleteAnimalModalES,
-				editAnimalForm: editAnimalFormES,
-				editAnimalModal: editAnimalModalES,
-				newAnimalBulkForm: newAnimalBulkFormES,
-				newAnimalForm: newAnimalFormES,
-				newAnimalModal: newAnimalModalES,
-				animalCard: animalCardES,
-				breedSelect: breedSelectES,
-				addNewMeasurementForm: addNewMeasurementFormES,
-				addNewMeasurementModal: addNewMeasurementModalES,
-				deleteMeasurementModal: deleteMeasurementModalES,
-				measurementTypeSelect: measurementTypeSelectES,
-				measurementRecordModal: measurementRecordModalES,
-				specieSelect: specieSelectES,
 				sheetMenu: sheetMenuES,
-				speciesIndex: speciesIndexES,
 				farmMembers: farmMembersES,
-				farmInviteModal: farmInviteModalES,
-				parentsByGenderSelect: parentsByGenderSelectES,
-				animalsCountBySpeciesCard: animalsCountBySpeciesCardES,
 				animals: animalsES,
 				dashboard: dashboardES,
 				tasks: tasksES,
@@ -161,9 +64,6 @@ i18next
 				bottomTabNav: bottomTabNavES,
 				expenses: expensesES,
 				flocks: flocksES,
-				feedTypes: feedTypesES,
-				feedLots: feedLotsES,
-				feedConsumptions: feedConsumptionsES,
 				inventory: inventoryES,
 			},
 		},

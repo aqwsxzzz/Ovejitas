@@ -10,7 +10,7 @@ import { getErrorMessage } from "@/features/crops/utils/crop-utils";
 export interface CropExpensePayload {
 	occurred_at: string;
 	amount: number;
-	currency: string;
+	currency_id?: number;
 	category_id?: number | null;
 	notes?: string | null;
 }
@@ -41,7 +41,7 @@ export function useCropActions(farmId: string, cropId: string) {
 					type: "expense",
 					occurred_at: payload.occurred_at,
 					amount: payload.amount,
-					currency: payload.currency,
+					currency_id: payload.currency_id,
 					category_id: payload.category_id ?? undefined,
 					notes: payload.notes ?? undefined,
 				},

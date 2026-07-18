@@ -12,22 +12,26 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
 import type { ILivestockEventCategory } from "@/features/livestock/types/livestock-types";
 
 interface CropExpenseFormProps {
+	farmId: string;
 	categories: Pick<ILivestockEventCategory, "id" | "name">[];
 	isSubmitting: boolean;
 	errorMessage: string | null;
 	onSubmit: (payload: {
 		occurred_at: string;
 		amount: number;
-		currency: string;
+		currency_id?: number;
 		category_id?: number | null;
 		notes?: string | null;
 	}) => Promise<void>;
 }
 
 export function CropExpenseForm({
+	farmId,
 	categories,
 	isSubmitting,
 	errorMessage,
@@ -37,7 +41,9 @@ export function CropExpenseForm({
 		new Date().toISOString().slice(0, 16),
 	);
 	const [amount, setAmount] = useState("");
-	const [currency, setCurrency] = useState("USD");
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
+	const [currencyId, setCurrencyId] = useState<number | undefined>(undefined);
+	const selectedCurrencyId = currencyId ?? defaultCurrencyId;
 	const [categoryId, setCategoryId] = useState<string>("none");
 	const [notes, setNotes] = useState("");
 	const [localError, setLocalError] = useState<string | null>(null);
@@ -51,10 +57,6 @@ export function CropExpenseForm({
 			setLocalError("El monto debe ser mayor a 0.");
 			return;
 		}
-		if (!currency.trim()) {
-			setLocalError("La moneda es obligatoria.");
-			return;
-		}
 		if (!occurredAt) {
 			setLocalError("La fecha y hora son obligatorias.");
 			return;
@@ -64,7 +66,7 @@ export function CropExpenseForm({
 		await onSubmit({
 			occurred_at: new Date(occurredAt).toISOString(),
 			amount: parsedAmount,
-			currency: currency.trim().toUpperCase(),
+			currency_id: selectedCurrencyId,
 			category_id: categoryId !== "none" ? Number(categoryId) : null,
 			notes: notes.trim() || null,
 		});
@@ -86,16 +88,6 @@ export function CropExpenseForm({
 					/>
 				</div>
 				<div className="space-y-1.5">
-					<Label htmlFor="expense-currency">Moneda</Label>
-					<Input
-						id="expense-currency"
-						value={currency}
-						onChange={(event) => setCurrency(event.target.value)}
-						placeholder="USD"
-						maxLength={3}
-					/>
-				</div>
-				<div className="space-y-1.5 md:col-span-2">
 					<Label htmlFor="expense-amount">Monto</Label>
 					<Input
 						id="expense-amount"
@@ -108,6 +100,12 @@ export function CropExpenseForm({
 					/>
 				</div>
 			</div>
+
+			<CurrencySelectField
+				farmId={farmId}
+				value={selectedCurrencyId}
+				onChange={setCurrencyId}
+			/>
 
 			{categories.length > 0 ? (
 				<div className="space-y-1.5">

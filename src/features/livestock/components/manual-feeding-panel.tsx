@@ -1,14 +1,14 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { ManualFeedingActionRow } from "@/features/livestock/components/manual-feeding/manual-feeding-action-row";
-import { ManualFeedingConfirmation } from "@/features/livestock/components/manual-feeding/manual-feeding-confirmation";
 import { ManualFeedingFormSection } from "@/features/livestock/components/manual-feeding/manual-feeding-form-section";
-import { ManualFeedingHeader } from "@/features/livestock/components/manual-feeding/manual-feeding-header";
+import { ManualFeedingToggle } from "@/features/livestock/components/manual-feeding/manual-feeding-toggle";
 import { ManualFeedingStats } from "@/features/livestock/components/manual-feeding/manual-feeding-stats";
 import type { ManualFeedingPanelProps } from "@/features/livestock/components/manual-feeding/types";
+import { useManualFeedingForm } from "@/features/livestock/components/manual-feeding/use-manual-feeding-form";
 import { useManualFeedingMetrics } from "@/features/livestock/components/manual-feeding/use-manual-feeding-metrics";
-import { useManualFeedingProfile } from "@/features/livestock/components/manual-feeding/use-manual-feeding-profile";
 import { useManualFeedingSubmit } from "@/features/livestock/components/manual-feeding/use-manual-feeding-submit";
+import { SectionCard } from "@/components/common/section-card";
 import { Separator } from "@/components/ui/separator";
 
 export function ManualFeedingPanel({
@@ -16,9 +16,8 @@ export function ManualFeedingPanel({
 	consumerAssetId,
 	consumerAssetName,
 }: ManualFeedingPanelProps) {
-	const profileStorageId = `${farmId}:${consumerAssetId}`;
-	const { form, saveError, updateField, saveProfile, clearProfile } =
-		useManualFeedingProfile(farmId, profileStorageId);
+	const [isExpanded, setIsExpanded] = useState(false);
+	const { form, updateField } = useManualFeedingForm();
 
 	const selectedMaterialAssetId = Number(form.materialAssetId);
 	const hasSelectedMaterial = Number.isInteger(selectedMaterialAssetId);
@@ -29,8 +28,6 @@ export function ManualFeedingPanel({
 		selectedMaterial,
 		selectedMaterialOnHand,
 		todaysFeeds,
-		effectiveCountForSelectedMaterial,
-		effectiveLatestFeedAtForSelectedMaterial,
 		applyOptimisticFeed,
 	} = useManualFeedingMetrics({
 		farmId,
@@ -40,85 +37,62 @@ export function ManualFeedingPanel({
 		hasSelectedMaterial,
 	});
 
-	const {
-		feedError,
-		lastFeedAtIso,
-		needsExtraFeedConfirmation,
-		feedConfirmationMessage,
-		isSubmittingFeed,
-		clearFeedState,
-		handleLogFeedingNow,
-	} = useManualFeedingSubmit({
-		farmId,
-		consumerAssetId,
-		consumerAssetName,
-		form,
-		effectiveCountForSelectedMaterial,
-		effectiveLatestFeedAtForSelectedMaterial,
-		onFeedSuccess: applyOptimisticFeed,
-	});
-
-	const handleFieldChange = useCallback(
-		<K extends keyof typeof form>(field: K, value: (typeof form)[K]) => {
-			updateField(field, value);
-			clearFeedState();
-		},
-		[updateField, clearFeedState],
-	);
+	const { feedError, lastFeedAtIso, isSubmittingFeed, handleLogFeedingNow } =
+		useManualFeedingSubmit({
+			farmId,
+			consumerAssetId,
+			consumerAssetName,
+			form,
+			onFeedSuccess: applyOptimisticFeed,
+		});
 
 	const handleLogFeedingClick = useCallback(() => {
 		void handleLogFeedingNow();
 	}, [handleLogFeedingNow]);
 
-	const handleClearProfile = useCallback(() => {
-		clearProfile();
-		clearFeedState();
-	}, [clearProfile, clearFeedState]);
-
 	return (
-		<div className="v2-card p-4 flex flex-col gap-8">
-			<ManualFeedingHeader todayFeedCount={todaysFeeds.count} />
+		<SectionCard
+			title="Alimentacion manual"
+			description="Registra el alimento en el momento que lo das."
+			action={
+				<ManualFeedingToggle
+					todayFeedCount={todaysFeeds.count}
+					isExpanded={isExpanded}
+					onToggle={() => setIsExpanded((current) => !current)}
+				/>
+			}
+		>
+			{isExpanded ? (
+				<div className="flex flex-col gap-6">
+					<ManualFeedingFormSection
+						form={form}
+						materialOptions={materialOptions}
+						isLoadingMaterials={isLoadingMaterials}
+						onFieldChange={updateField}
+					/>
 
-			<ManualFeedingFormSection
-				form={form}
-				materialOptions={materialOptions}
-				isLoadingMaterials={isLoadingMaterials}
-				onFieldChange={handleFieldChange}
-			/>
+					<ManualFeedingActionRow
+						onLogFeeding={handleLogFeedingClick}
+						isSubmittingFeed={isSubmittingFeed}
+					/>
 
-			<ManualFeedingActionRow
-				onSaveProfile={saveProfile}
-				onClearProfile={handleClearProfile}
-				onLogFeeding={handleLogFeedingClick}
-				isSubmittingFeed={isSubmittingFeed}
-			/>
+					<Separator />
 
-			<Separator />
+					<ManualFeedingStats
+						selectedMaterialName={selectedMaterial?.name ?? null}
+						selectedMaterialOnHand={selectedMaterialOnHand}
+						unit={form.unit}
+						totalForSelectedMaterialAndUnit={
+							todaysFeeds.totalForSelectedMaterialAndUnit
+						}
+						lastFeedAtIso={lastFeedAtIso}
+					/>
 
-			<ManualFeedingConfirmation
-				isVisible={needsExtraFeedConfirmation}
-				message={feedConfirmationMessage}
-				isSubmittingFeed={isSubmittingFeed}
-				onConfirm={handleLogFeedingClick}
-				onCancel={clearFeedState}
-			/>
-
-			<ManualFeedingStats
-				selectedMaterialName={selectedMaterial?.name ?? null}
-				selectedMaterialOnHand={selectedMaterialOnHand}
-				unit={form.unit}
-				totalForSelectedMaterialAndUnit={
-					todaysFeeds.totalForSelectedMaterialAndUnit
-				}
-				lastFeedAtIso={lastFeedAtIso}
-			/>
-
-			{saveError ? (
-				<p className="mt-2 text-sm text-destructive">{saveError}</p>
+					{feedError ? (
+						<p className="text-sm text-destructive">{feedError}</p>
+					) : null}
+				</div>
 			) : null}
-			{feedError ? (
-				<p className="mt-2 text-sm text-destructive">{feedError}</p>
-			) : null}
-		</div>
+		</SectionCard>
 	);
 }

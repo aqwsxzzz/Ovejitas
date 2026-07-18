@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/common/empty-state";
 import { Label } from "@/components/ui/label";
+import { LoadingState } from "@/components/common/loading-state";
 import {
 	Select,
 	SelectContent,
@@ -9,8 +12,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useFarmCurrencyMap } from "@/features/currency/api/currency-queries";
+import { getCurrencyCode } from "@/features/currency/currency-utils";
 import { useListEventsByAssetId } from "@/features/livestock/api/livestock-queries";
-import type { LivestockEventType } from "@/features/livestock/types/livestock-types";
+import {
+	getEventTypeLabel,
+	type LivestockEventType,
+} from "@/features/livestock/types/livestock-types";
 import { MaterialPaginationControls } from "@/features/inventory/components/material-pagination-controls";
 import {
 	formatDate,
@@ -31,23 +39,13 @@ const EVENT_TYPE_FILTERS: Array<"all" | LivestockEventType> = [
 	"observation",
 ];
 
-const EVENT_TYPE_LABELS: Record<"all" | LivestockEventType, string> = {
-	all: "Todos",
-	production: "Producción",
-	expense: "Gasto",
-	income: "Ingreso",
-	observation: "Observación",
-	reproductive: "Reproductivo",
-	acquisition: "Adquisición",
-	mortality: "Mortalidad",
-	inventory: "Inventario",
-};
 
 export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 	const [page, setPage] = useState(1);
 	const [typeFilter, setTypeFilter] = useState<"all" | LivestockEventType>(
 		"all",
 	);
+	const { data: currencyCodeById } = useFarmCurrencyMap({ farmId });
 
 	const eventsQuery = useListEventsByAssetId({
 		farmId,
@@ -89,7 +87,7 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 										key={type}
 										value={type}
 									>
-										{EVENT_TYPE_LABELS[type]}
+										{getEventTypeLabel(type)}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -98,17 +96,18 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 				</div>
 
 				{eventsQuery.isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">Cargando eventos...</p>
+					<LoadingState message="Cargando eventos..." />
 				) : null}
 				{eventsQuery.error ? (
-					<p className="text-sm text-destructive">Error al cargar eventos.</p>
+					<ErrorState
+						description="No se pudieron cargar los eventos."
+						onRetry={() => void eventsQuery.refetch()}
+					/>
 				) : null}
 				{!eventsQuery.isLoading &&
 				!eventsQuery.error &&
 				(eventsQuery.data?.data ?? []).length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">
-						No hay eventos registrados.
-					</p>
+					<EmptyState title="No hay eventos registrados" />
 				) : null}
 
 				<div className="space-y-2">
@@ -118,7 +117,9 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 							className="rounded-lg border px-3 py-2 text-sm"
 						>
 							<div className="flex items-center justify-between gap-2">
-								<span className="font-medium">{EVENT_TYPE_LABELS[event.type] ?? event.type}</span>
+								<span className="font-medium">
+									{getEventTypeLabel(event.type)}
+								</span>
 								<span className="text-xs text-(--v2-ink-soft)">
 									{formatDate(event.occurred_at)}
 								</span>
@@ -128,9 +129,10 @@ export function CropTimelinePanel({ farmId, cropId }: CropTimelinePanelProps) {
 									{event.quantity} {event.unit}
 								</p>
 							) : null}
-							{event.amount && event.currency ? (
+							{event.amount != null ? (
 								<p className="mt-0.5 text-(--v2-ink-soft)">
-									{event.amount} {event.currency}
+									{event.amount}{" "}
+									{getCurrencyCode(currencyCodeById, event.currency_id)}
 								</p>
 							) : null}
 							{event.notes ? (

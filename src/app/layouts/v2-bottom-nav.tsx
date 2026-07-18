@@ -22,13 +22,38 @@ const moreItems = [
 	{ to: "/v2/settings", label: "Configuracion", icon: Settings },
 ] as const;
 
+function NavItemBody({
+	icon: Icon,
+	label,
+	isActive,
+}: {
+	icon: typeof Home;
+	label: string;
+	isActive: boolean;
+}) {
+	return (
+		<>
+			<span
+				className={`flex h-7 w-7 items-center justify-center rounded-md border ${
+					isActive
+						? "border-(--v2-charcoal) bg-(--v2-charcoal) text-(--v2-cream)"
+						: "border-(--v2-border) bg-(--v2-cream)"
+				}`}
+			>
+				<Icon className="h-4 w-4" />
+			</span>
+			<span>{label}</span>
+		</>
+	);
+}
+
 export function V2BottomNav() {
 	const location = useLocation();
 	const [open, setOpen] = useState(false);
 
 	return (
 		<>
-			<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-black/20 bg-(--v2-cream)/95 px-3 py-2 backdrop-blur md:px-6">
+			<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-(--v2-border) bg-(--v2-cream)/95 px-3 py-2 backdrop-blur md:px-6">
 				<div className="mx-auto flex w-full max-w-4xl items-end justify-between">
 					{navItems.map((item) => {
 						const isActive =
@@ -46,16 +71,7 @@ export function V2BottomNav() {
 									isActive ? "font-semibold text-(--v2-charcoal)" : "text-(--v2-stone)"
 								}`}
 							>
-								<span
-									className={`flex h-7 w-7 items-center justify-center rounded-md border ${
-										isActive
-											? "border-(--v2-charcoal) bg-(--v2-charcoal) text-(--v2-cream)"
-											: "border-black/25 bg-(--v2-cream)"
-									}`}
-								>
-									<Icon className="h-4 w-4" />
-								</span>
-								<span>{item.label}</span>
+								<NavItemBody icon={Icon} label={item.label} isActive={isActive} />
 							</Link>
 						);
 					})}
@@ -63,20 +79,11 @@ export function V2BottomNav() {
 					<Button
 						variant="ghost"
 						onClick={() => setOpen(true)}
-						className={`flex h-auto w-14 flex-col items-center gap-1 p-0 text-xs hover:bg-transparent ${
+						className={`flex h-auto w-14 flex-col items-center gap-1 p-0 text-xs hover:bg-transparent hover:text-inherit dark:hover:bg-transparent ${
 							open ? "font-semibold text-(--v2-charcoal)" : "text-(--v2-stone)"
 						}`}
 					>
-						<span
-							className={`flex h-7 w-7 items-center justify-center rounded-md border ${
-								open
-									? "border-(--v2-charcoal) bg-(--v2-charcoal) text-(--v2-cream)"
-									: "border-black/25 bg-(--v2-cream)"
-							}`}
-						>
-							<Ellipsis className="h-4 w-4" />
-						</span>
-						<span>Mas</span>
+						<NavItemBody icon={Ellipsis} label="Mas" isActive={open} />
 					</Button>
 				</div>
 			</nav>
@@ -98,7 +105,7 @@ export function V2BottomNav() {
 								<SheetClose asChild key={item.to}>
 									<Link
 										to={item.to}
-										className="flex items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-black/5"
+										className="flex items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-(--v2-surface-raised)"
 									>
 										<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-(--v2-mint-100) text-(--v2-emerald-600)">
 											<Icon className="h-4 w-4" />

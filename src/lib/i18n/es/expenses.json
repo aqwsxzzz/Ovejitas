@@ -89,7 +89,8 @@
     "validation": {
       "amountRequired": "El monto es obligatorio",
       "amountPositive": "El monto debe ser mayor a 0",
-      "speciesRequired": "La especie es obligatoria"
+      "speciesRequired": "La especie es obligatoria",
+      "descriptionMaxLength": "La descripción debe tener menos de 400 caracteres"
     }
   },
   "enums": {

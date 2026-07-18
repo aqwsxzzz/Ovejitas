@@ -71,7 +71,6 @@ export function CreateLocationAssetDialog({
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
 					kind: "location",
-					mode: "aggregated",
 				},
 			});
 

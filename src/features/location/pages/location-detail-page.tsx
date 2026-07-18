@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { useGetLivestockAssetById } from "@/features/livestock/api/livestock-queries";
@@ -30,11 +31,13 @@ export function LocationDetailPage({ locationId }: LocationDetailPageProps) {
 	}
 
 	if (!hasValidAssetId) {
-		return <p className="text-sm text-destructive">ID de ubicación no válido.</p>;
+		return (
+			<p className="text-sm text-destructive">ID de ubicación no válido.</p>
+		);
 	}
 
 	if (isLoading) {
-		return <p className="text-sm text-(--v2-ink-soft)">Cargando ubicación...</p>;
+		return <LoadingState message="Cargando ubicación..." />;
 	}
 
 	if (!asset || asset.kind !== "location") {
@@ -55,7 +58,10 @@ export function LocationDetailPage({ locationId }: LocationDetailPageProps) {
 	return (
 		<section className="space-y-4">
 			<FlockHeaderCard asset={asset} />
-			<LocationTimelinePanel farmId={farmId} locationId={locationId} />
+			<LocationTimelinePanel
+				farmId={farmId}
+				locationId={locationId}
+			/>
 		</section>
 	);
 }

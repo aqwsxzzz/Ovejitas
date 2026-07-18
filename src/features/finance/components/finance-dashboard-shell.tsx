@@ -565,7 +565,7 @@ export function FinanceDashboardShell({
 }: FinanceDashboardShellProps) {
 	return (
 		<div className="space-y-4 pb-6">
-			<section className="rounded-3xl border-0 bg-linear-to-br from-muted via-white to-success/10 p-5 shadow-sm">
+			<section className="v2-card p-5 md:p-6">
 				<div className="flex items-start justify-between gap-3">
 					<div>
 						<p className="v2-kicker">Finanzas</p>
@@ -650,6 +650,9 @@ export function FinanceDashboardShell({
 							value="profitability"
 							className="space-y-4"
 						>
+							<p className="text-xs text-(--v2-ink-soft)">
+								Neto operativo, sin el alimento consumido.
+							</p>
 							<div className="space-y-2">
 								<div className="flex items-center justify-between gap-2">
 									<p className="text-sm font-medium">Activos mas rentables</p>

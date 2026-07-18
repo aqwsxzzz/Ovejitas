@@ -44,13 +44,15 @@ export function FlockHeaderCard({ asset }: FlockHeaderCardProps) {
 					)}
 					<div className="flex items-center gap-2">
 						<Badge variant="kind">{toKindLabel(asset)}</Badge>
-						<Badge variant="mode">{toModeLabel(asset)}</Badge>
+						{toModeLabel(asset) ? (
+							<Badge variant="mode">{toModeLabel(asset)}</Badge>
+						) : null}
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
 					<h1
-						className="text-3xl font-bold leading-tight md:text-[2.35rem]"
-						style={{ color: "#006847", fontFamily: "var(--v2-font-display)" }}
+						className="text-3xl font-bold leading-tight text-(--v2-emerald-700) md:text-[2.35rem]"
+						style={{ fontFamily: "var(--v2-font-display)" }}
 					>
 						{asset.name}
 					</h1>

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { MapPin, Package } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/common/empty-state";
 import { Input } from "@/components/ui/input";
+import { LoadingState } from "@/components/common/loading-state";
+import { SearchBar } from "@/components/common/search-bar";
 import { Textarea } from "@/components/ui/textarea";
 
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
@@ -12,38 +15,11 @@ import {
 	useUpdateLivestockAssetById,
 } from "@/features/livestock/api/livestock-queries";
 
-interface SearchBarProps {
-	value: string;
-	onChange: (value: string) => void;
-}
-
-function SearchBar({ value, onChange }: SearchBarProps) {
-	return (
-		<div className="flex items-center gap-2 rounded-xl border border-dashed border-(--v2-border) bg-white px-3 py-2.5">
-			<span
-				className="text-base"
-				aria-hidden="true"
-			>
-				🔍
-			</span>
-			<Input
-				type="search"
-				value={value}
-				onChange={(event) => onChange(event.target.value)}
-				placeholder="Buscar material por nombre o ubicacion..."
-				className="h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
-				aria-label="Buscar materiales"
-			/>
-		</div>
-	);
-}
-
 function MaterialAssetRow(props: {
 	id: number;
 	name: string;
 	location: string | null;
 	description: string | null;
-	mode: "aggregated" | "individual";
 	isEditing: boolean;
 	isDeleting: boolean;
 	isSaving: boolean;
@@ -140,24 +116,20 @@ function MaterialAssetRow(props: {
 						<Package className="h-5 w-5" />
 					</div>
 					<div className="min-w-0">
-						<div className="flex flex-wrap items-center gap-2">
+						<div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
 							<p className="font-semibold leading-tight">{props.name}</p>
-							<span
-								className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-									props.mode === "individual"
-										? "bg-info/10 text-info"
-										: "bg-(--v2-surface) text-(--v2-ink-soft)"
-								}`}
-							>
-								{props.mode === "individual" ? "Individual" : "Agrupado"}
-							</span>
+							{props.location ? (
+								<span className="flex items-center gap-1 text-sm text-(--v2-ink-soft)">
+									<MapPin className="h-3.5 w-3.5 shrink-0" />
+									{props.location}
+								</span>
+							) : null}
 						</div>
-						<div className="mt-1 flex items-center gap-1">
-							<MapPin className="h-4 w-4 shrink-0 text-(--v2-ink-soft)" />
-							<p className="text-sm text-(--v2-ink-soft)">
-								{props.location ?? "Sin ubicacion"}
+						{props.description ? (
+							<p className="mt-1 line-clamp-2 text-sm text-(--v2-ink-soft)">
+								{props.description}
 							</p>
-						</div>
+						) : null}
 					</div>
 				</div>
 				{isConfirmingDelete ? null : (
@@ -327,14 +299,23 @@ export function InventoryPage() {
 			<SearchBar
 				value={query}
 				onChange={setQuery}
+				placeholder="Buscar material por nombre o ubicacion..."
+				ariaLabel="Buscar materiales"
 			/>
 
 			{isLoading ? (
-				<p className="text-sm text-(--v2-ink-soft)">Cargando materiales...</p>
+				<LoadingState message="Cargando materiales..." />
 			) : materials.length === 0 ? (
-				<p className="text-sm text-(--v2-ink-soft)">
-					No hay materiales reales que coincidan con "{query}".
-				</p>
+				<EmptyState
+					title={
+						query ? `Sin resultados para "${query}"` : "Aun no hay materiales"
+					}
+					description={
+						query
+							? "Prueba con otro nombre o ubicacion."
+							: "Crea tu primer material para empezar a controlar el stock."
+					}
+				/>
 			) : (
 				<div className="space-y-2">
 					{materials.map((material) => (
@@ -344,7 +325,6 @@ export function InventoryPage() {
 							name={material.name}
 							location={material.location}
 							description={material.description}
-							mode={material.mode}
 							isEditing={editingAssetId === material.id}
 							isDeleting={deletingAssetId === material.id}
 							isSaving={

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { LoadingState } from "@/components/common/loading-state";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { useGetLivestockAssetById } from "@/features/livestock/api/livestock-queries";
 import { FlockHeaderCard } from "@/features/livestock/components/flock-detail/flock-header-card";
@@ -34,7 +35,7 @@ export function EquipmentDetailPage({ equipmentId }: EquipmentDetailPageProps) {
 	}
 
 	if (isLoading) {
-		return <p className="text-sm text-(--v2-ink-soft)">Cargando equipo...</p>;
+		return <LoadingState message="Cargando equipo..." />;
 	}
 
 	if (!asset || asset.kind !== "equipment") {
@@ -55,7 +56,10 @@ export function EquipmentDetailPage({ equipmentId }: EquipmentDetailPageProps) {
 	return (
 		<section className="space-y-4">
 			<FlockHeaderCard asset={asset} />
-			<EquipmentTimelinePanel farmId={farmId} equipmentId={equipmentId} />
+			<EquipmentTimelinePanel
+				farmId={farmId}
+				equipmentId={equipmentId}
+			/>
 		</section>
 	);
 }

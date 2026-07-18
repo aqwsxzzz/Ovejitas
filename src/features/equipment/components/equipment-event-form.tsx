@@ -12,12 +12,15 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
+import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
 import type { ILivestockEventCategory } from "@/features/livestock/types/livestock-types";
 import type { LivestockEventCreatePayload } from "@/features/livestock/api/livestock-api";
 
 type EquipmentEventType = "expense" | "income" | "observation";
 
 interface EquipmentEventFormProps {
+	farmId: string;
 	categories: ILivestockEventCategory[];
 	isSubmitting: boolean;
 	errorMessage: string | null;
@@ -31,6 +34,7 @@ const TYPE_LABELS: Record<EquipmentEventType, string> = {
 };
 
 export function EquipmentEventForm({
+	farmId,
 	categories,
 	isSubmitting,
 	errorMessage,
@@ -39,6 +43,9 @@ export function EquipmentEventForm({
 	const [eventType, setEventType] = useState<EquipmentEventType>("expense");
 	const [occurredAt, setOccurredAt] = useState(new Date().toISOString().slice(0, 16));
 	const [amount, setAmount] = useState("");
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
+	const [currencyId, setCurrencyId] = useState<number | undefined>(undefined);
+	const selectedCurrencyId = currencyId ?? defaultCurrencyId;
 	const [categoryId, setCategoryId] = useState<string>("none");
 	const [notes, setNotes] = useState("");
 	const [localError, setLocalError] = useState<string | null>(null);
@@ -76,6 +83,7 @@ export function EquipmentEventForm({
 				type: eventType,
 				occurred_at: new Date(occurredAt).toISOString(),
 				amount: parsedAmount,
+				currency_id: selectedCurrencyId,
 				category_id: categoryId !== "none" ? Number(categoryId) : undefined,
 				notes: notes.trim() || undefined,
 			});
@@ -119,18 +127,25 @@ export function EquipmentEventForm({
 				</div>
 
 				{(eventType === "expense" || eventType === "income") ? (
-					<div className="space-y-1.5 sm:col-span-2">
-						<Label htmlFor="eq-amount">Monto</Label>
-						<Input
-							id="eq-amount"
-							type="number"
-							min="0"
-							step="0.01"
-							value={amount}
-							onChange={(e) => setAmount(e.target.value)}
-							placeholder="0.00"
+					<>
+						<div className="space-y-1.5">
+							<Label htmlFor="eq-amount">Monto</Label>
+							<Input
+								id="eq-amount"
+								type="number"
+								min="0"
+								step="0.01"
+								value={amount}
+								onChange={(e) => setAmount(e.target.value)}
+								placeholder="0.00"
+							/>
+						</div>
+						<CurrencySelectField
+							farmId={farmId}
+							value={selectedCurrencyId}
+							onChange={setCurrencyId}
 						/>
-					</div>
+					</>
 				) : null}
 			</div>
 

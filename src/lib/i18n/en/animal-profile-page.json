@@ -1,9 +1,0 @@
-{
-    "defaultTitle": "Animal Details",
-    "description": "View and manage animal information",
-    "quickActions": {
-        "healthCheck": "Health Check",
-        "breeding": "Breeding",
-        "notes": "Notes"
-    }
-}

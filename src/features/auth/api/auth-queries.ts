@@ -45,10 +45,11 @@ export const useSignUp = () => {
 	return useMutation({
 		mutationFn: ({ payload }: { payload: ISignUpPayload }) =>
 			signup({ payload }),
-		onSuccess: () => {
-			toast.success("Account created successfully");
+		onSuccess: (_data, { payload }) => {
+			toast.success("Cuenta creada con éxito");
 			navigate({
 				to: "/v2/login",
+				search: { email: payload.email },
 			});
 		},
 		onError: (error) => {

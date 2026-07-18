@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { ErrorState } from "@/components/common/error-state";
+import { EmptyState } from "@/components/common/empty-state";
+import { LoadingState } from "@/components/common/loading-state";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -10,7 +13,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useListEventsByAssetId } from "@/features/livestock/api/livestock-queries";
-import type { LivestockEventType } from "@/features/livestock/types/livestock-types";
+import {
+	getEventTypeLabel,
+	type LivestockEventType,
+} from "@/features/livestock/types/livestock-types";
 import { MaterialPaginationControls } from "@/features/inventory/components/material-pagination-controls";
 import {
 	formatDate,
@@ -84,7 +90,7 @@ export function MaterialTimelinePanel({
 										key={type}
 										value={type}
 									>
-										{type}
+										{getEventTypeLabel(type)}
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -92,15 +98,18 @@ export function MaterialTimelinePanel({
 					</div>
 				</div>
 				{timelineQuery.isLoading ? (
-					<p className="text-sm text-(--v2-ink-soft)">Loading movements...</p>
+					<LoadingState message="Cargando movimientos..." />
 				) : null}
 				{timelineQuery.error ? (
-					<p className="text-sm text-destructive">Failed to load movements.</p>
+					<ErrorState
+						description="No se pudieron cargar los movimientos."
+						onRetry={() => void timelineQuery.refetch()}
+					/>
 				) : null}
 				{!timelineQuery.isLoading &&
 				!timelineQuery.error &&
 				(timelineQuery.data?.data ?? []).length === 0 ? (
-					<p className="text-sm text-(--v2-ink-soft)">No movements yet.</p>
+					<EmptyState title="Sin movimientos aún" />
 				) : null}
 				<div className="space-y-2">
 					{(timelineQuery.data?.data ?? []).map((event) => (
@@ -108,7 +117,7 @@ export function MaterialTimelinePanel({
 							key={event.id}
 							className="rounded-lg border px-3 py-2 text-sm"
 						>
-							<p className="font-medium">{event.type}</p>
+							<p className="font-medium">{getEventTypeLabel(event.type)}</p>
 							<p className="text-(--v2-ink-soft)">
 								{formatDate(event.occurred_at)}
 							</p>

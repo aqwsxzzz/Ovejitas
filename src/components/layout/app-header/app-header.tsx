@@ -1,12 +1,12 @@
 import { DropdownHeaderMenu } from "@/components/layout/app-header/components/dropdown-header-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { IUser } from "@/features/auth/types/auth-types";
-import { useGetFarmById } from "@/features/farm/api/farm-queries";
+import { useGetV1FarmById } from "@/features/farm/api/farm-queries";
 import { useParams } from "@tanstack/react-router";
 
 export const AppHeader = ({ userData }: { userData: IUser }) => {
 	const { farmId } = useParams({ strict: false });
-	const { data: farmData } = useGetFarmById(farmId!);
+	const { data: farmData } = useGetV1FarmById(farmId ?? "");
 
 	return (
 		<div className="bg-card h-16 flex items-center justify-between px-4 w-screen">

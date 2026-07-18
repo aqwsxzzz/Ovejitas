@@ -7,9 +7,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { ProductionProductivityReport } from "@/features/reports/components/production-productivity-report";
 import { CostPerUnitReport } from "@/features/reports/components/cost-per-unit-report";
 import { ProductionReport } from "@/features/reports/components/production-report";
 import { ProfitabilityReport } from "@/features/reports/components/profitability-report";
+import { SalesValueReport } from "@/features/reports/components/sales-value-report";
 import type { FinanceFilters, FinanceReportType } from "@/features/finance/finance-types";
 import { formatAssetKind, toApiDateTime } from "@/features/finance/finance-utils";
 
@@ -23,6 +25,8 @@ const REPORT_OPTIONS: Array<{ value: FinanceReportType; label: string }> = [
 	{ value: "income-trend", label: "Ingresos por periodo" },
 	{ value: "expense-trend", label: "Gastos por periodo" },
 	{ value: "cost-per-unit", label: "Costo por unidad" },
+	{ value: "production-productivity", label: "Productividad de producción" },
+	{ value: "sales-value", label: "Valor de venta por unidad" },
 ];
 
 export const FinanceReportBuilder = ({
@@ -110,6 +114,20 @@ export const FinanceReportBuilder = ({
 					dateFrom={dateFrom}
 					dateTo={dateTo}
 					assetId={filters.assetId}
+				/>
+			)}
+			{reportType === "production-productivity" && dateFrom && dateTo && (
+				<ProductionProductivityReport
+					farmId={farmId}
+					dateFrom={dateFrom}
+					dateTo={dateTo}
+				/>
+			)}
+			{reportType === "sales-value" && (
+				<SalesValueReport
+					farmId={farmId}
+					dateFrom={dateFrom}
+					dateTo={dateTo}
 				/>
 			)}
 		</div>

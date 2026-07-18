@@ -6,23 +6,59 @@ import {
 	useCreateFlockSaleByAssetId,
 	useGetAggregatedHeadcountByAssetId,
 } from "@/features/livestock/api/livestock-queries";
+import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
+
+import {
+	isBackdatedDraft,
+	parseHeadcount,
+	resolveFlockMovement,
+	resolveOccurredAt,
+	resolvePendingKind,
+	toDateInputValue,
+	type FlockMovement,
+	type FlockMovementKind,
+} from "./flock-headcount-movement";
+import {
+	useFlockHeadcountDrafts,
+	type FlockHeadcountDrafts,
+} from "./use-flock-headcount-drafts";
+
+const MORTALITY_CAUSE = "Ajuste manual de conteo";
 
 interface UseFlockHeadcountAdjustmentParams {
 	farmId: string;
 	unitId: string;
 }
 
+export interface UseFlockHeadcountAdjustmentResult {
+	isAdjustingHeadcount: boolean;
+	drafts: FlockHeadcountDrafts;
+	patchDrafts: (patch: Partial<FlockHeadcountDrafts>) => void;
+	headcountError: string;
+	aggregatedActiveCount: number;
+	isAggregatedHeadcountPending: boolean;
+	isBackdated: boolean;
+	/** Upper bound for the date field — the flock can't change before it happens. */
+	todayValue: string;
+	headcountDeltaPreview: number | null;
+	pendingKind: FlockMovementKind | null;
+	/** Farm scope for the currency picker. */
+	farmId: string;
+	/** Sticky/default currency to preselect when the draft has none. */
+	defaultCurrencyId: number | undefined;
+	openHeadcountAdjustment: () => void;
+	closeHeadcountAdjustment: () => void;
+	handleApplyHeadcountAdjustment: () => Promise<void>;
+	isApplying: boolean;
+}
+
 export function useFlockHeadcountAdjustment({
 	farmId,
 	unitId,
-}: UseFlockHeadcountAdjustmentParams) {
+}: UseFlockHeadcountAdjustmentParams): UseFlockHeadcountAdjustmentResult {
 	const [isAdjustingHeadcount, setIsAdjustingHeadcount] = useState(false);
-	const [headcountDraft, setHeadcountDraft] = useState("");
-	const [headcountAmountDraft, setHeadcountAmountDraft] = useState("");
-	const [headcountDecreaseMode, setHeadcountDecreaseMode] = useState<
-		"mortality" | "sale"
-	>("mortality");
 	const [headcountError, setHeadcountError] = useState("");
+	const { drafts, patchDrafts, resetDrafts } = useFlockHeadcountDrafts();
 
 	const { data: aggregatedHeadcount, isPending: isAggregatedHeadcountPending } =
 		useGetAggregatedHeadcountByAssetId({
@@ -33,120 +69,140 @@ export function useFlockHeadcountAdjustment({
 	const createFlockAcquisitionMutation = useCreateFlockAcquisitionByAssetId();
 	const createFlockSaleMutation = useCreateFlockSaleByAssetId();
 	const createFlockMortalityMutation = useCreateFlockMortalityByAssetId();
+	const defaultCurrencyId = useDefaultCurrencyId(farmId);
 
 	const aggregatedActiveCount = aggregatedHeadcount?.net ?? 0;
-	const parsedHeadcountTarget = useMemo(() => {
-		const parsed = Number(headcountDraft);
-		if (!Number.isFinite(parsed)) return null;
-		return Math.max(0, Math.floor(parsed));
-	}, [headcountDraft]);
+	const todayValue = toDateInputValue(new Date());
+	const isBackdated = useMemo(
+		() => isBackdatedDraft(drafts.occurredOn, new Date()),
+		[drafts.occurredOn],
+	);
 	const headcountDeltaPreview = useMemo(() => {
-		if (parsedHeadcountTarget == null) return null;
-		return parsedHeadcountTarget - aggregatedActiveCount;
-	}, [parsedHeadcountTarget, aggregatedActiveCount]);
+		if (isBackdated) return null;
+		const target = parseHeadcount(drafts.target);
+		return target == null ? null : target - aggregatedActiveCount;
+	}, [isBackdated, drafts.target, aggregatedActiveCount]);
+	const pendingKind = resolvePendingKind(
+		{
+			isBackdated,
+			movementType: drafts.movementType,
+			decreaseMode: drafts.decreaseMode,
+		},
+		headcountDeltaPreview,
+	);
 
 	const openHeadcountAdjustment = useCallback(() => {
 		setHeadcountError("");
-		setHeadcountDraft(String(aggregatedActiveCount));
-		setHeadcountAmountDraft("");
-		setHeadcountDecreaseMode("mortality");
+		resetDrafts(aggregatedActiveCount);
 		setIsAdjustingHeadcount(true);
-	}, [aggregatedActiveCount]);
+	}, [aggregatedActiveCount, resetDrafts]);
 	const closeHeadcountAdjustment = useCallback(() => {
 		setIsAdjustingHeadcount(false);
 		setHeadcountError("");
-		setHeadcountAmountDraft("");
-		setHeadcountDecreaseMode("mortality");
 	}, []);
 
-	const handleApplyHeadcountAdjustment = useCallback(async () => {
-		const parsedTarget = Number(headcountDraft);
-		const target = Number.isFinite(parsedTarget)
-			? Math.max(0, Math.floor(parsedTarget))
-			: NaN;
-		if (!Number.isFinite(target))
-			return setHeadcountError("Ingresa un conteo valido.");
+	const submitMovement = useCallback(
+		async (
+			movement: FlockMovement,
+			occurredAt: string,
+			currencyId: number | undefined,
+		) => {
+			const target = { farmId, assetId: unitId };
+			switch (movement.kind) {
+				case "acquisition":
+					await createFlockAcquisitionMutation.mutateAsync({
+						...target,
+						payload: {
+							occurred_at: occurredAt,
+							quantity: movement.quantity,
+							amount: movement.amount,
+							currency_id: movement.amount != null ? currencyId : undefined,
+						},
+					});
+					return;
+				case "sale":
+					await createFlockSaleMutation.mutateAsync({
+						...target,
+						payload: {
+							occurred_at: occurredAt,
+							quantity: movement.quantity,
+							amount: movement.amount,
+							currency_id: currencyId,
+						},
+					});
+					return;
+				case "mortality":
+					await createFlockMortalityMutation.mutateAsync({
+						...target,
+						payload: {
+							occurred_at: occurredAt,
+							quantity: movement.quantity,
+							cause: MORTALITY_CAUSE,
+						},
+					});
+					return;
+				default: {
+					const exhaustive: never = movement;
+					return exhaustive;
+				}
+			}
+		},
+		[
+			farmId,
+			unitId,
+			createFlockAcquisitionMutation,
+			createFlockSaleMutation,
+			createFlockMortalityMutation,
+		],
+	);
 
-		const delta = target - aggregatedActiveCount;
-		if (delta === 0) return closeHeadcountAdjustment();
+	const handleApplyHeadcountAdjustment = useCallback(async () => {
+		const occurredAt = resolveOccurredAt(drafts.occurredOn, new Date());
+		if (occurredAt == null) {
+			return setHeadcountError("Ingresa una fecha valida.");
+		}
+
+		const result = resolveFlockMovement({
+			isBackdated,
+			currentCount: aggregatedActiveCount,
+			targetDraft: drafts.target,
+			quantityDraft: drafts.quantity,
+			amountDraft: drafts.amount,
+			decreaseMode: drafts.decreaseMode,
+			movementType: drafts.movementType,
+		});
+		if (result.status === "error") return setHeadcountError(result.message);
+		if (result.status === "noop") return closeHeadcountAdjustment();
 
 		setHeadcountError("");
-		if (delta > 0) {
-			const parsedAmount = Number(headcountAmountDraft);
-			const hasAmount = headcountAmountDraft.trim().length > 0;
-			if (hasAmount && (!Number.isFinite(parsedAmount) || parsedAmount < 0)) {
-				return setHeadcountError("Ingresa un costo valido o dejalo vacio.");
-			}
-			await createFlockAcquisitionMutation.mutateAsync({
-				farmId,
-				assetId: unitId,
-				payload: {
-					occurred_at: new Date().toISOString(),
-					quantity: delta,
-					amount: hasAmount ? parsedAmount : null,
-				},
-			});
-			return closeHeadcountAdjustment();
-		}
-
-		if (headcountDecreaseMode === "sale") {
-			const parsedAmount = Number(headcountAmountDraft);
-			if (
-				headcountAmountDraft.trim().length === 0 ||
-				!Number.isFinite(parsedAmount) ||
-				parsedAmount < 0
-			) {
-				return setHeadcountError(
-					"Para una venta debes ingresar un ingreso valido.",
-				);
-			}
-			await createFlockSaleMutation.mutateAsync({
-				farmId,
-				assetId: unitId,
-				payload: {
-					occurred_at: new Date().toISOString(),
-					quantity: Math.abs(delta),
-					amount: parsedAmount,
-				},
-			});
-			return closeHeadcountAdjustment();
-		}
-
-		await createFlockMortalityMutation.mutateAsync({
-			farmId,
-			assetId: unitId,
-			payload: {
-				occurred_at: new Date().toISOString(),
-				quantity: Math.abs(delta),
-				cause: "Ajuste manual de conteo",
-			},
-		});
+		await submitMovement(
+			result.movement,
+			occurredAt.toISOString(),
+			drafts.currencyId ?? defaultCurrencyId,
+		);
 		closeHeadcountAdjustment();
 	}, [
-		farmId,
-		unitId,
-		headcountDraft,
-		headcountAmountDraft,
-		headcountDecreaseMode,
+		drafts,
+		isBackdated,
 		aggregatedActiveCount,
-		createFlockAcquisitionMutation,
-		createFlockSaleMutation,
-		createFlockMortalityMutation,
+		submitMovement,
 		closeHeadcountAdjustment,
+		defaultCurrencyId,
 	]);
 
 	return {
 		isAdjustingHeadcount,
-		headcountDraft,
-		headcountAmountDraft,
-		headcountDecreaseMode,
+		drafts,
+		patchDrafts,
 		headcountError,
 		aggregatedActiveCount,
 		isAggregatedHeadcountPending,
+		isBackdated,
+		todayValue,
 		headcountDeltaPreview,
-		setHeadcountDraft,
-		setHeadcountAmountDraft,
-		setHeadcountDecreaseMode,
+		pendingKind,
+		farmId,
+		defaultCurrencyId,
 		openHeadcountAdjustment,
 		closeHeadcountAdjustment,
 		handleApplyHeadcountAdjustment,

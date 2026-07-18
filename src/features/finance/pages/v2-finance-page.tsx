@@ -204,7 +204,7 @@ export function V2FinancePage() {
 
 	if (!hasFarm) {
 		return (
-			<section className="rounded-3xl border-0 bg-card/90 p-5 shadow-sm">
+			<section className="v2-card p-5 md:p-6">
 				<p className="v2-kicker">Finanzas</p>
 				<h1 className="mt-2 text-2xl font-semibold tracking-tight">Finanzas</h1>
 				<p className="mt-1 text-sm text-muted-foreground">

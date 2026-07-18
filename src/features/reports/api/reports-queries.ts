@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
 	getProfitabilityReport,
+	getProfitabilityFullReport,
 	getAggregateReport,
 	getCostPerUnitReport,
 	getTimelineReport,
@@ -8,15 +9,22 @@ import {
 	getMaterialConsumptionAggregateReport,
 	getProfitabilityReportPdf,
 	getCostPerUnitReportPdf,
+	getUpcomingBirthsReport,
+	getProductionProductivityReport,
+	getSalesValueReport,
 } from "@/features/reports/api/reports-api";
 import type {
 	IProfitabilityReportParams,
+	IProfitabilityFullReportParams,
 	IAggregateReportParams,
 	ICostPerUnitReportParams,
 	ITimelineReportParams,
 	IInventorySummaryReportParams,
 	IMaterialConsumptionAggregateReportParams,
 	IReportPdfParams,
+	IUpcomingBirthsReportParams,
+	IProductionProductivityReportParams,
+	ISalesValueReportParams,
 } from "@/features/reports/types/reports-types";
 
 export const reportsQueryKeys = {
@@ -59,6 +67,19 @@ export const reportsQueryKeys = {
 		[
 			...reportsQueryKeys.farm(farmId),
 			"profitability",
+			dateFrom ?? null,
+			dateTo ?? null,
+			assetId ?? null,
+		] as const,
+	profitabilityFull: (
+		farmId: string | number,
+		dateFrom?: string,
+		dateTo?: string,
+		assetId?: number,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"profitability-full",
 			dateFrom ?? null,
 			dateTo ?? null,
 			assetId ?? null,
@@ -133,6 +154,31 @@ export const reportsQueryKeys = {
 			dateFrom ?? null,
 			dateTo ?? null,
 		] as const,
+	upcomingBirths: (farmId: string | number, dateFrom: string, dateTo: string) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"upcoming-births",
+			dateFrom,
+			dateTo,
+		] as const,
+	productionProductivity: (
+		farmId: string | number,
+		dateFrom: string,
+		dateTo: string,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"production-productivity",
+			dateFrom,
+			dateTo,
+		] as const,
+	salesValue: (farmId: string | number, dateFrom?: string, dateTo?: string) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"sales-value",
+			dateFrom ?? null,
+			dateTo ?? null,
+		] as const,
 };
 
 /**
@@ -174,6 +220,25 @@ export const useGetAggregateReport = (
 			params.group_by,
 		),
 		queryFn: () => getAggregateReport(params),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Get profitability-full report — income minus direct expense AND consumed feed.
+ * Use this for the all-in bottom line; plain `useGetProfitabilityReport` excludes feed.
+ */
+export const useGetProfitabilityFullReport = (
+	params: IProfitabilityFullReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.profitabilityFull(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+			params.asset_id,
+		),
+		queryFn: () => getProfitabilityFullReport(params),
 		enabled: enabled && !!params.farmId,
 	});
 
@@ -256,6 +321,60 @@ export const useGetMaterialConsumptionAggregateReport = (
 			params.date_to,
 		),
 		queryFn: () => getMaterialConsumptionAggregateReport(params),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Get upcoming births (individuals due within a required date window)
+ */
+export const useGetUpcomingBirthsReport = (
+	params: IUpcomingBirthsReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.upcomingBirths(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getUpcomingBirthsReport(params),
+		enabled:
+			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
+	});
+
+/**
+ * Get production productivity (produced vs expected per asset × product,
+ * required date window)
+ */
+export const useGetProductionProductivityReport = (
+	params: IProductionProductivityReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.productionProductivity(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getProductionProductivityReport(params),
+		enabled:
+			enabled && !!params.farmId && !!params.date_from && !!params.date_to,
+	});
+
+/**
+ * Get realized sale value per unit, per asset
+ */
+export const useGetSalesValueReport = (
+	params: ISalesValueReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.salesValue(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+		),
+		queryFn: () => getSalesValueReport(params),
 		enabled: enabled && !!params.farmId,
 	});
 

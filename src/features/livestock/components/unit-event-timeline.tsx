@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
-import type {
-	ILivestockEvent,
-	ILivestockEventCategory,
+import { getCurrencyCode } from "@/features/currency/currency-utils";
+import {
+	getEventTypeLabel,
+	type ILivestockEvent,
+	type ILivestockEventCategory,
 } from "@/features/livestock/types/livestock-types";
+import { formatProductionQuantity } from "@/features/reports/utils/reports-format";
 
 interface UnitEventTimelineProps {
 	events: ILivestockEvent[];
 	categories: ILivestockEventCategory[];
+	currencyCodeById?: Map<number, string>;
 	onEditEvent?: (event: ILivestockEvent) => void;
 	onDeleteEvent?: (event: ILivestockEvent) => Promise<void>;
 	deletingEventId?: number | null;
@@ -23,27 +27,6 @@ function canDeleteEvent(event: ILivestockEvent): boolean {
 
 function isActionOwnedEvent(event: ILivestockEvent): boolean {
 	return typeof event.payload.source === "string";
-}
-
-function eventTypeLabel(type: ILivestockEvent["type"]): string {
-	switch (type) {
-		case "production":
-			return "Produccion";
-		case "income":
-			return "Ingreso";
-		case "expense":
-			return "Gasto";
-		case "observation":
-			return "Observacion";
-		case "reproductive":
-			return "Reproductivo";
-		case "acquisition":
-			return "Adquisicion";
-		case "mortality":
-			return "Mortalidad";
-		default:
-			return type;
-	}
 }
 
 function categoryLabel(
@@ -74,6 +57,7 @@ function getEventStatus(event: ILivestockEvent): "logged" | "planned" {
 export function UnitEventTimeline({
 	events,
 	categories,
+	currencyCodeById,
 	onEditEvent,
 	onDeleteEvent,
 	deletingEventId,
@@ -96,20 +80,22 @@ export function UnitEventTimeline({
 				return (
 					<article
 						key={event.id}
-						className="rounded-xl border border-(--v2-border) bg-white px-3 py-2"
+						className="rounded-xl border border-(--v2-border) bg-(--v2-surface) px-3 py-2"
 					>
 						<div className="flex items-center justify-between gap-2">
 							<p className="text-sm font-semibold leading-tight">
-								{categoryLabel(categories, event.category_id)}
+								{getEventTypeLabel(event.type)}
 							</p>
 							<span className="text-xs text-(--v2-ink-soft)">
 								{formatEventDate(event.occurred_at)}
 							</span>
 						</div>
 						<div className="mt-1 flex items-center gap-2 text-xs text-(--v2-ink-soft)">
-							<span className="rounded-full border border-(--v2-border) px-2 py-0.5">
-								{eventTypeLabel(event.type)}
-							</span>
+							{event.category_id ? (
+								<span className="rounded-full border border-(--v2-border) px-2 py-0.5">
+									{categoryLabel(categories, event.category_id)}
+								</span>
+							) : null}
 							<span
 								className={`rounded-full px-2 py-0.5 ${
 									status === "logged"
@@ -120,11 +106,15 @@ export function UnitEventTimeline({
 								{status === "logged" ? "Registrado" : "Planificado"}
 							</span>
 							{event.quantity != null ? (
-								<span>Cantidad: {Number(event.quantity)}</span>
+								<span>
+									Cantidad:{" "}
+									{formatProductionQuantity(event.quantity, event.unit)}
+								</span>
 							) : null}
 							{event.amount != null ? (
 								<span>
-									Monto: ${Number(event.amount)} {event.currency ?? ""}
+									Monto: ${Number(event.amount)}{" "}
+									{getCurrencyCode(currencyCodeById, event.currency_id)}
 								</span>
 							) : null}
 						</div>
