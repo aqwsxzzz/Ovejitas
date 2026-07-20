@@ -11,7 +11,6 @@ interface UseManualFeedingSubmitArgs {
 	consumerAssetId: number;
 	consumerAssetName: string;
 	form: ManualFeedingFormState;
-	onFeedSuccess: (materialAssetId: number, occurredAtIso: string) => void;
 }
 
 export function useManualFeedingSubmit({
@@ -19,7 +18,6 @@ export function useManualFeedingSubmit({
 	consumerAssetId,
 	consumerAssetName,
 	form,
-	onFeedSuccess,
 }: UseManualFeedingSubmitArgs) {
 	const [feedError, setFeedError] = useState<string | null>(null);
 	const [lastFeedAtIso, setLastFeedAtIso] = useState<string | null>(null);
@@ -53,7 +51,6 @@ export function useManualFeedingSubmit({
 					idempotency_key: crypto.randomUUID(),
 				},
 			});
-			onFeedSuccess(validated.data.materialAssetId, occurredAtIso);
 			setLastFeedAtIso(occurredAtIso);
 			setFeedError(null);
 		} catch (error) {
@@ -70,7 +67,6 @@ export function useManualFeedingSubmit({
 		createMaterialConsumptionMutation,
 		consumerAssetId,
 		consumerAssetName,
-		onFeedSuccess,
 	]);
 
 	return {

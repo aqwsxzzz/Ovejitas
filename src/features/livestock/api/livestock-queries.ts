@@ -1427,7 +1427,11 @@ export const useCreateEventCategoryByFarmId = () => {
 		}) => createEventCategoryByFarmId({ farmId, data }),
 		onSuccess: (_, { farmId }) => {
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventCategoriesByFarm(farmId, undefined),
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventCategoriesByFarm",
+					farmId,
+				],
 			});
 		},
 	});
@@ -1448,7 +1452,11 @@ export const useUpdateEventCategoryById = () => {
 		}) => updateEventCategoryById({ farmId, categoryId, data }),
 		onSuccess: (_, { farmId }) => {
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventCategoriesByFarm(farmId, undefined),
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventCategoriesByFarm",
+					farmId,
+				],
 			});
 		},
 	});
@@ -1467,7 +1475,11 @@ export const useDeleteEventCategoryById = () => {
 		}) => deleteEventCategoryById({ farmId, categoryId }),
 		onSuccess: (_, { farmId }) => {
 			void queryClient.invalidateQueries({
-				queryKey: livestockQueryKeys.eventCategoriesByFarm(farmId, undefined),
+				queryKey: [
+					...livestockQueryKeys.all,
+					"eventCategoriesByFarm",
+					farmId,
+				],
 			});
 		},
 	});
