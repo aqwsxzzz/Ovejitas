@@ -13,7 +13,9 @@ import {
 import type {
 	ILivestockEventCategory,
 	LivestockEventType,
+	LivestockEventUnit,
 } from "@/features/livestock/types/livestock-types";
+import { EVENT_UNITS, EVENT_UNIT_LABELS } from "@/shared/types/unit-types";
 
 /** Radix Select forbids empty-string item values; use sentinels for special rows. */
 const NEW_OPTION_VALUE = "__new__";
@@ -24,6 +26,7 @@ export interface CreateEventCategoryInput {
 	type: LivestockEventType;
 	name: string;
 	color?: string;
+	unit?: LivestockEventUnit;
 }
 
 interface EventCategorySelectFieldProps {
@@ -65,8 +68,12 @@ export function EventCategorySelectField({
 	const [isCreating, setIsCreating] = useState(false);
 	const [newName, setNewName] = useState("");
 	const [newColor, setNewColor] = useState(DEFAULT_COLOR);
+	const [newUnit, setNewUnit] = useState<LivestockEventUnit | "">("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState("");
+
+	/** Backend requires a unit for production categories only. */
+	const requiresUnit = type === "production";
 
 	const availableCategories = categories.filter(
 		(category) => category.type === type,
@@ -94,15 +101,21 @@ export function EventCategorySelectField({
 			setError("Escribe un nombre.");
 			return;
 		}
+		if (requiresUnit && !newUnit) {
+			setError("Selecciona una unidad.");
+			return;
+		}
 		setIsSubmitting(true);
 		try {
 			const createdId = await onCreateEventCategory({
 				type,
 				name: newName.trim(),
 				color: newColor,
+				unit: requiresUnit && newUnit ? newUnit : undefined,
 			});
 			onChange(String(createdId));
 			setNewName("");
+			setNewUnit("");
 			setCreating(false);
 		} finally {
 			setIsSubmitting(false);
@@ -155,6 +168,26 @@ export function EventCategorySelectField({
 							className="h-10 px-1 py-1"
 						/>
 					</div>
+					{requiresUnit ? (
+						<div className="space-y-1">
+							<Label>Unidad</Label>
+							<Select
+								value={newUnit || undefined}
+								onValueChange={(next) => setNewUnit(next as LivestockEventUnit)}
+							>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Selecciona una unidad" />
+								</SelectTrigger>
+								<SelectContent>
+									{EVENT_UNITS.map((unit) => (
+										<SelectItem key={unit} value={unit}>
+											{EVENT_UNIT_LABELS[unit]}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					) : null}
 					{error ? <p className="text-sm text-destructive">{error}</p> : null}
 					<div className="flex justify-end">
 						<Button
