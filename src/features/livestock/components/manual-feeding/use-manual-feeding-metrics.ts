@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import {
 	useListLivestockAssetsByFarmId,
@@ -23,8 +23,6 @@ export function useManualFeedingMetrics({
 	selectedUnit,
 	hasSelectedMaterial,
 }: UseManualFeedingMetricsArgs) {
-	const [optimisticFeedCount, setOptimisticFeedCount] = useState(0);
-
 	const { data: materialAssetsResponse, isLoading: isLoadingMaterials } =
 		useListLivestockAssetsByFarmId({
 			farmId,
@@ -101,7 +99,7 @@ export function useManualFeedingMetrics({
 			: 0;
 
 		return {
-			count: rows.length + optimisticFeedCount,
+			count: rows.length,
 			totalForSelectedMaterialAndUnit,
 		};
 	}, [
@@ -109,16 +107,7 @@ export function useManualFeedingMetrics({
 		hasSelectedMaterial,
 		selectedMaterialAssetId,
 		selectedUnit,
-		optimisticFeedCount,
 	]);
-
-	useEffect(() => {
-		setOptimisticFeedCount(0);
-	}, [todaysFeedingResponse?.data]);
-
-	function applyOptimisticFeed() {
-		setOptimisticFeedCount((current) => current + 1);
-	}
 
 	return {
 		isLoadingMaterials,
@@ -126,6 +115,5 @@ export function useManualFeedingMetrics({
 		selectedMaterial,
 		selectedMaterialOnHand,
 		todaysFeeds,
-		applyOptimisticFeed,
 	};
 }

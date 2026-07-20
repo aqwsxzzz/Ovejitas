@@ -616,6 +616,7 @@ export const createEventCategoryByFarmId = ({
 		type: LivestockEventType;
 		name: string;
 		color?: string;
+		unit?: LivestockEventUnit;
 	};
 }) =>
 	axiosHelper<{

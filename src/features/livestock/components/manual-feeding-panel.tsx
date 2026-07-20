@@ -1,7 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { ManualFeedingActionRow } from "@/features/livestock/components/manual-feeding/manual-feeding-action-row";
 import { ManualFeedingFormSection } from "@/features/livestock/components/manual-feeding/manual-feeding-form-section";
+import { ManualFeedingHistory } from "@/features/livestock/components/manual-feeding/manual-feeding-history";
 import { ManualFeedingToggle } from "@/features/livestock/components/manual-feeding/manual-feeding-toggle";
 import { ManualFeedingStats } from "@/features/livestock/components/manual-feeding/manual-feeding-stats";
 import type { ManualFeedingPanelProps } from "@/features/livestock/components/manual-feeding/types";
@@ -28,7 +29,6 @@ export function ManualFeedingPanel({
 		selectedMaterial,
 		selectedMaterialOnHand,
 		todaysFeeds,
-		applyOptimisticFeed,
 	} = useManualFeedingMetrics({
 		farmId,
 		consumerAssetId,
@@ -43,12 +43,16 @@ export function ManualFeedingPanel({
 			consumerAssetId,
 			consumerAssetName,
 			form,
-			onFeedSuccess: applyOptimisticFeed,
 		});
 
 	const handleLogFeedingClick = useCallback(() => {
 		void handleLogFeedingNow();
 	}, [handleLogFeedingNow]);
+
+	const materialNameById = useMemo(
+		() => new Map(materialOptions.map((asset) => [asset.id, asset.name])),
+		[materialOptions],
+	);
 
 	return (
 		<SectionCard
@@ -86,6 +90,14 @@ export function ManualFeedingPanel({
 							todaysFeeds.totalForSelectedMaterialAndUnit
 						}
 						lastFeedAtIso={lastFeedAtIso}
+					/>
+
+					<Separator />
+
+					<ManualFeedingHistory
+						farmId={farmId}
+						consumerAssetId={consumerAssetId}
+						materialNameById={materialNameById}
 					/>
 
 					{feedError ? (
