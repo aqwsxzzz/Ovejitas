@@ -32,7 +32,12 @@ export function useReportPeriod(defaultDays = 30): ReportPeriod {
 		const now = new Date();
 		const from = new Date(now);
 		from.setDate(from.getDate() - Number(selectedDays));
-		return { date_from: from.toISOString(), date_to: now.toISOString() };
+		// End the window at end of *today* (local), not the mount instant — otherwise
+		// an event registered after the page loaded falls past `date_to` and won't
+		// appear until a refresh advances it.
+		const to = new Date(now);
+		to.setHours(23, 59, 59, 999);
+		return { date_from: from.toISOString(), date_to: to.toISOString() };
 	}, [selectedDays]);
 
 	return { selectedDays, setSelectedDays, date_from, date_to };

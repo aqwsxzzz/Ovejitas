@@ -5,6 +5,7 @@ export type LivestockAssetKind =
 	| "crop"
 	| "equipment"
 	| "material"
+	| "produce"
 	| "location";
 
 export type LivestockEventUnit = EventUnit;

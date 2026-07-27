@@ -22,6 +22,8 @@ import type {
 	IProductionProductivityReportParams,
 	ISalesValueReport,
 	ISalesValueReportParams,
+	IProduceOutcomeReport,
+	IProduceOutcomeReportParams,
 } from "@/features/reports/types/reports-types";
 
 /**
@@ -245,6 +247,26 @@ export const getSalesValueReport = ({
 		urlParams: {
 			date_from,
 			date_to,
+		},
+	});
+
+/**
+ * Per-producer contribution to a produce pool, and what became of it
+ * GET /api/v1/farms/{farm_id}/reports/produce-outcome
+ */
+export const getProduceOutcomeReport = ({
+	farmId,
+	date_from,
+	date_to,
+	asset_id,
+}: IProduceOutcomeReportParams) =>
+	axiosHelper<IProduceOutcomeReport>({
+		method: "get",
+		url: `/api/v1/farms/${farmId}/reports/produce-outcome`,
+		urlParams: {
+			date_from,
+			date_to,
+			asset_id,
 		},
 	});
 

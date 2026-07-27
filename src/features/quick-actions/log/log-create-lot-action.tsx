@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
 	useCreateFlockAcquisitionByAssetId,
 	useCreateLivestockAsset,
+	useUpdateLivestockAssetById,
 } from "@/features/livestock/api/livestock-queries";
+import { ProduceAssetSelectField } from "@/features/livestock/components/produce-asset-select-field";
 import type { LivestockAssetMode } from "@/features/livestock/types/livestock-types";
 
 import { LogActionCard } from "./log-action-card";
@@ -31,9 +34,12 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 	const [initialAmount, setInitialAmount] = useState("");
 	const [description, setDescription] = useState("");
 	const [mode, setMode] = useState<LivestockAssetMode>("aggregated");
+	const [produceAssetId, setProduceAssetId] = useState("none");
+	const [acquiredAt, setAcquiredAt] = useState(toDateTimeLocalValue());
 	const [error, setError] = useState<string | null>(null);
 
 	const createAsset = useCreateLivestockAsset();
+	const updateAsset = useUpdateLivestockAssetById();
 	const createAcquisition = useCreateFlockAcquisitionByAssetId();
 	const isSaving = createAsset.isPending || createAcquisition.isPending;
 
@@ -50,6 +56,7 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 		}
 		setError(null);
 		try {
+			// `AssetCreate` forbids extra fields, so the produce link is a follow-up PATCH.
 			const createdAsset = await createAsset.mutateAsync({
 				farmId,
 				data: {
@@ -60,12 +67,19 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 					mode,
 				},
 			});
+			if (produceAssetId !== "none") {
+				await updateAsset.mutateAsync({
+					farmId,
+					assetId: createdAsset.id,
+					data: { produce_asset_id: Number(produceAssetId) },
+				});
+			}
 			if (mode === "aggregated") {
 				await createAcquisition.mutateAsync({
 					farmId,
 					assetId: String(createdAsset.id),
 					payload: {
-						occurred_at: new Date().toISOString(),
+						occurred_at: new Date(acquiredAt).toISOString(),
 						quantity: parsedInitialAmount,
 						amount: null,
 					},
@@ -137,6 +151,21 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 						/>
 					</div>
 				) : null}
+				{mode === "aggregated" ? (
+					<div className="space-y-1.5">
+						<Label htmlFor="lot-acquired-at">Fecha de adquisición</Label>
+						<Input
+							id="lot-acquired-at"
+							type="datetime-local"
+							value={acquiredAt}
+							onChange={(event) => setAcquiredAt(event.target.value)}
+						/>
+						<p className="text-xs text-(--v2-ink-soft)">
+							Cuándo adquiriste estos animales. Ponla en el pasado si ya los
+							tenías, para que las metas cuenten los días completos.
+						</p>
+					</div>
+				) : null}
 				<div className="space-y-1.5">
 					<Label htmlFor="lot-description">Descripcion</Label>
 					<Textarea
@@ -146,6 +175,13 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 						onChange={(event) => setDescription(event.target.value)}
 					/>
 				</div>
+				<ProduceAssetSelectField
+					farmId={farmId}
+					value={produceAssetId}
+					onChange={setProduceAssetId}
+					label="Producto que genera (opcional)"
+					helperText="Producto sugerido por defecto al registrar recolecciones. Puedes crearlo aquí mismo."
+				/>
 				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				<div className="flex justify-end">
 					<Button

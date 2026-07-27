@@ -783,7 +783,10 @@ export interface IHarvestCreatePayload {
 	occurred_at?: string;
 	quantity: number;
 	unit: LivestockEventUnit;
-	category_id?: number | null;
+	/** Destination produce pool (material asset). Required per harvest — no longer derived from asset.produce_asset_id. */
+	produce_asset_id: number;
+	/** Product category recorded on the emitted production event. Required. */
+	category_id: number;
 	notes?: string | null;
 }
 

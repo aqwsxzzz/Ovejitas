@@ -1,3 +1,5 @@
+import { toDateTimeLocalValue } from "@/lib/datetime";
+
 export const MATERIAL_PAGE_SIZE = 20;
 
 export function toNumber(value: string | null | undefined): number {
@@ -16,7 +18,7 @@ export function formatDate(value: string): string {
 }
 
 export function toDateTimeInputValue(value: string): string {
-	return new Date(value).toISOString().slice(0, 16);
+	return toDateTimeLocalValue(new Date(value));
 }
 
 export function getPayloadSource(

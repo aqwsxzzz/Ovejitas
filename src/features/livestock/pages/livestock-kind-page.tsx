@@ -102,6 +102,11 @@ export function LivestockKindPage({
 					</Button>
 				) : selectedKind === "material" ? (
 					<CreateMaterialAssetDialog farmId={farmId} />
+				) : selectedKind === "produce" ? (
+					<CreateMaterialAssetDialog
+						farmId={farmId}
+						kind="produce"
+					/>
 				) : selectedKind === "crop" ? (
 					<CreateCropAssetDialog farmId={farmId} />
 				) : selectedKind === "equipment" ? (

@@ -12,6 +12,7 @@ import {
 	getUpcomingBirthsReport,
 	getProductionProductivityReport,
 	getSalesValueReport,
+	getProduceOutcomeReport,
 } from "@/features/reports/api/reports-api";
 import type {
 	IProfitabilityReportParams,
@@ -25,6 +26,7 @@ import type {
 	IUpcomingBirthsReportParams,
 	IProductionProductivityReportParams,
 	ISalesValueReportParams,
+	IProduceOutcomeReportParams,
 } from "@/features/reports/types/reports-types";
 
 export const reportsQueryKeys = {
@@ -178,6 +180,19 @@ export const reportsQueryKeys = {
 			"sales-value",
 			dateFrom ?? null,
 			dateTo ?? null,
+		] as const,
+	produceOutcome: (
+		farmId: string | number,
+		dateFrom?: string,
+		dateTo?: string,
+		assetId?: number,
+	) =>
+		[
+			...reportsQueryKeys.farm(farmId),
+			"produce-outcome",
+			dateFrom ?? null,
+			dateTo ?? null,
+			assetId ?? null,
 		] as const,
 };
 
@@ -375,6 +390,24 @@ export const useGetSalesValueReport = (
 			params.date_to,
 		),
 		queryFn: () => getSalesValueReport(params),
+		enabled: enabled && !!params.farmId,
+	});
+
+/**
+ * Get per-producer produce outcome (produced / sold / lost / income per pool)
+ */
+export const useGetProduceOutcomeReport = (
+	params: IProduceOutcomeReportParams,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: reportsQueryKeys.produceOutcome(
+			params.farmId,
+			params.date_from,
+			params.date_to,
+			params.asset_id,
+		),
+		queryFn: () => getProduceOutcomeReport(params),
 		enabled: enabled && !!params.farmId,
 	});
 

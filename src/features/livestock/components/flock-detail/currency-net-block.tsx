@@ -8,12 +8,14 @@ export interface CurrencyNetEntry {
 	/** Null for genuinely unpriced feed with no ledger currency. */
 	currency: string | null;
 	income: string;
+	/** Derived share of income from products this asset made and were sold from a pool. Already inside `netInclFeed`. */
+	produceIncome: string;
 	directExpense: string;
 	/** Income − direct expense. */
 	net: string;
 	/** Consumed feed cost, valued in this currency. */
 	feed: string;
-	/** Income − (direct expense + feed). */
+	/** Income − (direct expense + feed), already incl. produce income. */
 	netInclFeed: string;
 	hasUnvaluedConsumption?: boolean;
 }
@@ -57,6 +59,13 @@ export function CurrencyNetBlock({ entry }: CurrencyNetBlockProps) {
 						value={formatCurrency(entry.income, entry.currency)}
 						tone="text-success"
 					/>
+					{Number(entry.produceIncome) !== 0 ? (
+						<Row
+							label="Ingreso por productos"
+							value={formatCurrency(entry.produceIncome, entry.currency)}
+							tone="text-success"
+						/>
+					) : null}
 					<Row
 						label="Gasto directo"
 						value={formatCurrency(entry.directExpense, entry.currency)}

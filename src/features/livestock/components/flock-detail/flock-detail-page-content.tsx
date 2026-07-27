@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import { useGetLivestockAssetById } from "@/features/livestock/api/livestock-queries";
 import { ManualFeedingPanel } from "@/features/livestock/components/manual-feeding-panel";
+import { AnimalHarvestPanel } from "@/features/livestock/components/harvest/animal-harvest-panel";
 
 import { ProductionProductivityCard } from "./production-productivity-card";
 import { ProductionTargetCard } from "./production-target-card";
@@ -19,6 +20,7 @@ import {
 	FlockSelectFarmState,
 } from "./flock-page-states";
 import { FlockProductionOverviewSection } from "./flock-production-overview-section";
+import { ProduceOutcomePanel } from "./produce-outcome-panel";
 import { useFlockBackNavigationGuard } from "./use-flock-back-navigation-guard";
 
 export function FlockDetailPageContent({
@@ -44,7 +46,8 @@ export function FlockDetailPageContent({
 	const assetFlags = useMemo(
 		() => ({
 			isAnimalAsset: asset?.kind === "animal",
-			isMaterialAsset: asset?.kind === "material",
+			// Stock-bearing kinds (backend INVENTORY_KINDS): materials you buy and produce pools you harvest into.
+			isMaterialAsset: asset?.kind === "material" || asset?.kind === "produce",
 			isAggregatedAnimal:
 				asset?.kind === "animal" && asset?.mode === "aggregated",
 			isIndividualAnimal:
@@ -95,6 +98,21 @@ export function FlockDetailPageContent({
 					farmId={farmId}
 					consumerAssetId={asset.id}
 					consumerAssetName={asset.name}
+				/>
+			) : null}
+
+			{assetFlags.isAnimalAsset ? (
+				<AnimalHarvestPanel
+					farmId={farmId}
+					producerAssetId={asset.id}
+					defaultProduceAssetId={asset.produce_asset_id}
+				/>
+			) : null}
+
+			{assetFlags.isAnimalAsset ? (
+				<ProduceOutcomePanel
+					farmId={farmId}
+					assetId={asset.id}
 				/>
 			) : null}
 

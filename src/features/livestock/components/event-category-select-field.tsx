@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,8 +18,7 @@ import type {
 } from "@/features/livestock/types/livestock-types";
 import { EVENT_UNITS, EVENT_UNIT_LABELS } from "@/shared/types/unit-types";
 
-/** Radix Select forbids empty-string item values; use sentinels for special rows. */
-const NEW_OPTION_VALUE = "__new__";
+/** Sentinel for the "no category" row (Combobox needs a non-empty value). */
 const NONE_OPTION_VALUE = "__none__";
 const DEFAULT_COLOR = "#f2df77";
 
@@ -78,7 +78,18 @@ export function EventCategorySelectField({
 	const availableCategories = categories.filter(
 		(category) => category.type === type,
 	);
-	const selectValue = isCreating ? NEW_OPTION_VALUE : value || undefined;
+
+	const options = useMemo<ComboboxOption[]>(() => {
+		const rows: ComboboxOption[] = availableCategories.map((category) => ({
+			value: String(category.id),
+			label: category.name,
+		}));
+		return allowNone
+			? [{ value: NONE_OPTION_VALUE, label: "Sin categoria" }, ...rows]
+			: rows;
+	}, [availableCategories, allowNone]);
+
+	const comboboxValue = value || (allowNone ? NONE_OPTION_VALUE : undefined);
 
 	const setCreating = (next: boolean) => {
 		setIsCreating(next);
@@ -86,10 +97,6 @@ export function EventCategorySelectField({
 	};
 
 	const handleValueChange = (next: string) => {
-		if (next === NEW_OPTION_VALUE) {
-			setCreating(true);
-			return;
-		}
 		setCreating(false);
 		onChange(next === NONE_OPTION_VALUE ? "" : next);
 	};
@@ -125,24 +132,18 @@ export function EventCategorySelectField({
 	return (
 		<div className="space-y-1">
 			<Label>{label}</Label>
-			<Select value={selectValue} onValueChange={handleValueChange}>
-				<SelectTrigger className="w-full">
-					<SelectValue placeholder={placeholder ?? "Selecciona"} />
-				</SelectTrigger>
-				<SelectContent>
-					{allowNone ? (
-						<SelectItem value={NONE_OPTION_VALUE}>Sin categoria</SelectItem>
-					) : null}
-					{availableCategories.map((category) => (
-						<SelectItem key={category.id} value={String(category.id)}>
-							{category.name}
-						</SelectItem>
-					))}
-					{onCreateEventCategory ? (
-						<SelectItem value={NEW_OPTION_VALUE}>{newOptionLabel}</SelectItem>
-					) : null}
-				</SelectContent>
-			</Select>
+			<Combobox
+				options={options}
+				value={comboboxValue}
+				onChange={handleValueChange}
+				disabled={disabled}
+				placeholder={placeholder ?? "Selecciona"}
+				searchPlaceholder="Buscar"
+				createLabel={onCreateEventCategory ? newOptionLabel : undefined}
+				onCreateSelect={
+					onCreateEventCategory ? () => setCreating(true) : undefined
+				}
+			/>
 			{helperText ? (
 				<p className="text-xs text-muted-foreground">{helperText}</p>
 			) : null}

@@ -3,7 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadingState } from "@/components/common/loading-state";
 import { Separator } from "@/components/ui/separator";
-import { CropHarvestForm } from "@/features/crops/components/crop-harvest-form";
+import { HarvestForm } from "@/features/livestock/components/harvest/harvest-form";
+import { useHarvest } from "@/features/livestock/components/harvest/use-harvest";
 import { CropExpenseForm } from "@/features/crops/components/crop-expense-form";
 import { CropTimelinePanel } from "@/features/crops/components/crop-timeline-panel";
 import { CropDetailHeader } from "@/features/crops/components/crop-detail-header";
@@ -19,6 +20,11 @@ interface CropDetailPageProps {
 export function CropDetailPage({ cropId }: CropDetailPageProps) {
 	const data = useCropData(cropId);
 	const actions = useCropActions(data.farmId, cropId);
+	const harvest = useHarvest({
+		farmId: data.farmId,
+		producerAssetId: Number(cropId),
+		enabled: data.hasValidAssetId && !!data.farmId,
+	});
 
 	if (!data.farmId) {
 		return (
@@ -74,12 +80,15 @@ export function CropDetailPage({ cropId }: CropDetailPageProps) {
 						<CardTitle>Registrar cosecha</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<CropHarvestForm
-							isSubmitting={actions.isSubmittingHarvest}
-							errorMessage={actions.harvestError}
-							disabled={data.asset.produce_asset_id === null}
-							disabledReason="Vincula un material de produce al cultivo para registrar cosechas."
-							onSubmit={actions.handleHarvestSubmit}
+						<HarvestForm
+							produceAssets={harvest.produceAssets}
+							categories={harvest.categories}
+							defaultProduceAssetId={data.asset.produce_asset_id}
+							defaultUnit="kg"
+							isSubmitting={harvest.isSubmitting}
+							errorMessage={harvest.error}
+							onSubmit={harvest.submit}
+							onCreateCategory={harvest.createCategory}
 						/>
 					</CardContent>
 				</Card>

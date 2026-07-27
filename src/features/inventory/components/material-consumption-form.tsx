@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -43,7 +45,7 @@ export function MaterialConsumptionForm({
 	onSubmit,
 }: MaterialConsumptionFormProps) {
 	const [occurredAt, setOccurredAt] = useState(
-		new Date().toISOString().slice(0, 16),
+		toDateTimeLocalValue(),
 	);
 	const [quantity, setQuantity] = useState("");
 	const [unit, setUnit] = useState<LivestockEventUnit>("kg");

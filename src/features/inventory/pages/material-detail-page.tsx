@@ -125,7 +125,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 		return <LoadingState message="Cargando material..." />;
 	}
 
-	if (!asset || asset.kind !== "material") {
+	if (!asset || (asset.kind !== "material" && asset.kind !== "produce")) {
 		return (
 			<div className="space-y-2">
 				<p className="text-sm text-destructive">Material asset not found.</p>

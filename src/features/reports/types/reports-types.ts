@@ -43,6 +43,13 @@ export interface IProfitabilityFullRow {
 	asset_name: string;
 	currency: string | null;
 	income_total: string;
+	/**
+	 * Derived share of income from produce this asset made that was later sold from a
+	 * pool. Already folded into `net_incl_materials`; NOT in `net`. Never add it on top
+	 * of `net_incl_materials`, and never sum `income_total` across rows and also add this
+	 * (the same money is `income_total` on the pool asset's own row).
+	 */
+	allocated_produce_income: string;
 	direct_expense_total: string;
 	consumed_material_cost: string;
 	total_cost: string;
@@ -54,6 +61,7 @@ export interface IProfitabilityFullRow {
 export interface IProfitabilityFullTotal {
 	currency: string;
 	income_total: string;
+	allocated_produce_income: string;
 	direct_expense_total: string;
 	consumed_material_cost: string;
 	total_cost: string;
@@ -238,6 +246,28 @@ export interface ISalesValueReport {
 	data: ISalesValueRow[];
 }
 
+// Produce Outcome Report — per (producer, produce pool): what a producer
+// harvested into a pool and what became of its derived share.
+export interface IProduceOutcomeRow {
+	producer_asset_id: number;
+	producer_name: string;
+	produce_asset_id: number;
+	produce_name: string;
+	unit: Unit;
+	produced: string;
+	sold: string;
+	lost: string;
+	currency: string | null;
+	income_total: string;
+	has_other_currency: boolean;
+}
+
+export interface IProduceOutcomeReport {
+	data: IProduceOutcomeRow[];
+	unattributed_quantity: string;
+	unattributed_income: string;
+}
+
 // Query Parameters
 export interface IProfitabilityReportParams {
 	farmId: string | number;
@@ -322,4 +352,12 @@ export interface ISalesValueReportParams {
 	farmId: string | number;
 	date_from?: string;
 	date_to?: string;
+}
+
+export interface IProduceOutcomeReportParams {
+	farmId: string | number;
+	date_from?: string;
+	date_to?: string;
+	/** Optional producer filter; rows are also filtered client-side as a safeguard. */
+	asset_id?: number;
 }

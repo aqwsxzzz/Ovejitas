@@ -1,12 +1,12 @@
 # Ovejitas BE Event Ledger Rules (FE/BE Working Agreement)
 
 Status: active FE/BE contract baseline.
-Date: 2026-07-14.
+Date: 2026-07-24.
 
 ## Context and source of truth
 
-- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (synced 2026-07-14 from `backend-docs/api/*.yaml`; source revision not specified for this sync).
-- Where `backend-docs/events-and-actions.md` and `backend-docs/api/*.yaml` disagree, **the yaml specs win** — the prose doc currently lags (it still says "the 11 actions" and omits the pregnancy-check action, which `pregnancies.yaml` defines).
+- This file is aligned with the backend `events-and-actions.md` guidance and the `backend-docs/api/*.yaml` specs shared from the API repository docs (synced 2026-07-23 from `backend-docs/api/*.yaml`; source revision not specified for this sync).
+- Where `backend-docs/events-and-actions.md` and `backend-docs/api/*.yaml` disagree, **the yaml specs win** — the prose doc currently lags (it still says "the 11 actions", omits the pregnancy-check action defined in `pregnancies.yaml`, and does not reflect the produce-attribution work: required harvest `produce_asset_id`, the `produce-outcome` report, `profitability-full.allocated_produce_income`, or `farm.timezone`).
 - Local supporting references:
   - `backend-docs/domain-rebuild-plan.md`
   - `backend-docs/domain-notes.md`
@@ -16,7 +16,7 @@ Date: 2026-07-14.
 
 The backend domain is ledger-first and generic:
 
-- `asset`: any trackable thing (animal, crop, equipment, material, location)
+- `asset`: any trackable thing (animal, crop, equipment, `material`, **`produce`**, location)
 - `individual`: identity-level instance under an individual-mode asset
 - `event_category`: farm-scoped category taxonomy per event type
 - `event`: single ledger table for domain facts, discriminated by `type`
@@ -55,7 +55,7 @@ All action emission is atomic and rollback-safe.
 | 5 | Flock acquisition | `POST .../assets/{id}/flock/acquisitions` | `inventory`+ + `acquisition` (+ `expense`) |
 | 6 | Flock sale | `POST .../assets/{id}/flock/sales` | `inventory`− + `income` |
 | 7 | Flock mortality | `POST .../assets/{id}/flock/mortalities` | `inventory`− + `mortality` |
-| 8 | Harvest | `POST .../assets/{id}/harvests` | `production` + `inventory`+ on produce asset |
+| 8 | Harvest | `POST .../assets/{id}/harvests` | `production` + `inventory`+ on produce asset (routed by request `produce_asset_id`; writes a `produce_lot`) |
 | 9 | Material purchase | `POST .../material-purchases` | `inventory`+ + `expense` |
 | 10 | Material consumption | `POST .../material-consumptions` | `inventory`− |
 | 11 | Material sale | `POST .../assets/{id}/sales` | `inventory`− + `income` |
@@ -75,9 +75,11 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 ### Harvest constraints (action #8)
 
 - Source asset MUST be `kind=animal` or `kind=crop`.
-- Source asset MUST have `produce_asset_id` set, linking it to a material asset that receives the stock.
-- `unit` in the request MUST match the produce asset's existing stock unit.
-- `HarvestCreate` requires a production `category_id` (the product category recorded on the emitted `production` event).
+- `HarvestCreate` **requires `produce_asset_id`** in the **request body** — the destination material pool is now client-supplied per harvest, no longer derived from `asset.produce_asset_id`. `asset.produce_asset_id` is demoted to an optional UI **default** ("this producer usually harvests into X"); it is NOT the routing source of truth. A producer MAY therefore feed **multiple** pools (e.g. eggs → an Eggs pool, feathers → a Feathers pool). The supplied `produce_asset_id` is farm-scoped; a cross-farm id is rejected `404`.
+- `HarvestCreate` also **requires a production `category_id`** (the product category recorded on the emitted `production` event).
+- **Target MUST be `kind=produce`** (confirmed in source): a `material` target is rejected `422` "Harvest must deposit into a produce asset". FE pool pickers MUST filter `kind=produce`.
+- `unit` in the request MUST match the produce asset's existing stock unit. **A pool is locked to its first harvest's unit** — there is no unit conversion; a mismatch is rejected before emission.
+- Each harvest persists a **`produce_lot`** row linking the producer, the destination pool, and the paired `production`/`inventory`+ events. These lots are the FIFO "daily baskets" the produce-attribution reports consume (grouped by the **farm's local calendar day** — see `farm.timezone`), and they carry the per-producer contribution counts. This is the persisted link that makes per-producer attribution possible (harvest events alone are not back-attributable).
 - `HarvestRead` returns `{ production_event_id, inventory_event_id, produce_balance }`.
 
 ### Material purchase constraints (action #9)
@@ -103,16 +105,37 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 
 ### Material sale constraints (action #11)
 
-- Decrements the material asset's inventory and books a paired `income` event for `amount` in the farm's default currency.
+- Decrements the material asset's inventory and books a paired `income` event for `amount` in the farm's default currency. The sale links its `income_event_id` to its inventory decrement so each sale's quantity pairs to its own price (an `income` event alone cannot carry quantity) — this pairing is what the `sales-value` and `produce-outcome` derivations rely on.
 - `unit` MUST match a unit the asset already holds stock in; rejected `409` if it would drive stock below zero.
 - Create-only (table-less): `MaterialSaleRead` returns `{ inventory_event_id, income_event_id, on_hand }`. No edit/reverse path.
+- **Selling a produce pool uses THIS action — there is no dedicated "produce sale" action.** A pooled product (e.g. eggs harvested from several coops) is a `material` asset; the farmer sells it with `material_sale`, which books ONE `income` event on the pool. The split of that income back to the producing animals is **derived at read time** (see the produce-attribution reports), never booked as per-producer `income` events. Consequently **over-selling a pool is rejected** by the same non-negative guard (`409`) — you cannot sell more produce than harvests recorded; FE MUST surface this as "correct your production entry", not retry. Recording produce **loss / self-use** likewise uses the existing `material_consumption` with `reason=waste`/`spoilage` on the pool asset (zero-revenue), which the engine attributes per-producer as `lost`. A dedicated loss/self-use action and a `SELF_USE` reason are **not yet shipped**.
+
+## Asset kind: `produce` (stock-bearing pools, split out of `material`)
+
+`produce` is a first-class asset kind alongside `animal` / `crop` / `equipment` / `material` / `location`, present in `AssetCreate.kind`, `AssetRead.kind`, `AssetUpdate.kind`, and the per-kind `AssetSummary` counts. It gives produce pools (eggs, milk) their own kind instead of overloading `material`.
+
+> Semantics below were **confirmed from backend source at commit `e659525`** ("split produce pools out of the material kind"). `backend-docs/api/*.yaml` is still stale on this — its prose says `material` in several places where the guards now accept both kinds. Trust this section over that prose until the yaml is regenerated.
+
+The load-bearing rule is a backend set: **`INVENTORY_KINDS = {MATERIAL, PRODUCE}`**. Guards meaning *"stock-bearing"* use that set; guards meaning *"a consumable input you buy"* still require `MATERIAL` exactly.
+
+- **Sale — `produce` IS sellable.** `POST .../assets/{id}/sales` accepts both `material` and `produce` (guard checks `kind not in INVENTORY_KINDS`). The pool-sale → derived per-producer allocation path works against `kind=produce`.
+- **Inventory — full support.** `inventory` events are allowed for any `INVENTORY_KINDS` asset (plus aggregated animal flocks). `.../events/balance` and `inventory-summary` are pure INVENTORY-event replays with **no kind filter at all** — produce assets appear as soon as they have events. The old "only meaningful for `kind=material`" line was descriptive, never enforced.
+- **Harvest target — MUST be `kind=produce`.** A `material` target is rejected `422` "Harvest must deposit into a produce asset", and the producer-side `produce_asset_id` link is validated the same way. **This is a hard break:** harvesting into a still-`material` pool now fails.
+- **Loss / self-use — `material_consumption` REJECTS `produce`** (still `MATERIAL` exactly, deliberately, since consumption is the feed-cost path). **Produce losses are recorded as a plain `inventory` decrement on the pool.** The allocation engine treats every non-`material_sale` decrement/reset as a zero-revenue draw (`is_sale = payload.source == "material_sale"`), so those decrements feed the `lost` column correctly. There is no `reason=waste|spoilage` on produce, and there never was a produce-specific one.
+- **Migration — automatic, one bounded gap.** Two migrations: one adds the enum value, one backfills `material → produce` for any asset that has a `produce_lot` row or is pointed at by an `asset.produce_asset_id`. Both reversible. **Gap:** a pool harvested into before `produce_lot` existed (2026-07-22) and never linked from a producer is not caught — and it **cannot be fixed over the API**, because `AssetService.update` freezes `kind` once the asset has any event (a pool by definition has inventory events). Stragglers need a direct SQL `UPDATE`.
+- **Pools left as `material` still report correctly.** `produce_lot` rows are keyed by `produce_asset_id` and the pool lookup joins assets with no kind filter, so `produce-outcome` and `allocated_produce_income` keep working, and `profitability-full` excludes both kinds so nothing double-counts. Only **new harvests** into a still-`material` pool are rejected.
+
+### `AssetCreate` forbids `produce_asset_id` — create-then-PATCH
+
+`AssetCreate` genuinely omits `produce_asset_id`, and the schema base is `extra="forbid"`. Sending it on `POST /assets` returns **`422` "Extra inputs are not permitted"** from Pydantic before any service code runs — i.e. the whole asset creation fails, not just the link. FE MUST create the asset first and then set the link with `PATCH .../assets/{id}` (`AssetUpdate` does accept `produce_asset_id`, and validates the target is `kind=produce`).
 
 ## Linkage model
 
 - Individuals can link lifecycle events through FK fields (`acquisition_event_id`, `mortality_event_id`, `sale_event_id`, `birth_event_id`).
 - Table-backed actions (`material_purchase`, `material_consumption`, `pregnancy`) own a row and store FKs to emitted events (e.g. `pregnancy.reproductive_event_id`); they support reconcile-on-edit and reverse-on-delete.
-- Table-less actions (`flock/*`, `harvest`, `material_sale`) are create-only and correlate by `payload.source` + `occurred_at` — no edit/reverse.
-- Harvest links a producer asset (`kind=animal` or `kind=crop`) to its produce asset via `asset.produce_asset_id`.
+- Table-less actions (`flock/*`, `harvest`, `material_sale`) are create-only and correlate by `payload.source` + `occurred_at` — no edit/reverse. (Harvest additionally persists a `produce_lot` row, but its emitted events remain create-only; a dedicated harvest correction/replay path is **not yet shipped**.)
+- Harvest links a producer asset (`kind=animal` or `kind=crop`) to its destination produce pool via the **request-supplied `produce_asset_id`**, recorded on a `produce_lot` row (producer ↔ pool ↔ paired events). `asset.produce_asset_id` is only an optional default suggestion, not the link.
+- Because per-producer produce income is **derived, never materialized**, correcting a harvest simply changes the derived reports the next time they are queried — nothing needs re-booking or reversing. (The append-only "void + re-book" engine proposed by FE was intentionally **not** built; the ledger already permits event edit/delete, so derivation is the simpler correct model.)
 
 ## Event write-path rules
 
@@ -197,7 +220,12 @@ Reports are always derived from event replay (never cached mutable counters):
 
 - **profitability** (`GET .../reports/profitability`): income − expense per asset per currency. Events with null amount/currency excluded. Different currencies never silently summed. **Scope limit:** `net` counts only `expense`/`income` events booked **on that asset**. Consumed-material (feed) cost is NOT an expense event on the consumer, so it is structurally excluded from `net`. FE MUST NOT present this `net` as an all-in economic result — use `profitability-full` for that. FE MUST NOT synthesize an all-in net by subtracting `cost-per-unit` figures client-side.
 - **profitability-full** (`GET .../reports/profitability-full`): the **all-in bottom line** per asset — `net_incl_materials = income − (direct expense + consumed feed)`. Feed is valued on the **same basis as `cost-per-unit` (R3), so the two can never disagree**. This is the report to use for "what did this animal actually earn me".
-  - **Row:** `{ asset_id, asset_name, currency, income_total, direct_expense_total, consumed_material_cost, total_cost, net, net_incl_materials, has_unvalued_consumption, has_other_currency }`, where `total_cost = direct_expense_total + consumed_material_cost`. Envelope is `{ data, totals }` — note this **does** carry `totals`, unlike `cost-per-unit`, which does not.
+  - **Row:** `{ asset_id, asset_name, currency, income_total, allocated_produce_income, direct_expense_total, consumed_material_cost, total_cost, net, net_incl_materials, has_unvalued_consumption }`, where `total_cost = direct_expense_total + consumed_material_cost`. Envelope is `{ data, totals }` — note this **does** carry `totals`, unlike `cost-per-unit`, which does not. `totals` rows carry the same `allocated_produce_income` field.
+  - **`allocated_produce_income`** is the producer's derived share of income from produce it made that was later **sold** from a pool (see `produce-outcome`). This is how an animal finally reflects the money its products earned. The pool's own `material_sale` income sits on a MATERIAL asset that this report excludes, so surfacing the allocation here does **not** double-count. It is derived at read time (FIFO over `produce_lot` baskets); no per-producer `income` event exists in the ledger. **Net inclusion (confirmed by BE):**
+  - `net = income_total − direct_expense_total` — excludes BOTH produce income and feed; unchanged R1 figure kept for backward compatibility.
+  - `net_incl_materials = (income_total + allocated_produce_income) − (direct_expense + feed)` — **already includes** `allocated_produce_income`.
+  - FE rules: use `net_incl_materials` **as-is** for the all-in bottom line — never add the allocation on top of it. Add `allocated_produce_income` to a headline ONLY if that headline is the bare `net`. Displaying it as its own line is always safe.
+  - **Double-count trap:** the produce-sale money is also booked as ordinary `income_total` on the produce (pool) asset's OWN row. `allocated_produce_income` is an attribution *slice* of income that already lives on another row — not new money. NEVER sum `income_total` across rows and also add `allocated_produce_income`.
   - `net` (income − direct expense) is retained unchanged for backward compatibility with R1.
   - **Single-currency by design:** one row per asset in the **farm's default currency**. Income/expense booked in *another* currency is **excluded from the row** and flagged `has_other_currency: true`. FE MUST surface that flag — otherwise the number silently understates reality.
   - `has_unvalued_consumption: true` means consumed feed had no purchase cost basis, so cost is understated and `net_incl_materials` is **over**stated. FE MUST surface this.
@@ -217,9 +245,14 @@ Reports are always derived from event replay (never cached mutable counters):
 - **inventory balance** (`GET .../assets/{id}/events/balance`): current on-hand balance per (asset, unit) computed from `inventory` events since the most recent reset. Only meaningful for `kind=material` assets.
 - **individual timeline** (`GET .../reports/individuals/{id}/timeline`): paginated `EventRead` list for a single individual. Returns the full event history for that individual in `Page` envelope.
 - **sales-value** (`GET .../reports/sales-value`): realized weighted-average sale price per (asset, unit), derived from sale-action events only (manual income excluded). `value_per_unit = sale income ÷ quantity sold`. When an asset was sold in more than one unit in the window, income can't be split → `ambiguous: true` with null `unit`/`quantity_sold`/`value_per_unit`. Assets with no sales in the window do not appear. Pairs with `cost-per-unit` (the cost floor) to derive margin client-side.
+- **produce-outcome** (`GET .../reports/produce-outcome`): per (producer asset, produce pool) — what a producer harvested into a pool and what became of its share. Row: `{ producer_asset_id, producer_name, produce_asset_id, produce_name, unit, produced, sold, lost, currency, income_total, has_other_currency }`; envelope `{ data, unattributed_quantity, unattributed_income }`. `produced` = what the producer harvested; `sold`/`lost` = its **derived** share of what later left the pool; `income_total` = the money that share earned. The split is **derived, never stored** (pooled produce is fungible): each outflow consumes the pool's daily `produce_lot` baskets **oldest-first (FIFO)**, split within each basket in proportion to what each producer put in it, priced at that outflow's own unit price, reconciled with **largest-remainder** rounding so per-producer amounts sum exactly to the sale. Keyed per (producer, currency) — currencies are never summed; multi-currency output gives a null `currency` with `has_other_currency: true`. `lost` is stock drawn at zero revenue (`material_consumption` `waste`/`spoilage`). `unattributed_quantity`/`unattributed_income` capture pool outflow with **no lot behind it** (stock that entered by a manual `inventory` increment, or carried across a reset) — this is the only "unassigned" case (over-selling is rejected, not booked here). `produced` is bounded by harvest time, `sold`/`lost`/`income_total` by when stock left, and FIFO crosses window edges — so within a narrow window these are **not** expected to reconcile. This report is the FE's productivity-vs-profitability view (producers can be unprofitable per-pool without blocking either metric).
 - **production-productivity** (`GET .../reports/production-productivity`): produced vs expected output per (asset, product), where a product is a production `event_category`. One row per (asset, product) that either produced in the window or has an applicable production target. `produced` is converted into the product's unit; `expected` comes from the asset's applicable production target, scaled by the target's `basis` (`per_head_continuous` uses time-weighted animal-days; `per_event`; `total`). `productivity_pct = produced ÷ expected × 100`. `date_from` and `date_to` are **required**. A pair with no applicable target reports `missing_capacity: true` with null `expected`/`productivity_pct` (mirrors `has_unvalued_consumption`) — never divide-by-zero. Row: `{ asset_id, asset_name, category_id, product_name, unit, produced, expected, productivity_pct, basis, missing_capacity }`. Supersedes the removed egg-only `coop-productivity` report; see the Production targets section. Headcount for `per_head_continuous` remains event-derived, not stored.
 - **upcoming-births** (`GET .../reports/upcoming-births`): one row per individual whose *latest* pregnancy check is pregnant with `expected_due_at` inside `[date_from, date_to]`. A later not-pregnant check suppresses the alert. `date_from` and `date_to` are **required**; `days_until_due` counts whole days from `date_from`. Depends on pregnancy checks (action #12) existing.
 - **PDF exports**: `GET .../reports/profitability/pdf` and `GET .../reports/cost-per-unit/pdf` return the respective report as a downloadable PDF.
+
+## Farm configuration
+
+- **`farm.timezone`** (IANA name, e.g. `America/Montevideo`): `FarmRead` always returns it (default `UTC`); `FarmUpdate` accepts and validates it. It is **ledger-relevant**: produce FIFO baskets (`produce_lot`) group by the farm's **local calendar day**, so a harvest at 23:30 local lands in that day's basket, not the next UTC day's. FE SHOULD expose a farm timezone setting; getting it wrong silently reshuffles which producers contributed to which basket, changing produce-outcome and `allocated_produce_income`.
 
 ## Priority roadmap (recommended)
 
@@ -256,6 +289,52 @@ Reports are always derived from event replay (never cached mutable counters):
 ---
 
 ## Contract change log
+
+### 2026-07-24
+
+**Contract changes:**
+
+- **New `produce` asset kind.** The asset `kind` enum now reads `animal | crop | equipment | material | produce | location` across `AssetCreate`, `AssetRead`, `AssetUpdate`, and `AssetKindCount` (per-kind summary counts). This gives produce pools their own kind rather than overloading `material`.
+
+**Semantics confirmed from backend source at commit `e659525`** (the yaml prose is still stale — see the `produce` asset kind section for the full contract):
+
+- `INVENTORY_KINDS = {MATERIAL, PRODUCE}` is the load-bearing rule. "Stock-bearing" guards use the set; "consumable input you buy" guards still require `MATERIAL` exactly.
+- **Sale:** `produce` IS sellable via `POST .../assets/{id}/sales`. The pool-sale → per-producer allocation path works on `kind=produce`.
+- **Inventory:** full support; `balance` and `inventory-summary` have no kind filter at all.
+- **Harvest target:** MUST be `kind=produce` — a `material` target is `422`. **Hard break** for any pool still typed `material`.
+- **Loss/self-use:** `material_consumption` rejects `produce`; produce losses are a plain `inventory` decrement, which the engine counts as a zero-revenue draw into `lost`.
+- **Migration:** automatic backfill of `material → produce` for pools with a `produce_lot` or an incoming `produce_asset_id`. Stragglers (harvested before 2026-07-22 and never linked) can't be fixed via API — `kind` freezes once an asset has events — and need direct SQL. Pools left as `material` still report correctly; only new harvests into them fail.
+- **`AssetCreate` forbids `produce_asset_id`** (`extra="forbid"`) → `422` "Extra inputs are not permitted", failing the whole create. Must be create-then-`PATCH`.
+
+**FE follow-through applied in this pass:** added `produce` to the asset-kind union/labels; removed `produce_asset_id` from both asset **create** payloads (crop + lot) in favour of create-then-`PATCH`; switched pool pickers to `kind=produce` (harvest, lot, crop) while **leaving feed pickers on `material`**; made produce assets open in the asset detail (so the sale dialog is reachable) and browsable under a "Productos" kind; added produce creation.
+
+**Still stale on the backend side:** `backend-docs/api/*.yaml` descriptions were not regenerated for `produce`. Ask BE to update every affected endpoint description to name each accepted kind, so a future sync doesn't re-derive this from source.
+
+### 2026-07-23
+
+Produce revenue attribution shipped — pooled produce sales now flow back to the producing animals (derived, at read time). This is the backend's response to the FE capability request `docs/be-request-produce-revenue-attribution.md`; the BE **deliberately chose to derive rather than materialize** per-producer income (no void/re-book engine), so most FE-requested write machinery did **not** ship.
+
+**Contract changes:**
+
+- **Harvest routing decoupled (§A).** `HarvestCreate` now **requires `produce_asset_id` in the request body**; the destination pool is client-supplied per harvest, no longer derived from `asset.produce_asset_id` (demoted to an optional UI default). A producer can feed multiple pools; a cross-farm `produce_asset_id` is rejected `404`. Each harvest persists a `produce_lot` (producer ↔ pool ↔ paired events) — the FIFO basket that makes per-producer attribution possible.
+- **`profitability-full` gains `allocated_produce_income` (§B)** on both `data` rows and `totals`. It is the producer's derived FIFO share of income from produce later sold from a pool; the pool's own `material_sale` income is excluded from the producer's row (it lives on the pool's own row). **Net inclusion (confirmed):** `net_incl_materials` already includes `allocated_produce_income`; `net` (R1) does not. Use `net_incl_materials` as-is for the all-in figure. Watch the double-count trap: the same money is `income_total` on the pool asset's own row, so never sum `income_total` across rows and also add the allocation.
+- **`produce-outcome` report shipped (§E)** (`GET .../reports/produce-outcome`): per (producer, pool) `produced`/`sold`/`lost`/`income_total`, derived FIFO over `produce_lot` baskets with largest-remainder rounding, per (producer, currency); envelope adds `unattributed_quantity`/`unattributed_income` for pool outflow with no lot behind it. FE's productivity-vs-profitability view.
+- **`farm.timezone` shipped** (IANA, default `UTC`, validated on write) on `FarmRead`/`FarmUpdate`. Ledger-relevant: FIFO baskets group by the farm's local calendar day.
+- **`material_sale` pairs `income_event_id` to its inventory decrement** so each sale's quantity ties to its own price (income events can't carry quantity) — the basis for `sales-value` and `produce-outcome` derivation. `MaterialSaleRead` shape unchanged.
+- **Over-draw status code confirmed `409`** (not `422`). Selling/consuming more than a pool holds returns `409` (below-zero / `insufficient_stock`), consistent across `material_sale`, `material_consumption`, and `flock` actions; `422` is generic payload validation only, and the PR summary's "422" for over-draw was loose wording. Note: the yaml `responses` maps omit `409` (a codegen artifact — runtime-raised `HTTPException`s aren't listed), so FE MUST handle `409` for stock guards even though it's undeclared. FE: `409` → "correct your production/registration"; `422` → form validation error.
+
+**Clarifications** (no new behavior; contract detail now recorded):
+
+- **Selling a produce pool uses the existing `material_sale` action — there is no dedicated produce-sale action.** A pooled product is a MATERIAL asset; its sale books ONE `income` event on the pool, and the per-producer split is derived at read time, never booked on the animals. **Over-selling a pool is rejected** by the existing non-negative guard (`409` — confirmed, not `422`), not booked as an "unassigned" remainder — FE must prompt a production correction.
+- **Produce loss/self-use uses the existing `material_consumption` `reason=waste`/`spoilage`** on the pool (zero revenue); the engine attributes it per-producer as `lost`.
+- **Corrections are free by construction:** because the split is derived, editing a harvest simply recomputes the reports on next query — no re-booking. The append-only void/re-book engine the FE proposed was intentionally **not** built (the ledger already permits event edit/delete).
+
+**Deferred / NOT shipped (FE keep blocked-state or omit):**
+
+- Dedicated loss/self-use action and a `SELF_USE` reason (waste/spoilage already cover zero-revenue draws).
+- The correction/replay engine (unnecessary under derivation) — harvest emitted events remain create-only.
+- **Unit conversion** — a pool is locked to its first harvest's unit; harvests must match it. Selling/harvesting in a convertible-but-different unit (dozen/tray vs egg) is not supported yet.
+- **§D (traceable produce) dropped** — a fully-traceable product is just the allocation with a single-contributor lot; no separate path.
 
 ### 2026-07-14
 

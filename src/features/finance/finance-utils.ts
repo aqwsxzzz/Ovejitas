@@ -50,6 +50,7 @@ export const formatAssetKind = (
 		crop: "Cultivo",
 		equipment: "Equipo",
 		material: "Material",
+		produce: "Producto",
 		location: "Ubicacion",
 	};
 

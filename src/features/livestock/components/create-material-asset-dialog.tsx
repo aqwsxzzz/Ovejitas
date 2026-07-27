@@ -16,10 +16,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateLivestockAsset } from "@/features/livestock/api/livestock-queries";
 import { cn } from "@/lib/utils";
 
+/** Stock-bearing kinds share this dialog: `material` (inputs you buy) and `produce` (pools you harvest into). */
+type StockAssetKind = "material" | "produce";
+
 interface CreateMaterialAssetDialogProps {
 	farmId: string;
 	triggerClassName?: string;
+	kind?: StockAssetKind;
 }
+
+const COPY: Record<
+	StockAssetKind,
+	{
+		trigger: string;
+		title: string;
+		description: string;
+		placeholder: string;
+		submit: string;
+		submitting: string;
+		missingName: string;
+		failure: string;
+	}
+> = {
+	material: {
+		trigger: "Nuevo material",
+		title: "Crear material",
+		description: "Registra un nuevo material para esta granja.",
+		placeholder: "Nombre del material",
+		submit: "Crear material",
+		submitting: "Creando...",
+		missingName: "Ingresa el nombre del material.",
+		failure: "No se pudo crear el material. Revisa los datos e intenta de nuevo.",
+	},
+	produce: {
+		trigger: "Nuevo producto",
+		title: "Crear producto",
+		description:
+			"Registra un producto (la canasta donde se acumula lo que producen tus activos).",
+		placeholder: "Nombre del producto (ej. Huevos)",
+		submit: "Crear producto",
+		submitting: "Creando...",
+		missingName: "Ingresa el nombre del producto.",
+		failure: "No se pudo crear el producto. Revisa los datos e intenta de nuevo.",
+	},
+};
 
 const EMPTY_FORM = {
 	name: "",
@@ -30,7 +70,9 @@ const EMPTY_FORM = {
 export function CreateMaterialAssetDialog({
 	farmId,
 	triggerClassName,
+	kind = "material",
 }: CreateMaterialAssetDialogProps) {
+	const copy = COPY[kind];
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState(EMPTY_FORM.name);
 	const [location, setLocation] = useState(EMPTY_FORM.location);
@@ -57,7 +99,7 @@ export function CreateMaterialAssetDialog({
 
 		if (!farmId) return;
 		if (!name.trim()) {
-			setErrorMessage("Ingresa el nombre del material.");
+			setErrorMessage(copy.missingName);
 			return;
 		}
 
@@ -70,15 +112,13 @@ export function CreateMaterialAssetDialog({
 					name: name.trim(),
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
-					kind: "material",
+					kind,
 				},
 			});
 
 			handleOpenChange(false);
 		} catch {
-			setErrorMessage(
-				"No se pudo crear el material. Revisa los datos e intenta de nuevo.",
-			);
+			setErrorMessage(copy.failure);
 		}
 	};
 
@@ -95,15 +135,13 @@ export function CreateMaterialAssetDialog({
 						triggerClassName,
 					)}
 				>
-					Nuevo material
+					{copy.trigger}
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="w-[calc(100vw-2rem)] max-w-128 p-4 sm:p-6">
 				<DialogHeader>
-					<DialogTitle>Crear material</DialogTitle>
-					<DialogDescription>
-						Registra un nuevo material para esta granja.
-					</DialogDescription>
+					<DialogTitle>{copy.title}</DialogTitle>
+					<DialogDescription>{copy.description}</DialogDescription>
 				</DialogHeader>
 
 				<form
@@ -116,7 +154,7 @@ export function CreateMaterialAssetDialog({
 							id="material-name"
 							value={name}
 							onChange={(event) => setName(event.target.value)}
-							placeholder="Nombre del material"
+							placeholder={copy.placeholder}
 							required
 						/>
 					</div>
@@ -161,8 +199,8 @@ export function CreateMaterialAssetDialog({
 							disabled={createMaterialMutation.isPending}
 						>
 							{createMaterialMutation.isPending
-								? "Creando..."
-								: "Crear material"}
+								? copy.submitting
+								: copy.submit}
 						</Button>
 					</DialogFooter>
 				</form>

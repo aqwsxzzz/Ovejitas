@@ -9,6 +9,7 @@ export interface AssetKindOption {
 export const ASSET_KIND_OPTIONS: AssetKindOption[] = [
 	{ kind: "animal", title: "Ganado", pluralLabel: "lotes" },
 	{ kind: "material", title: "Materiales", pluralLabel: "materiales" },
+	{ kind: "produce", title: "Productos", pluralLabel: "productos" },
 	{ kind: "crop", title: "Cultivos", pluralLabel: "cultivos" },
 	{ kind: "equipment", title: "Equipos", pluralLabel: "equipos" },
 	{ kind: "location", title: "Ubicaciones", pluralLabel: "ubicaciones" },
@@ -20,6 +21,7 @@ export function isLivestockAssetKind(
 	return (
 		value === "animal" ||
 		value === "material" ||
+		value === "produce" ||
 		value === "crop" ||
 		value === "equipment" ||
 		value === "location"

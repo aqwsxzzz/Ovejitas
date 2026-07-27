@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { MapPin, Package, PawPrint, Sprout, Wrench } from "lucide-react";
+import { Egg, MapPin, Package, PawPrint, Sprout, Wrench } from "lucide-react";
 
 import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
@@ -34,6 +34,11 @@ const KIND_MEDAL_CONFIG: Record<
 		icon: Package,
 		label: "Material",
 		className: "bg-warning/10 text-warning ring-1 ring-warning/30",
+	},
+	produce: {
+		icon: Egg,
+		label: "Producto",
+		className: "bg-success/10 text-success ring-1 ring-success/30",
 	},
 	location: {
 		icon: MapPin,
