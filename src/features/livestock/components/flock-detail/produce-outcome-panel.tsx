@@ -9,6 +9,7 @@ import {
 } from "@/features/reports/components/report-period-select";
 import { useGetProduceOutcomeReport } from "@/features/reports/api/reports-queries";
 import { formatCurrency } from "@/features/reports/utils/reports-format";
+import { temporarilyExtendDateToForProduceAllocation } from "@/features/reports/utils/produce-allocation-window";
 
 interface ProduceOutcomePanelProps {
 	farmId: string;
@@ -23,8 +24,11 @@ export function ProduceOutcomePanel({ farmId, assetId }: ProduceOutcomePanelProp
 	const { data: report, isPending } = useGetProduceOutcomeReport({
 		farmId,
 		asset_id: assetId,
-		date_from: date_from.slice(0, 10),
-		date_to: date_to.slice(0, 10),
+		date_from,
+		// TEMPORARY: the `sold`/`income_total` side of this report cuts at the raw
+		// `date_to`, so a sale made today reports stock leaving the pool and no
+		// revenue. See the helper for the backend fix that retires this.
+		date_to: temporarilyExtendDateToForProduceAllocation(date_to),
 	});
 
 	const rows = useMemo(

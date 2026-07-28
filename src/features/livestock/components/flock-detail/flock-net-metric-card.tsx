@@ -6,6 +6,7 @@ import {
 	useReportPeriod,
 } from "@/features/reports/components/report-period-select";
 import { useGetProfitabilityFullReport } from "@/features/reports/api/reports-queries";
+import { temporarilyExtendDateToForProduceAllocation } from "@/features/reports/utils/produce-allocation-window";
 
 import { CurrencyNetBlock } from "./currency-net-block";
 import { buildCurrencyNetEntries } from "./flock-net-entries";
@@ -32,8 +33,11 @@ export function FlockNetMetricCard({
 	const { data: report, isPending } = useGetProfitabilityFullReport({
 		farmId,
 		asset_id: assetId,
-		date_from: date_from.slice(0, 10),
-		date_to: date_to.slice(0, 10),
+		date_from,
+		// TEMPORARY: without this, produce income earned today is dropped while
+		// the animal's own income for today is kept. See the helper for the cost
+		// of this patch and the backend fix that retires it.
+		date_to: temporarilyExtendDateToForProduceAllocation(date_to),
 	});
 
 	const entries = useMemo(
