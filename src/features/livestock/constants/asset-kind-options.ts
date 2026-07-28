@@ -6,6 +6,29 @@ export interface AssetKindOption {
 	pluralLabel: string;
 }
 
+/**
+ * Singular Spanish name for an asset kind — the one users read on badges.
+ *
+ * The raw value is a backend enum (`produce`, `crop`, `equipment`, `location`),
+ * so it must never reach the UI: capitalising it happens to look Spanish for
+ * `animal` and `material` and is plainly English for the rest.
+ */
+export const ASSET_KIND_LABELS: Record<LivestockAssetKind, string> = {
+	animal: "Animal",
+	crop: "Cultivo",
+	equipment: "Equipo",
+	material: "Material",
+	produce: "Producto",
+	location: "Ubicacion",
+};
+
+/** Falls back to "Animal", the kind an asset with no `kind` is treated as. */
+export function formatAssetKindLabel(
+	kind: LivestockAssetKind | null | undefined,
+): string {
+	return kind ? ASSET_KIND_LABELS[kind] : ASSET_KIND_LABELS.animal;
+}
+
 export const ASSET_KIND_OPTIONS: AssetKindOption[] = [
 	{ kind: "animal", title: "Ganado", pluralLabel: "lotes" },
 	{ kind: "material", title: "Materiales", pluralLabel: "materiales" },

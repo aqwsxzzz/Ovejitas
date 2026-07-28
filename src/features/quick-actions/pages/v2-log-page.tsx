@@ -1,5 +1,6 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
+import { Button } from "@/components/ui/button";
 import { LogActionCard } from "@/features/quick-actions/log/log-action-card";
 import { LogCreateAssetAction } from "@/features/quick-actions/log/log-create-asset-action";
 import { LogCreateIndividualAction } from "@/features/quick-actions/log/log-create-individual-action";
@@ -104,15 +105,29 @@ export function V2LogPage() {
 	return (
 		<section className="space-y-4">
 			<div className="v2-card p-5 md:p-6">
-				<p className="v2-kicker">Accion rapida</p>
-				<h2 className="mt-2 text-xl font-semibold">
-					{search.actionLabel ?? "Selecciona una accion"}
-				</h2>
-				<p className="mt-1 text-sm text-(--v2-ink-soft)">
-					{search.contextLabel
-						? `Contexto actual: ${search.contextLabel}`
-						: "Sin contexto especifico"}
-				</p>
+				<div className="flex items-start justify-between gap-3">
+					<div>
+						<p className="v2-kicker">Accion rapida</p>
+						<h2 className="mt-2 text-xl font-semibold">
+							{search.actionLabel ?? "Selecciona una accion"}
+						</h2>
+						<p className="mt-1 text-sm text-(--v2-ink-soft)">
+							{search.contextLabel
+								? `Contexto actual: ${search.contextLabel}`
+								: "Sin contexto especifico"}
+						</p>
+					</div>
+					{/* The only way out of this page short of submitting: these actions are
+					    full-page routes, not dialogs, so nothing else dismisses them. */}
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={goBack}
+					>
+						Cancelar
+					</Button>
+				</div>
 			</div>
 
 			{!farmId ? (

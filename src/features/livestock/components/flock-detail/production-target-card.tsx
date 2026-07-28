@@ -64,7 +64,7 @@ export function ProductionTargetCard({
 				) : (
 					<p className="text-xs text-(--v2-ink-soft)">
 						Define la producción esperada para calcular la productividad de este
-						lote.
+						activo.
 					</p>
 				)}
 				{isFormOpen ? (
