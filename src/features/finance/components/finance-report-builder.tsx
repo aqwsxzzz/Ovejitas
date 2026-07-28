@@ -13,7 +13,7 @@ import { ProductionReport } from "@/features/reports/components/production-repor
 import { ProfitabilityReport } from "@/features/reports/components/profitability-report";
 import { SalesValueReport } from "@/features/reports/components/sales-value-report";
 import type { FinanceFilters, FinanceReportType } from "@/features/finance/finance-types";
-import { formatAssetKind, toApiDateTime } from "@/features/finance/finance-utils";
+import { formatAssetKind, toApiDate } from "@/features/finance/finance-utils";
 
 interface FinanceReportBuilderProps {
 	farmId: string;
@@ -34,8 +34,8 @@ export const FinanceReportBuilder = ({
 	filters,
 }: FinanceReportBuilderProps) => {
 	const [reportType, setReportType] = useState<FinanceReportType>("profitability");
-	const dateFrom = toApiDateTime(filters.dateFrom, false);
-	const dateTo = toApiDateTime(filters.dateTo, true);
+	const dateFrom = toApiDate(filters.dateFrom);
+	const dateTo = toApiDate(filters.dateTo);
 	const blocksKindScopedReports = filters.assetKind !== "all" && !filters.assetId;
 
 	return (

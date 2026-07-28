@@ -3,6 +3,7 @@ import {
 	formatCurrency,
 	parseDecimal,
 } from "@/features/finance/finance-dashboard-utils";
+import { parseBucketYearMonth } from "@/features/finance/utils/finance-date-utils";
 import type {
 	FinanceInsightRow,
 	FinanceTrendSection,
@@ -161,21 +162,7 @@ export const buildYearMonthSections = (
 
 	for (const row of incomeRows) {
 		const currency = row.group_label ?? row.group ?? "USD";
-		const parsed =
-			(row.bucket.match(/^(\d{4})-(\d{2})/)
-				? {
-						year: Number(row.bucket.slice(0, 4)),
-						month: Number(row.bucket.slice(5, 7)) - 1,
-					}
-				: null) ||
-			(() => {
-				const bucketDate = new Date(row.bucket);
-				if (Number.isNaN(bucketDate.getTime())) return null;
-				return {
-					year: bucketDate.getFullYear(),
-					month: bucketDate.getMonth(),
-				};
-			})();
+		const parsed = parseBucketYearMonth(row.bucket);
 		if (!parsed || parsed.year !== year) continue;
 		const monthIndex = parsed.month;
 		const months =
@@ -187,21 +174,7 @@ export const buildYearMonthSections = (
 
 	for (const row of expenseRows) {
 		const currency = row.group_label ?? row.group ?? "USD";
-		const parsed =
-			(row.bucket.match(/^(\d{4})-(\d{2})/)
-				? {
-						year: Number(row.bucket.slice(0, 4)),
-						month: Number(row.bucket.slice(5, 7)) - 1,
-					}
-				: null) ||
-			(() => {
-				const bucketDate = new Date(row.bucket);
-				if (Number.isNaN(bucketDate.getTime())) return null;
-				return {
-					year: bucketDate.getFullYear(),
-					month: bucketDate.getMonth(),
-				};
-			})();
+		const parsed = parseBucketYearMonth(row.bucket);
 		if (!parsed || parsed.year !== year) continue;
 		const monthIndex = parsed.month;
 		const months =

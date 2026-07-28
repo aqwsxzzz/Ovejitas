@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { toDateParam, toDateParamOffsetDays } from "@/lib/datetime";
 import {
 	Select,
 	SelectContent,
@@ -24,21 +25,20 @@ export interface ReportPeriod {
 	date_to: string;
 }
 
-/** Rolling-window period state as ISO date_from/date_to, driven by a day count. */
+/** Rolling-window period state as bare date_from/date_to, driven by a day count. */
 export function useReportPeriod(defaultDays = 30): ReportPeriod {
 	const [selectedDays, setSelectedDays] = useState(String(defaultDays));
 
-	const { date_from, date_to } = useMemo(() => {
-		const now = new Date();
-		const from = new Date(now);
-		from.setDate(from.getDate() - Number(selectedDays));
-		// End the window at end of *today* (local), not the mount instant — otherwise
-		// an event registered after the page loaded falls past `date_to` and won't
-		// appear until a refresh advances it.
-		const to = new Date(now);
-		to.setHours(23, 59, 59, 999);
-		return { date_from: from.toISOString(), date_to: to.toISOString() };
-	}, [selectedDays]);
+	const { date_from, date_to } = useMemo(
+		() => ({
+			// Bare dates, so the backend resolves both ends on the farm's calendar
+			// and covers the whole of today — an event registered after the page
+			// loaded still falls inside the window.
+			date_from: toDateParamOffsetDays(-Number(selectedDays)),
+			date_to: toDateParam(),
+		}),
+		[selectedDays],
+	);
 
 	return { selectedDays, setSelectedDays, date_from, date_to };
 }

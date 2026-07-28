@@ -1,4 +1,5 @@
 import type { FinanceAssetKindFilter } from "@/features/finance/finance-types";
+import { formatAssetKindLabel } from "@/features/livestock/constants/asset-kind-options";
 import type { LivestockAssetKind } from "@/features/livestock/types/livestock-types";
 
 export const parseDecimal = (value: string | null | undefined): number => {
@@ -30,29 +31,22 @@ export const formatDateLabel = (value: string): string => {
 	}
 };
 
-export const toApiDateTime = (
-	rawDate: string,
-	endOfDay: boolean,
-): string | undefined => {
+/**
+ * A `<input type="date">` value is already the bound the backend wants: bare
+ * "YYYY-MM-DD", resolved on the farm's calendar, with `date_to` rolled to the
+ * end of its local day server-side. Converting it to a UTC instant here is what
+ * made "today" windows drop the day's own events.
+ */
+export const toApiDate = (rawDate: string): string | undefined => {
 	if (!rawDate) return undefined;
-	const timePart = endOfDay ? "23:59:59.999" : "00:00:00.000";
-	const parsed = new Date(`${rawDate}T${timePart}`);
-	return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+	return Number.isNaN(new Date(`${rawDate}T00:00:00`).getTime())
+		? undefined
+		: rawDate;
 };
 
 export const formatAssetKind = (
 	kind: FinanceAssetKindFilter | LivestockAssetKind,
 ): string => {
 	if (kind === "all") return "Todos los tipos";
-
-	const labels: Record<LivestockAssetKind, string> = {
-		animal: "Animal",
-		crop: "Cultivo",
-		equipment: "Equipo",
-		material: "Material",
-		produce: "Producto",
-		location: "Ubicacion",
-	};
-
-	return labels[kind];
+	return formatAssetKindLabel(kind);
 };

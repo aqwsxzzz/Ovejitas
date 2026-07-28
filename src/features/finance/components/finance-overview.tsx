@@ -10,7 +10,7 @@ import {
 	formatCurrency,
 	formatDateLabel,
 	parseDecimal,
-	toApiDateTime,
+	toApiDate,
 } from "@/features/finance/finance-utils";
 import {
 	useGetAggregateReport,
@@ -38,8 +38,8 @@ export const FinanceOverview = ({
 	filters,
 	assets,
 }: FinanceOverviewProps) => {
-	const dateFrom = toApiDateTime(filters.dateFrom, false);
-	const dateTo = toApiDateTime(filters.dateTo, true);
+	const dateFrom = toApiDate(filters.dateFrom);
+	const dateTo = toApiDate(filters.dateTo);
 	const assetsById = new Map(assets.map((asset) => [asset.id, asset]));
 	const selectedAsset = filters.assetId
 		? assetsById.get(filters.assetId)

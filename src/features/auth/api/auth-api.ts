@@ -16,6 +16,10 @@ export const signup = ({ payload }: { payload: ISignUpPayload }) =>
 			name: payload.displayName,
 			email: payload.email.trim().toLowerCase(),
 			password: payload.password,
+			// The new farm's calendar. Left unset the backend defaults to UTC, which
+			// ends the farmer's day at 21:00 local at UTC-3 and pushes an evening's
+			// work into tomorrow. Changeable later in farm settings.
+			timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
 		},
 	});
 

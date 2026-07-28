@@ -93,7 +93,13 @@ export type MaterialConsumptionGroupBy = "material" | "consumer" | "both";
 export type MaterialConsumptionReason = "feeding" | "waste" | "spoilage";
 
 export interface IAggregateRow {
-	bucket: string; // ISO datetime
+	/**
+	 * Bare calendar date ("2026-04-10"), cut on the farm's timezone. NOT a
+	 * timestamp: `new Date(bucket)` parses it as UTC midnight, so formatting the
+	 * result in browser-local time renders the previous day west of UTC. Round
+	 * trips directly as a `date_from` bound.
+	 */
+	bucket: string;
 	group: string | null;
 	group_label?: string | null;
 	measure: AggregateMeasure;
