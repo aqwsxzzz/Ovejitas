@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useDefaultCurrencyId } from "@/features/currency/api/currency-queries";
 import { CurrencySelectField } from "@/features/currency/components/currency-select-field";
-import { EVENT_UNITS } from "@/shared/types/unit-types";
+import { useStockUnit } from "./use-stock-unit";
 import type { LivestockEventUnit } from "@/features/livestock/types/livestock-types";
 import type { IMaterialSaleCreatePayload } from "@/features/livestock/api/livestock-api";
 
@@ -26,6 +26,8 @@ interface MaterialSaleFormProps {
 		id: number;
 		name: string;
 	}>;
+	/** Units this asset already holds stock in; empty until it has any. */
+	stockedUnits: LivestockEventUnit[];
 	isSubmitting: boolean;
 	errorMessage: string | null;
 	onSubmit: (payload: IMaterialSaleCreatePayload) => Promise<void>;
@@ -34,15 +36,15 @@ interface MaterialSaleFormProps {
 export function MaterialSaleForm({
 	farmId,
 	categoryOptions = [],
+	stockedUnits,
 	isSubmitting,
 	errorMessage,
 	onSubmit,
 }: MaterialSaleFormProps) {
-	const [occurredAt, setOccurredAt] = useState(
-		toDateTimeLocalValue(),
-	);
+	const [occurredAt, setOccurredAt] = useState(toDateTimeLocalValue());
 	const [quantity, setQuantity] = useState("");
-	const [unit, setUnit] = useState<LivestockEventUnit>("kg");
+	const { unit, setUnit, unitOptions, isUnitLocked } =
+		useStockUnit(stockedUnits);
 	const [amount, setAmount] = useState("");
 	const defaultCurrencyId = useDefaultCurrencyId(farmId);
 	const [currencyId, setCurrencyId] = useState<number | undefined>(undefined);
@@ -100,6 +102,7 @@ export function MaterialSaleForm({
 					<Select
 						value={unit}
 						onValueChange={(value) => setUnit(value as LivestockEventUnit)}
+						disabled={isUnitLocked}
 					>
 						<SelectTrigger
 							id="sale-unit"
@@ -108,7 +111,7 @@ export function MaterialSaleForm({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{EVENT_UNITS.map((eventUnit) => (
+							{unitOptions.map((eventUnit) => (
 								<SelectItem
 									key={eventUnit}
 									value={eventUnit}
@@ -118,6 +121,12 @@ export function MaterialSaleForm({
 							))}
 						</SelectContent>
 					</Select>
+					{isUnitLocked ? (
+						<p className="text-xs text-(--v2-ink-soft)">
+							Este activo lleva su stock en {unit}. No hay conversion de
+							unidades.
+						</p>
+					) : null}
 				</div>
 				<div className="space-y-1.5">
 					<Label htmlFor="sale-quantity">Cantidad</Label>
@@ -194,7 +203,9 @@ export function MaterialSaleForm({
 				</div>
 			</div>
 
-			{localError ? <p className="text-sm text-destructive">{localError}</p> : null}
+			{localError ? (
+				<p className="text-sm text-destructive">{localError}</p>
+			) : null}
 			{errorMessage ? (
 				<p className="text-sm text-destructive">{errorMessage}</p>
 			) : null}

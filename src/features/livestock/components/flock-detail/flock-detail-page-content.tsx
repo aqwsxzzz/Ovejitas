@@ -69,6 +69,7 @@ export function FlockDetailPageContent({
 				<FlockMaterialInventorySection
 					farmId={farmId}
 					assetId={asset.id}
+					alertOnLowStock={asset.kind === "material"}
 				/>
 			) : null}
 
