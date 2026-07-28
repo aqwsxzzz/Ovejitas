@@ -41,6 +41,8 @@ interface EventCategorySelectFieldProps {
 	placeholder?: string;
 	/** Offer a "no category" option (not appropriate when a category is required). */
 	allowNone?: boolean;
+	/** Wording for the `allowNone` row when "Sin categoria" doesn't fit. */
+	noneLabel?: string;
 	/** Label for the inline-create row, e.g. "Nueva categoria" / "Nuevo producto". */
 	newOptionLabel: string;
 	helperText?: React.ReactNode;
@@ -59,6 +61,7 @@ export function EventCategorySelectField({
 	label,
 	placeholder,
 	allowNone = false,
+	noneLabel = "Sin categoria",
 	newOptionLabel,
 	helperText,
 	disabled = false,
@@ -85,9 +88,9 @@ export function EventCategorySelectField({
 			label: category.name,
 		}));
 		return allowNone
-			? [{ value: NONE_OPTION_VALUE, label: "Sin categoria" }, ...rows]
+			? [{ value: NONE_OPTION_VALUE, label: noneLabel }, ...rows]
 			: rows;
-	}, [availableCategories, allowNone]);
+	}, [availableCategories, allowNone, noneLabel]);
 
 	const comboboxValue = value || (allowNone ? NONE_OPTION_VALUE : undefined);
 

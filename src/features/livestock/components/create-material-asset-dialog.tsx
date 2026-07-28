@@ -16,50 +16,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateLivestockAsset } from "@/features/livestock/api/livestock-queries";
 import { cn } from "@/lib/utils";
 
-/** Stock-bearing kinds share this dialog: `material` (inputs you buy) and `produce` (pools you harvest into). */
-type StockAssetKind = "material" | "produce";
-
+/**
+ * Creates a `material` asset — an input you buy (feed, medicine).
+ *
+ * Produce pools deliberately have no creation path here: they belong to a
+ * product and are provisioned with it, and `POST /assets` rejects
+ * `kind=produce`.
+ */
 interface CreateMaterialAssetDialogProps {
 	farmId: string;
 	triggerClassName?: string;
-	kind?: StockAssetKind;
 }
 
-const COPY: Record<
-	StockAssetKind,
-	{
-		trigger: string;
-		title: string;
-		description: string;
-		placeholder: string;
-		submit: string;
-		submitting: string;
-		missingName: string;
-		failure: string;
-	}
-> = {
-	material: {
-		trigger: "Nuevo material",
-		title: "Crear material",
-		description: "Registra un nuevo material para esta granja.",
-		placeholder: "Nombre del material",
-		submit: "Crear material",
-		submitting: "Creando...",
-		missingName: "Ingresa el nombre del material.",
-		failure: "No se pudo crear el material. Revisa los datos e intenta de nuevo.",
-	},
-	produce: {
-		trigger: "Nuevo producto",
-		title: "Crear producto",
-		description:
-			"Registra un producto (la canasta donde se acumula lo que producen tus activos).",
-		placeholder: "Nombre del producto (ej. Huevos)",
-		submit: "Crear producto",
-		submitting: "Creando...",
-		missingName: "Ingresa el nombre del producto.",
-		failure: "No se pudo crear el producto. Revisa los datos e intenta de nuevo.",
-	},
-};
+const COPY = {
+	trigger: "Nuevo material",
+	title: "Crear material",
+	description: "Registra un nuevo material para esta granja.",
+	placeholder: "Nombre del material",
+	submit: "Crear material",
+	submitting: "Creando...",
+	missingName: "Ingresa el nombre del material.",
+	failure: "No se pudo crear el material. Revisa los datos e intenta de nuevo.",
+} as const;
 
 const EMPTY_FORM = {
 	name: "",
@@ -70,9 +48,8 @@ const EMPTY_FORM = {
 export function CreateMaterialAssetDialog({
 	farmId,
 	triggerClassName,
-	kind = "material",
 }: CreateMaterialAssetDialogProps) {
-	const copy = COPY[kind];
+	const copy = COPY;
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState(EMPTY_FORM.name);
 	const [location, setLocation] = useState(EMPTY_FORM.location);
@@ -112,7 +89,7 @@ export function CreateMaterialAssetDialog({
 					name: name.trim(),
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
-					kind,
+					kind: "material",
 				},
 			});
 

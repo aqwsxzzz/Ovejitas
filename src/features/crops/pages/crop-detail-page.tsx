@@ -81,7 +81,6 @@ export function CropDetailPage({ cropId }: CropDetailPageProps) {
 					</CardHeader>
 					<CardContent>
 						<HarvestForm
-							produceAssets={harvest.produceAssets}
 							categories={harvest.categories}
 							defaultProduceAssetId={data.asset.produce_asset_id}
 							defaultUnit="kg"

@@ -47,7 +47,6 @@ export function AnimalHarvestPanel({
 		>
 			{isExpanded ? (
 				<HarvestForm
-					produceAssets={harvest.produceAssets}
 					categories={harvest.categories}
 					defaultProduceAssetId={defaultProduceAssetId}
 					isSubmitting={harvest.isSubmitting}

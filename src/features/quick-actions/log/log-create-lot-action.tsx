@@ -9,9 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
 	useCreateFlockAcquisitionByAssetId,
 	useCreateLivestockAsset,
-	useUpdateLivestockAssetById,
 } from "@/features/livestock/api/livestock-queries";
-import { ProduceAssetSelectField } from "@/features/livestock/components/produce-asset-select-field";
 import type { LivestockAssetMode } from "@/features/livestock/types/livestock-types";
 
 import { LogActionCard } from "./log-action-card";
@@ -34,12 +32,10 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 	const [initialAmount, setInitialAmount] = useState("");
 	const [description, setDescription] = useState("");
 	const [mode, setMode] = useState<LivestockAssetMode>("aggregated");
-	const [produceAssetId, setProduceAssetId] = useState("none");
 	const [acquiredAt, setAcquiredAt] = useState(toDateTimeLocalValue());
 	const [error, setError] = useState<string | null>(null);
 
 	const createAsset = useCreateLivestockAsset();
-	const updateAsset = useUpdateLivestockAssetById();
 	const createAcquisition = useCreateFlockAcquisitionByAssetId();
 	const isSaving = createAsset.isPending || createAcquisition.isPending;
 
@@ -56,7 +52,6 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 		}
 		setError(null);
 		try {
-			// `AssetCreate` forbids extra fields, so the produce link is a follow-up PATCH.
 			const createdAsset = await createAsset.mutateAsync({
 				farmId,
 				data: {
@@ -67,13 +62,6 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 					mode,
 				},
 			});
-			if (produceAssetId !== "none") {
-				await updateAsset.mutateAsync({
-					farmId,
-					assetId: createdAsset.id,
-					data: { produce_asset_id: Number(produceAssetId) },
-				});
-			}
 			if (mode === "aggregated") {
 				await createAcquisition.mutateAsync({
 					farmId,
@@ -175,13 +163,6 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 						onChange={(event) => setDescription(event.target.value)}
 					/>
 				</div>
-				<ProduceAssetSelectField
-					farmId={farmId}
-					value={produceAssetId}
-					onChange={setProduceAssetId}
-					label="Producto que genera (opcional)"
-					helperText="Producto sugerido por defecto al registrar recolecciones. Puedes crearlo aquí mismo."
-				/>
 				{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				<div className="flex justify-end">
 					<Button

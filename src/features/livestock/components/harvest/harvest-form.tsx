@@ -22,12 +22,16 @@ import type {
 	LivestockEventUnit,
 } from "@/features/livestock/types/livestock-types";
 import type { IHarvestCreatePayload } from "@/features/livestock/api/livestock-api";
+import { findCategoryIdByPool } from "@/features/livestock/utils/product-utils";
 import { EVENT_UNITS } from "@/shared/types/unit-types";
 
 interface HarvestFormProps {
-	/** Destination pools — MUST be `kind=produce` assets. */
-	produceAssets: Array<{ id: number; name: string }>;
+	/** Production categories — a category IS the product, and owns its pool. */
 	categories: ILivestockEventCategory[];
+	/**
+	 * The producer's usual product, stored on the asset as a *pool* id. Resolved
+	 * back to the product that owns that pool to pre-select the picker.
+	 */
 	defaultProduceAssetId?: number | null;
 	defaultUnit?: LivestockEventUnit;
 	isSubmitting: boolean;
@@ -40,7 +44,6 @@ interface HarvestFormProps {
 }
 
 export function HarvestForm({
-	produceAssets,
 	categories,
 	defaultProduceAssetId,
 	defaultUnit = "unit",
@@ -50,10 +53,9 @@ export function HarvestForm({
 	onCreateCategory,
 	onSuccess,
 }: HarvestFormProps) {
-	const [produceAssetId, setProduceAssetId] = useState(
-		defaultProduceAssetId != null ? String(defaultProduceAssetId) : "",
+	const [categoryId, setCategoryId] = useState(() =>
+		findCategoryIdByPool(categories, defaultProduceAssetId),
 	);
-	const [categoryId, setCategoryId] = useState("");
 	const [quantity, setQuantity] = useState("");
 	const [unit, setUnit] = useState<LivestockEventUnit>(defaultUnit);
 	const [occurredAt, setOccurredAt] = useState(toDateTimeLocalValue());
@@ -63,7 +65,6 @@ export function HarvestForm({
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const parsedQuantity = Number(quantity);
-		if (!produceAssetId) return setLocalError("Selecciona un producto destino.");
 		if (!categoryId) return setLocalError("Selecciona un producto.");
 		if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
 			return setLocalError("La cantidad debe ser mayor a 0.");
@@ -72,13 +73,12 @@ export function HarvestForm({
 		const ok = await onSubmit({
 			occurred_at: new Date(occurredAt).toISOString(),
 			quantity: parsedQuantity,
-			unit,
-			produce_asset_id: Number(produceAssetId),
 			category_id: Number(categoryId),
+			unit,
 			notes: notes.trim() || null,
 		});
 		if (ok) {
-			// Keep basket/category/unit for fast repeat entries; clear the rest.
+			// Keep product/unit for fast repeat entries; clear the rest.
 			setQuantity("");
 			setNotes("");
 			setOccurredAt(toDateTimeLocalValue());
@@ -91,43 +91,15 @@ export function HarvestForm({
 			className="space-y-3"
 			onSubmit={(event) => void handleSubmit(event)}
 		>
-			<div className="space-y-1.5">
-				<Label htmlFor="harvest-basket">Producto destino</Label>
-				<Select
-					value={produceAssetId || undefined}
-					onValueChange={setProduceAssetId}
-				>
-					<SelectTrigger
-						id="harvest-basket"
-						className="w-full"
-					>
-						<SelectValue placeholder="Selecciona un producto" />
-					</SelectTrigger>
-					<SelectContent>
-						{produceAssets.map((produce) => (
-							<SelectItem
-								key={produce.id}
-								value={String(produce.id)}
-							>
-								{produce.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-				<p className="text-xs text-(--v2-ink-soft)">
-					La canasta donde se acumula el stock y desde donde se vende.
-				</p>
-			</div>
-
 			<EventCategorySelectField
 				type="production"
 				categories={categories}
 				value={categoryId}
 				onChange={setCategoryId}
-				label="Categoría de producción"
-				newOptionLabel="Nueva categoría"
+				label="Producto"
+				newOptionLabel="Nuevo producto"
 				onCreateEventCategory={onCreateCategory}
-				helperText="Clasifica la producción para las estadísticas de productividad."
+				helperText="El stock se acumula en la canasta de este producto, y desde ahí se vende."
 			/>
 
 			<div className="grid gap-3 md:grid-cols-2">
@@ -201,7 +173,7 @@ export function HarvestForm({
 					type="submit"
 					disabled={isSubmitting}
 				>
-					{isSubmitting ? "Registrando..." : "Registrar cosecha"}
+					{isSubmitting ? "Registrando..." : "Registrar recoleccion"}
 				</Button>
 			</div>
 		</form>

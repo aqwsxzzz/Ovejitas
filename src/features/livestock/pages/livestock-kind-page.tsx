@@ -102,11 +102,6 @@ export function LivestockKindPage({
 					</Button>
 				) : selectedKind === "material" ? (
 					<CreateMaterialAssetDialog farmId={farmId} />
-				) : selectedKind === "produce" ? (
-					<CreateMaterialAssetDialog
-						farmId={farmId}
-						kind="produce"
-					/>
 				) : selectedKind === "crop" ? (
 					<CreateCropAssetDialog farmId={farmId} />
 				) : selectedKind === "equipment" ? (
@@ -137,7 +132,9 @@ export function LivestockKindPage({
 					description={
 						query
 							? "Prueba con otro nombre o ubicacion."
-							: `Crea tu primer registro para empezar a hacer seguimiento.`
+							: selectedKind === "produce"
+								? "Los productos se crean al registrar una recoleccion o una meta de produccion. Su canasta de stock aparece aqui."
+								: "Crea tu primer registro para empezar a hacer seguimiento."
 					}
 				/>
 			) : (

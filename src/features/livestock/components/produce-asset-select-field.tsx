@@ -1,19 +1,24 @@
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-	useCreateLivestockAsset,
-	useListLivestockAssetsByFarmId,
+	EventCategorySelectField,
+	type CreateEventCategoryInput,
+} from "@/features/livestock/components/event-category-select-field";
+import {
+	useCreateEventCategoryByFarmId,
+	useListEventCategoriesByFarmId,
 } from "@/features/livestock/api/livestock-queries";
+import type { ILivestockEventCategory } from "@/features/livestock/types/livestock-types";
+import {
+	findCategoryIdByPool,
+	findPoolIdByCategory,
+} from "@/features/livestock/utils/product-utils";
 
 const NONE_OPTION_VALUE = "none";
 
 interface ProduceAssetSelectFieldProps {
 	farmId: string;
-	/** Selected produce asset id as string, or "none". */
+	/** Selected produce pool id as string, or "none". */
 	value: string;
 	onChange: (value: string) => void;
 	label: string;
@@ -22,9 +27,12 @@ interface ProduceAssetSelectFieldProps {
 }
 
 /**
- * Picks a `produce` asset (the pool a producer harvests into), with an inline
- * "create new" row so a first product can be made without leaving the form —
- * ordering (product-before-animal) never matters.
+ * Picks the product a producer harvests by default.
+ *
+ * The farmer picks a *product* (a production category), but `asset` stores the
+ * default as a *pool* id, so this maps between the two in both directions. The
+ * pool itself is never authored here — creating a product provisions it on the
+ * backend, and `POST /assets` rejects `kind=produce` outright.
  */
 export function ProduceAssetSelectField({
 	farmId,
@@ -34,98 +42,57 @@ export function ProduceAssetSelectField({
 	helperText,
 	disabled = false,
 }: ProduceAssetSelectFieldProps) {
-	const [isCreating, setIsCreating] = useState(false);
-	const [newName, setNewName] = useState("");
-	const [error, setError] = useState("");
+	// A just-created product, held until the invalidated list refetches. The ref
+	// is what makes the mapping work: the field selects the new product in the
+	// same tick it is created, before a state update could be read back.
+	const createdRef = useRef<ILivestockEventCategory[]>([]);
+	const [created, setCreated] = useState<ILivestockEventCategory[]>([]);
 
-	const { data: response } = useListLivestockAssetsByFarmId({
+	const { data: fetched = [] } = useListEventCategoriesByFarmId({
 		farmId,
-		filters: { kind: "produce", page: 1, pageSize: 100 },
+		filters: { type: "production", archived: false, pageSize: 100 },
 		enabled: !!farmId,
 	});
-	const createMutation = useCreateLivestockAsset();
+	const createMutation = useCreateEventCategoryByFarmId();
 
-	const options = useMemo<ComboboxOption[]>(
-		() => [
-			{ value: NONE_OPTION_VALUE, label: "Sin producto vinculado" },
-			...(response?.data ?? []).map((asset) => ({
-				value: String(asset.id),
-				label: asset.name,
-			})),
-		],
-		[response?.data],
-	);
+	const categories = [
+		...fetched,
+		...created.filter((one) => !fetched.some((other) => other.id === one.id)),
+	];
 
-	const handleValueChange = (next: string) => {
-		setIsCreating(false);
-		onChange(next);
+	const selectedCategoryId =
+		value === NONE_OPTION_VALUE
+			? ""
+			: findCategoryIdByPool(categories, Number(value));
+
+	const handleChange = (categoryId: string) => {
+		const poolId =
+			findPoolIdByCategory(categories, categoryId) ??
+			findPoolIdByCategory(createdRef.current, categoryId);
+		onChange(poolId == null ? NONE_OPTION_VALUE : String(poolId));
 	};
 
-	const handleCreate = async () => {
-		setError("");
-		if (!newName.trim()) {
-			setError("Escribe un nombre.");
-			return;
-		}
-		try {
-			const created = await createMutation.mutateAsync({
-				farmId,
-				data: { name: newName.trim(), kind: "produce" },
-			});
-			onChange(String(created.id));
-			setNewName("");
-			setIsCreating(false);
-		} catch {
-			setError("No se pudo crear el producto.");
-		}
+	const handleCreate = async (input: CreateEventCategoryInput) => {
+		const category = await createMutation.mutateAsync({ farmId, data: input });
+		createdRef.current = [...createdRef.current, category];
+		setCreated(createdRef.current);
+		return category.id;
 	};
 
 	return (
-		<div className="space-y-1.5">
-			<Label>{label}</Label>
-			<Combobox
-				options={options}
-				value={value}
-				onChange={handleValueChange}
-				disabled={disabled}
-				placeholder="Sin producto vinculado"
-				searchPlaceholder="Buscar producto"
-				createLabel="Nuevo producto"
-				onCreateSelect={() => setIsCreating(true)}
-			/>
-
-			{isCreating ? (
-				<div className="grid gap-2 rounded-lg border bg-muted/40 p-2">
-					<Input
-						value={newName}
-						onChange={(event) => setNewName(event.target.value)}
-						placeholder="Nombre del producto (ej. Huevos)"
-					/>
-					{error ? <p className="text-sm text-destructive">{error}</p> : null}
-					<div className="flex justify-end gap-2">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={() => setIsCreating(false)}
-						>
-							Cancelar
-						</Button>
-						<Button
-							type="button"
-							size="sm"
-							onClick={() => void handleCreate()}
-							disabled={createMutation.isPending}
-						>
-							{createMutation.isPending ? "Creando..." : "Crear"}
-						</Button>
-					</div>
-				</div>
-			) : null}
-
-			{helperText ? (
-				<p className="text-xs text-(--v2-ink-soft)">{helperText}</p>
-			) : null}
-		</div>
+		<EventCategorySelectField
+			type="production"
+			categories={categories}
+			value={selectedCategoryId}
+			onChange={handleChange}
+			label={label}
+			placeholder="Sin producto vinculado"
+			allowNone
+			noneLabel="Sin producto vinculado"
+			newOptionLabel="Nuevo producto"
+			helperText={helperText}
+			disabled={disabled}
+			onCreateEventCategory={handleCreate}
+		/>
 	);
 }

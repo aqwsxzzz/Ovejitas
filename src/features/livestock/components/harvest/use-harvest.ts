@@ -5,7 +5,6 @@ import {
 	useCreateEventCategoryByFarmId,
 	useCreateHarvestByAssetId,
 	useListEventCategoriesByFarmId,
-	useListLivestockAssetsByFarmId,
 } from "@/features/livestock/api/livestock-queries";
 import type { IHarvestCreatePayload } from "@/features/livestock/api/livestock-api";
 import type { CreateEventCategoryInput } from "@/features/livestock/components/event-category-select-field";
@@ -24,12 +23,8 @@ export function useHarvest({
 }: UseHarvestArgs) {
 	const [error, setError] = useState<string | null>(null);
 
-	// Harvest MUST deposit into a `produce` asset — a material target is rejected 422.
-	const materialsQuery = useListLivestockAssetsByFarmId({
-		farmId,
-		filters: { kind: "produce", page: 1, pageSize: 100 },
-		enabled: enabled && !!farmId,
-	});
+	// A harvest names only its product; the backend resolves the destination pool
+	// from the category, so there is no pool to list or pick here.
 	const { data: categories = [] } = useListEventCategoriesByFarmId({
 		farmId,
 		filters: { type: "production", archived: false, pageSize: 100 },
@@ -69,10 +64,6 @@ export function useHarvest({
 	};
 
 	return {
-		produceAssets: (materialsQuery.data?.data ?? []).map((asset) => ({
-			id: asset.id,
-			name: asset.name,
-		})),
 		categories,
 		error,
 		isSubmitting: harvestMutation.isPending,
