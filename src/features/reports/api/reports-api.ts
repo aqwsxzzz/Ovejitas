@@ -258,7 +258,7 @@ export const getProduceOutcomeReport = ({
 	farmId,
 	date_from,
 	date_to,
-	asset_id,
+	producer_asset_id,
 }: IProduceOutcomeReportParams) =>
 	axiosHelper<IProduceOutcomeReport>({
 		method: "get",
@@ -266,7 +266,7 @@ export const getProduceOutcomeReport = ({
 		urlParams: {
 			date_from,
 			date_to,
-			asset_id,
+			producer_asset_id,
 		},
 	});
 

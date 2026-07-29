@@ -23,7 +23,7 @@ export function ProduceOutcomePanel({ farmId, assetId }: ProduceOutcomePanelProp
 
 	const { data: report, isPending } = useGetProduceOutcomeReport({
 		farmId,
-		asset_id: assetId,
+		producer_asset_id: assetId,
 		date_from,
 		// TEMPORARY: the `sold`/`income_total` side of this report cuts at the raw
 		// `date_to`, so a sale made today reports stock leaving the pool and no

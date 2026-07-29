@@ -405,7 +405,7 @@ export const useGetProduceOutcomeReport = (
 			params.farmId,
 			params.date_from,
 			params.date_to,
-			params.asset_id,
+			params.producer_asset_id,
 		),
 		queryFn: () => getProduceOutcomeReport(params),
 		enabled: enabled && !!params.farmId,

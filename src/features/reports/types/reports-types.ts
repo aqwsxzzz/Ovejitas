@@ -364,6 +364,7 @@ export interface IProduceOutcomeReportParams {
 	farmId: string | number;
 	date_from?: string;
 	date_to?: string;
-	/** Optional producer filter; rows are also filtered client-side as a safeguard. */
-	asset_id?: number;
+	/** Producer filter. The endpoint parameter is `producer_asset_id`; sending
+	 * `asset_id` is silently ignored and returns every producer. */
+	producer_asset_id?: number;
 }
