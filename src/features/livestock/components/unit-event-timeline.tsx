@@ -12,7 +12,8 @@ interface UnitEventTimelineProps {
 	categories: ILivestockEventCategory[];
 	currencyCodeById?: Map<number, string>;
 	onEditEvent?: (event: ILivestockEvent) => void;
-	onDeleteEvent?: (event: ILivestockEvent) => Promise<void>;
+	/** Requests deletion; the caller confirms before anything is removed. */
+	onDeleteEvent?: (event: ILivestockEvent) => void;
 	deletingEventId?: number | null;
 	editingEventId?: number | null;
 }

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { LoadingState } from "@/components/common/loading-state";
 
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,23 @@ import {
 	updateEventCategoryById,
 } from "@/features/livestock/api/livestock-api";
 import { useListEventCategoriesByFarmId } from "@/features/livestock/api/livestock-queries";
+import { ApiRequestError } from "@/lib/axios/axios-helper";
 import {
 	EVENT_TYPE_LABELS,
 	type ILivestockEventCategory,
 	type LivestockEventType,
 } from "@/features/livestock/types/livestock-types";
+
+function getDeleteCategoryErrorMessage(error: unknown): string {
+	const detail =
+		error instanceof ApiRequestError ? error.message.toLowerCase() : "";
+	if (detail.includes("recorded stock")) {
+		return "No se puede eliminar: este producto ya tiene stock registrado. Archivalo en su lugar.";
+	}
+	// The backend raises an unhandled FK violation when a production target still
+	// points at the category, so there is no message to key off — only a 500.
+	return "No se pudo eliminar la categoria. Puede tener stock o una meta de produccion asociada.";
+}
 
 export function V2EventCategoriesPage() {
 	const { data: currentUser } = useGetUserProfile();
@@ -25,6 +38,8 @@ export function V2EventCategoriesPage() {
 	const [colorDraft, setColorDraft] = useState("#8a8677");
 	const [savingId, setSavingId] = useState<number | null>(null);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const [pendingDelete, setPendingDelete] =
+		useState<ILivestockEventCategory | null>(null);
 	const [message, setMessage] = useState("");
 
 	const {
@@ -85,10 +100,28 @@ export function V2EventCategoriesPage() {
 		}
 	};
 
+	const archiveCategory = async (category: ILivestockEventCategory) => {
+		if (!farmId) return;
+		setDeletingId(category.id);
+		setMessage("");
+		try {
+			await updateEventCategoryById({
+				farmId,
+				categoryId: category.id,
+				data: { archived_at: new Date().toISOString() },
+			});
+			setMessage("Categoria archivada.");
+			await refetch();
+		} catch (caught) {
+			setMessage(getDeleteCategoryErrorMessage(caught));
+		} finally {
+			setDeletingId(null);
+			setPendingDelete(null);
+		}
+	};
+
 	const deleteCategory = async (category: ILivestockEventCategory) => {
 		if (!farmId) return;
-		if (!confirm(`Eliminar categoria "${category.name}"?`)) return;
-
 		setDeletingId(category.id);
 		setMessage("");
 		try {
@@ -101,8 +134,15 @@ export function V2EventCategoriesPage() {
 			}
 			setMessage("Categoria eliminada.");
 			await refetch();
+		} catch (caught) {
+			// A production category can be undeletable for reasons the farmer can
+			// act on — its pool holds stock, or a meta still points at it. Without
+			// this the request just failed silently and the row stayed put with no
+			// explanation.
+			setMessage(getDeleteCategoryErrorMessage(caught));
 		} finally {
 			setDeletingId(null);
+			setPendingDelete(null);
 		}
 	};
 
@@ -126,9 +166,29 @@ export function V2EventCategoriesPage() {
 				<p className="v2-kicker">Categorias de eventos</p>
 				<h2 className="mt-2 text-xl font-semibold">Gestionar categorias</h2>
 				<p className="mt-1 text-sm text-(--v2-ink-soft)">
-					Edita nombre/color y elimina categorias que ya no uses.
+					Edita nombre/color, archiva las que ya no uses, o eliminalas si nunca
+					registraron nada.
 				</p>
 			</div>
+
+			<ConfirmDialog
+				open={pendingDelete !== null}
+				onOpenChange={(next) => {
+					if (!next) setPendingDelete(null);
+				}}
+				title="Eliminar categoria"
+				description={
+					<>
+						Se eliminara <strong>{pendingDelete?.name}</strong> de forma
+						permanente. Si ya registro produccion o stock no se podra eliminar —
+						archivala en su lugar.
+					</>
+				}
+				isPending={pendingDelete !== null && deletingId === pendingDelete.id}
+				onConfirm={() => {
+					if (pendingDelete) void deleteCategory(pendingDelete);
+				}}
+			/>
 
 			{isLoading ? (
 				<div className="v2-card p-4">
@@ -218,9 +278,18 @@ export function V2EventCategoriesPage() {
 														</Button>
 														<Button
 															type="button"
+															variant="outline"
+															size="sm"
+															onClick={() => void archiveCategory(category)}
+															disabled={isDeleting}
+														>
+															Archivar
+														</Button>
+														<Button
+															type="button"
 															variant="ghost"
 															size="sm"
-															onClick={() => void deleteCategory(category)}
+															onClick={() => setPendingDelete(category)}
 															disabled={isDeleting}
 															className="text-destructive hover:bg-destructive/10 hover:text-destructive"
 														>
