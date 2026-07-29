@@ -38,7 +38,6 @@ export function ProductionTargetCard({
 	// With no targets yet the form is the whole point of the card, so it stays
 	// open. Once one exists it collapses behind the button until asked for.
 	const isFormOpen = targets.length === 0 || isAddingTarget;
-	const canAddTarget = availableCategories.length > 0;
 
 	return (
 		<Card>
@@ -65,7 +64,7 @@ export function ProductionTargetCard({
 				) : (
 					<p className="text-xs text-(--v2-ink-soft)">
 						Define la producción esperada para calcular la productividad de este
-						lote.
+						activo.
 					</p>
 				)}
 				{isFormOpen ? (
@@ -82,18 +81,18 @@ export function ProductionTargetCard({
 						}
 					/>
 				) : (
-					canAddTarget && (
-						<Button
-							type="button"
-							variant="outline"
-							className="w-full"
-							disabled={isMutating}
-							onClick={() => setIsAddingTarget(true)}
-						>
-							<Plus aria-hidden="true" className="h-4 w-4" />
-							Agregar otra meta
-						</Button>
-					)
+					// Always available: even with every existing product already targeted,
+					// the form lets the farmer create a new product inline.
+					<Button
+						type="button"
+						variant="outline"
+						className="w-full"
+						disabled={isMutating}
+						onClick={() => setIsAddingTarget(true)}
+					>
+						<Plus aria-hidden="true" className="h-4 w-4" />
+						Agregar otra meta
+					</Button>
 				)}
 			</CardContent>
 		</Card>

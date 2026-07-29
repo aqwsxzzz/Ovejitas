@@ -20,6 +20,7 @@ import type {
 } from "@/shared/types/v2-domain-types";
 
 import { LoadingState } from "@/components/common/loading-state";
+import { toDateParam } from "@/lib/datetime";
 
 import { DashboardEmptyState } from "../components/dashboard-empty-state";
 import { UnitKpiSlider } from "../components/unit-kpi-slider";
@@ -198,17 +199,17 @@ export function V2DashboardPage() {
 			? location.pathname
 			: `${location.pathname}${window.location.search}`;
 	const now = useMemo(() => new Date(), []);
+	// Bare dates: the backend resolves a naive bound on the farm's calendar, so
+	// these windows follow the farm's days rather than the browser's.
 	const currentMonthStart = useMemo(
-		() => new Date(now.getFullYear(), now.getMonth(), 1).toISOString(),
+		() => toDateParam(new Date(now.getFullYear(), now.getMonth(), 1)),
 		[now],
 	);
 	const sevenDaysAgo = useMemo(
 		() =>
-			new Date(
-				now.getFullYear(),
-				now.getMonth(),
-				now.getDate() - 6,
-			).toISOString(),
+			toDateParam(
+				new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6),
+			),
 		[now],
 	);
 
@@ -337,10 +338,13 @@ export function V2DashboardPage() {
 	}, [aggregatedAssets, aggregatedCountQueries]);
 
 	const productionByAssetAndUnit = useMemo(() => {
+		// Local calendar days, matching the farm-local dates the report buckets by.
+		// `toISOString()` here keyed off the UTC date, so late-evening loads west
+		// of UTC built a window shifted one day ahead of the rows it matched.
 		const dayKeys = Array.from({ length: 7 }, (_, index) => {
 			const day = new Date(now);
 			day.setDate(day.getDate() - (6 - index));
-			return day.toISOString().slice(0, 10);
+			return toDateParam(day);
 		});
 
 		// Intermediate: Map<assetId, Map<compositeKey, { unit, categoryId, byDay }>>

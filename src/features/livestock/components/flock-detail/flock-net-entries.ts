@@ -14,6 +14,7 @@ export function buildCurrencyNetEntries(
 		.map((row) => ({
 			currency: row.currency,
 			income: row.income_total,
+			produceIncome: row.allocated_produce_income,
 			directExpense: row.direct_expense_total,
 			net: row.net,
 			feed: row.consumed_material_cost,

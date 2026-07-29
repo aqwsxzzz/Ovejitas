@@ -14,6 +14,7 @@ import {
 } from "@/features/finance/finance-dashboard-utils";
 import {
 	useGetAggregateReport,
+	useGetProfitabilityFullReport,
 	useGetProfitabilityReport,
 } from "@/features/reports/api/reports-queries";
 import {
@@ -73,6 +74,19 @@ export function V2FinancePage() {
 		},
 		hasFarm && isRangeValid,
 	);
+	// Per-asset insights come from profitability-full, not R1: R1 books feed on
+	// the material rather than the animal that ate it, and includes material and
+	// produce assets, which can only ever look like a permanent loss and a
+	// permanent profit respectively. The summary cards stay on R1 — those are
+	// farm cashflow, where a feed purchase genuinely is money out.
+	const assetProfitabilityQuery = useGetProfitabilityFullReport(
+		{
+			farmId,
+			date_from: currentRange.from,
+			date_to: currentRange.to,
+		},
+		hasFarm && isRangeValid,
+	);
 	const incomeQuery = useGetAggregateReport(
 		{
 			farmId,
@@ -119,7 +133,7 @@ export function V2FinancePage() {
 	const primaryCurrency = getPrimaryCurrency(currentTotals, previousTotals);
 	const currentSummary = pickTotal(currentTotals, primaryCurrency);
 	const previousSummary = pickTotal(previousTotals, primaryCurrency);
-	const currentRows = currentProfitabilityQuery.data?.data ?? [];
+	const currentRows = assetProfitabilityQuery.data?.data ?? [];
 
 	const currentIncome = parseDecimal(currentSummary?.income_total);
 	const currentExpense = parseDecimal(currentSummary?.expense_total);

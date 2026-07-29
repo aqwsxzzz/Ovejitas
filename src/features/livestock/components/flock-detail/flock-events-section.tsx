@@ -14,6 +14,8 @@ import {
 import { useFarmCurrencyMap } from "@/features/currency/api/currency-queries";
 
 import { UnitEventForm } from "../unit-event-form";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
+
 import { UnitEventTimeline } from "../unit-event-timeline";
 import { isLivestockEventType } from "./flock-detail-types";
 import { useFlockEventActions } from "./use-flock-event-actions";
@@ -154,7 +156,7 @@ export function FlockEventsSection({
 						isMaterialAsset ? undefined : actions.handleStartEditEvent
 					}
 					onDeleteEvent={
-						isMaterialAsset ? undefined : actions.handleDeleteEvent
+						isMaterialAsset ? undefined : actions.requestDeleteEvent
 					}
 					deletingEventId={actions.deletingEventId}
 					editingEventId={actions.editingEvent?.id ?? null}
@@ -165,6 +167,27 @@ export function FlockEventsSection({
 						className="h-2"
 					/>
 				) : null}
+
+				{actions.actionOwnedNotice ? (
+					<p className="mt-2 text-sm text-warning">
+						{actions.actionOwnedNotice}
+					</p>
+				) : null}
+
+				<ConfirmDialog
+					open={actions.pendingDeleteEvent !== null}
+					onOpenChange={(next) => {
+						if (!next) actions.cancelDeleteEvent();
+					}}
+					title="Eliminar evento"
+					description="Se eliminara este evento del historial de forma permanente."
+					isPending={actions.deletingEventId !== null}
+					onConfirm={() => {
+						if (actions.pendingDeleteEvent) {
+							void actions.handleDeleteEvent(actions.pendingDeleteEvent);
+						}
+					}}
+				/>
 			</div>
 			{data.isPendingEventsLog ? (
 				<p className="mt-2 text-xs text-(--v2-ink-soft)">

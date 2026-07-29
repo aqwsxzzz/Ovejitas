@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,7 +23,7 @@ interface PregnancyRecordRowProps {
 }
 
 const toLocalInput = (iso: string | null): string =>
-	iso ? new Date(iso).toISOString().slice(0, 16) : "";
+	iso ? toDateTimeLocalValue(new Date(iso)) : "";
 
 const formatDate = (iso: string | null): string =>
 	iso ? new Date(iso).toLocaleDateString("es") : "—";

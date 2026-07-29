@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import { useGetUpcomingBirthsReport } from "@/features/reports/api/reports-queries";
+import { toDateParam, toDateParamOffsetDays } from "@/lib/datetime";
 
 interface UpcomingBirthsCardProps {
 	farmId: string;
@@ -19,12 +20,16 @@ export function UpcomingBirthsCard({
 	farmId,
 	windowDays = 30,
 }: UpcomingBirthsCardProps) {
-	const { date_from, date_to } = useMemo(() => {
-		const now = new Date();
-		const end = new Date(now);
-		end.setDate(end.getDate() + windowDays);
-		return { date_from: now.toISOString(), date_to: end.toISOString() };
-	}, [windowDays]);
+	// Bare dates so the window opens on the farm's today, not the load instant —
+	// `days_until_due` counts from `date_from`, so a mid-day instant would round
+	// every countdown against a partial first day.
+	const { date_from, date_to } = useMemo(
+		() => ({
+			date_from: toDateParam(),
+			date_to: toDateParamOffsetDays(windowDays),
+		}),
+		[windowDays],
+	);
 
 	const { data, isLoading } = useGetUpcomingBirthsReport({
 		farmId,

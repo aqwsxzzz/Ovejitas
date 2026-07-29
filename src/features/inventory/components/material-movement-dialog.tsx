@@ -17,6 +17,8 @@ import {
 	useCreateMaterialSaleByAssetId,
 } from "@/features/livestock/api/livestock-queries";
 
+import type { LivestockEventUnit } from "@/features/livestock/types/livestock-types";
+
 import { getMaterialActionErrorMessage } from "./material-action-utils";
 import { MaterialConsumptionForm } from "./material-consumption-form";
 import { MaterialPurchaseForm } from "./material-purchase-form";
@@ -27,6 +29,11 @@ interface MaterialMovementDialogProps {
 	materialAssetId: number;
 	consumerAssets: Array<{ id: number; name: string }>;
 	categoryOptions: Array<{ id: number; name: string }>;
+	/**
+	 * Units this asset already holds stock in. The backend rejects a movement in
+	 * any other unit and there is no conversion, so the forms offer only these.
+	 */
+	stockedUnits: LivestockEventUnit[];
 }
 
 type Step = "choose" | "increase" | "decrease" | "consumption" | "sale";
@@ -58,6 +65,7 @@ export function MaterialMovementDialog({
 	materialAssetId,
 	consumerAssets,
 	categoryOptions,
+	stockedUnits,
 }: MaterialMovementDialogProps) {
 	const [open, setOpen] = useState(false);
 	const [step, setStep] = useState<Step>("choose");
@@ -175,6 +183,7 @@ export function MaterialMovementDialog({
 						<MaterialPurchaseForm
 							farmId={farmId}
 							materialAssetId={materialAssetId}
+							stockedUnits={stockedUnits}
 							isSubmitting={purchaseMutation.isPending}
 							errorMessage={error}
 							onSubmit={handlePurchase}
@@ -189,6 +198,7 @@ export function MaterialMovementDialog({
 							farmId={farmId}
 							materialAssetId={materialAssetId}
 							consumerAssets={consumerAssets}
+							stockedUnits={stockedUnits}
 							isSubmitting={consumptionMutation.isPending}
 							errorMessage={error}
 							onSubmit={handleConsumption}
@@ -202,6 +212,7 @@ export function MaterialMovementDialog({
 						<MaterialSaleForm
 							farmId={farmId}
 							categoryOptions={categoryOptions}
+							stockedUnits={stockedUnits}
 							isSubmitting={saleMutation.isPending}
 							errorMessage={error}
 							onSubmit={handleSale}

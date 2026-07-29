@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,7 @@ export function PregnancyCheckForm({
 	individualId,
 }: PregnancyCheckFormProps) {
 	const [occurredAt, setOccurredAt] = useState(
-		new Date().toISOString().slice(0, 16),
+		toDateTimeLocalValue(),
 	);
 	const [isPregnant, setIsPregnant] = useState(false);
 	const [offspringCount, setOffspringCount] = useState("");

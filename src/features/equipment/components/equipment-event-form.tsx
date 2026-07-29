@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -41,7 +43,7 @@ export function EquipmentEventForm({
 	onSubmit,
 }: EquipmentEventFormProps) {
 	const [eventType, setEventType] = useState<EquipmentEventType>("expense");
-	const [occurredAt, setOccurredAt] = useState(new Date().toISOString().slice(0, 16));
+	const [occurredAt, setOccurredAt] = useState(toDateTimeLocalValue());
 	const [amount, setAmount] = useState("");
 	const defaultCurrencyId = useDefaultCurrencyId(farmId);
 	const [currencyId, setCurrencyId] = useState<number | undefined>(undefined);

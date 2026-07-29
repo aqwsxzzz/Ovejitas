@@ -43,6 +43,13 @@ export interface IProfitabilityFullRow {
 	asset_name: string;
 	currency: string | null;
 	income_total: string;
+	/**
+	 * Derived share of income from produce this asset made that was later sold from a
+	 * pool. Already folded into `net_incl_materials`; NOT in `net`. Never add it on top
+	 * of `net_incl_materials`, and never sum `income_total` across rows and also add this
+	 * (the same money is `income_total` on the pool asset's own row).
+	 */
+	allocated_produce_income: string;
 	direct_expense_total: string;
 	consumed_material_cost: string;
 	total_cost: string;
@@ -54,6 +61,7 @@ export interface IProfitabilityFullRow {
 export interface IProfitabilityFullTotal {
 	currency: string;
 	income_total: string;
+	allocated_produce_income: string;
 	direct_expense_total: string;
 	consumed_material_cost: string;
 	total_cost: string;
@@ -85,7 +93,13 @@ export type MaterialConsumptionGroupBy = "material" | "consumer" | "both";
 export type MaterialConsumptionReason = "feeding" | "waste" | "spoilage";
 
 export interface IAggregateRow {
-	bucket: string; // ISO datetime
+	/**
+	 * Bare calendar date ("2026-04-10"), cut on the farm's timezone. NOT a
+	 * timestamp: `new Date(bucket)` parses it as UTC midnight, so formatting the
+	 * result in browser-local time renders the previous day west of UTC. Round
+	 * trips directly as a `date_from` bound.
+	 */
+	bucket: string;
 	group: string | null;
 	group_label?: string | null;
 	measure: AggregateMeasure;
@@ -238,6 +252,28 @@ export interface ISalesValueReport {
 	data: ISalesValueRow[];
 }
 
+// Produce Outcome Report — per (producer, produce pool): what a producer
+// harvested into a pool and what became of its derived share.
+export interface IProduceOutcomeRow {
+	producer_asset_id: number;
+	producer_name: string;
+	produce_asset_id: number;
+	produce_name: string;
+	unit: Unit;
+	produced: string;
+	sold: string;
+	lost: string;
+	currency: string | null;
+	income_total: string;
+	has_other_currency: boolean;
+}
+
+export interface IProduceOutcomeReport {
+	data: IProduceOutcomeRow[];
+	unattributed_quantity: string;
+	unattributed_income: string;
+}
+
 // Query Parameters
 export interface IProfitabilityReportParams {
 	farmId: string | number;
@@ -322,4 +358,13 @@ export interface ISalesValueReportParams {
 	farmId: string | number;
 	date_from?: string;
 	date_to?: string;
+}
+
+export interface IProduceOutcomeReportParams {
+	farmId: string | number;
+	date_from?: string;
+	date_to?: string;
+	/** Producer filter. The endpoint parameter is `producer_asset_id`; sending
+	 * `asset_id` is silently ignored and returns every producer. */
+	producer_asset_id?: number;
 }

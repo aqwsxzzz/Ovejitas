@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 	const [initialAmount, setInitialAmount] = useState("");
 	const [description, setDescription] = useState("");
 	const [mode, setMode] = useState<LivestockAssetMode>("aggregated");
+	const [acquiredAt, setAcquiredAt] = useState(toDateTimeLocalValue());
 	const [error, setError] = useState<string | null>(null);
 
 	const createAsset = useCreateLivestockAsset();
@@ -65,7 +67,7 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 					farmId,
 					assetId: String(createdAsset.id),
 					payload: {
-						occurred_at: new Date().toISOString(),
+						occurred_at: new Date(acquiredAt).toISOString(),
 						quantity: parsedInitialAmount,
 						amount: null,
 					},
@@ -135,6 +137,21 @@ export function LogCreateLotAction({ farmId, onDone }: LogCreateLotActionProps) 
 							value={initialAmount}
 							onChange={(event) => setInitialAmount(event.target.value)}
 						/>
+					</div>
+				) : null}
+				{mode === "aggregated" ? (
+					<div className="space-y-1.5">
+						<Label htmlFor="lot-acquired-at">Fecha de adquisición</Label>
+						<Input
+							id="lot-acquired-at"
+							type="datetime-local"
+							value={acquiredAt}
+							onChange={(event) => setAcquiredAt(event.target.value)}
+						/>
+						<p className="text-xs text-(--v2-ink-soft)">
+							Cuándo adquiriste estos animales. Ponla en el pasado si ya los
+							tenías, para que las metas cuenten los días completos.
+						</p>
 					</div>
 				) : null}
 				<div className="space-y-1.5">
