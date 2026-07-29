@@ -45,10 +45,19 @@ export function ProductionTargetForm({
 	);
 	const [period, setPeriod] = useState<ProductionTargetPeriod | "none">("day");
 	const [rate, setRate] = useState("");
+	// Backdatable: a farmer entering a year of history needs the meta to cover
+	// it, or every past day reports missing_capacity and productivity stays null.
+	const [effectiveFrom, setEffectiveFrom] = useState(todayISODate());
 
 	const handleAdd = () => {
 		const parsed = Number(rate.trim());
-		if (!categoryId || !rate.trim() || !Number.isFinite(parsed) || parsed < 0) {
+		if (
+			!categoryId ||
+			!rate.trim() ||
+			!Number.isFinite(parsed) ||
+			parsed < 0 ||
+			!effectiveFrom
+		) {
 			return;
 		}
 		onAdd({
@@ -56,10 +65,11 @@ export function ProductionTargetForm({
 			basis,
 			expectedRate: rate.trim(),
 			period: period === "none" ? null : period,
-			effectiveFrom: todayISODate(),
+			effectiveFrom,
 		});
 		setCategoryId("");
 		setRate("");
+		setEffectiveFrom(todayISODate());
 	};
 
 	return (
@@ -118,6 +128,18 @@ export function ProductionTargetForm({
 					placeholder="0.7"
 					onChange={(event) => setRate(event.target.value)}
 				/>
+			</div>
+			<div className="space-y-1">
+				<Label htmlFor="production-target-effective-from">Vigente desde</Label>
+				<Input
+					id="production-target-effective-from"
+					type="date"
+					value={effectiveFrom}
+					onChange={(event) => setEffectiveFrom(event.target.value)}
+				/>
+				<p className="text-xs text-(--v2-ink-soft)">
+					Retrocede la fecha para que la meta cubra produccion ya registrada.
+				</p>
 			</div>
 			<div className="flex gap-2 sm:col-span-2">
 				{onCancel && (
