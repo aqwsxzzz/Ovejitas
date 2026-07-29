@@ -48,6 +48,11 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 		assetId: materialId,
 		enabled: !!farmId && hasValidAssetId,
 	});
+	// An asset is locked to the unit it already holds stock in — the movement
+	// forms offer only these, so a pool gathered in `unit` can't be sold in `kg`.
+	const stockedUnits = (balanceQuery.data?.balances ?? []).map(
+		(row) => row.unit,
+	);
 	const linkedProduceAssetId = asset?.produce_asset_id ?? null;
 	const linkedProduceQuery = useGetLivestockAssetById({
 		farmId,
@@ -125,7 +130,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 		return <LoadingState message="Cargando material..." />;
 	}
 
-	if (!asset || asset.kind !== "material") {
+	if (!asset || (asset.kind !== "material" && asset.kind !== "produce")) {
 		return (
 			<div className="space-y-2">
 				<p className="text-sm text-destructive">Material asset not found.</p>
@@ -221,6 +226,7 @@ export function MaterialDetailPage({ materialId }: MaterialDetailPageProps) {
 							categoryOptions={(incomeCategoriesQuery.data ?? []).map(
 								(item) => ({ id: item.id, name: item.name }),
 							)}
+							stockedUnits={stockedUnits}
 						/>
 					</div>
 				</CardContent>

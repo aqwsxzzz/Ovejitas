@@ -5,6 +5,7 @@ export type LivestockAssetKind =
 	| "crop"
 	| "equipment"
 	| "material"
+	| "produce"
 	| "location";
 
 export type LivestockEventUnit = EventUnit;
@@ -81,6 +82,14 @@ export interface ILivestockEventCategory {
 	farm_id: number;
 	type: LivestockEventType;
 	name: string;
+	/** Required for `production` categories (the product's unit of measure). */
+	unit: LivestockEventUnit | null;
+	/**
+	 * The produce pool holding this product's stock. Provisioned by the backend
+	 * when a `production` category is created — never client-supplied, and null
+	 * for every other category type.
+	 */
+	produce_asset_id: number | null;
 	color: string | null;
 	archived_at: string | null;
 	created_at: string;

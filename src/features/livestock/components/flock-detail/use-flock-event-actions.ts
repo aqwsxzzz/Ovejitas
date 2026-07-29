@@ -37,6 +37,10 @@ export function useFlockEventActions({
 		null,
 	);
 	const [deletingEventId, setDeletingEventId] = useState<number | null>(null);
+	const [pendingDeleteEvent, setPendingDeleteEvent] =
+		useState<ILivestockEvent | null>(null);
+	// Action-owned events are refused with an inline notice rather than window.alert.
+	const [actionOwnedNotice, setActionOwnedNotice] = useState<string | null>(null);
 
 	const createEventMutation = useCreateEventByAssetId();
 	const updateEventMutation = useUpdateEventByAssetId();
@@ -45,25 +49,31 @@ export function useFlockEventActions({
 
 	const handleStartEditEvent = useCallback((event: ILivestockEvent) => {
 		if (isActionOwnedEvent(event)) {
-			alert(
+			setActionOwnedNotice(
 				"Este evento fue generado por una accion del sistema. Edita la accion original para mantener consistencia.",
 			);
 			return;
 		}
+		setActionOwnedNotice(null);
 		setEditingEvent(event);
 		setIsCreatingEvent(true);
 	}, []);
 
+	// Asking happens in the UI (ConfirmDialog), not via window.confirm: this hook
+	// only performs the delete once the farmer has agreed.
+	const requestDeleteEvent = useCallback((event: ILivestockEvent) => {
+		if (isActionOwnedEvent(event)) {
+			setActionOwnedNotice(
+				"Este evento fue generado por una accion del sistema. Eliminalo desde la accion original para evitar desbalances.",
+			);
+			return;
+		}
+		setActionOwnedNotice(null);
+		setPendingDeleteEvent(event);
+	}, []);
+
 	const handleDeleteEvent = useCallback(
 		async (event: ILivestockEvent) => {
-			if (isActionOwnedEvent(event)) {
-				alert(
-					"Este evento fue generado por una accion del sistema. Eliminalo desde la accion original para evitar desbalances.",
-				);
-				return;
-			}
-			if (!confirm("Eliminar este evento?")) return;
-
 			setDeletingEventId(event.id);
 			try {
 				await deleteEventMutation.mutateAsync({
@@ -77,6 +87,7 @@ export function useFlockEventActions({
 				}
 			} finally {
 				setDeletingEventId(null);
+				setPendingDeleteEvent(null);
 			}
 		},
 		[farmId, unitId, editingEvent, deleteEventMutation],
@@ -97,7 +108,7 @@ export function useFlockEventActions({
 					return;
 				}
 				if (isActionOwnedEvent(editingEvent)) {
-					alert(
+					setActionOwnedNotice(
 						"Este evento fue generado por una accion del sistema. Edita la accion original para mantener consistencia.",
 					);
 					setEditingEvent(null);
@@ -150,6 +161,11 @@ export function useFlockEventActions({
 		isSavingEvent,
 		editingEvent,
 		deletingEventId,
+		pendingDeleteEvent,
+		actionOwnedNotice,
+		dismissActionOwnedNotice: () => setActionOwnedNotice(null),
+		requestDeleteEvent,
+		cancelDeleteEvent: () => setPendingDeleteEvent(null),
 		setIsCreatingEvent,
 		setEditingEvent,
 		handleStartEditEvent,

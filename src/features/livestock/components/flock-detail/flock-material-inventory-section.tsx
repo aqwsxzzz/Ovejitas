@@ -5,11 +5,21 @@ import { useFlockMaterialActions } from "./use-flock-material-actions";
 interface FlockMaterialInventorySectionProps {
 	farmId: string;
 	assetId: number;
+	/**
+	 * Whether running out is worth flagging.
+	 *
+	 * True for a material you buy: no feed left means the animals don't eat, and
+	 * the farmer has to act. False for a produce pool, where an empty balance
+	 * usually means everything sold — the good outcome. Alarming there trains the
+	 * farmer to ignore the badge on the assets where it does mean something.
+	 */
+	alertOnLowStock: boolean;
 }
 
 export function FlockMaterialInventorySection({
 	farmId,
 	assetId,
+	alertOnLowStock,
 }: FlockMaterialInventorySectionProps) {
 	const material = useFlockMaterialActions({ farmId, assetId });
 
@@ -24,26 +34,30 @@ export function FlockMaterialInventorySection({
 							: `${material.inventoryRows.length} unidad(es) de medida activas`}
 					</p>
 				</div>
-				<span
-					className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-						material.inventoryStatus === "critical"
-							? "bg-destructive/15 text-destructive"
+				{alertOnLowStock ? (
+					<span
+						className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+							material.inventoryStatus === "critical"
+								? "bg-destructive/15 text-destructive"
+								: material.inventoryStatus === "low"
+									? "bg-warning/15 text-warning"
+									: "bg-success/15 text-success"
+						}`}
+					>
+						{material.inventoryStatus === "critical"
+							? "Critico"
 							: material.inventoryStatus === "low"
-								? "bg-warning/15 text-warning"
-								: "bg-success/15 text-success"
-					}`}
-				>
-					{material.inventoryStatus === "critical"
-						? "Critico"
-						: material.inventoryStatus === "low"
-							? "Bajo"
-							: "OK"}
-				</span>
+								? "Bajo"
+								: "OK"}
+					</span>
+				) : null}
 			</div>
 
 			{material.inventoryRows.length === 0 ? (
 				<p className="text-sm text-(--v2-ink-soft)">
-					Registra un primer movimiento de inventario para activar stock.
+					{alertOnLowStock
+						? "Registra un primer movimiento de inventario para activar stock."
+						: "El stock se acumula al registrar recolecciones de produccion."}
 				</p>
 			) : (
 				<div className="space-y-2">
@@ -67,6 +81,9 @@ export function FlockMaterialInventorySection({
 					materialAssetId={assetId}
 					consumerAssets={material.consumerAssets}
 					categoryOptions={material.categoryOptions}
+					// The units this asset already holds stock in — the same rows shown
+					// above. Any other unit is rejected by the backend.
+					stockedUnits={material.inventoryRows.map((row) => row.unit)}
 				/>
 			</div>
 		</div>

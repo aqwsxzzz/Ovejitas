@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,7 +14,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { EVENT_UNITS } from "@/shared/types/unit-types";
+import { useStockUnit } from "./use-stock-unit";
 import { useListIndividualsByAssetId } from "@/features/livestock/api/livestock-queries";
 import type {
 	LivestockEventUnit,
@@ -29,6 +31,8 @@ interface MaterialConsumptionFormProps {
 	farmId?: string;
 	materialAssetId: number;
 	consumerAssets: ConsumerAssetOption[];
+	/** Units this asset already holds stock in; empty until it has any. */
+	stockedUnits: LivestockEventUnit[];
 	isSubmitting: boolean;
 	errorMessage: string | null;
 	onSubmit: (payload: IMaterialConsumptionCreatePayload) => Promise<void>;
@@ -38,15 +42,15 @@ export function MaterialConsumptionForm({
 	farmId = "",
 	materialAssetId,
 	consumerAssets,
+	stockedUnits,
 	isSubmitting,
 	errorMessage,
 	onSubmit,
 }: MaterialConsumptionFormProps) {
-	const [occurredAt, setOccurredAt] = useState(
-		new Date().toISOString().slice(0, 16),
-	);
+	const [occurredAt, setOccurredAt] = useState(toDateTimeLocalValue());
 	const [quantity, setQuantity] = useState("");
-	const [unit, setUnit] = useState<LivestockEventUnit>("kg");
+	const { unit, setUnit, unitOptions, isUnitLocked } =
+		useStockUnit(stockedUnits);
 	const [reason, setReason] = useState<MaterialConsumptionReason>("feeding");
 	const [consumerAssetId, setConsumerAssetId] = useState<string>("");
 	const [individualId, setIndividualId] = useState<string>("");
@@ -129,6 +133,7 @@ export function MaterialConsumptionForm({
 					<Select
 						value={unit}
 						onValueChange={(value) => setUnit(value as LivestockEventUnit)}
+						disabled={isUnitLocked}
 					>
 						<SelectTrigger
 							id="consumption-unit"
@@ -137,7 +142,7 @@ export function MaterialConsumptionForm({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{EVENT_UNITS.map((eventUnit) => (
+							{unitOptions.map((eventUnit) => (
 								<SelectItem
 									key={eventUnit}
 									value={eventUnit}
@@ -147,6 +152,12 @@ export function MaterialConsumptionForm({
 							))}
 						</SelectContent>
 					</Select>
+					{isUnitLocked ? (
+						<p className="text-xs text-(--v2-ink-soft)">
+							Este activo lleva su stock en {unit}. No hay conversion de
+							unidades.
+						</p>
+					) : null}
 				</div>
 				<div className="space-y-1.5">
 					<Label htmlFor="consumption-quantity">Cantidad</Label>
@@ -257,7 +268,9 @@ export function MaterialConsumptionForm({
 				/>
 			</div>
 
-			{localError ? <p className="text-sm text-destructive">{localError}</p> : null}
+			{localError ? (
+				<p className="text-sm text-destructive">{localError}</p>
+			) : null}
 			{errorMessage ? (
 				<p className="text-sm text-destructive">{errorMessage}</p>
 			) : null}

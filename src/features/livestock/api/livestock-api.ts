@@ -7,6 +7,7 @@ import type {
 	IBirthCreatePayload,
 	IBirthRead,
 	ILivestockAssetListResponse,
+	ILivestockEventCategory,
 	ILivestockEventCategoryListResponse,
 	ILivestockEventListResponse,
 	ILivestockIndividual,
@@ -619,16 +620,7 @@ export const createEventCategoryByFarmId = ({
 		unit?: LivestockEventUnit;
 	};
 }) =>
-	axiosHelper<{
-		id: number;
-		farm_id: number;
-		type: LivestockEventType;
-		name: string;
-		color: string | null;
-		archived_at: string | null;
-		created_at: string;
-		updated_at: string;
-	}>({
+	axiosHelper<ILivestockEventCategory>({
 		method: "post",
 		url: `/api/v1/farms/${farmId}/event-categories`,
 		data,
@@ -783,7 +775,13 @@ export interface IHarvestCreatePayload {
 	occurred_at?: string;
 	quantity: number;
 	unit: LivestockEventUnit;
-	category_id?: number | null;
+	/**
+	 * The product harvested. The backend resolves the destination pool from
+	 * `event_category.produce_asset_id`, so the stock and the production event
+	 * can never point at different products — do NOT send `produce_asset_id`
+	 * (the schema forbids extra fields and rejects the whole request).
+	 */
+	category_id: number;
 	notes?: string | null;
 }
 

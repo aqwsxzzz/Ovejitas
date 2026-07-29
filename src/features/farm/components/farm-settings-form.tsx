@@ -18,6 +18,7 @@ import {
 } from "@/features/farm/api/farm-queries";
 import { CurrencyManagementSection } from "@/features/currency/components/currency-management-section";
 import { CURRENCY_OPTIONS } from "@/features/farm/constants/currency-options";
+import { TimezoneSelect } from "@/features/farm/components/timezone-select";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 
 interface FarmSettingsFormProps {
@@ -27,6 +28,7 @@ interface FarmSettingsFormProps {
 interface FarmDraft {
 	name?: string;
 	currency?: string;
+	timezone?: string;
 }
 
 export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
@@ -39,6 +41,8 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 
 	const currentName = draft.name ?? farm?.name ?? "";
 	const currentCurrency = draft.currency ?? farm?.default_currency ?? "";
+	const currentTimezone = draft.timezone ?? farm?.timezone ?? "";
+	const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	const hasChanges = Object.keys(draft).length > 0;
 
 	const handleSave = async () => {
@@ -54,6 +58,7 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 				payload: {
 					...(draft.name !== undefined ? { name: currentName.trim() } : {}),
 					...(draft.currency ? { default_currency: draft.currency } : {}),
+					...(draft.timezone ? { timezone: draft.timezone } : {}),
 				},
 			});
 			setDraft({});
@@ -128,6 +133,35 @@ export const FarmSettingsForm = ({ farmId }: FarmSettingsFormProps) => {
 								))}
 							</SelectContent>
 						</Select>
+					</div>
+					<div className="space-y-1">
+						<Label>Zona horaria</Label>
+						<TimezoneSelect
+							value={currentTimezone}
+							disabled={!isOwner}
+							onChange={(value) =>
+								setDraft((previous) => ({ ...previous, timezone: value }))
+							}
+						/>
+						{isOwner && currentTimezone !== detectedTimezone ? (
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								className="h-auto px-0 text-xs text-primary"
+								onClick={() =>
+									setDraft((previous) => ({
+										...previous,
+										timezone: detectedTimezone,
+									}))
+								}
+							>
+								Usar zona detectada: {detectedTimezone}
+							</Button>
+						) : null}
+						<p className="text-xs text-(--v2-ink-soft)">
+							Define qué cuenta como "hoy" al agrupar la producción diaria.
+						</p>
 					</div>
 				</CardContent>
 			</Card>

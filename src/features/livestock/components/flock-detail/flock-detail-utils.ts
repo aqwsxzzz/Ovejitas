@@ -1,3 +1,4 @@
+import { formatAssetKindLabel } from "@/features/livestock/constants/asset-kind-options";
 import type { ILivestockAsset } from "@/features/livestock/types/livestock-types";
 
 export function formatMoney(value: number): string {
@@ -13,10 +14,9 @@ export function parseNumeric(value: string | null): number {
 
 export function toModeLabel(asset: ILivestockAsset): string | null {
 	if (asset.mode == null) return null;
-	return asset.mode === "aggregated" ? "Aggregate" : "Individual";
+	return asset.mode === "aggregated" ? "Agrupado" : "Individual";
 }
 
 export function toKindLabel(asset: ILivestockAsset): string {
-	if (!asset.kind) return "Animal";
-	return `${asset.kind.charAt(0).toUpperCase()}${asset.kind.slice(1)}`;
+	return formatAssetKindLabel(asset.kind);
 }

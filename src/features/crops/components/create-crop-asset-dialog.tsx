@@ -12,18 +12,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
 	useCreateLivestockAsset,
-	useListLivestockAssetsByFarmId,
+	useUpdateLivestockAssetById,
 } from "@/features/livestock/api/livestock-queries";
+import { ProduceAssetSelectField } from "@/features/livestock/components/produce-asset-select-field";
 import { cn } from "@/lib/utils";
 
 interface CreateCropAssetDialogProps {
@@ -52,11 +46,7 @@ export function CreateCropAssetDialog({
 	const [errorMessage, setErrorMessage] = useState("");
 
 	const createCropMutation = useCreateLivestockAsset();
-	const materialAssetsQuery = useListLivestockAssetsByFarmId({
-		farmId,
-		filters: { kind: "material", page: 1, pageSize: 100 },
-		enabled: !!farmId && open,
-	});
+	const updateCropMutation = useUpdateLivestockAssetById();
 
 	const resetForm = () => {
 		setName(EMPTY_FORM.name);
@@ -85,17 +75,24 @@ export function CreateCropAssetDialog({
 		setErrorMessage("");
 
 		try {
-			await createCropMutation.mutateAsync({
+			// `AssetCreate` forbids extra fields, so the produce link is a follow-up PATCH.
+			const created = await createCropMutation.mutateAsync({
 				farmId,
 				data: {
 					name: name.trim(),
 					location: location.trim() || undefined,
 					description: description.trim() || undefined,
 					kind: "crop",
-					produce_asset_id:
-						produceAssetId !== "none" ? Number(produceAssetId) : undefined,
 				},
 			});
+
+			if (produceAssetId !== "none") {
+				await updateCropMutation.mutateAsync({
+					farmId,
+					assetId: created.id,
+					data: { produce_asset_id: Number(produceAssetId) },
+				});
+			}
 
 			handleOpenChange(false);
 		} catch {
@@ -104,8 +101,6 @@ export function CreateCropAssetDialog({
 			);
 		}
 	};
-
-	const materials = materialAssetsQuery.data?.data ?? [];
 
 	return (
 		<Dialog
@@ -156,35 +151,13 @@ export function CreateCropAssetDialog({
 						/>
 					</div>
 
-					<div className="space-y-2">
-						<Label htmlFor="crop-produce">Material de produce (opcional)</Label>
-						<Select
-							value={produceAssetId}
-							onValueChange={setProduceAssetId}
-						>
-							<SelectTrigger
-								id="crop-produce"
-								className="w-full"
-							>
-								<SelectValue placeholder="Sin material vinculado" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="none">Sin material vinculado</SelectItem>
-								{materials.map((mat) => (
-									<SelectItem
-										key={mat.id}
-										value={String(mat.id)}
-									>
-										{mat.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<p className="text-xs text-(--v2-ink-soft)">
-							Vincula un material para que las cosechas actualicen su
-							inventario.
-						</p>
-					</div>
+					<ProduceAssetSelectField
+						farmId={farmId}
+						value={produceAssetId}
+						onChange={setProduceAssetId}
+						label="Producto de cosecha (opcional)"
+						helperText="Producto sugerido por defecto al registrar cosechas. Puedes crearlo aquí mismo."
+					/>
 
 					<div className="space-y-2">
 						<Label htmlFor="crop-description">Descripcion</Label>

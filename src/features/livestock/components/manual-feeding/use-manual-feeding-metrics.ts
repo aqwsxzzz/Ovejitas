@@ -5,6 +5,7 @@ import {
 	useListMaterialConsumptionsByFarmId,
 } from "@/features/livestock/api/livestock-queries";
 import { useGetInventorySummaryReport } from "@/features/reports/api/reports-queries";
+import { toDateParam } from "@/lib/datetime";
 
 import type { TodaysFeedMetrics } from "./types";
 
@@ -38,27 +39,18 @@ export function useManualFeedingMetrics({
 		!!farmId && hasSelectedMaterial,
 	);
 
-	const { startOfTodayIso, endOfTodayIso } = useMemo(() => {
-		const now = new Date();
-		const start = new Date(now);
-		start.setHours(0, 0, 0, 0);
-
-		const end = new Date(now);
-		end.setHours(23, 59, 59, 999);
-
-		return {
-			startOfTodayIso: start.toISOString(),
-			endOfTodayIso: end.toISOString(),
-		};
-	}, []);
+	// Today as a bare date on both ends: the backend reads a naive bound as the
+	// farm's wall clock and rolls `to` to the next farm-local midnight, so this
+	// covers exactly the farm's today whatever the hour.
+	const today = useMemo(() => toDateParam(), []);
 
 	const { data: todaysFeedingResponse } = useListMaterialConsumptionsByFarmId({
 		farmId,
 		filters: {
 			consumerAssetId,
 			reason: "feeding",
-			from: startOfTodayIso,
-			to: endOfTodayIso,
+			from: today,
+			to: today,
 			page: 1,
 			pageSize: 100,
 		},

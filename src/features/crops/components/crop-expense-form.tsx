@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,7 +40,7 @@ export function CropExpenseForm({
 	onSubmit,
 }: CropExpenseFormProps) {
 	const [occurredAt, setOccurredAt] = useState(
-		new Date().toISOString().slice(0, 16),
+		toDateTimeLocalValue(),
 	);
 	const [amount, setAmount] = useState("");
 	const defaultCurrencyId = useDefaultCurrencyId(farmId);

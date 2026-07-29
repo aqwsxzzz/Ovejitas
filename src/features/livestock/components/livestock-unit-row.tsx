@@ -109,7 +109,12 @@ export function LivestockUnitRow(props: LivestockUnitRowProps) {
 		navigate({
 			to: "/v2/production-units/flock/$unitId",
 			params: { unitId: String(props.id) },
-			search: { eventType: props.kind === "material" ? "inventory" : undefined },
+			search: {
+				eventType:
+					props.kind === "material" || props.kind === "produce"
+						? "inventory"
+						: undefined,
+			},
 		});
 	};
 

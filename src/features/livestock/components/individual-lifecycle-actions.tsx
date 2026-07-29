@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { toDateTimeLocalValue } from "@/lib/datetime";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +25,7 @@ export function IndividualLifecycleActions({
 }: IndividualLifecycleActionsProps) {
 	const [mode, setMode] = useState<Mode>("none");
 	const [occurredAt, setOccurredAt] = useState(
-		new Date().toISOString().slice(0, 16),
+		toDateTimeLocalValue(),
 	);
 	const [saleAmount, setSaleAmount] = useState("");
 	const defaultCurrencyId = useDefaultCurrencyId(farmId);

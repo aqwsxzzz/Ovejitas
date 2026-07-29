@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import { toDateTimeLocalValue } from "@/lib/datetime";
 import type { FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,7 @@ export function RecordBirthForm({
 	candidateParents,
 }: RecordBirthFormProps) {
 	const [occurredAt, setOccurredAt] = useState(
-		new Date().toISOString().slice(0, 16),
+		toDateTimeLocalValue(),
 	);
 	const [fatherId, setFatherId] = useState("none");
 	const [notes, setNotes] = useState("");

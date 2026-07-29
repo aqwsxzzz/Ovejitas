@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { useGetProductionReport } from "@/features/livestock/api/livestock-queries";
 import { useListEventCategoriesByFarmId } from "@/features/livestock/api/livestock-queries";
+import { toDateParam, toDateParamOffsetDays } from "@/lib/datetime";
 
 import { FlockProductionSeriesSlider } from "./flock-production-series-slider";
 import type { ProductionProductSeries } from "./flock-detail-types";
@@ -16,14 +17,8 @@ export function FlockProductionOverviewSection({
 	farmId,
 	assetId,
 }: FlockProductionOverviewSectionProps) {
-	const sevenDaysAgo = useMemo(() => {
-		const now = new Date();
-		return new Date(
-			now.getFullYear(),
-			now.getMonth(),
-			now.getDate() - 6,
-		).toISOString();
-	}, []);
+	// Bare date, so the backend opens the window on the farm's calendar day.
+	const sevenDaysAgo = useMemo(() => toDateParamOffsetDays(-6), []);
 
 	const { data: eventCategories = [] } = useListEventCategoriesByFarmId({
 		farmId,
@@ -52,7 +47,7 @@ export function FlockProductionOverviewSection({
 		const dayLabels = days.map((day) =>
 			day.toLocaleDateString("es-EC", { weekday: "short" }),
 		);
-		const dayKeys = days.map((d) => d.toISOString().slice(0, 10));
+		const dayKeys = days.map((day) => toDateParam(day));
 		const firstDayLabel = days[0]?.toLocaleDateString("es-EC", {
 			weekday: "short",
 		});

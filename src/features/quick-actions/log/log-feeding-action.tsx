@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import {
 	useCreateMaterialConsumptionByFarmId,
+	useGetInventoryBalanceByAssetId,
 	useGetLivestockAssetById,
 	useListLivestockAssetsByFarmId,
 } from "@/features/livestock/api/livestock-queries";
@@ -45,6 +46,17 @@ export function LogFeedingAction({
 		filters: { kind: "animal", page: 1, pageSize: 100 },
 		enabled: !!farmId,
 	});
+	// The material is locked to the unit it already holds stock in, so the form
+	// offers only that — picking any other is a guaranteed 422.
+	const balanceQuery = useGetInventoryBalanceByAssetId({
+		farmId,
+		assetId: String(materialAssetId ?? ""),
+		enabled: !!farmId && !!materialAssetId,
+	});
+	const stockedUnits = (balanceQuery.data?.balances ?? []).map(
+		(row) => row.unit,
+	);
+
 	const createConsumption = useCreateMaterialConsumptionByFarmId();
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -78,6 +90,7 @@ export function LogFeedingAction({
 					farmId={farmId}
 					materialAssetId={Number(materialAssetId)}
 					consumerAssets={consumerAssetsQuery.data?.data ?? []}
+					stockedUnits={stockedUnits}
 					isSubmitting={createConsumption.isPending}
 					errorMessage={errorMessage}
 					onSubmit={handleSubmit}

@@ -1,10 +1,6 @@
 import { useState } from "react";
 
-import {
-	useCreateEventByAssetId,
-	useCreateHarvestByAssetId,
-} from "@/features/livestock/api/livestock-queries";
-import type { IHarvestCreatePayload } from "@/features/livestock/api/livestock-api";
+import { useCreateEventByAssetId } from "@/features/livestock/api/livestock-queries";
 import { getErrorMessage } from "@/features/crops/utils/crop-utils";
 
 export interface CropExpensePayload {
@@ -16,20 +12,9 @@ export interface CropExpensePayload {
 }
 
 export function useCropActions(farmId: string, cropId: string) {
-	const [harvestError, setHarvestError] = useState<string | null>(null);
 	const [expenseError, setExpenseError] = useState<string | null>(null);
 
-	const createHarvestMutation = useCreateHarvestByAssetId();
 	const createEventMutation = useCreateEventByAssetId();
-
-	const handleHarvestSubmit = async (payload: IHarvestCreatePayload) => {
-		setHarvestError(null);
-		try {
-			await createHarvestMutation.mutateAsync({ farmId, assetId: cropId, data: payload });
-		} catch (error) {
-			setHarvestError(getErrorMessage(error, "No se pudo registrar la cosecha."));
-		}
-	};
 
 	const handleExpenseSubmit = async (payload: CropExpensePayload) => {
 		setExpenseError(null);
@@ -52,11 +37,8 @@ export function useCropActions(farmId: string, cropId: string) {
 	};
 
 	return {
-		harvestError,
 		expenseError,
-		handleHarvestSubmit,
 		handleExpenseSubmit,
-		isSubmittingHarvest: createHarvestMutation.isPending,
 		isSubmittingExpense: createEventMutation.isPending,
 	};
 }

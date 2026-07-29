@@ -72,24 +72,19 @@ export const monthLabel = (year: number, month: number): string =>
 		new Date(year, month, 1),
 	);
 
+/**
+ * A report bucket is a bare farm-local calendar date ("2026-04-10"), so it is
+ * read as text. Parsing it into a `Date` would anchor it at UTC midnight and
+ * report the previous month for a 1st-of-month bucket west of UTC.
+ */
 export const parseBucketYearMonth = (
 	bucket: string,
 ): { year: number; month: number } | null => {
 	const isoMatch = bucket.match(/^(\d{4})-(\d{2})/);
-	if (isoMatch) {
-		const year = Number(isoMatch[1]);
-		const month = Number(isoMatch[2]) - 1;
-		if (month >= 0 && month <= 11) {
-			return { year, month };
-		}
-	}
-
-	const bucketDate = new Date(bucket);
-	if (Number.isNaN(bucketDate.getTime())) return null;
-	return {
-		year: bucketDate.getFullYear(),
-		month: bucketDate.getMonth(),
-	};
+	if (!isoMatch) return null;
+	const year = Number(isoMatch[1]);
+	const month = Number(isoMatch[2]) - 1;
+	return month >= 0 && month <= 11 ? { year, month } : null;
 };
 
 export const buildAvailableMonths = (
