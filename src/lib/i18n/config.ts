@@ -19,8 +19,6 @@ import tasksEN from "./en/tasks-tab.json";
 import tasksES from "./es/tasks-tab.json";
 import privateLayoutEN from "./en/private-layout.json";
 import privateLayoutES from "./es/private-layout.json";
-import bottomTabNavEN from "./en/bottom-tab-nav.json";
-import bottomTabNavES from "./es/bottom-tab-nav.json";
 import expensesEN from "./en/expenses.json";
 import expensesES from "./es/expenses.json";
 import flocksEN from "./en/flocks.json";
@@ -46,7 +44,6 @@ i18next
 				dashboard: dashboardEN,
 				tasks: tasksEN,
 				privateLayout: privateLayoutEN,
-				bottomTabNav: bottomTabNavEN,
 				expenses: expensesEN,
 				flocks: flocksEN,
 				inventory: inventoryEN,
@@ -61,7 +58,6 @@ i18next
 				dashboard: dashboardES,
 				tasks: tasksES,
 				privateLayout: privateLayoutES,
-				bottomTabNav: bottomTabNavES,
 				expenses: expensesES,
 				flocks: flocksES,
 				inventory: inventoryES,

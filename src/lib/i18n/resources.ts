@@ -7,7 +7,6 @@ import animals from "./en/animals.json";
 import dashboard from "./en/dashboard.json";
 import tasks from "./en/tasks-tab.json";
 import privateLayout from "./en/private-layout.json";
-import bottomTabNav from "./en/bottom-tab-nav.json";
 import expenses from "./en/expenses.json";
 import flocks from "./en/flocks.json";
 import inventory from "./en/inventory.json";
@@ -23,7 +22,6 @@ const resources = {
 	dashboard,
 	tasks,
 	privateLayout,
-	bottomTabNav,
 	expenses,
 	flocks,
 	inventory,

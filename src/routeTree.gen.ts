@@ -39,7 +39,6 @@ import { Route as PublicLayoutSignupRouteImport } from './routes/_public/_layout
 import { Route as PublicLayoutLoginRouteImport } from './routes/_public/_layout/login'
 import { Route as V2ProductionUnitsFlockUnitIdRouteImport } from './routes/v2.production-units.flock.$unitId'
 import { Route as V2InventoryMaterialsMaterialIdRouteImport } from './routes/v2.inventory.materials.$materialId'
-import { Route as CompatFarmIdSpeciesIdAnimalIdRouteImport } from './routes/compat.$farmId.$speciesId.$animalId'
 import { Route as V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRouteImport } from './routes/v2.production-units.flock.$unitId.individuals.$individualId'
 
 const V2Route = V2RouteImport.update({
@@ -194,12 +193,6 @@ const V2InventoryMaterialsMaterialIdRoute =
     path: '/materials/$materialId',
     getParentRoute: () => V2InventoryRoute,
   } as any)
-const CompatFarmIdSpeciesIdAnimalIdRoute =
-  CompatFarmIdSpeciesIdAnimalIdRouteImport.update({
-    id: '/compat/$farmId/$speciesId/$animalId',
-    path: '/compat/$farmId/$speciesId/$animalId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute =
   V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRouteImport.update({
     id: '/individuals/$individualId',
@@ -235,7 +228,6 @@ export interface FileRoutesByFullPath {
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
   '/v2/production-units/': typeof V2ProductionUnitsIndexRoute
-  '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
   '/v2/inventory/materials/$materialId': typeof V2InventoryMaterialsMaterialIdRoute
   '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
   '/v2/production-units/flock/$unitId/individuals/$individualId': typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
@@ -265,7 +257,6 @@ export interface FileRoutesByTo {
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more': typeof V2MoreIndexRoute
   '/v2/production-units': typeof V2ProductionUnitsIndexRoute
-  '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
   '/v2/inventory/materials/$materialId': typeof V2InventoryMaterialsMaterialIdRoute
   '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
   '/v2/production-units/flock/$unitId/individuals/$individualId': typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
@@ -300,7 +291,6 @@ export interface FileRoutesById {
   '/v2/production-units/$assetKind': typeof V2ProductionUnitsAssetKindRoute
   '/v2/more/': typeof V2MoreIndexRoute
   '/v2/production-units/': typeof V2ProductionUnitsIndexRoute
-  '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
   '/v2/inventory/materials/$materialId': typeof V2InventoryMaterialsMaterialIdRoute
   '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
   '/v2/production-units/flock/$unitId/individuals/$individualId': typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
@@ -335,7 +325,6 @@ export interface FileRouteTypes {
     | '/v2/production-units/$assetKind'
     | '/v2/more/'
     | '/v2/production-units/'
-    | '/compat/$farmId/$speciesId/$animalId'
     | '/v2/inventory/materials/$materialId'
     | '/v2/production-units/flock/$unitId'
     | '/v2/production-units/flock/$unitId/individuals/$individualId'
@@ -365,7 +354,6 @@ export interface FileRouteTypes {
     | '/v2/production-units/$assetKind'
     | '/v2/more'
     | '/v2/production-units'
-    | '/compat/$farmId/$speciesId/$animalId'
     | '/v2/inventory/materials/$materialId'
     | '/v2/production-units/flock/$unitId'
     | '/v2/production-units/flock/$unitId/individuals/$individualId'
@@ -399,7 +387,6 @@ export interface FileRouteTypes {
     | '/v2/production-units/$assetKind'
     | '/v2/more/'
     | '/v2/production-units/'
-    | '/compat/$farmId/$speciesId/$animalId'
     | '/v2/inventory/materials/$materialId'
     | '/v2/production-units/flock/$unitId'
     | '/v2/production-units/flock/$unitId/individuals/$individualId'
@@ -410,7 +397,6 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   V2Route: typeof V2RouteWithChildren
   PublicLayoutRoute: typeof PublicLayoutRouteWithChildren
-  CompatFarmIdSpeciesIdAnimalIdRoute: typeof CompatFarmIdSpeciesIdAnimalIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -625,13 +611,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V2InventoryMaterialsMaterialIdRouteImport
       parentRoute: typeof V2InventoryRoute
     }
-    '/compat/$farmId/$speciesId/$animalId': {
-      id: '/compat/$farmId/$speciesId/$animalId'
-      path: '/compat/$farmId/$speciesId/$animalId'
-      fullPath: '/compat/$farmId/$speciesId/$animalId'
-      preLoaderRoute: typeof CompatFarmIdSpeciesIdAnimalIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/v2/production-units/flock/$unitId/individuals/$individualId': {
       id: '/v2/production-units/flock/$unitId/individuals/$individualId'
       path: '/individuals/$individualId'
@@ -761,7 +740,6 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   V2Route: V2RouteWithChildren,
   PublicLayoutRoute: PublicLayoutRouteWithChildren,
-  CompatFarmIdSpeciesIdAnimalIdRoute: CompatFarmIdSpeciesIdAnimalIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
