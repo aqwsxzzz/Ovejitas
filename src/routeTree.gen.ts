@@ -40,6 +40,7 @@ import { Route as PublicLayoutLoginRouteImport } from './routes/_public/_layout/
 import { Route as V2ProductionUnitsFlockUnitIdRouteImport } from './routes/v2.production-units.flock.$unitId'
 import { Route as V2InventoryMaterialsMaterialIdRouteImport } from './routes/v2.inventory.materials.$materialId'
 import { Route as CompatFarmIdSpeciesIdAnimalIdRouteImport } from './routes/compat.$farmId.$speciesId.$animalId'
+import { Route as V2ProductionUnitsFlockUnitIdIndexRouteImport } from './routes/v2.production-units.flock.$unitId.index'
 import { Route as V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRouteImport } from './routes/v2.production-units.flock.$unitId.individuals.$individualId'
 
 const V2Route = V2RouteImport.update({
@@ -200,6 +201,12 @@ const CompatFarmIdSpeciesIdAnimalIdRoute =
     path: '/compat/$farmId/$speciesId/$animalId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const V2ProductionUnitsFlockUnitIdIndexRoute =
+  V2ProductionUnitsFlockUnitIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => V2ProductionUnitsFlockUnitIdRoute,
+  } as any)
 const V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute =
   V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRouteImport.update({
     id: '/individuals/$individualId',
@@ -238,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
   '/v2/inventory/materials/$materialId': typeof V2InventoryMaterialsMaterialIdRoute
   '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
+  '/v2/production-units/flock/$unitId/': typeof V2ProductionUnitsFlockUnitIdIndexRoute
   '/v2/production-units/flock/$unitId/individuals/$individualId': typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
 }
 export interface FileRoutesByTo {
@@ -267,7 +275,7 @@ export interface FileRoutesByTo {
   '/v2/production-units': typeof V2ProductionUnitsIndexRoute
   '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
   '/v2/inventory/materials/$materialId': typeof V2InventoryMaterialsMaterialIdRoute
-  '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
+  '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdIndexRoute
   '/v2/production-units/flock/$unitId/individuals/$individualId': typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
 }
 export interface FileRoutesById {
@@ -303,6 +311,7 @@ export interface FileRoutesById {
   '/compat/$farmId/$speciesId/$animalId': typeof CompatFarmIdSpeciesIdAnimalIdRoute
   '/v2/inventory/materials/$materialId': typeof V2InventoryMaterialsMaterialIdRoute
   '/v2/production-units/flock/$unitId': typeof V2ProductionUnitsFlockUnitIdRouteWithChildren
+  '/v2/production-units/flock/$unitId/': typeof V2ProductionUnitsFlockUnitIdIndexRoute
   '/v2/production-units/flock/$unitId/individuals/$individualId': typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
 }
 export interface FileRouteTypes {
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/compat/$farmId/$speciesId/$animalId'
     | '/v2/inventory/materials/$materialId'
     | '/v2/production-units/flock/$unitId'
+    | '/v2/production-units/flock/$unitId/'
     | '/v2/production-units/flock/$unitId/individuals/$individualId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/compat/$farmId/$speciesId/$animalId'
     | '/v2/inventory/materials/$materialId'
     | '/v2/production-units/flock/$unitId'
+    | '/v2/production-units/flock/$unitId/'
     | '/v2/production-units/flock/$unitId/individuals/$individualId'
   fileRoutesById: FileRoutesById
 }
@@ -632,6 +643,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompatFarmIdSpeciesIdAnimalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v2/production-units/flock/$unitId/': {
+      id: '/v2/production-units/flock/$unitId/'
+      path: '/'
+      fullPath: '/v2/production-units/flock/$unitId/'
+      preLoaderRoute: typeof V2ProductionUnitsFlockUnitIdIndexRouteImport
+      parentRoute: typeof V2ProductionUnitsFlockUnitIdRoute
+    }
     '/v2/production-units/flock/$unitId/individuals/$individualId': {
       id: '/v2/production-units/flock/$unitId/individuals/$individualId'
       path: '/individuals/$individualId'
@@ -672,11 +690,14 @@ const V2MoreRouteWithChildren =
   V2MoreRoute._addFileChildren(V2MoreRouteChildren)
 
 interface V2ProductionUnitsFlockUnitIdRouteChildren {
+  V2ProductionUnitsFlockUnitIdIndexRoute: typeof V2ProductionUnitsFlockUnitIdIndexRoute
   V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute: typeof V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute
 }
 
 const V2ProductionUnitsFlockUnitIdRouteChildren: V2ProductionUnitsFlockUnitIdRouteChildren =
   {
+    V2ProductionUnitsFlockUnitIdIndexRoute:
+      V2ProductionUnitsFlockUnitIdIndexRoute,
     V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute:
       V2ProductionUnitsFlockUnitIdIndividualsIndividualIdRoute,
   }
