@@ -6,6 +6,7 @@ import { ManualFeedingPanel } from "@/features/livestock/components/manual-feedi
 import { AnimalHarvestPanel } from "@/features/livestock/components/harvest/animal-harvest-panel";
 
 import { ProductionProductivityCard } from "./production-productivity-card";
+import { GestationLengthCard } from "./gestation-length-card";
 import { ProductionTargetCard } from "./production-target-card";
 import type { FlockDetailPageProps } from "./flock-detail-types";
 import { FlockEventsSection } from "./flock-events-section";
@@ -139,11 +140,18 @@ export function FlockDetailPageContent({
 			/>
 
 			{assetFlags.isIndividualAnimal ? (
-				<FlockIndividualsSection
-					farmId={farmId}
-					unitId={unitId}
-					eventTypeFilter={eventTypeFilter}
-				/>
+				<>
+					<GestationLengthCard
+						farmId={farmId}
+						assetId={asset.id}
+						gestationDays={asset.gestation_days}
+					/>
+					<FlockIndividualsSection
+						farmId={farmId}
+						unitId={unitId}
+						eventTypeFilter={eventTypeFilter}
+					/>
+				</>
 			) : null}
 		</section>
 	);

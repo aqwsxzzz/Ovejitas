@@ -15,27 +15,53 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { ILivestockIndividual } from "@/features/livestock/types/livestock-types";
 import { useCreatePregnancy } from "@/features/pregnancy/api/pregnancy-queries";
+
+import {
+	NO_SIRE_VALUE,
+	PregnancyProjectionFields,
+} from "./pregnancy-projection-fields";
+
+const EMPTY_PROJECTION = {
+	offspringCount: "",
+	serviceDate: "",
+	expectedDueAt: "",
+	sireId: NO_SIRE_VALUE,
+};
 
 interface PregnancyCheckFormProps {
 	farmId: string;
 	individualId: number;
+	/**
+	 * Individuals in the same asset, minus this one. Scoped to the asset because
+	 * the backend only lists individuals per asset — a sire kept in a separate
+	 * lot cannot be selected yet.
+	 */
+	sireCandidates: ILivestockIndividual[];
+	gestationDays: number | null;
 }
 
 export function PregnancyCheckForm({
 	farmId,
 	individualId,
+	sireCandidates,
+	gestationDays,
 }: PregnancyCheckFormProps) {
 	const [occurredAt, setOccurredAt] = useState(
 		toDateTimeLocalValue(),
 	);
 	const [isPregnant, setIsPregnant] = useState(false);
-	const [offspringCount, setOffspringCount] = useState("");
-	const [expectedDueAt, setExpectedDueAt] = useState("");
+	const [projection, setProjection] = useState(EMPTY_PROJECTION);
 	const [notes, setNotes] = useState("");
 	const [localError, setLocalError] = useState<string | null>(null);
 
 	const createPregnancyMutation = useCreatePregnancy();
+
+	const updateProjection = (
+		field: keyof typeof EMPTY_PROJECTION,
+		value: string,
+	) => setProjection((current) => ({ ...current, [field]: value }));
 
 	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -44,9 +70,12 @@ export function PregnancyCheckForm({
 			return;
 		}
 
-		const parsedCount = Number(offspringCount);
 		setLocalError(null);
 
+		// A not-pregnant check must carry no projection at all (backend rejects
+		// an offspring count or due date on one). Omitting expected_due_at on a
+		// positive check is what asks the backend to derive it.
+		const { offspringCount, serviceDate, expectedDueAt, sireId } = projection;
 		try {
 			await createPregnancyMutation.mutateAsync({
 				farmId,
@@ -55,17 +84,22 @@ export function PregnancyCheckForm({
 					occurred_at: new Date(occurredAt).toISOString(),
 					is_pregnant: isPregnant,
 					offspring_count:
-						isPregnant && offspringCount ? parsedCount : undefined,
+						isPregnant && offspringCount ? Number(offspringCount) : undefined,
 					expected_due_at:
 						isPregnant && expectedDueAt
 							? new Date(expectedDueAt).toISOString()
 							: undefined,
+					service_date:
+						isPregnant && serviceDate
+							? new Date(serviceDate).toISOString()
+							: undefined,
+					sire_individual_id:
+						isPregnant && sireId !== NO_SIRE_VALUE ? Number(sireId) : undefined,
 					notes: notes.trim() || undefined,
 					idempotency_key: crypto.randomUUID(),
 				},
 			});
-			setOffspringCount("");
-			setExpectedDueAt("");
+			setProjection(EMPTY_PROJECTION);
 			setNotes("");
 		} catch {
 			setLocalError(
@@ -115,28 +149,12 @@ export function PregnancyCheckForm({
 					</div>
 
 					{isPregnant ? (
-						<div className="grid gap-3 md:grid-cols-2">
-							<div className="space-y-1.5">
-								<Label htmlFor="pregnancy-offspring">Crías estimadas</Label>
-								<Input
-									id="pregnancy-offspring"
-									type="number"
-									min="0"
-									step="1"
-									value={offspringCount}
-									onChange={(event) => setOffspringCount(event.target.value)}
-								/>
-							</div>
-							<div className="space-y-1.5">
-								<Label htmlFor="pregnancy-due">Fecha estimada de parto</Label>
-								<Input
-									id="pregnancy-due"
-									type="datetime-local"
-									value={expectedDueAt}
-									onChange={(event) => setExpectedDueAt(event.target.value)}
-								/>
-							</div>
-						</div>
+						<PregnancyProjectionFields
+							values={projection}
+							onChange={updateProjection}
+							sireCandidates={sireCandidates}
+							gestationDays={gestationDays}
+						/>
 					) : null}
 
 					<div className="space-y-1.5">

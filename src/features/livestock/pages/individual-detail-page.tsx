@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useGetUserProfile } from "@/features/auth/api/auth-queries";
 import {
 	useGetIndividualById,
+	useGetLivestockAssetById,
 	useListIndividualsByAssetId,
 	useUpdateIndividual,
 	useDeleteIndividual,
@@ -47,6 +48,18 @@ export function IndividualDetailPage({
 		});
 
 	const allIndividuals = individualsResponse?.data ?? [];
+
+	// The flock's gestation length drives whether a pregnancy check can derive
+	// its own due date, so the form needs to tell the farmer which case they're in.
+	const { data: asset } = useGetLivestockAssetById({
+		farmId,
+		assetId: Number(assetId),
+		enabled: !!farmId && !!assetId,
+	});
+
+	const sireCandidates = allIndividuals.filter(
+		(candidate) => candidate.id !== Number(individualId),
+	);
 
 	const updateIndividualMutation = useUpdateIndividual();
 	const deleteIndividualMutation = useDeleteIndividual();
@@ -135,6 +148,8 @@ export function IndividualDetailPage({
 			<PregnancyCheckForm
 				farmId={farmId}
 				individualId={individual.id}
+				sireCandidates={sireCandidates}
+				gestationDays={asset?.gestation_days ?? null}
 			/>
 
 			{individual.status === "active" ? (

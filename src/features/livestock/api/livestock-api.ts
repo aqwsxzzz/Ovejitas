@@ -224,6 +224,8 @@ export const createLivestockAsset = ({
 		location?: string;
 		mode?: LivestockAssetMode;
 		produce_asset_id?: number | null;
+		/** Animal assets only — the backend rejects it for any other kind. */
+		gestation_days?: number | null;
 	};
 }) =>
 	axiosHelper<ILivestockAsset>({
@@ -246,6 +248,8 @@ export const updateLivestockAssetById = ({
 		location: string | null;
 		mode: LivestockAssetMode | null;
 		produce_asset_id: number | null;
+		/** Animal assets only — the backend rejects it for any other kind. */
+		gestation_days: number | null;
 	}>;
 }) =>
 	axiosHelper<ILivestockAsset>({

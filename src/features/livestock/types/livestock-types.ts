@@ -58,6 +58,12 @@ export interface ILivestockAsset {
 	location: string | null;
 	description: string | null;
 	produce_asset_id: number | null;
+	/**
+	 * Gestation length in days (20-400), used to derive a pregnancy check's
+	 * expected due date. Animal assets only — null everywhere else, and the
+	 * backend rejects a value on any other kind.
+	 */
+	gestation_days: number | null;
 	created_at: string;
 	updated_at: string;
 }
