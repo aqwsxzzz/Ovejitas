@@ -220,7 +220,12 @@ export function V2DashboardPage() {
 			enabled: !!farmId,
 		});
 
-	const assets = farmAssetsResponse?.data ?? [];
+	// `?? []` builds a fresh array on every render, which made `assets` an
+	// unstable dependency and defeated all five memos derived from it below.
+	const assets = useMemo(
+		() => farmAssetsResponse?.data ?? [],
+		[farmAssetsResponse?.data],
+	);
 
 	const { data: profitabilityReport } = useGetProfitabilityReport({
 		farmId,

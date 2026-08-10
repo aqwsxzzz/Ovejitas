@@ -14,6 +14,20 @@ const farmAnimals = [
 	{ emoji: "🐓", name: "rooster" },
 ];
 
+const sizeClasses = {
+	sm: "text-2xl",
+	md: "text-4xl",
+	lg: "text-6xl",
+};
+
+// Module scope: rebuilt per render these are new objects every time, which made
+// `speedMs` an unstable dependency of the interval effect below.
+const speedMs = {
+	slow: 800,
+	normal: 500,
+	fast: 300,
+};
+
 interface FarmAnimalSpinnerProps {
 	size?: "sm" | "md" | "lg";
 	speed?: "slow" | "normal" | "fast";
@@ -27,18 +41,6 @@ export function FarmAnimalSpinner({
 }: FarmAnimalSpinnerProps) {
 	const [currentAnimalIndex, setCurrentAnimalIndex] = useState(0);
 	const [scale, setScale] = useState(1);
-
-	const sizeClasses = {
-		sm: "text-2xl",
-		md: "text-4xl",
-		lg: "text-6xl",
-	};
-
-	const speedMs = {
-		slow: 800,
-		normal: 500,
-		fast: 300,
-	};
 
 	useEffect(() => {
 		const scaleInterval = setInterval(() => {
