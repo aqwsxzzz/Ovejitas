@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import redBarn from "@/routes/_public/assets/redBarn.svg";
-import { useTranslation } from "react-i18next";
 import { authQueryKeys } from "@/features/auth/api/auth-queries";
 import { getUserProfile } from "@/features/auth/api/auth-api";
 import type { IMeResponse } from "@/features/auth/types/auth-types";
@@ -41,8 +40,7 @@ export const Route = createFileRoute("/_public/_layout")({
 });
 
 function RouteComponent() {
-	const login = location.pathname.includes("login") ? "login" : "signup";
-	const { t } = useTranslation(login);
+	const isLogin = location.pathname.includes("login");
 
 	return (
 		<div className="flex h-screen w-screen flex-col items-center justify-center p-2 md:p-4">
@@ -53,8 +51,12 @@ function RouteComponent() {
 					alt="A big red barn"
 				/>
 			</div>
-			<h1>{t("headerTitle")}</h1>
-			<h2>{t("headerDescription")}</h2>
+			<h1>Bienvenido a Ovejitas</h1>
+			<h2>
+				{isLogin
+					? "Ingresa tus datos para entrar a tu cuenta"
+					: "Ingresa tus datos para crear tu cuenta"}
+			</h2>
 			<div className="w-full self-stretch">
 				<Outlet />
 			</div>
