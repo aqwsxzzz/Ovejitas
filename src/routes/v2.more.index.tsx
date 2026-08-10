@@ -6,9 +6,7 @@ import {
 	ChevronRight,
 	Package,
 	Settings,
-	Tractor,
 	Users,
-	Wallet,
 	type LucideIcon,
 } from "lucide-react";
 interface MoreSectionItem {
@@ -39,18 +37,6 @@ const extraViews: MoreSectionItem[] = [
 		icon: Baby,
 	},
 	{
-		to: "/v2/production-units",
-		title: "Ganado / Unidades",
-		description: "Inventario y trazabilidad animal",
-		icon: Tractor,
-	},
-	{
-		to: "/v2/finance",
-		title: "Finanzas",
-		description: "Costos operativos y margenes",
-		icon: Wallet,
-	},
-	{
 		to: "/v2/inventory",
 		title: "Alimento e Inventario",
 		description: "Stock de insumos y raciones",
@@ -61,7 +47,6 @@ const extraViews: MoreSectionItem[] = [
 		title: "Alertas",
 		description: "Centro de notificaciones criticas",
 		icon: Bell,
-		badge: "3",
 	},
 	{
 		to: "/v2/settings",
@@ -106,7 +91,7 @@ function MorePage() {
 							</div>
 							<div className="ml-1 flex items-center gap-2">
 								{view.badge ? (
-									<span className="rounded-full bg-(--v2-danger) px-1.5 py-0.5 text-[10px] leading-none font-semibold text-white">
+									<span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] leading-none font-semibold text-destructive-foreground">
 										{view.badge}
 									</span>
 								) : null}
