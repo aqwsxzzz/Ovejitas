@@ -21,15 +21,12 @@ import {
 } from "./flock-page-states";
 import { FlockProductionOverviewSection } from "./flock-production-overview-section";
 import { ProduceOutcomePanel } from "./produce-outcome-panel";
-import { useFlockBackNavigationGuard } from "./use-flock-back-navigation-guard";
 
 export function FlockDetailPageContent({
 	unitId,
 	eventTypeFilter,
 	onEventTypeFilterChange,
 }: FlockDetailPageProps) {
-	useFlockBackNavigationGuard();
-
 	const { data: currentUser } = useGetUserProfile();
 	const parsedAssetId = Number(unitId);
 	const hasValidAssetId = Number.isInteger(parsedAssetId);
