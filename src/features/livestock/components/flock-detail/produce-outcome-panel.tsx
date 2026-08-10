@@ -3,10 +3,8 @@ import { Loader2 } from "lucide-react";
 
 import { SectionCard } from "@/components/common/section-card";
 import { EmptyState } from "@/components/common/empty-state";
-import {
-	PeriodSelect,
-	useReportPeriod,
-} from "@/features/reports/components/report-period-select";
+import { PeriodSelect } from "@/features/reports/components/report-period-select";
+import { useReportPeriod } from "@/features/reports/hooks/use-report-period";
 import { useGetProduceOutcomeReport } from "@/features/reports/api/reports-queries";
 import { formatCurrency } from "@/features/reports/utils/reports-format";
 import { temporarilyExtendDateToForProduceAllocation } from "@/features/reports/utils/produce-allocation-window";

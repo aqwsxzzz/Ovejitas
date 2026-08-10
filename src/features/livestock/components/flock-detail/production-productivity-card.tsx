@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-	PeriodSelect,
-	useReportPeriod,
-} from "@/features/reports/components/report-period-select";
+import { PeriodSelect } from "@/features/reports/components/report-period-select";
+import { useReportPeriod } from "@/features/reports/hooks/use-report-period";
 import { useGetProductionProductivityReport } from "@/features/reports/api/reports-queries";
 import {
 	formatProductionQuantity,

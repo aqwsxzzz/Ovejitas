@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 
-import {
-	PeriodSelect,
-	useReportPeriod,
-} from "@/features/reports/components/report-period-select";
+import { PeriodSelect } from "@/features/reports/components/report-period-select";
+import { useReportPeriod } from "@/features/reports/hooks/use-report-period";
 import { useGetProfitabilityFullReport } from "@/features/reports/api/reports-queries";
 import { temporarilyExtendDateToForProduceAllocation } from "@/features/reports/utils/produce-allocation-window";
 

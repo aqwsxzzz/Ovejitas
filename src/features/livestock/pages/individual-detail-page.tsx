@@ -102,7 +102,7 @@ export function IndividualDetailPage({
 			params: { unitId: assetId },
 			search: { eventType: undefined },
 		});
-	}, [farmId, assetId, individualId, navigate]);
+	}, [farmId, assetId, individualId, navigate, deleteIndividualMutation]);
 
 	if (isLoadingIndividual || isLoadingList) {
 		return (
