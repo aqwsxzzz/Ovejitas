@@ -16,7 +16,7 @@ Date: 2026-07-27.
 
 The backend domain is ledger-first and generic:
 
-- `asset`: any trackable thing (animal, crop, equipment, `material`, **`produce`**, location)
+- `asset`: any trackable thing (animal, crop, equipment, `material`, **`produce`**, location). Carries an optional `gestation_days` (20–400) used to derive pregnancy due dates — **animals only**; sending it for any other `kind` is a `422` ("Only animal assets carry a gestation length"). Present on `AssetCreate`, `AssetUpdate`, and `AssetRead`.
 - `individual`: identity-level instance under an individual-mode asset
 - `event_category`: farm-scoped category taxonomy per event type
 - `event`: single ledger table for domain facts, discriminated by `type`
@@ -71,6 +71,17 @@ Every action-emitted event must carry `payload.source` (for example: `harvest`, 
 - `DELETE .../pregnancies/{id}` hard-deletes the record and reverses its reproductive event.
 - Supports `idempotency_key`: replaying a key returns the original record with `200` (no duplicate event).
 - `PregnancyRead` exposes `reproductive_event_id` linking the record to its emitted ledger row.
+- A check MAY record `service_date` (when she was served) and `sire_individual_id` (who bred her). Both optional; both are mirrored onto the paired `reproductive` event's payload. The sire MUST be a different individual in the same farm.
+- The list endpoint filters by `sire_individual_id` (alongside `individual_id` and `is_pregnant`).
+- A pregnancy is **one row per check, not one row per gestation**. There is no pregnancy entity, no status, and no link from a check to the birth that resolved it — so estimated-vs-actual offspring is NOT derivable. Current state is reconstructed latest-record-wins by the upcoming-births report.
+
+#### Derived `expected_due_at`
+
+- On **create**, a positive check that omits `expected_due_at` gets one derived as `(service_date or occurred_at) + asset.gestation_days`.
+- A value the caller supplies is ALWAYS kept as given — the farmer overrides the model.
+- An asset with no `gestation_days` derives nothing rather than erroring. FE MUST treat a null `expected_due_at` on a positive check as a valid state.
+- **PATCH never re-derives.** A stored due date does not move when `service_date` is edited, nor when the asset's `gestation_days` changes later.
+- FE consequence: `expected_due_at` SHOULD be an optional field, not a required one. Leave it empty to accept the derived value.
 
 ### Harvest constraints (action #8)
 
@@ -266,6 +277,9 @@ Reports are always derived from event replay (never cached mutable counters):
 - **produce-outcome** (`GET .../reports/produce-outcome`): per (producer asset, produce pool) — what a producer harvested into a pool and what became of its share. Row: `{ producer_asset_id, producer_name, produce_asset_id, produce_name, unit, produced, sold, lost, currency, income_total, has_other_currency }`; envelope `{ data, unattributed_quantity, unattributed_income }`. `produced` = what the producer harvested; `sold`/`lost` = its **derived** share of what later left the pool; `income_total` = the money that share earned. The split is **derived, never stored** (pooled produce is fungible): each outflow consumes the pool's daily `produce_lot` baskets **oldest-first (FIFO)**, split within each basket in proportion to what each producer put in it, priced at that outflow's own unit price, reconciled with **largest-remainder** rounding so per-producer amounts sum exactly to the sale. Keyed per (producer, currency) — currencies are never summed; multi-currency output gives a null `currency` with `has_other_currency: true`. `lost` is stock drawn at zero revenue (`material_consumption` `waste`/`spoilage`). `unattributed_quantity`/`unattributed_income` capture pool outflow with **no lot behind it** (stock that entered by a manual `inventory` increment, or carried across a reset) — this is the only "unassigned" case (over-selling is rejected, not booked here). `produced` is bounded by harvest time, `sold`/`lost`/`income_total` by when stock left, and FIFO crosses window edges — so within a narrow window these are **not** expected to reconcile. This report is the FE's productivity-vs-profitability view (producers can be unprofitable per-pool without blocking either metric).
 - **production-productivity** (`GET .../reports/production-productivity`): produced vs expected output per (asset, product), where a product is a production `event_category`. One row per (asset, product) that either produced in the window or has an applicable production target. `produced` is converted into the product's unit; `expected` comes from the asset's applicable production target, scaled by the target's `basis` (`per_head_continuous` uses time-weighted animal-days; `per_event`; `total`). `productivity_pct = produced ÷ expected × 100`. `date_from` and `date_to` are **required**, and **both ends are widened to whole farm-local calendar days** — this report is day-grained, so asking about "today" at 18:45 expects a whole day's target, not the elapsed fraction. The same widened window bounds the `produced` numerator, so numerator and denominator always cover the same days. A pair with no applicable target reports `missing_capacity: true` with null `expected`/`productivity_pct` (mirrors `has_unvalued_consumption`) — never divide-by-zero. Row: `{ asset_id, asset_name, category_id, product_name, unit, produced, expected, productivity_pct, basis, missing_capacity }`. Supersedes the removed egg-only `coop-productivity` report; see the Production targets section. Headcount for `per_head_continuous` remains event-derived, not stored.
 - **upcoming-births** (`GET .../reports/upcoming-births`): one row per individual whose *latest* pregnancy check is pregnant with `expected_due_at` inside `[date_from, date_to]`. A later not-pregnant check suppresses the alert. `date_from` and `date_to` are **required**; `days_until_due` counts whole days from `date_from`. Depends on pregnancy checks (action #12) existing.
+  - A check with a null `expected_due_at` is **invisible to this report**, permanently. Coverage therefore depends on `asset.gestation_days` being configured (or the date being supplied).
+  - **`days_until_due` is NOT a countdown from today.** The report filters `expected_due_at >= date_from`, so the value is always `>= 0` regardless of the window — an overdue animal does not report a negative number. FE MUST NOT use `days_until_due` to detect overdue.
+  - **Overdue is an FE-derived read, not a BE capability.** To surface it, request a window whose `date_from` is in the past (otherwise overdue rows are excluded by the filter) and compare each row's `expected_due_at` against today locally. Note that a past `date_from` also inflates `days_until_due` for every row by that offset, so derive all day counts from `expected_due_at` instead.
 - **PDF exports**: `GET .../reports/profitability/pdf` and `GET .../reports/cost-per-unit/pdf` return the respective report as a downloadable PDF.
 
 ### How `expected` is computed (`per_head_continuous`)
@@ -375,6 +389,21 @@ date_to = next local midnight → {(1, 'UYU'): Decimal('2458.00')}
 **FE status — TEMPORARY PATCH IN PLACE (2026-07-27), remove when BE lands.** `src/features/reports/utils/produce-allocation-window.ts` passes tomorrow as `date_to` for the two affected panels, restoring the missing day for a demo. It is a patch, not a fix: it widens **both** halves of the window by a day, makes "últimos 30 días" 31, would admit future-dated events, and does nothing for a `date_to` the farmer picks by hand. `production-productivity` must NOT use it — it resolves its own whole-day window and is already correct.
 
 ## Contract change log
+
+### 2026-08-07
+
+Source: backend `develop@53f46e0` (`d5bd91b`, branch `feat/gestation-derived-due-date`). Answers the Stage 5 follow-up request (`docs/be-request-pregnancy-stage5-followup.md`). `backend-docs/api/assets.yaml`, `backend-docs/api/pregnancies.yaml`, and `backend-docs/domain-model.md` all refreshed.
+
+**Contract changes:**
+
+- **`asset.gestation_days` added** (nullable integer, 20–400, **animals only**). Present on `AssetCreate`, `AssetUpdate`, `AssetRead`. Sending it for a non-animal `kind` is a `422` ("Only animal assets carry a gestation length"). The bounds are sanity limits, not biology — wide enough for any farmed species, narrow enough to catch weeks/months typed into a days field.
+- **`expected_due_at` is now derived on create.** A positive check that omits it gets `(service_date or occurred_at) + asset.gestation_days`. A supplied value is always kept as given; an asset with no `gestation_days` derives nothing rather than erroring. **PATCH never re-derives** — a stored due date never moves, not when `service_date` is edited and not when the asset's gestation length changes later. FE can drop the hand-typed due-date requirement and make the field optional.
+- **`pregnancy.service_date` and `pregnancy.sire_individual_id` added** (both optional, both editable, both mirrored onto the paired `reproductive` event's payload). The sire MUST be a different individual in the same farm. The list endpoint now filters by `sire_individual_id`.
+- **Pregnancy stays a stream of checks — confirmed by design, not an omission.** No pregnancy entity, no status, no link from a check to the birth that resolved it. Consequence: **estimated-vs-actual offspring and loss rate are NOT derivable**, and FE must not synthesize them. BE will revisit if a concrete need appears. Check method and the `reproductive` event `payload` stay closed for the same reason.
+
+**Correction to a previously assumed FE behavior:**
+
+- **`days_until_due` can never be negative.** The report filters `expected_due_at >= date_from`, so the value is always `>= 0` whatever window is passed — it does not count down from today, it counts from `date_from`. An earlier FE reading assumed a past `date_from` would surface overdue animals as negative values; it does not. **Overdue is FE-derived:** request a window starting in the past (or overdue rows are filtered out entirely) and compare `expected_due_at` to today locally. Derive all day counts from `expected_due_at`, never from `days_until_due`, since a past `date_from` inflates it for every row.
 
 ### 2026-07-27 (c)
 
