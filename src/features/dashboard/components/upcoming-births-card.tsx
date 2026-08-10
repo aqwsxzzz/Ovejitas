@@ -1,12 +1,23 @@
 import { useMemo } from "react";
 
+import {
+	formatBirthCountdown,
+	toSortedBirthAlerts,
+	type BirthAlert,
+} from "@/features/dashboard/utils/birth-alert-utils";
 import { useGetUpcomingBirthsReport } from "@/features/reports/api/reports-queries";
-import { toDateParam, toDateParamOffsetDays } from "@/lib/datetime";
+import { toDateParamOffsetDays } from "@/lib/datetime";
 
 interface UpcomingBirthsCardProps {
 	farmId: string;
-	/** Size of the alert window in days (from now). */
+	/** Size of the forward alert window in days (from now). */
 	windowDays?: number;
+	/**
+	 * How far back to look for births that were due and never closed out. The
+	 * report filters `expected_due_at >= date_from`, so overdue rows are only
+	 * returned when the window starts in the past.
+	 */
+	overdueWindowDays?: number;
 }
 
 function formatDueDate(iso: string): string {
@@ -16,19 +27,46 @@ function formatDueDate(iso: string): string {
 	});
 }
 
+const BADGE_TONE: Record<BirthAlert["severity"], string> = {
+	overdue: "bg-destructive/15 text-destructive",
+	imminent: "bg-(--v2-sage-50) text-(--v2-emerald-700)",
+	upcoming: "bg-(--v2-surface) text-(--v2-ink-soft)",
+};
+
+function BirthAlertRow({ alert }: { alert: BirthAlert }) {
+	const { row } = alert;
+	return (
+		<li className="flex items-center justify-between rounded-lg border border-(--v2-border) px-3 py-2 text-sm">
+			<div className="min-w-0">
+				<p className="font-medium">{row.individual_tag}</p>
+				<p className="text-(--v2-ink-soft)">
+					{formatDueDate(row.expected_due_at)}
+					{row.offspring_count != null
+						? ` · ${row.offspring_count} crías est.`
+						: ""}
+				</p>
+			</div>
+			<span
+				className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${BADGE_TONE[alert.severity]}`}
+			>
+				{formatBirthCountdown(alert)}
+			</span>
+		</li>
+	);
+}
+
 export function UpcomingBirthsCard({
 	farmId,
 	windowDays = 30,
+	overdueWindowDays = 30,
 }: UpcomingBirthsCardProps) {
-	// Bare dates so the window opens on the farm's today, not the load instant —
-	// `days_until_due` counts from `date_from`, so a mid-day instant would round
-	// every countdown against a partial first day.
+	// Bare dates so the window opens on the farm's today, not the load instant.
 	const { date_from, date_to } = useMemo(
 		() => ({
-			date_from: toDateParam(),
+			date_from: toDateParamOffsetDays(-overdueWindowDays),
 			date_to: toDateParamOffsetDays(windowDays),
 		}),
-		[windowDays],
+		[overdueWindowDays, windowDays],
 	);
 
 	const { data, isLoading } = useGetUpcomingBirthsReport({
@@ -37,39 +75,39 @@ export function UpcomingBirthsCard({
 		date_to,
 	});
 
-	const rows = data?.data ?? [];
+	const alerts = useMemo(
+		() => toSortedBirthAlerts(data?.data ?? []),
+		[data?.data],
+	);
+	const overdueCount = alerts.filter(
+		(alert) => alert.severity === "overdue",
+	).length;
 
 	return (
 		<article className="v2-card p-4">
-			<p className="v2-kicker mb-3">Próximos partos</p>
+			<div className="mb-3 flex items-center justify-between gap-2">
+				<p className="v2-kicker">Próximos partos</p>
+				{overdueCount > 0 ? (
+					<span className="rounded-full bg-destructive/15 px-2.5 py-0.5 text-xs font-semibold text-destructive">
+						{overdueCount} vencido{overdueCount === 1 ? "" : "s"}
+					</span>
+				) : null}
+			</div>
 			{isLoading ? (
-				<p className="text-sm text-(--v2-ink-soft)">Cargando próximos partos...</p>
-			) : rows.length === 0 ? (
+				<p className="text-sm text-(--v2-ink-soft)">
+					Cargando próximos partos...
+				</p>
+			) : alerts.length === 0 ? (
 				<p className="text-sm text-(--v2-ink-soft)">
 					No hay partos previstos en los próximos {windowDays} días.
 				</p>
 			) : (
 				<ul className="space-y-2">
-					{rows.map((row) => (
-						<li
-							key={row.individual_id}
-							className="flex items-center justify-between rounded-lg border border-(--v2-border) px-3 py-2 text-sm"
-						>
-							<div className="min-w-0">
-								<p className="font-medium">{row.individual_tag}</p>
-								<p className="text-(--v2-ink-soft)">
-									{formatDueDate(row.expected_due_at)}
-									{row.offspring_count != null
-										? ` · ${row.offspring_count} crías est.`
-										: ""}
-								</p>
-							</div>
-							<span className="rounded-full bg-(--v2-surface) px-2.5 py-0.5 text-xs font-semibold text-(--v2-ink-soft)">
-								{row.days_until_due <= 0
-									? "Hoy"
-									: `en ${row.days_until_due} d`}
-							</span>
-						</li>
+					{alerts.map((alert) => (
+						<BirthAlertRow
+							key={alert.row.individual_id}
+							alert={alert}
+						/>
 					))}
 				</ul>
 			)}
